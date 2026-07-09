@@ -22,4 +22,16 @@ final class Complex implements \Stringable
     public function __construct(float $real = 0, float $imag = 0) {}
 
     public function __toString(): string {}
+
+    public function toArray(): array {}
+
+    public function toObject(): \stdClass {}
+
+    public function isReal(): bool {}
+
+    public static function fromArray(array $arr): Complex {}
+
+    public static function fromObject(object $obj): Complex {}
+
+    public static function toComplex(mixed $value): Complex {}
 }

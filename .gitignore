@@ -1,4 +1,5 @@
 .DS_Store
+*~
 
 # Build artifacts from phpize / configure / make
 /.libs/

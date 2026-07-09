@@ -27,4 +27,4 @@ exec php \
     "$MATH_DIR/vendor/bin/phpunit" \
     --bootstrap "$MATH_DIR/tests/bootstrap.php" \
     --colors=always \
-    "${@:-$EXT_DIR/tests/phpunit}"
+    "${@:-$EXT_DIR/tests/phpunit/symlinked-from-package}"

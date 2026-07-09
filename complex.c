@@ -1,13 +1,15 @@
 /*
  * complex.c
  *
- * Minimal build-and-load skeleton for the OceanMoon complex extension.
+ * Core of the OceanMoon complex extension: class registration (MINIT/RINIT),
+ * the constructor, the module entry, and the shared internal helpers
+ * (complex_init/complex_create/complex_from_array/complex_from_object)
+ * declared in complex_internal.h and used by this file's factory methods as
+ * well as the other complex_*.c implementation files.
  *
- * Deliberately tiny: it registers OceanMoon\Math\Complex with two properties
- * (real, imaginary), a constructor, and __toString. No math, no custom object
- * handlers, and no operator overloading yet. The goal is only to prove the full
- * toolchain (phpize -> configure -> make -> load) end to end before the real
- * value type and operators are built on top.
+ * Conversion methods (toArray/toObject/__toString) live in
+ * complex_conversion.c. No arithmetic, custom object handlers, or operator
+ * overloading yet.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -21,10 +23,141 @@
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
 #include "php_complex.h"
+#include "complex_internal.h"
 #include "complex_arginfo.h"
 
 /* The registered class entry for OceanMoon\Math\Complex. */
-static zend_class_entry *complex_ce_Complex;
+zend_class_entry *complex_ce_Complex;
+
+/* {{{ complex_init
+ *
+ * Validate real/imaginary and set them on an already-allocated Complex object. Shared by
+ * __construct and complex_create() (used by the from*()/toComplex() factory methods), mirroring
+ * how the PHP implementation's factory methods all funnel through `new self(...)`, so the
+ * finite-value check lives in exactly one place.
+ *
+ * Returns FAILURE (with an exception already thrown) if either value is non-finite.
+ */
+zend_result complex_init(zend_object *obj, double real, double imag)
+{
+	if (!zend_finite(real) || !zend_finite(imag)) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot create a complex number from non-finite values.", 0);
+		return FAILURE;
+	}
+
+	zend_update_property_double(complex_ce_Complex, obj, "real", sizeof("real") - 1, real);
+	zend_update_property_double(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, imag);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ complex_create
+ *
+ * Allocate a new Complex object into return_value and initialize it via complex_init(). Used by
+ * all the from*()/toComplex() factory paths.
+ */
+zend_result complex_create(zval *return_value, double real, double imag)
+{
+	object_init_ex(return_value, complex_ce_Complex);
+	return complex_init(Z_OBJ_P(return_value), real, imag);
+}
+/* }}} */
+
+/* {{{ complex_from_array
+ *
+ * Shared by fromArray() and toComplex()'s array branch, matching the PHP package's
+ * Complex::fromArray(). Accepts two shapes:
+ *  - A list: [real, imaginary] -- must contain exactly two numeric (int or float) elements.
+ *  - An associative array: ['real' => ..., 'imaginary' => ...] -- key order doesn't matter, and
+ *    extra keys (e.g. 'magnitude'/'phase' from (array) $complex) are ignored.
+ */
+zend_result complex_from_array(zval *return_value, HashTable *arr)
+{
+	if (zend_array_is_list(arr)) {
+		if (zend_hash_num_elements(arr) != 2) {
+			zend_throw_exception(spl_ce_LengthException, "Cannot convert array to Complex. Array must contain exactly two elements.", 0);
+			return FAILURE;
+		}
+
+		zval *real_zv = zend_hash_index_find(arr, 0);
+		zval *imag_zv = zend_hash_index_find(arr, 1);
+
+		if (Z_TYPE_P(real_zv) != IS_LONG && Z_TYPE_P(real_zv) != IS_DOUBLE) {
+			zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Element at index 0 must be numeric (int or float).", 0);
+			return FAILURE;
+		}
+		if (Z_TYPE_P(imag_zv) != IS_LONG && Z_TYPE_P(imag_zv) != IS_DOUBLE) {
+			zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Element at index 1 must be numeric (int or float).", 0);
+			return FAILURE;
+		}
+
+		return complex_create(return_value, zval_get_double(real_zv), zval_get_double(imag_zv));
+	}
+
+	zval *real_zv = zend_hash_str_find(arr, "real", sizeof("real") - 1);
+	if (!real_zv) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Array is missing key \"real\".", 0);
+		return FAILURE;
+	}
+	zval *imag_zv = zend_hash_str_find(arr, "imaginary", sizeof("imaginary") - 1);
+	if (!imag_zv) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Array is missing key \"imaginary\".", 0);
+		return FAILURE;
+	}
+
+	if (Z_TYPE_P(real_zv) != IS_LONG && Z_TYPE_P(real_zv) != IS_DOUBLE) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Value for key \"real\" must be numeric (int or float).", 0);
+		return FAILURE;
+	}
+	if (Z_TYPE_P(imag_zv) != IS_LONG && Z_TYPE_P(imag_zv) != IS_DOUBLE) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert array to Complex. Value for key \"imaginary\" must be numeric (int or float).", 0);
+		return FAILURE;
+	}
+
+	return complex_create(return_value, zval_get_double(real_zv), zval_get_double(imag_zv));
+}
+/* }}} */
+
+/* {{{ complex_from_object
+ *
+ * Shared by fromObject() and toComplex()'s object branch. $obj must have numeric (int or float)
+ * "real" and "imaginary" properties -- matching the PHP package's Complex::fromObject().
+ */
+zend_result complex_from_object(zval *return_value, zend_object *obj)
+{
+	zend_string *real_str = zend_string_init("real", sizeof("real") - 1, 0);
+	bool has_real = obj->handlers->has_property(obj, real_str, ZEND_PROPERTY_EXISTS, NULL);
+	zend_string_release(real_str);
+	if (!has_real) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert object to Complex. Object is missing property \"real\".", 0);
+		return FAILURE;
+	}
+
+	zend_string *imag_str = zend_string_init("imaginary", sizeof("imaginary") - 1, 0);
+	bool has_imag = obj->handlers->has_property(obj, imag_str, ZEND_PROPERTY_EXISTS, NULL);
+	zend_string_release(imag_str);
+	if (!has_imag) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert object to Complex. Object is missing property \"imaginary\".", 0);
+		return FAILURE;
+	}
+
+	zval rv1, rv2;
+	zval *real_zv = zend_read_property(obj->ce, obj, "real", sizeof("real") - 1, /* silent */ true, &rv1);
+	zval *imag_zv = zend_read_property(obj->ce, obj, "imaginary", sizeof("imaginary") - 1, /* silent */ true, &rv2);
+
+	if (Z_TYPE_P(real_zv) != IS_LONG && Z_TYPE_P(real_zv) != IS_DOUBLE) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert object to Complex. Value for property \"real\" must be numeric (int or float).", 0);
+		return FAILURE;
+	}
+	if (Z_TYPE_P(imag_zv) != IS_LONG && Z_TYPE_P(imag_zv) != IS_DOUBLE) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot convert object to Complex. Value for property \"imaginary\" must be numeric (int or float).", 0);
+		return FAILURE;
+	}
+
+	return complex_create(return_value, zval_get_double(real_zv), zval_get_double(imag_zv));
+}
+/* }}} */
 
 /* {{{ OceanMoon\Math\Complex::__construct(float $real = 0, float $imag = 0) */
 PHP_METHOD(OceanMoon_Math_Complex, __construct)
@@ -37,36 +170,85 @@ PHP_METHOD(OceanMoon_Math_Complex, __construct)
 		Z_PARAM_DOUBLE(imag)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Matches Complex::__construct()'s own validation in the PHP package. */
-	if (!zend_finite(real) || !zend_finite(imag)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create a complex number from non-finite values.", 0);
+	if (complex_init(Z_OBJ_P(ZEND_THIS), real, imag) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_update_property_double(complex_ce_Complex, self, "real", sizeof("real") - 1, real);
-	zend_update_property_double(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, imag);
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::__toString(): string */
-PHP_METHOD(OceanMoon_Math_Complex, __toString)
+/* {{{ OceanMoon\Math\Complex::fromArray(array $arr): Complex */
+PHP_METHOD(OceanMoon_Math_Complex, fromArray)
 {
-	zval rv1, rv2;
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
+	zval *arr;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(arr)
+	ZEND_PARSE_PARAMETERS_END();
 
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
-
-	/* Placeholder formatting; real parity with the PHP __toString() comes later. */
-	if (imag == 0.0) {
-		RETURN_STR(strpprintf(0, "%g", real));
+	if (complex_from_array(return_value, Z_ARRVAL_P(arr)) == FAILURE) {
+		RETURN_THROWS();
 	}
-	RETURN_STR(strpprintf(0, "%g%+gi", real, imag));
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::fromObject(object $obj): Complex */
+PHP_METHOD(OceanMoon_Math_Complex, fromObject)
+{
+	zval *obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (complex_from_object(return_value, Z_OBJ_P(obj)) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::toComplex(mixed $value): Complex
+ *
+ * NB: unlike the PHP package's toComplex(), string values aren't handled yet (parse() isn't
+ * implemented in the extension), so a string currently falls through to the final
+ * InvalidArgumentException branch rather than being parsed.
+ */
+PHP_METHOD(OceanMoon_Math_Complex, toComplex)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* Existing Complex instance: return unchanged (same instance, not a copy). */
+	if (Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), complex_ce_Complex)) {
+		RETURN_ZVAL(value, 1, 0);
+	}
+
+	/* int or float: real Complex with zero imaginary part. */
+	if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_DOUBLE) {
+		if (complex_create(return_value, zval_get_double(value), 0.0) == FAILURE) {
+			RETURN_THROWS();
+		}
+		return;
+	}
+
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		if (complex_from_array(return_value, Z_ARRVAL_P(value)) == FAILURE) {
+			RETURN_THROWS();
+		}
+		return;
+	}
+
+	if (Z_TYPE_P(value) == IS_OBJECT) {
+		if (complex_from_object(return_value, Z_OBJ_P(value)) == FAILURE) {
+			RETURN_THROWS();
+		}
+		return;
+	}
+
+	zend_throw_exception(spl_ce_InvalidArgumentException, "Cannot convert value to Complex. Value must be Complex, int, float, array, or object.", 0);
+	RETURN_THROWS();
 }
 /* }}} */
 

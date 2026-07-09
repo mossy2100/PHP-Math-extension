@@ -6,5 +6,5 @@ PHP_ARG_ENABLE([complex],
 
 if test "$PHP_COMPLEX" != "no"; then
   AC_DEFINE(HAVE_COMPLEX, 1, [ Have OceanMoon complex support ])
-  PHP_NEW_EXTENSION(complex, complex.c, $ext_shared)
+  PHP_NEW_EXTENSION(complex, complex.c complex_conversion.c complex_inspection.c, $ext_shared)
 fi
