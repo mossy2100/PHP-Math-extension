@@ -1,0 +1,14 @@
+{
+    "name": "oceanmoon/complex-ext",
+    "description": "A native PHP complex number type.",
+    "type": "php-ext",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.4"
+    },
+    "php-ext": {
+        "extension-name": "complex",
+        "priority": 80,
+        "configure-options": []
+    }
+}

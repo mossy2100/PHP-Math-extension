@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# Run the extension's PHPUnit conformance tests (tests/phpunit/) with the built extension loaded.
+# These are copies of packages/Math's own PHPUnit tests, trimmed to only what the extension
+# implements, used to drive development: run them, see what fails, implement the next method.
+#
+# Usage:
+#   scripts/test-phpunit                                       # run everything under tests/phpunit
+#   scripts/test-phpunit tests/phpunit/Complex/ComplexFactoryTest.php
+#   scripts/test-phpunit --filter testConstructor
+
+set -euo pipefail
+
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MATH_DIR="$EXT_DIR/../../packages/Math"
+MODULE="$EXT_DIR/modules/complex.so"
+
+if [ ! -f "$MODULE" ]; then
+    echo "complex.so not found -- run 'make' in $EXT_DIR first." >&2
+    exit 1
+fi
+
+# Reuse Math's own phpunit install and bootstrap (for PHPUnit\Framework\TestCase and the global
+# EPSILON constant), rather than duplicating a composer install just for these dev-only tests.
+exec php \
+    -d extension="$MODULE" \
+    "$MATH_DIR/vendor/bin/phpunit" \
+    --bootstrap "$MATH_DIR/tests/bootstrap.php" \
+    --colors=always \
+    "${@:-$EXT_DIR/tests/phpunit}"

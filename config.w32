@@ -1,0 +1,8 @@
+// Windows build configuration for the complex extension.
+
+ARG_ENABLE("complex", "enable OceanMoon complex support", "no");
+
+if (PHP_COMPLEX != "no") {
+  EXTENSION("complex", "complex.c");
+  AC_DEFINE("HAVE_COMPLEX", 1, "OceanMoon complex support");
+}
