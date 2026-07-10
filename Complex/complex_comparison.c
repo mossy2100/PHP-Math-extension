@@ -13,36 +13,38 @@
 
 #include "php.h"
 #include "php_math.h"
+#include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 #include "floats.h"
 
 /* {{{ complex_normalize_operand
  *
- * Shared by equal() and approxEqual(): resolves $other into a (real, imaginary) pair the way
- * the PHP package's Complex::equal()/approxEqual() do -- an int or float is treated as a real
- * Complex (zero imaginary part); an existing Complex instance contributes its own parts. Returns
- * false (nothing else set) for any other type, which both callers treat as "not equal".
+ * Shared by equal() and approxEqual(): resolves $other into a (real, imaginary) pair by
+ * delegating to complex_to_complex(), exactly mirroring how the PHP package's equal()/
+ * approxEqual() call self::toComplex($other) and swallow any resulting exception. Returns false
+ * (nothing else set, and any pending exception cleared) if $other can't be converted, which both
+ * callers treat as "not equal" rather than propagating the exception.
  */
 static bool complex_normalize_operand(zval *value, double *out_real, double *out_imag)
 {
-	if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_DOUBLE) {
-		*out_real = zval_get_double(value);
-		*out_imag = 0.0;
-		return true;
+	zval converted;
+	if (complex_to_complex(&converted, value) == FAILURE) {
+		if (EG(exception)) {
+			zend_clear_exception();
+		}
+		return false;
 	}
 
-	if (Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), complex_ce_Complex)) {
-		zval rv1, rv2;
-		zend_object *obj = Z_OBJ_P(value);
-		*out_real = zval_get_double(
-			zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
-		*out_imag = zval_get_double(
-			zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
-		return true;
-	}
+	zval rv1, rv2;
+	zend_object *obj = Z_OBJ(converted);
+	*out_real = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
+	*out_imag = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
 
-	return false;
+	zval_ptr_dtor(&converted);
+	return true;
 }
 /* }}} */
 
@@ -108,5 +110,29 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
 		math_floats_approx_equal(real, other_real, rel_tol, abs_tol) &&
 		math_floats_approx_equal(imag, other_imag, rel_tol, abs_tol)
 	);
+}
+/* }}} */
+
+/* {{{ complex_compare_objects
+ *
+ * The `compare` object handler backing ==/!=/<=> (and, degenerately, </>/<=/>=, for which Complex
+ * has no meaningful ordering). Installed onto complex_object_handlers in complex_minit().
+ *
+ * A thin wrapper around the same logic as equal(): both operands are normalized via
+ * complex_normalize_operand() (which already handles a Complex instance on either side, since
+ * that's exactly what complex_to_complex()'s first branch does), then compared for exact
+ * equality. Returns 0 (equal) or 1 (not equal, or either side isn't convertible) -- matching
+ * zend_object_compare_t's strcmp-style contract, but only the zero/non-zero distinction is
+ * meaningful here, since Complex numbers have no natural ordering.
+ */
+int complex_compare_objects(zval *op1, zval *op2)
+{
+	double real1, imag1, real2, imag2;
+
+	if (!complex_normalize_operand(op1, &real1, &imag1) || !complex_normalize_operand(op2, &real2, &imag2)) {
+		return 1;
+	}
+
+	return (real1 == real2 && imag1 == imag2) ? 0 : 1;
 }
 /* }}} */

@@ -37,5 +37,7 @@ final class Complex implements \Stringable
 
     public static function fromObject(object $obj): Complex {}
 
+    public static function parse(string $str): Complex {}
+
     public static function toComplex(mixed $value): Complex {}
 }

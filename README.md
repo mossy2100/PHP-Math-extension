@@ -1,9 +1,10 @@
-# math
+# OceanMoon PHP Math extension
 
 **Work in progress.** A native PHP extension intended to eventually replicate all of
-[oceanmoon/math](https://github.com/mossy2100/PHP-Math) — `Complex`, `Rational`, `Vector`, and
-`Matrix` — as a drop-in, faster counterpart to the pure-PHP package. `Complex` is the first (and so
-far only) class implemented.
+[OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) (including the `Complex`, `Rational`, `Vector`, and
+`Matrix` classes) as a drop-in, faster substitute that also adds support for operators.
+
+Implementation of `Complex` is in progress; this is the first (and so far only) class implemented.
 
 Since each class uses the same fully-qualified name as its PHP package counterpart, loading this
 extension transparently replaces the userland class (Composer's autoloader never runs); without it,
@@ -17,20 +18,29 @@ and to add capabilities userland PHP can't provide on its own — operator overl
 
 - Class registration, `real` / `imaginary` properties
 - Constructor, including the same non-finite-value validation as the PHP package
-- Factory methods: `fromArray()` (list and associative), `fromObject()`, `toComplex()`
+- Factory methods: `fromArray()` (list and associative), `fromObject()`, `parse()`, `toComplex()`
+  (including string support, via `parse()`)
 - Conversion methods: `toArray()`, `toObject()`, `__toString()` (byte-for-byte parity with the PHP
   package's native `(string)`-cast-based formatting)
 - Inspection: `isReal()`
-- Comparison methods: `equal()`, `approxEqual()`
+- Comparison methods: `equal()`, `approxEqual()` — both accept anything `toComplex()` can convert
+  (`Complex`, `int`, `float`, `string`, `array`, `object`), matching the PHP package
+- Operators: `==`/`!=`, via the extension's first custom object handler (`compare`). Two PHP
+  language limitations mean this can't be full parity with `equal()`/`identical()`, and never will
+  be, regardless of any C code: `===`/`!==` between distinct object instances is always identity,
+  hardcoded by the engine with no override hook; and `$z == true`/`false` converts both sides to
+  bool before ever consulting the object's compare handler (every object is truthy), so those two
+  specific comparisons can't be customized either. See
+  `tests/phpunit/Complex/extension-only/ComplexComparisonOperatorsTest.php` for what is and isn't
+  tested, and why.
 - The `OceanMoon\Math\I` constant
 
-In progress: `==`/`!=` operator overloading (needs a custom object handler; see
-`tests/phpunit/Complex/extension-only/ComplexComparisonOperatorsTest.php`).
-
-Not yet implemented: the rest of the arithmetic/comparison operators, `parse()`, `fromPolar()`,
-trigonometric/hyperbolic methods, `ArrayAccess`, serialization, and the rest of `Complex`'s API —
-nor any of `Rational`, `Vector`, or `Matrix`. See [packages/Math](https://github.com/mossy2100/PHP-Math)
-for the reference implementation this is being built to match.
+Not yet implemented: `Complex::identical()` (a strict, `===`-style comparison — exists as a *method*
+in the PHP package, just not ported to C yet; distinct from the `===`/`!==` operator limitation
+above), `fromPolar()`, the rest of the arithmetic operators, trigonometric/hyperbolic methods,
+`ArrayAccess`, serialization, and the rest of `Complex`'s API — nor any of `Rational`, `Vector`, or
+`Matrix`. See [packages/Math](https://github.com/mossy2100/PHP-Math) for the reference
+implementation this is being built to match.
 
 ## Layout
 

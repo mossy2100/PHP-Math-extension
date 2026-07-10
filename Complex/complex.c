@@ -23,6 +23,10 @@
 # include "config.h"
 #endif
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
@@ -212,12 +216,309 @@ PHP_METHOD(OceanMoon_Math_Complex, fromObject)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::toComplex(mixed $value): Complex
+/* {{{ complex_is_imaginary_unit */
+static bool complex_is_imaginary_unit(char c)
+{
+	return c == 'i' || c == 'I' || c == 'j' || c == 'J';
+}
+/* }}} */
+
+/* {{{ complex_match_number
  *
- * NB: unlike the PHP package's toComplex(), string values aren't handled yet (parse() isn't
- * implemented in the extension), so a string currently falls through to the final
- * InvalidArgumentException branch rather than being parsed.
+ * Hand-rolled equivalent of the PHP package's `rxNum` regex fragment (unsigned):
+ *   (?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?
+ * i.e. digits with an optional trailing ".digits" part, OR a leading "." with required
+ * digits -- either way, optionally followed by a well-formed exponent. Tries to match at
+ * `pos` in `str` (length `len`, no sign -- the sign is handled by the caller, matching how the
+ * PHP pattern captures it in a separate group). On success, sets *out_value to the parsed
+ * magnitude and *out_consumed to how many characters matched, and returns true. Deliberately
+ * consumes nothing beyond a valid match (e.g. "3e" matches just "3", leaving "e" for the caller
+ * to reject) rather than using a general-purpose strtod() over the whole remaining string, which
+ * would accept things like "inf"/"nan" that PHP's is_numeric()/this grammar do not.
  */
+static bool complex_match_number(const char *str, size_t len, size_t pos, double *out_value, size_t *out_consumed)
+{
+	size_t start = pos;
+	size_t i = pos;
+
+	bool has_digits_before_dot = false;
+	while (i < len && str[i] >= '0' && str[i] <= '9') {
+		i++;
+		has_digits_before_dot = true;
+	}
+
+	bool has_dot = false;
+	if (i < len && str[i] == '.') {
+		has_dot = true;
+		i++;
+		while (i < len && str[i] >= '0' && str[i] <= '9') {
+			i++;
+		}
+	}
+
+	if (!has_digits_before_dot && (!has_dot || i == start + 1)) {
+		/* Neither "digits..." nor ".digits" matched. */
+		return false;
+	}
+
+	/* Optional exponent: only consumed if followed by at least one digit. */
+	if (i < len && (str[i] == 'e' || str[i] == 'E')) {
+		size_t j = i + 1;
+		if (j < len && (str[j] == '+' || str[j] == '-')) {
+			j++;
+		}
+		size_t digits_start = j;
+		while (j < len && str[j] >= '0' && str[j] <= '9') {
+			j++;
+		}
+		if (j > digits_start) {
+			i = j;
+		}
+	}
+
+	size_t match_len = i - start;
+	char buf[64];
+	if (match_len == 0 || match_len >= sizeof(buf)) {
+		return false;
+	}
+	memcpy(buf, str + start, match_len);
+	buf[match_len] = '\0';
+
+	*out_value = strtod(buf, NULL);
+	*out_consumed = match_len;
+	return true;
+}
+/* }}} */
+
+/* {{{ complex_is_pure_number
+ *
+ * Whole-string equivalent of PHP's is_numeric(): an optional leading sign followed by a
+ * complex_match_number() match that consumes every remaining character. Rejects "nan"/"inf" the
+ * same way complex_match_number() does -- neither contains only digits/dot/exponent characters.
+ */
+static bool complex_is_pure_number(const char *str, size_t len, double *out_value)
+{
+	if (len == 0) {
+		return false;
+	}
+
+	size_t pos = 0;
+	double sign = 1.0;
+	if (str[0] == '+' || str[0] == '-') {
+		sign = (str[0] == '-') ? -1.0 : 1.0;
+		pos = 1;
+	}
+
+	double value;
+	size_t consumed;
+	if (!complex_match_number(str, len, pos, &value, &consumed) || pos + consumed != len) {
+		return false;
+	}
+
+	*out_value = sign * value;
+	return true;
+}
+/* }}} */
+
+/* {{{ complex_try_parse
+ *
+ * Hand-rolled equivalent of the PHP package's Complex::parse() matching logic (minus whitespace
+ * stripping and the empty-string check, both handled by the caller). Tries, in order: a pure
+ * real number; a pure imaginary number (optional sign, optional coefficient, i/j suffix); a
+ * complex number in "real±imag i" form; a complex number in "imag i±real" form. Returns false if
+ * none match.
+ */
+static bool complex_try_parse(const char *str, size_t len, double *out_real, double *out_imag)
+{
+	double value;
+	if (complex_is_pure_number(str, len, &value)) {
+		*out_real = value;
+		*out_imag = 0.0;
+		return true;
+	}
+
+	/* Pure imaginary: [sign]? [coefficient]? i|j (whole string). */
+	{
+		size_t pos = 0;
+		double sign = 1.0;
+		if (len > 0 && (str[0] == '+' || str[0] == '-')) {
+			sign = (str[0] == '-') ? -1.0 : 1.0;
+			pos = 1;
+		}
+
+		double coeff = 0.0;
+		size_t consumed = 0;
+		bool has_coeff = complex_match_number(str, len, pos, &coeff, &consumed);
+		size_t after = pos + (has_coeff ? consumed : 0);
+
+		if (after < len && after == len - 1 && complex_is_imaginary_unit(str[after])) {
+			*out_real = 0.0;
+			*out_imag = sign * (has_coeff ? coeff : 1.0);
+			return true;
+		}
+	}
+
+	/* Complex, real first: [sign]? real (+|-) [coefficient]? i|j (whole string). */
+	{
+		size_t pos = 0;
+		double real_sign = 1.0;
+		if (len > 0 && (str[0] == '+' || str[0] == '-')) {
+			real_sign = (str[0] == '-') ? -1.0 : 1.0;
+			pos = 1;
+		}
+
+		double real_val;
+		size_t real_consumed;
+		if (complex_match_number(str, len, pos, &real_val, &real_consumed)) {
+			size_t after_real = pos + real_consumed;
+			if (after_real < len && (str[after_real] == '+' || str[after_real] == '-')) {
+				double imag_sign = (str[after_real] == '-') ? -1.0 : 1.0;
+				size_t imag_pos = after_real + 1;
+
+				double imag_val = 0.0;
+				size_t imag_consumed = 0;
+				bool has_imag_coeff = complex_match_number(str, len, imag_pos, &imag_val, &imag_consumed);
+				size_t after_imag = imag_pos + (has_imag_coeff ? imag_consumed : 0);
+
+				if (after_imag < len && after_imag == len - 1 && complex_is_imaginary_unit(str[after_imag])) {
+					*out_real = real_sign * real_val;
+					*out_imag = imag_sign * (has_imag_coeff ? imag_val : 1.0);
+					return true;
+				}
+			}
+		}
+	}
+
+	/* Complex, imaginary first: [sign]? [coefficient]? i|j (+|-) real (whole string). */
+	{
+		size_t pos = 0;
+		double imag_sign = 1.0;
+		if (len > 0 && (str[0] == '+' || str[0] == '-')) {
+			imag_sign = (str[0] == '-') ? -1.0 : 1.0;
+			pos = 1;
+		}
+
+		double imag_val = 0.0;
+		size_t imag_consumed = 0;
+		bool has_imag_coeff = complex_match_number(str, len, pos, &imag_val, &imag_consumed);
+		size_t after_imag_coeff = pos + (has_imag_coeff ? imag_consumed : 0);
+
+		if (after_imag_coeff < len && complex_is_imaginary_unit(str[after_imag_coeff])) {
+			size_t after_unit = after_imag_coeff + 1;
+			if (after_unit < len && (str[after_unit] == '+' || str[after_unit] == '-')) {
+				double real_sign = (str[after_unit] == '-') ? -1.0 : 1.0;
+				size_t real_pos = after_unit + 1;
+
+				double real_val;
+				size_t real_consumed;
+				if (complex_match_number(str, len, real_pos, &real_val, &real_consumed)
+					&& real_pos + real_consumed == len) {
+					*out_imag = imag_sign * (has_imag_coeff ? imag_val : 1.0);
+					*out_real = real_sign * real_val;
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+/* }}} */
+
+/* {{{ complex_parse
+ *
+ * Shared by parse() and toComplex()'s string branch. Matches the PHP package's Complex::parse(),
+ * except the message for an unparseable string throws spl_ce_DomainException directly rather than
+ * the package's FormatException (a subclass); the Math test suite only asserts on DomainException,
+ * not the more specific type.
+ */
+static zend_result complex_parse(zval *return_value, zend_string *str)
+{
+	char *stripped = emalloc(ZSTR_LEN(str) + 1);
+	size_t stripped_len = 0;
+	for (size_t i = 0; i < ZSTR_LEN(str); i++) {
+		char c = ZSTR_VAL(str)[i];
+		if (!isspace((unsigned char) c)) {
+			stripped[stripped_len++] = c;
+		}
+	}
+	stripped[stripped_len] = '\0';
+
+	if (stripped_len == 0) {
+		efree(stripped);
+		zend_throw_exception(spl_ce_DomainException, "Cannot parse empty string as complex number.", 0);
+		return FAILURE;
+	}
+
+	double real, imag;
+	bool ok = complex_try_parse(stripped, stripped_len, &real, &imag);
+
+	if (!ok) {
+		zend_string *msg = strpprintf(0, "Cannot parse '%s' as complex number.", stripped);
+		efree(stripped);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	efree(stripped);
+
+	return complex_create(return_value, real, imag);
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::parse(string $str): Complex */
+PHP_METHOD(OceanMoon_Math_Complex, parse)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (complex_parse(return_value, str) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ complex_to_complex
+ *
+ * Shared by toComplex() and complex_normalize_operand() (complex_comparison.c's shared helper for
+ * equal()/approxEqual()), mirroring how the PHP package's equal()/approxEqual() delegate to
+ * self::toComplex(). An existing Complex instance is returned unchanged (same instance, not a
+ * copy, via RETVAL_ZVAL's refcount bump); everything else is dispatched to the matching from*()/
+ * complex_create()/complex_parse() helper, or rejected with InvalidArgumentException.
+ */
+zend_result complex_to_complex(zval *return_value, zval *value)
+{
+	if (Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), complex_ce_Complex)) {
+		RETVAL_ZVAL(value, 1, 0);
+		return SUCCESS;
+	}
+
+	if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_DOUBLE) {
+		return complex_create(return_value, zval_get_double(value), 0.0);
+	}
+
+	if (Z_TYPE_P(value) == IS_STRING) {
+		return complex_parse(return_value, Z_STR_P(value));
+	}
+
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		return complex_from_array(return_value, Z_ARRVAL_P(value));
+	}
+
+	if (Z_TYPE_P(value) == IS_OBJECT) {
+		return complex_from_object(return_value, Z_OBJ_P(value));
+	}
+
+	zend_throw_exception(spl_ce_InvalidArgumentException, "Cannot convert value to Complex. Value must be Complex, int, float, string, array, or object.", 0);
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::toComplex(mixed $value): Complex */
 PHP_METHOD(OceanMoon_Math_Complex, toComplex)
 {
 	zval *value;
@@ -226,35 +527,28 @@ PHP_METHOD(OceanMoon_Math_Complex, toComplex)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Existing Complex instance: return unchanged (same instance, not a copy). */
-	if (Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), complex_ce_Complex)) {
-		RETURN_ZVAL(value, 1, 0);
+	if (complex_to_complex(return_value, value) == FAILURE) {
+		RETURN_THROWS();
 	}
+}
+/* }}} */
 
-	/* int or float: real Complex with zero imaginary part. */
-	if (Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_DOUBLE) {
-		if (complex_create(return_value, zval_get_double(value), 0.0) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
+/* The custom object handlers for Complex, installed by complex_create_object(). A copy of the
+ * standard handlers with `compare` overridden (complex_comparison.c) so ==/!=/<=> use value
+ * comparison instead of the engine's default identity-only behavior for objects. */
+static zend_object_handlers complex_object_handlers;
 
-	if (Z_TYPE_P(value) == IS_ARRAY) {
-		if (complex_from_array(return_value, Z_ARRVAL_P(value)) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	if (Z_TYPE_P(value) == IS_OBJECT) {
-		if (complex_from_object(return_value, Z_OBJ_P(value)) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	zend_throw_exception(spl_ce_InvalidArgumentException, "Cannot convert value to Complex. Value must be Complex, int, float, array, or object.", 0);
-	RETURN_THROWS();
+/* {{{ complex_create_object
+ *
+ * Installs complex_object_handlers on every new Complex instance in place of the class entry's
+ * default (std_object_handlers). Registered as complex_ce_Complex->create_object in complex_minit().
+ */
+static zend_object *complex_create_object(zend_class_entry *ce)
+{
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &complex_object_handlers;
+	return obj;
 }
 /* }}} */
 
@@ -266,6 +560,10 @@ PHP_METHOD(OceanMoon_Math_Complex, toComplex)
 zend_result complex_minit(void)
 {
 	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable);
+
+	memcpy(&complex_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	complex_object_handlers.compare = complex_compare_objects;
+	complex_ce_Complex->create_object = complex_create_object;
 
 	return SUCCESS;
 }

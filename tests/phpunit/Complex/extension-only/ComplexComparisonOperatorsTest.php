@@ -9,13 +9,28 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+/**
+ * Mirrors (in part) packages/Math's ComplexComparisonTest, but exercises the native `==`/`!=`
+ * operators instead of calling equal() directly -- these can only be tested from the extension,
+ * since userland PHP can't overload operators.
+ *
+ * identical() has no operator equivalent: === for objects is always identity (same instance),
+ * hardcoded by the engine with no handler to override it, so it can't express identical()'s
+ * value-based semantics for two distinct instances. approxEqual() likewise has no operator
+ * equivalent. Neither is mirrored here.
+ *
+ * == has one gap of its own: comparing an object to bool (`$z == true`/`$z == false`) converts
+ * both sides to bool first, without ever consulting the object's compare handler -- every object
+ * is truthy, so this is always true for `true` and always false for `false`, for any PHP object.
+ * See testEqualInvalidTypeReturnsFalse().
+ */
 #[CoversClass(Complex::class)]
 class ComplexComparisonOperatorsTest extends TestCase
 {
-    #region Exact equality tests
+    #region Exact equality tests (==)
 
     /**
-     * Test exact equality with identical complex numbers.
+     * Test exact equality (==) with identical complex numbers.
      */
     public function testEqualExact(): void
     {
@@ -26,7 +41,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test inequality with different complex numbers.
+     * Test inequality (==) with different complex numbers.
      */
     public function testNotEqual(): void
     {
@@ -43,7 +58,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test equality with real numbers (int and float).
+     * Test equality (==) with real numbers (int and float).
      */
     public function testEqualWithRealNumber(): void
     {
@@ -57,7 +72,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test equality with zero.
+     * Test equality (==) with zero.
      */
     public function testEqualWithZero(): void
     {
@@ -70,7 +85,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test reflexivity: a value should equal itself.
+     * Test reflexivity: a value should equal (==) itself.
      */
     public function testEqualReflexive(): void
     {
@@ -85,7 +100,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test symmetry: if a equals b, then b equals a.
+     * Test symmetry: if a == b, then b == a.
      */
     public function testEqualSymmetric(): void
     {
@@ -103,7 +118,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test transitivity: if a equals b and b equals c, then a equals c.
+     * Test transitivity: if a == b and b == c, then a == c.
      */
     public function testEqualTransitive(): void
     {
@@ -117,7 +132,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test equality with negative zero.
+     * Test equality (==) with negative zero.
      */
     public function testEqualNegativeZero(): void
     {
@@ -139,7 +154,14 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test that equal returns false for invalid types instead of throwing.
+     * Test that equality (==) returns false for invalid types instead of throwing.
+     *
+     * NB: doesn't test `$z == true` (unlike the equal() method's equivalent test) -- PHP compares
+     * object == bool by converting *both sides* to bool first, never consulting the object's
+     * compare handler. Since every object is truthy, `$z == true` is always true for any PHP
+     * object; no C code can change that. `== null` is unaffected -- objects are never == null
+     * regardless of any custom handler, so it still exercises the same "false for the wrong type"
+     * behavior.
      */
     public function testEqualInvalidTypeReturnsFalse(): void
     {
@@ -149,11 +171,48 @@ class ComplexComparisonOperatorsTest extends TestCase
         $this->assertFalse($z == null);
         $this->assertFalse($z == []);
         $this->assertFalse($z == new stdClass());
-        $this->assertFalse($z == true);
     }
 
     /**
-     * Test equality with pure imaginary numbers.
+     * Test equality (==) with a parseable string, converted via toComplex().
+     */
+    public function testEqualWithString(): void
+    {
+        $z = new Complex(3, 4);
+
+        $this->assertTrue($z == '3+4i');
+        $this->assertFalse($z == '3+5i');
+        $this->assertFalse($z == 'not a number');
+    }
+
+    /**
+     * Test equality (==) with a 2-element array (list or associative), converted via
+     * toComplex().
+     */
+    public function testEqualWithArray(): void
+    {
+        $z = new Complex(3, 4);
+
+        $this->assertTrue($z == [3, 4]);
+        $this->assertTrue($z == ['real' => 3, 'imaginary' => 4]);
+        $this->assertFalse($z == [3, 5]);
+        $this->assertFalse($z == [1, 2, 3]);
+    }
+
+    /**
+     * Test equality (==) with a plain object with numeric real/imaginary properties, converted
+     * via toComplex().
+     */
+    public function testEqualWithObject(): void
+    {
+        $z = new Complex(3, 4);
+
+        $this->assertTrue($z == (object) ['real' => 3, 'imaginary' => 4]);
+        $this->assertFalse($z == (object) ['real' => 3, 'imaginary' => 5]);
+    }
+
+    /**
+     * Test equality (==) with pure imaginary numbers.
      */
     public function testEqualPureImaginary(): void
     {
@@ -164,6 +223,28 @@ class ComplexComparisonOperatorsTest extends TestCase
 
         $z3 = new Complex(0, -5);
         $this->assertFalse($z1 == $z3);
+    }
+
+    /**
+     * Test not equal (!=): the logical negation of == -- true for differing values or for
+     * anything toComplex() can't convert, false when the values match (or are convertibly
+     * equal).
+     */
+    public function testNotEqualOperator(): void
+    {
+        $z1 = new Complex(3, 4);
+
+        $this->assertTrue($z1 != new Complex(3, 5));
+        $this->assertTrue($z1 != 'not a number');
+        $this->assertTrue($z1 != null);
+
+        $z2 = new Complex(5, 0);
+        $this->assertTrue($z2 != 6);
+        $this->assertFalse($z2 != 5);
+        $this->assertFalse($z2 != 5.0);
+
+        $this->assertFalse($z1 != new Complex(3, 4));
+        $this->assertFalse($z1 != '3+4i');
     }
 
     #endregion
