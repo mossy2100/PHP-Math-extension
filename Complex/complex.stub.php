@@ -6,7 +6,7 @@
  * This mirrors the public shape the extension exposes and is the source of
  * truth for complex_arginfo.h. Regenerate that header after editing this file:
  *
- *   php $(php-config --prefix)/lib/php/build/gen_stub.php complex.stub.php
+ *   php $(php-config --prefix)/lib/php/build/gen_stub.php Complex/complex.stub.php
  *
  * @generate-class-entries
  */
@@ -28,6 +28,10 @@ final class Complex implements \Stringable
     public function toObject(): \stdClass {}
 
     public function isReal(): bool {}
+
+    public function equal(mixed $other): bool {}
+
+    public function approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool {}
 
     public static function fromArray(array $arr): Complex {}
 

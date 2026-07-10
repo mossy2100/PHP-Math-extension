@@ -11,58 +11,30 @@
 #endif
 
 #include <math.h>
-#include <string.h>
 
 #include "php.h"
-#include "php_complex.h"
+#include "php_math.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 #include "Zend/zend_smart_str.h"
 
-/* {{{ complex_format_double
+/* {{{ complex_double_to_str
  *
- * Mirrors OceanMoon\Core\Floats::format($value)'s defaults (specifier 'g', precision 7,
- * trimZeros true): sprintf with "%.7g", then strip trailing fractional zeros (and a trailing
- * lone "." if the fraction was all zeros).
+ * Converts a double to a zend_string the exact same way PHP's own (string) cast does (governed
+ * by the `precision` ini setting), by wrapping it in a zval and running it through the engine's
+ * normal string-conversion machinery. This gives byte-for-byte parity with the PHP package's
+ * __toString(), which itself just does (string) $this->real, etc. -- no bespoke formatting logic
+ * to keep in sync.
  *
- * NB: doesn't replicate Floats::format()'s Unicode "×10ⁿ" superscript rendering for scientific
- * notation -- the exponent (if %.7g produces one) is left in sprintf's plain "e+NN" form. No
- * Math test currently asserts on that exact output, only on the fixed-point common case.
+ * Takes ownership of the resulting zend_string; the caller must eventually release it (or hand
+ * it to RETURN_STR(), which takes ownership itself).
  */
-static zend_string *complex_format_double(double value)
+static zend_string *complex_double_to_str(double value)
 {
-	/* Canonicalize -0.0 to 0.0, matching Floats::normalizeZero(). */
-	if (value == 0.0) {
-		value = 0.0;
-	}
-
-	char buf[64];
-	snprintf(buf, sizeof(buf), "%.7g", value);
-
-	char *e_pos = strpbrk(buf, "eE");
-	size_t mantissa_len = e_pos ? (size_t) (e_pos - buf) : strlen(buf);
-
-	if (strchr(buf, '.') != NULL) {
-		char *end = buf + mantissa_len - 1;
-		while (end > buf && *end == '0') {
-			*end-- = '\0';
-			mantissa_len--;
-		}
-		if (end > buf && *end == '.') {
-			*end = '\0';
-			mantissa_len--;
-		}
-	}
-
-	if (!e_pos) {
-		return zend_string_init(buf, mantissa_len, 0);
-	}
-
-	smart_str result = {0};
-	smart_str_appendl(&result, buf, mantissa_len);
-	smart_str_appends(&result, e_pos);
-	smart_str_0(&result);
-	return result.s;
+	zval tmp;
+	ZVAL_DOUBLE(&tmp, value);
+	convert_to_string(&tmp);
+	return Z_STR(tmp);
 }
 /* }}} */
 
@@ -84,7 +56,7 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 
 	/* Real number: imaginary part is zero. */
 	if (imag == 0.0) {
-		RETURN_STR(complex_format_double(real));
+		RETURN_STR(complex_double_to_str(real));
 	}
 
 	/* Real part is zero, imaginary part non-zero. */
@@ -97,7 +69,7 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 		}
 
 		smart_str buf = {0};
-		zend_string *imag_str = complex_format_double(imag);
+		zend_string *imag_str = complex_double_to_str(imag);
 		smart_str_append(&buf, imag_str);
 		zend_string_release(imag_str);
 		smart_str_appendc(&buf, 'i');
@@ -109,12 +81,12 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 	double abs_imag = fabs(imag);
 
 	smart_str buf = {0};
-	zend_string *real_str = complex_format_double(real);
+	zend_string *real_str = complex_double_to_str(real);
 	smart_str_append(&buf, real_str);
 	zend_string_release(real_str);
 	smart_str_appends(&buf, imag > 0 ? " + " : " - ");
 	if (abs_imag != 1.0) {
-		zend_string *imag_str = complex_format_double(abs_imag);
+		zend_string *imag_str = complex_double_to_str(abs_imag);
 		smart_str_append(&buf, imag_str);
 		zend_string_release(imag_str);
 	}

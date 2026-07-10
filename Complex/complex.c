@@ -1,14 +1,21 @@
 /*
  * complex.c
  *
- * Core of the OceanMoon complex extension: class registration (MINIT/RINIT),
- * the constructor, the module entry, and the shared internal helpers
- * (complex_init/complex_create/complex_from_array/complex_from_object)
- * declared in complex_internal.h and used by this file's factory methods as
- * well as the other complex_*.c implementation files.
+ * OceanMoon\Math\Complex: class registration, the constructor, factory
+ * methods, and the shared internal helpers (complex_init/complex_create/
+ * complex_from_array/complex_from_object) declared in complex_internal.h and
+ * used by this file as well as the other complex_*.c implementation files in
+ * this directory.
+ *
+ * complex_minit()/complex_rinit() are called from the module's real
+ * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION in ../math.c, which owns module
+ * lifecycle for the whole `math` extension. Everything in this directory is
+ * Complex-specific; rational_*.c/vector_*.c/matrix_*.c (in their own
+ * directories) will follow the same pattern once those classes are built.
  *
  * Conversion methods (toArray/toObject/__toString) live in
- * complex_conversion.c. No arithmetic, custom object handlers, or operator
+ * complex_conversion.c; comparison methods (equal/approxEqual) live in
+ * complex_comparison.c. No arithmetic, custom object handlers, or operator
  * overloading yet.
  */
 
@@ -17,12 +24,11 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/info.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
-#include "php_complex.h"
+#include "php_math.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 
@@ -252,20 +258,23 @@ PHP_METHOD(OceanMoon_Math_Complex, toComplex)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(complex)
+/* {{{ complex_minit
+ *
+ * Called from PHP_MINIT_FUNCTION(math) in ../math.c. Class entry, method table, and typed
+ * properties are all generated from complex.stub.php into complex_arginfo.h; register them here.
+ */
+zend_result complex_minit(void)
 {
-	/* Class entry, method table, and typed properties are all generated from
-	 * complex.stub.php into complex_arginfo.h; register them here. */
 	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable);
 
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* {{{ complex_rinit
  *
- * Registers OceanMoon\Math\I, a constant Complex(0, 1), fresh on every request.
+ * Called from PHP_RINIT_FUNCTION(math) in ../math.c. Registers OceanMoon\Math\I, a constant
+ * Complex(0, 1), fresh on every request.
  *
  * This deliberately runs at RINIT rather than MINIT. MINIT executes once per
  * process, before any request begins; an object built there with the ordinary
@@ -279,7 +288,7 @@ PHP_MINIT_FUNCTION(complex)
  * rebuilds them fresh on the next request. Same lifetime as a plain PHP
  * `const I = new Complex(0, 1);` declaration re-executed on every request.
  */
-PHP_RINIT_FUNCTION(complex)
+zend_result complex_rinit(int module_number)
 {
 	zend_constant c;
 
@@ -297,35 +306,3 @@ PHP_RINIT_FUNCTION(complex)
 	return SUCCESS;
 }
 /* }}} */
-
-/* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(complex)
-{
-	php_info_print_table_start();
-	php_info_print_table_row(2, "complex support", "enabled");
-	php_info_print_table_row(2, "version", PHP_COMPLEX_VERSION);
-	php_info_print_table_end();
-}
-/* }}} */
-
-/* {{{ complex_module_entry */
-zend_module_entry complex_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"complex",					/* Extension name */
-	NULL,						/* zend_function_entry (no global functions) */
-	PHP_MINIT(complex),			/* PHP_MINIT - Module initialization */
-	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
-	PHP_RINIT(complex),			/* PHP_RINIT - Request initialization */
-	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(complex),			/* PHP_MINFO - Module info */
-	PHP_COMPLEX_VERSION,		/* Version */
-	STANDARD_MODULE_PROPERTIES
-};
-/* }}} */
-
-#ifdef COMPILE_DL_COMPLEX
-# ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-# endif
-ZEND_GET_MODULE(complex)
-#endif

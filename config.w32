@@ -1,8 +1,8 @@
-// Windows build configuration for the complex extension.
+// Windows build configuration for the math extension.
 
-ARG_ENABLE("complex", "enable OceanMoon complex support", "no");
+ARG_ENABLE("math", "enable OceanMoon math support", "no");
 
-if (PHP_COMPLEX != "no") {
-  EXTENSION("complex", "complex.c");
-  AC_DEFINE("HAVE_COMPLEX", 1, "OceanMoon complex support");
+if (PHP_MATH != "no") {
+  EXTENSION("math", "math.c floats.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c");
+  AC_DEFINE("HAVE_MATH", 1, "OceanMoon math support");
 }

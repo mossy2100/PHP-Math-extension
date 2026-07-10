@@ -34,3 +34,4 @@
 /mkinstalldirs
 /run-tests.php
 /tmp-php.ini
+/php_test_results_*.txt

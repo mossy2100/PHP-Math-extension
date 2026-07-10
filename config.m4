@@ -1,10 +1,10 @@
-PHP_ARG_ENABLE([complex],
-  [whether to enable complex support],
-  [AS_HELP_STRING([--enable-complex],
-    [Enable OceanMoon complex number support])],
+PHP_ARG_ENABLE([math],
+  [whether to enable math support],
+  [AS_HELP_STRING([--enable-math],
+    [Enable OceanMoon math support])],
   [no])
 
-if test "$PHP_COMPLEX" != "no"; then
-  AC_DEFINE(HAVE_COMPLEX, 1, [ Have OceanMoon complex support ])
-  PHP_NEW_EXTENSION(complex, complex.c complex_conversion.c complex_inspection.c, $ext_shared)
+if test "$PHP_MATH" != "no"; then
+  AC_DEFINE(HAVE_MATH, 1, [ Have OceanMoon math support ])
+  PHP_NEW_EXTENSION(math, math.c floats.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c, $ext_shared)
 fi

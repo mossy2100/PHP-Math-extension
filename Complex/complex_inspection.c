@@ -10,7 +10,7 @@
 #endif
 
 #include "php.h"
-#include "php_complex.h"
+#include "php_math.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 
