@@ -1,7 +1,8 @@
 /*
  * complex_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Complex: equal() and approxEqual(). Mirrors the
+ * Comparison methods for OceanMoon\Math\Complex: identical(), equal(), and approxEqual(). Also
+ * the compare object handler backing ==/!= (see complex_compare_objects()). Mirrors the
  * "Comparison methods" region of the PHP package's Complex class.
  */
 
@@ -17,6 +18,21 @@
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 #include "floats.h"
+
+/* {{{ complex_read_parts
+ *
+ * Shared by identical(), equal(), approxEqual(), and complex_normalize_operand(): reads the real
+ * and imaginary parts off a zend_object already known to be a Complex instance.
+ */
+static void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
+{
+	zval rv1, rv2;
+	*out_real = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
+	*out_imag = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+}
+/* }}} */
 
 /* {{{ complex_normalize_operand
  *
@@ -36,15 +52,37 @@ static bool complex_normalize_operand(zval *value, double *out_real, double *out
 		return false;
 	}
 
-	zval rv1, rv2;
-	zend_object *obj = Z_OBJ(converted);
-	*out_real = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
-	*out_imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+	complex_read_parts(Z_OBJ(converted), out_real, out_imag);
 
 	zval_ptr_dtor(&converted);
 	return true;
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::identical(mixed $other): bool
+ *
+ * Matches the PHP package's Complex::identical(): true only if $other is actually a Complex
+ * instance (not merely something toComplex() could convert) with exactly equal real/imaginary
+ * parts. Since Complex is final, checking instanceof here is equivalent to the package's
+ * Types::same() (get_debug_type() comparison) -- no subclass can exist to make them differ.
+ */
+PHP_METHOD(OceanMoon_Math_Complex, identical)
+{
+	zval *other;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(other)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), complex_ce_Complex)) {
+		RETURN_FALSE;
+	}
+
+	double real, imag, other_real, other_imag;
+	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
+	complex_read_parts(Z_OBJ_P(other), &other_real, &other_imag);
+
+	RETURN_BOOL(real == other_real && imag == other_imag);
 }
 /* }}} */
 
@@ -65,12 +103,8 @@ PHP_METHOD(OceanMoon_Math_Complex, equal)
 		RETURN_FALSE;
 	}
 
-	zval rv1, rv2;
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+	double real, imag;
+	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
 	RETURN_BOOL(real == other_real && imag == other_imag);
 }
@@ -99,12 +133,8 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
 		RETURN_FALSE;
 	}
 
-	zval rv1, rv2;
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+	double real, imag;
+	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
 	RETURN_BOOL(
 		math_floats_approx_equal(real, other_real, rel_tol, abs_tol) &&
