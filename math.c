@@ -7,6 +7,12 @@
  * will follow the same pattern). MINIT/RINIT delegate to each class's own
  * complex_minit()/complex_rinit()-style hooks rather than doing class-specific
  * work here directly.
+ *
+ * Shared, non-class-specific infrastructure (floats.c/floats.h, integers.c/integers.h,
+ * exceptions.c/exceptions.h) lives flat at this level rather than in a per-class subdirectory --
+ * it isn't a ported PHP class, it's support code every class-specific file can depend on. Only
+ * exceptions.c needs an MINIT hook (class registration); floats.c/integers.c are pure functions
+ * with no PHP-visible state to initialize.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -16,11 +22,17 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_math.h"
+#include "exceptions.h"
 #include "Complex/complex_internal.h"
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(math)
 {
+	/* Exception classes are registered first, before any class that might throw them. */
+	if (math_exceptions_minit() == FAILURE) {
+		return FAILURE;
+	}
+
 	if (complex_minit() == FAILURE) {
 		return FAILURE;
 	}
