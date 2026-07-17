@@ -1,9 +1,8 @@
 /*
  * complex_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Complex: identical(), equal(), and approxEqual(). Also
- * the compare object handler backing ==/!= (see complex_compare_objects()). Mirrors the
- * "Comparison methods" region of the PHP package's Complex class.
+ * Comparison methods for OceanMoon\Math\Complex: equal() and approxEqual(). Mirrors the "Comparison
+ * methods" region of the PHP package's Complex class.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -21,7 +20,7 @@
 
 /* {{{ complex_read_parts
  *
- * Shared by identical(), equal(), approxEqual(), and complex_normalize_operand(): reads the real
+ * Shared by equal(), approxEqual(), and complex_normalize_operand(): reads the real
  * and imaginary parts off a zend_object already known to be a Complex instance.
  */
 static void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
@@ -56,33 +55,6 @@ static bool complex_normalize_operand(zval *value, double *out_real, double *out
 
 	zval_ptr_dtor(&converted);
 	return true;
-}
-/* }}} */
-
-/* {{{ OceanMoon\Math\Complex::identical(mixed $other): bool
- *
- * Matches the PHP package's Complex::identical(): true only if $other is actually a Complex
- * instance (not merely something toComplex() could convert) with exactly equal real/imaginary
- * parts. Since Complex is final, checking instanceof here is equivalent to the package's
- * Types::same() (get_debug_type() comparison) -- no subclass can exist to make them differ.
- */
-PHP_METHOD(OceanMoon_Math_Complex, identical)
-{
-	zval *other;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(other)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), complex_ce_Complex)) {
-		RETURN_FALSE;
-	}
-
-	double real, imag, other_real, other_imag;
-	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
-	complex_read_parts(Z_OBJ_P(other), &other_real, &other_imag);
-
-	RETURN_BOOL(real == other_real && imag == other_imag);
 }
 /* }}} */
 
@@ -140,29 +112,5 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
 		math_floats_approx_equal(real, other_real, rel_tol, abs_tol) &&
 		math_floats_approx_equal(imag, other_imag, rel_tol, abs_tol)
 	);
-}
-/* }}} */
-
-/* {{{ complex_compare_objects
- *
- * The `compare` object handler backing ==/!=/<=> (and, degenerately, </>/<=/>=, for which Complex
- * has no meaningful ordering). Installed onto complex_object_handlers in complex_minit().
- *
- * A thin wrapper around the same logic as equal(): both operands are normalized via
- * complex_normalize_operand() (which already handles a Complex instance on either side, since
- * that's exactly what complex_to_complex()'s first branch does), then compared for exact
- * equality. Returns 0 (equal) or 1 (not equal, or either side isn't convertible) -- matching
- * zend_object_compare_t's strcmp-style contract, but only the zero/non-zero distinction is
- * meaningful here, since Complex numbers have no natural ordering.
- */
-int complex_compare_objects(zval *op1, zval *op2)
-{
-	double real1, imag1, real2, imag2;
-
-	if (!complex_normalize_operand(op1, &real1, &imag1) || !complex_normalize_operand(op2, &real2, &imag2)) {
-		return 1;
-	}
-
-	return (real1 == real2 && imag1 == imag2) ? 0 : 1;
 }
 /* }}} */

@@ -29,8 +29,6 @@ final class Complex implements \Stringable
 
     public function isReal(): bool {}
 
-    public function identical(mixed $other): bool {}
-
     public function equal(mixed $other): bool {}
 
     public function approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool {}
@@ -39,7 +37,9 @@ final class Complex implements \Stringable
 
     public static function fromObject(object $obj): Complex {}
 
-    public static function parse(string $str): Complex {}
+    public static function fromString(string $str): Complex {}
+
+    public static function fromPolar(float $mag, float $phase): Complex {}
 
     public static function toComplex(mixed $value): Complex {}
 }

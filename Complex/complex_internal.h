@@ -23,10 +23,6 @@ zend_result complex_from_array(zval *return_value, HashTable *arr);
 zend_result complex_from_object(zval *return_value, zend_object *obj);
 zend_result complex_to_complex(zval *return_value, zval *value);
 
-/* The custom `compare` object handler, defined in complex_comparison.c. See its doc comment
- * there. Installed onto complex_object_handlers by complex_minit(). */
-int complex_compare_objects(zval *op1, zval *op2);
-
 /* Module lifecycle hooks, called from ../math.c. See their doc comments in complex.c. */
 zend_result complex_minit(void);
 zend_result complex_rinit(int module_number);
