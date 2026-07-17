@@ -1,13 +1,15 @@
 {
     "name": "oceanmoon/math-ext",
-    "description": "A native PHP extension replicating oceanmoon/math, starting with Complex.",
+    "description": "A native PHP extension providing the same Complex, Rational, Vector and Matrix classes from oceanmoon/math, plus operators.",
     "type": "php-ext",
     "license": "MIT",
     "require": {
         "php": ">=8.4"
     },
     "php-ext": {
-        "extension-name": "math",
+        "extension-name": "oceanmoon_math",
+        "support-zts": true,
+        "support-nts": true,
         "priority": 80,
         "configure-options": []
     }

@@ -1,56 +1,50 @@
 # OceanMoon PHP Math extension
 
-**Work in progress.** A native PHP extension intended to eventually replicate all of
-[OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) (including the `Complex`, `Rational`, `Vector`, and
-`Matrix` classes) as a drop-in, faster substitute that also adds support for operators.
+**Work in progress.** A native PHP extension that replicates the
+[OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) - the `Complex`, `Rational`, `Vector`, and `Matrix`
+classes - as a drop-in, faster substitute that also adds operator overloading, something userland PHP classes can't
+offer on their own.
 
-Implementation of `Complex` is in progress; this is the first (and so far only) class implemented.
+Since each class uses the same fully-qualified name as its PHP package counterpart, loading this extension transparently
+replaces the userland class - no code changes required. Without the extension loaded, the plain PHP package classes are
+used instead, so this is a purely additive, opt-in performance and ergonomics upgrade.
 
-Since each class uses the same fully-qualified name as its PHP package counterpart, loading this
-extension transparently replaces the userland class (Composer's autoloader never runs); without it,
-the plain PHP class is used. The goal is to eventually let both share one PHPUnit conformance suite,
-and to add capabilities userland PHP can't provide on its own — operator overloading, chiefly.
+Implementation of `Complex` is currently in progress; it's the first class being built, with `Rational`, `Vector`, and
+`Matrix` to follow the same pattern.
 
-## Status
+---
 
-`OceanMoon\Math\Complex`, built incrementally against the Math package's own tests (see
-`tests/phpunit/`). Implemented so far:
+## Classes
 
-- Class registration, `real` / `imaginary` properties
-- Constructor, including the same non-finite-value validation as the PHP package
-- Factory methods: `fromArray()` (list and associative), `fromObject()`, `parse()`, `toComplex()`
-  (including string support, via `parse()`)
-- Conversion methods: `toArray()`, `toObject()`, `__toString()` (byte-for-byte parity with the PHP
-  package's native `(string)`-cast-based formatting)
-- Inspection: `isReal()`
-- Comparison methods: `equal()`, `approxEqual()` — both accept anything `toComplex()` can convert
-  (`Complex`, `int`, `float`, `string`, `array`, `object`), matching the PHP package
-- Operators: `==`/`!=`, via the extension's first custom object handler (`compare`). Two PHP
-  language limitations mean this can't be full parity with `equal()`/`identical()`, and never will
-  be, regardless of any C code: `===`/`!==` between distinct object instances is always identity,
-  hardcoded by the engine with no override hook; and `$z == true`/`false` converts both sides to
-  bool before ever consulting the object's compare handler (every object is truthy), so those two
-  specific comparisons can't be customized either. See
-  `tests/phpunit/Complex/extension-only/ComplexComparisonOperatorsTest.php` for what is and isn't
-  tested, and why.
-- The `OceanMoon\Math\I` constant
+Each class's full API (properties, factory methods, conversion, comparison, everything else) is documented in the
+Math package itself - this extension is a drop-in replacement, not a different API. The pages below cover only what
+the extension adds: operator overloading.
 
-Not yet implemented: `Complex::identical()` (a strict, `===`-style comparison — exists as a *method*
-in the PHP package, just not ported to C yet; distinct from the `===`/`!==` operator limitation
-above), `fromPolar()`, the rest of the arithmetic operators, trigonometric/hyperbolic methods,
-`ArrayAccess`, serialization, and the rest of `Complex`'s API — nor any of `Rational`, `Vector`, or
-`Matrix`. See [packages/Math](https://github.com/mossy2100/PHP-Math) for the reference
-implementation this is being built to match.
+### [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)
 
-## Layout
+Adds `+`, `-`, `*`, `/`, `**`, and `~` (conjugate). See [Complex operators](docs/Complex.md).
 
-- Top level: module-wide files only (`math.c` — MINIT/RINIT/MINFO/module entry; `floats.c`/`floats.h`
-  — shared helpers with no class affinity, e.g. the `Floats::approxEqual()` port used by comparison
-  methods).
-- One subfolder per class (`Complex/` so far): everything specific to that class — its `.c`
-  implementation files split by region (construction/factories, conversion, inspection, comparison,
-  ...), its `_internal.h`, its stub, and its generated arginfo header. `Rational/`, `Vector/`, and
-  `Matrix/` will follow the same pattern.
+### [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md)
+
+Adds `+`, `-`, `*`, `/`, `**`, and the full set of comparison operators (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See
+[Rational operators](docs/Rational.md).
+
+### [Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)
+
+Adds `+`, `-`, `*`, `/`. See [Vector operators](docs/Vector.md).
+
+### [Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)
+
+Adds `+`, `-`, `*`, `/`, `**`. See [Matrix operators](docs/Matrix.md).
+
+---
+
+## Requirements
+
+- PHP 8.4+
+- A C compiler and the PHP development headers (`phpize`, `php-config`)
+
+---
 
 ## Building
 
@@ -61,12 +55,25 @@ make
 php -d extension="$PWD/modules/math.so" -m | grep math   # confirm it loads
 ```
 
+---
+
 ## Testing
 
 ```bash
 make test               # .phpt tests (tests/phpt/)
 scripts/test-phpunit    # PHPUnit conformance tests against the Math package's own tests (tests/phpunit/)
 ```
+
+---
+
+## Project Structure
+
+- Top level: module-wide files only (`math.c` - MINIT/RINIT/MINFO/module entry; `floats.c`/`floats.h` - shared helpers
+  with no class affinity).
+- One subfolder per class (`Complex/`, and eventually `Rational/`, `Vector/`, `Matrix/`): everything specific to that
+  class - its `.c` implementation files, its `_internal.h`, its stub, and its generated arginfo header.
+
+---
 
 ## License
 
