@@ -19,6 +19,10 @@ final class Complex implements \Stringable
 
     public float $imaginary = 0.0;
 
+    public ?float $magnitude = null;
+
+    public ?float $phase = null;
+
     public function __construct(float $real = 0, float $imag = 0) {}
 
     public function __toString(): string {}
@@ -33,13 +37,7 @@ final class Complex implements \Stringable
 
     public function approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool {}
 
-    public static function fromArray(array $arr): Complex {}
-
-    public static function fromObject(object $obj): Complex {}
-
     public static function fromString(string $str): Complex {}
 
     public static function fromPolar(float $mag, float $phase): Complex {}
-
-    public static function toComplex(mixed $value): Complex {}
 }

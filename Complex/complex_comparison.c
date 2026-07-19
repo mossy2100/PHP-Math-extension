@@ -13,10 +13,12 @@
 
 #include "php.h"
 #include "php_math.h"
+#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
 #include "floats.h"
+#include "types.h"
 
 /* {{{ complex_read_parts
  *
@@ -35,26 +37,48 @@ static void complex_read_parts(zend_object *obj, double *out_real, double *out_i
 
 /* {{{ complex_normalize_operand
  *
- * Shared by equal() and approxEqual(): resolves $other into a (real, imaginary) pair by
- * delegating to complex_to_complex(), exactly mirroring how the PHP package's equal()/
- * approxEqual() call self::toComplex($other) and swallow any resulting exception. Returns false
- * (nothing else set, and any pending exception cleared) if $other can't be converted, which both
- * callers treat as "not equal" rather than propagating the exception.
+ * Shared by equal() and approxEqual(): resolves $other into a (real, imaginary) pair, matching
+ * the PHP package's shared type-check logic. $other must be a Complex instance or a number
+ * (int/float); anything else throws InvalidArgumentException. A NAN float throws DomainException
+ * (no meaningful comparison result); a non-finite float (+-INF) returns false via *out_finite,
+ * since a Complex is always finite and so never (approximately) equal to it.
+ *
+ * Returns FAILURE (with an exception already thrown) for a type mismatch or NAN. On SUCCESS,
+ * *out_finite is false only for the +-INF case -- callers should return false without comparing
+ * real/imaginary in that case.
  */
-static bool complex_normalize_operand(zval *value, double *out_real, double *out_imag)
+static zend_result complex_normalize_operand(zval *value, double *out_real, double *out_imag, bool *out_finite)
 {
-	zval converted;
-	if (complex_to_complex(&converted, value) == FAILURE) {
-		if (EG(exception)) {
-			zend_clear_exception();
-		}
-		return false;
+	*out_finite = true;
+
+	if (Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), complex_ce_Complex)) {
+		complex_read_parts(Z_OBJ_P(value), out_real, out_imag);
+		return SUCCESS;
 	}
 
-	complex_read_parts(Z_OBJ(converted), out_real, out_imag);
+	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_DOUBLE) {
+		zend_string *msg = strpprintf(0, "Cannot compare Complex with %s. Must be Complex, int, or float.",
+			math_types_debug_type_name(value));
+		zend_throw_exception(spl_ce_InvalidArgumentException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
 
-	zval_ptr_dtor(&converted);
-	return true;
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		double d = Z_DVAL_P(value);
+		if (zend_isnan(d)) {
+			zend_throw_exception(spl_ce_DomainException, "Cannot compare Complex with NAN.", 0);
+			return FAILURE;
+		}
+		if (!zend_finite(d)) {
+			*out_finite = false;
+			return SUCCESS;
+		}
+	}
+
+	*out_real = zval_get_double(value);
+	*out_imag = 0.0;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -71,7 +95,11 @@ PHP_METHOD(OceanMoon_Math_Complex, equal)
 	ZEND_PARSE_PARAMETERS_END();
 
 	double other_real, other_imag;
-	if (!complex_normalize_operand(other, &other_real, &other_imag)) {
+	bool finite;
+	if (complex_normalize_operand(other, &other_real, &other_imag, &finite) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (!finite) {
 		RETURN_FALSE;
 	}
 
@@ -101,7 +129,11 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
 	ZEND_PARSE_PARAMETERS_END();
 
 	double other_real, other_imag;
-	if (!complex_normalize_operand(other, &other_real, &other_imag)) {
+	bool finite;
+	if (complex_normalize_operand(other, &other_real, &other_imag, &finite) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (!finite) {
 		RETURN_FALSE;
 	}
 
