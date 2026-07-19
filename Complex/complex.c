@@ -36,6 +36,7 @@
 #include "php_math.h"
 #include "complex_internal.h"
 #include "complex_arginfo.h"
+#include "exceptions.h"
 #include "floats.h"
 
 /* The registered class entry for OceanMoon\Math\Complex. */
@@ -471,7 +472,7 @@ static zend_result complex_from_string(zval *return_value, zend_string *str)
 
 	if (trimmed_len == 0) {
 		efree(trimmed);
-		zend_throw_exception(spl_ce_DomainException, "Cannot convert empty string to Complex.", 0);
+		zend_throw_exception(math_ce_FormatException, "Cannot convert empty string to Complex.", 0);
 		return FAILURE;
 	}
 
@@ -481,7 +482,7 @@ static zend_result complex_from_string(zval *return_value, zend_string *str)
 	if (!ok) {
 		zend_string *msg = strpprintf(0, "Cannot convert string '%s' to Complex. Invalid format.", trimmed);
 		efree(trimmed);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_throw_exception(math_ce_FormatException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
 		return FAILURE;
 	}

@@ -12,5 +12,8 @@
         "support-nts": true,
         "priority": 80,
         "configure-options": []
+    },
+    "scripts": {
+        "test": "./scripts/test-phpunit"
     }
 }
