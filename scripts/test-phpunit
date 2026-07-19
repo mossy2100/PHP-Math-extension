@@ -12,7 +12,6 @@
 set -euo pipefail
 
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MATH_DIR="$EXT_DIR/../../packages/Math"
 MODULE="$EXT_DIR/modules/oceanmoon_math.so"
 
 if [ ! -f "$MODULE" ]; then
@@ -20,11 +19,14 @@ if [ ! -f "$MODULE" ]; then
     exit 1
 fi
 
-# Reuse Math's own phpunit install and bootstrap (for PHPUnit\Framework\TestCase and the global
-# EPSILON constant), rather than duplicating a composer install just for these dev-only tests.
+if [ ! -f "$EXT_DIR/vendor/bin/phpunit" ]; then
+    echo "vendor/bin/phpunit not found -- run 'composer install' in $EXT_DIR first." >&2
+    exit 1
+fi
+
 exec php \
     -d extension="$MODULE" \
-    "$MATH_DIR/vendor/bin/phpunit" \
-    --bootstrap "$MATH_DIR/tests/bootstrap.php" \
+    "$EXT_DIR/vendor/bin/phpunit" \
+    --bootstrap "$EXT_DIR/tests/bootstrap.php" \
     --colors=always \
     "${@:-$EXT_DIR/tests/phpunit}"

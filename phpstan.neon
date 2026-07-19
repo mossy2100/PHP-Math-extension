@@ -1,0 +1,6 @@
+parameters:
+    paths:
+        - tests/_dev
+    scanFiles:
+        - Complex/complex.stub.php
+    treatPhpDocTypesAsCertain: false

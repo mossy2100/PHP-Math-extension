@@ -6,6 +6,17 @@
     "require": {
         "php": ">=8.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
+        "phpstan/phpstan": "^2.1",
+        "oceanmoon/core": "dev-main"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../packages/Core"
+        }
+    ],
     "php-ext": {
         "extension-name": "oceanmoon_math",
         "support-zts": true,
@@ -14,6 +25,7 @@
         "configure-options": []
     },
     "scripts": {
-        "test": "./scripts/test-phpunit"
+        "test": "./scripts/test-phpunit",
+        "analyze": "scripts/analyze"
     }
 }
