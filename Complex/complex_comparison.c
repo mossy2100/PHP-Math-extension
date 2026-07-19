@@ -20,21 +20,6 @@
 #include "floats.h"
 #include "types.h"
 
-/* {{{ complex_read_parts
- *
- * Shared by equal(), approxEqual(), and complex_normalize_operand(): reads the real
- * and imaginary parts off a zend_object already known to be a Complex instance.
- */
-static void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
-{
-	zval rv1, rv2;
-	*out_real = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
-	*out_imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
-}
-/* }}} */
-
 /* {{{ complex_normalize_operand
  *
  * Shared by equal() and approxEqual(): resolves $other into a (real, imaginary) pair, matching

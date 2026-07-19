@@ -76,6 +76,21 @@ zend_result complex_create(zval *return_value, double real, double imag)
 }
 /* }}} */
 
+/* {{{ complex_read_parts
+ *
+ * Reads the real and imaginary parts off a zend_object already known to be a Complex instance.
+ * Shared by complex_comparison.c, complex_properties.c, and complex_arithmetic.c.
+ */
+void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
+{
+	zval rv1, rv2;
+	*out_real = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
+	*out_imag = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Complex::__construct(float $real = 0, float $imag = 0) */
 PHP_METHOD(OceanMoon_Math_Complex, __construct)
 {

@@ -40,4 +40,18 @@ final class Complex implements \Stringable
     public static function fromString(string $str): Complex {}
 
     public static function fromPolar(float $mag, float $phase): Complex {}
+
+    public function neg(): Complex {}
+
+    public function inv(): Complex {}
+
+    public function conj(): Complex {}
+
+    public function add(Complex|float $other): Complex {}
+
+    public function sub(Complex|float $other): Complex {}
+
+    public function mul(Complex|float $other): Complex {}
+
+    public function div(Complex|float $other): Complex {}
 }

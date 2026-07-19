@@ -50,9 +50,9 @@ Adds `+`, `-`, `*`, `/`, `**`. See [Matrix operators](docs/Matrix.md).
 
 ```bash
 phpize
-./configure --enable-math
+./configure --enable-oceanmoon_math
 make
-php -d extension="$PWD/modules/math.so" -m | grep math   # confirm it loads
+php -d extension="$PWD/modules/oceanmoon_math.so" -m | grep oceanmoon_math   # confirm it loads
 ```
 
 ---

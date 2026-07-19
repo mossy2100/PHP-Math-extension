@@ -26,7 +26,7 @@
 #include "Complex/complex_internal.h"
 
 /* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(math)
+PHP_MINIT_FUNCTION(oceanmoon_math)
 {
 	/* Exception classes are registered first, before any class that might throw them. */
 	if (math_exceptions_minit() == FAILURE) {
@@ -42,7 +42,7 @@ PHP_MINIT_FUNCTION(math)
 /* }}} */
 
 /* {{{ PHP_RINIT_FUNCTION */
-PHP_RINIT_FUNCTION(math)
+PHP_RINIT_FUNCTION(oceanmoon_math)
 {
 	if (complex_rinit(module_number) == FAILURE) {
 		return FAILURE;
@@ -53,7 +53,7 @@ PHP_RINIT_FUNCTION(math)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(math)
+PHP_MINFO_FUNCTION(oceanmoon_math)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "math support", "enabled");
@@ -62,24 +62,24 @@ PHP_MINFO_FUNCTION(math)
 }
 /* }}} */
 
-/* {{{ math_module_entry */
-zend_module_entry math_module_entry = {
+/* {{{ oceanmoon_math_module_entry */
+zend_module_entry oceanmoon_math_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"math",						/* Extension name */
+	"oceanmoon_math",			/* Extension name */
 	NULL,						/* zend_function_entry (no global functions) */
-	PHP_MINIT(math),			/* PHP_MINIT - Module initialization */
+	PHP_MINIT(oceanmoon_math),	/* PHP_MINIT - Module initialization */
 	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
-	PHP_RINIT(math),			/* PHP_RINIT - Request initialization */
+	PHP_RINIT(oceanmoon_math),	/* PHP_RINIT - Request initialization */
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(math),			/* PHP_MINFO - Module info */
+	PHP_MINFO(oceanmoon_math),	/* PHP_MINFO - Module info */
 	PHP_MATH_VERSION,			/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
-#ifdef COMPILE_DL_MATH
+#ifdef COMPILE_DL_OCEANMOON_MATH
 # ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 # endif
-ZEND_GET_MODULE(math)
+ZEND_GET_MODULE(oceanmoon_math)
 #endif

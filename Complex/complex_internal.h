@@ -19,6 +19,7 @@ extern zend_class_entry *complex_ce_Complex;
 /* Shared helpers, defined in complex.c. See their doc comments there. */
 zend_result complex_init(zend_object *obj, double real, double imag);
 zend_result complex_create(zval *return_value, double real, double imag);
+void complex_read_parts(zend_object *obj, double *out_real, double *out_imag);
 
 /* Installs the magnitude/phase computed-property object handlers. Defined in
  * complex_properties.c; called from complex_minit() (complex.c). */

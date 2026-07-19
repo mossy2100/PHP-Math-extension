@@ -1,10 +1,10 @@
 --TEST--
 Extension loads and registers OceanMoon\Math\Complex
 --EXTENSIONS--
-math
+oceanmoon_math
 --FILE--
 <?php
-var_dump(extension_loaded('math'));
+var_dump(extension_loaded('oceanmoon_math'));
 var_dump(class_exists('OceanMoon\\Math\\Complex'));
 
 $rc = new ReflectionClass('OceanMoon\\Math\\Complex');

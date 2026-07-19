@@ -13,10 +13,10 @@ set -euo pipefail
 
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MATH_DIR="$EXT_DIR/../../packages/Math"
-MODULE="$EXT_DIR/modules/math.so"
+MODULE="$EXT_DIR/modules/oceanmoon_math.so"
 
 if [ ! -f "$MODULE" ]; then
-    echo "math.so not found -- run 'make' in $EXT_DIR first." >&2
+    echo "oceanmoon_math.so not found -- run 'make' in $EXT_DIR first." >&2
     exit 1
 fi
 

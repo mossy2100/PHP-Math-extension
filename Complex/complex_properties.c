@@ -27,11 +27,8 @@
  */
 static double complex_compute_magnitude(zend_object *obj)
 {
-	zval rv;
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv));
+	double real, imag;
+	complex_read_parts(obj, &real, &imag);
 
 	return imag == 0.0 ? fabs(real) : hypot(real, imag);
 }
@@ -45,11 +42,8 @@ static double complex_compute_magnitude(zend_object *obj)
  */
 static double complex_compute_phase(zend_object *obj)
 {
-	zval rv;
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv));
+	double real, imag;
+	complex_read_parts(obj, &real, &imag);
 
 	if (imag == 0.0) {
 		return real < 0 ? M_PI : 0.0;
