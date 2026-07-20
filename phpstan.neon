@@ -1,6 +1,18 @@
 parameters:
     paths:
-        - tests/_dev
+        - tests/phpunit
     scanFiles:
         - Complex/complex.stub.php
+    bootstrapFiles:
+        - tests/bootstrap.php
     treatPhpDocTypesAsCertain: false
+
+services:
+    -
+        class: OceanMoon\Math\PHPStan\ComplexBinaryOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\ComplexUnaryOperatorExtension
+        tags:
+            - phpstan.broker.unaryOperatorTypeSpecifyingExtension

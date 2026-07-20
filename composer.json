@@ -11,6 +11,11 @@
         "phpstan/phpstan": "^2.1",
         "oceanmoon/core": "dev-main"
     },
+    "autoload-dev": {
+        "psr-4": {
+            "OceanMoon\\Math\\PHPStan\\": "phpstan/"
+        }
+    },
     "repositories": [
         {
             "type": "path",
