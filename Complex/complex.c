@@ -131,7 +131,7 @@ PHP_METHOD(OceanMoon_Math_Complex, __construct)
 /* {{{ complex_is_imaginary_unit */
 static bool complex_is_imaginary_unit(char c)
 {
-	return c == 'i' || c == 'I' || c == 'j' || c == 'J';
+	return c == 'i' || c == 'I';
 }
 /* }}} */
 
@@ -206,7 +206,7 @@ static bool complex_match_number(const char *str, size_t len, size_t pos, double
  *
  * Advances past a run of whitespace characters starting at `pos`, matching a bare `\s*` in the
  * PHP package's regex patterns (used only around the +/- separator between the real and
- * imaginary parts -- everywhere else, e.g. between a coefficient and its i/j suffix, the package's
+ * imaginary parts -- everywhere else, e.g. between a coefficient and its i suffix, the package's
  * patterns have no \s*, so no whitespace is tolerated there either).
  */
 static size_t complex_skip_spaces(const char *str, size_t len, size_t pos)
@@ -252,7 +252,7 @@ static bool complex_is_pure_number(const char *str, size_t len, double *out_valu
  *
  * Hand-rolled equivalent of the PHP package's Complex::fromString() matching logic (minus
  * whitespace stripping and the empty-string check, both handled by the caller). Tries, in order:
- * a pure real number; a pure imaginary number (optional sign, optional coefficient, i/j suffix);
+ * a pure real number; a pure imaginary number (optional sign, optional coefficient, i suffix);
  * a complex number in "real±imag i" form; a complex number in "imag i±real" form. Returns false
  * if none match.
  */
@@ -265,7 +265,7 @@ static bool complex_try_parse(const char *str, size_t len, double *out_real, dou
 		return true;
 	}
 
-	/* Pure imaginary: [sign]? [coefficient]? i|j (whole string). */
+	/* Pure imaginary: [sign]? [coefficient]? i (whole string). */
 	{
 		size_t pos = 0;
 		double sign = 1.0;
@@ -286,7 +286,7 @@ static bool complex_try_parse(const char *str, size_t len, double *out_real, dou
 		}
 	}
 
-	/* Complex, real first: [sign]? real (+|-) [coefficient]? i|j (whole string). */
+	/* Complex, real first: [sign]? real (+|-) [coefficient]? i (whole string). */
 	{
 		size_t pos = 0;
 		double real_sign = 1.0;
@@ -317,7 +317,7 @@ static bool complex_try_parse(const char *str, size_t len, double *out_real, dou
 		}
 	}
 
-	/* Complex, imaginary first: [sign]? [coefficient]? i|j (+|-) real (whole string). */
+	/* Complex, imaginary first: [sign]? [coefficient]? i (+|-) real (whole string). */
 	{
 		size_t pos = 0;
 		double imag_sign = 1.0;
