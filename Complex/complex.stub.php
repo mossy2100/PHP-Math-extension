@@ -13,7 +13,7 @@
 
 namespace OceanMoon\Math;
 
-final class Complex implements \Stringable
+final class Complex implements \Stringable, \ArrayAccess
 {
     public float $real = 0.0;
 
@@ -67,4 +67,38 @@ final class Complex implements \Stringable
     public function ln(): Complex {}
 
     public function log(Complex|float $base): Complex {}
+
+    public function sin(): Complex {}
+
+    public function cos(): Complex {}
+
+    public function tan(): Complex {}
+
+    public function asin(): Complex {}
+
+    public function acos(): Complex {}
+
+    public function atan(): Complex {}
+
+    public function sinh(): Complex {}
+
+    public function cosh(): Complex {}
+
+    public function tanh(): Complex {}
+
+    public function asinh(): Complex {}
+
+    public function acosh(): Complex {}
+
+    public function atanh(): Complex {}
+
+    public function round(int $precision = 0, \RoundingMode $mode = \RoundingMode::HalfAwayFromZero): Complex {}
+
+    public function offsetExists(mixed $offset): bool {}
+
+    public function offsetGet(mixed $offset): float {}
+
+    public function offsetSet(mixed $offset, mixed $value): void {}
+
+    public function offsetUnset(mixed $offset): void {}
 }

@@ -14,7 +14,9 @@
  *
  * Conversion methods (__toString) live in complex_conversion.c; comparison methods (equal/
  * approxEqual) live in complex_comparison.c; arithmetic/power/root/transcendental methods live in
- * complex_arithmetic.c/complex_power.c/complex_transcendental.c; operator overloading lives in
+ * complex_arithmetic.c/complex_power.c/complex_transcendental.c; trigonometric/hyperbolic methods
+ * live in complex_trigonometric.c/complex_hyperbolic.c; round() lives in complex_rounding.c;
+ * ArrayAccess methods live in complex_arrayaccess.c; operator overloading lives in
  * complex_operators.c.
  */
 
@@ -479,7 +481,7 @@ PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
  */
 zend_result complex_minit(void)
 {
-	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable);
+	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable, zend_ce_arrayaccess);
 
 	return complex_properties_minit();
 }
