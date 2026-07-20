@@ -79,7 +79,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
 
-        -$z;
+        $z2 = -$z;
 
         $this->assertSame(3.0, $z->real);
         $this->assertSame(4.0, $z->imaginary);
@@ -132,7 +132,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
 
-        ~$z;
+        $z2 = ~$z;
 
         $this->assertSame(3.0, $z->real);
         $this->assertSame(4.0, $z->imaginary);

@@ -70,7 +70,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z1 = new Complex(3, 4);
         $z2 = new Complex(1, 2);
 
-        $z1 + $z2;
+        $z3 = $z1 + $z2;
 
         $this->assertSame(3.0, $z1->real);
         $this->assertSame(4.0, $z1->imaginary);
@@ -129,7 +129,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z1 = new Complex(5, 7);
         $z2 = new Complex(2, 3);
 
-        $z1 - $z2;
+        $z3 = $z1 - $z2;
 
         $this->assertSame(5.0, $z1->real);
         $this->assertSame(7.0, $z1->imaginary);
@@ -186,7 +186,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z1 = new Complex(1, 2);
         $z2 = new Complex(3, 4);
 
-        $z1 * $z2;
+        $z3 = $z1 * $z2;
 
         $this->assertSame(1.0, $z1->real);
         $this->assertSame(2.0, $z1->imaginary);
@@ -248,7 +248,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z = new Complex(3, 4);
 
         $this->expectException(ArithmeticException::class);
-        $z / 0;
+        $z / 0; // @phpstan-ignore binaryOp.invalid
     }
 
     /**
@@ -331,7 +331,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
 
-        $z ** 2;
+        $z2 = $z ** 2;
 
         $this->assertSame(3.0, $z->real);
         $this->assertSame(4.0, $z->imaginary);

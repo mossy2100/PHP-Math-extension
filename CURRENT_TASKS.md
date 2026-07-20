@@ -1,1 +1,0 @@
-- [x] Get ComplexFactoryTest tests passing.
