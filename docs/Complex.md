@@ -69,6 +69,23 @@ Each operator accepts a `Complex` or `int|float` operand on either side. Each is
 method directly, and throws the same exceptions, under the same conditions, as that method - see the linked method docs
 for specifics.
 
+This is a genuine flexibility gain over the fluent method API, not just shorter syntax. `$z->add($x)` is naturally
+`Complex + int|float` - the method is called _on_ a `Complex`, so that side is fixed. There's no equally natural way to
+write `int|float + Complex` with the fluent API alone; you'd need to promote the scalar first, e.g.
+`(new Complex($x))->add($z)`. The `+` operator accepts either order directly, so `$x + $z` and `$z + $x` both just work.
+
+This matters most for the non-commutative operators (`-`, `/`, `**`), where `$x - $z` and `$z - $x` are genuinely
+different values and the operator lets you express whichever order the math actually calls for, without a scalar
+promotion detour.
+
+Operators also come with precedence and associativity rules that PHP itself resolves, whereas a fluent chain of method
+calls has no notion of precedence at all - it only ever evaluates in the order you nest the calls, so you have to work
+out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
+ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
+requires you to have already done that grouping in your head before writing a single method call. This applies equally
+to every class this extension adds operators to, so see [Operator Precedence](../README.md#operator-precedence) in the
+main README for the shared precedence table and PHP manual link.
+
 ### + (add)
 
 ```php
@@ -186,6 +203,9 @@ $z ** 2;  // -7 + 24i (Complex ** int|float)
 ---
 
 ## Inverting with `1 / z` or `z ** -1`
+
+The fluent API provided by the package includes an `inv()` method, which inverts a `Complex`. The operators give you a
+couple of alternative ways to achieve the same thing.
 
 Since `int|float / Complex` is supported (see `/` above), `1 / $z` computes the same multiplicative inverse as
 [`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via
