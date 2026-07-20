@@ -6,10 +6,6 @@ can't overload operators, so none of this exists in the userland package. For ev
 package's own [Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md) - this page
 covers only the operators the extension adds on top of it.
 
-_Planned - not yet implemented. See `docs/planning/MATH_EXTENSION.md` in the main repo for current status._
-
----
-
 ## Unary Arithmetic Operators
 
 ### + (identity)
@@ -54,7 +50,9 @@ Equivalent to `$z->conj()`. There's no natural PHP operator for "complex conjuga
 repurposed for it, being the closest visual/conceptual fit among the operators PHP allows a `do_operation` handler to
 intercept for a single operand.
 
-This notation originated with GCC (GNU Compiler Collection), which extends standard C the same way, giving `~` complex-conjugate behavior when applied to its built-in `_Complex` types (alongside its traditional bitwise-NOT meaning for integers).
+This notation originated with GCC (GNU Compiler Collection), which extends standard C the same way, giving `~`
+complex-conjugate behavior when applied to its built-in `_Complex` types (alongside its traditional bitwise-NOT meaning
+for integers).
 
 **Example:**
 
@@ -81,6 +79,7 @@ Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/
 this operator can be used:
 
 Forms:
+
 1. `Complex + Complex`.
 2. `Complex + int|float`.
 3. `int|float + Complex`. Addition is commutative, so this gives the same result as #2.
@@ -102,6 +101,7 @@ $diff = $z1 - $z2;
 Equivalent to [`$z1->sub($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub).
 
 Forms:
+
 1. `Complex - Complex`.
 2. `Complex - int|float`.
 3. `int|float - Complex`. Subtraction isn't commutative, so this is a distinct case from #2 - the scalar is promoted to
@@ -124,6 +124,7 @@ $product = $z1 * $z2;
 Equivalent to [`$z1->mul($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul).
 
 Forms:
+
 1. `Complex * Complex`.
 2. `Complex * int|float`.
 3. `int|float * Complex`. Multiplication is commutative, so this give the same result as #2.
@@ -145,6 +146,7 @@ $quotient = $z1 / $z2;
 Equivalent to [`$z1->div($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div).
 
 Forms:
+
 1. `Complex / Complex`.
 2. `Complex / int|float`.
 3. `int|float / Complex`. Division isn't commutative, so this is a distinct case from #2 - the scalar is promoted to a
@@ -168,6 +170,7 @@ $result = $z ** $other;
 Equivalent to [`$z->pow($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow).
 
 Forms:
+
 1. `Complex ** Complex`.
 2. `Complex ** int|float`.
 3. `int|float ** Complex`. Not commutative with #2 in general - the scalar is promoted to a `Complex` with a zero

@@ -12,10 +12,10 @@
  * Complex-specific; rational_*.c/vector_*.c/matrix_*.c (in their own
  * directories) will follow the same pattern once those classes are built.
  *
- * Conversion methods (toArray/toObject/__toString) live in
- * complex_conversion.c; comparison methods (equal/approxEqual) live in
- * complex_comparison.c. No arithmetic, custom object handlers, or operator
- * overloading yet.
+ * Conversion methods (__toString) live in complex_conversion.c; comparison methods (equal/
+ * approxEqual) live in complex_comparison.c; arithmetic/power/root/transcendental methods live in
+ * complex_arithmetic.c/complex_power.c/complex_transcendental.c; operator overloading lives in
+ * complex_operators.c.
  */
 
 #ifdef HAVE_CONFIG_H

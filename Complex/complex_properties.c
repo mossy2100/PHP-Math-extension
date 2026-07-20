@@ -118,6 +118,7 @@ zend_result complex_properties_minit(void)
 {
 	memcpy(&complex_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	complex_object_handlers.read_property = complex_read_property;
+	complex_object_handlers.do_operation = complex_do_operation;
 	complex_ce_Complex->create_object = complex_create_object;
 
 	return SUCCESS;

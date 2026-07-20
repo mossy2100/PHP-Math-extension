@@ -37,6 +37,15 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag);
 void complex_calc_exp(double real, double imag, double *out_real, double *out_imag);
 zend_result complex_calc_ln(zend_object *obj, double *out_real, double *out_imag);
 
+/* The computational core of pow(), shared with complex_do_operation()'s `**` handling
+ * (complex_operators.c). See its doc comment in complex_power.c. */
+zend_result complex_calc_pow(zend_object *base_obj, double other_real, double other_imag, double *out_real, double *out_imag);
+
+/* The `do_operation` object handler backing Complex's operator overloads. Installed on
+ * complex_object_handlers in complex_properties_minit() (complex_properties.c). See its doc
+ * comment in complex_operators.c. */
+zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 /* Module lifecycle hooks, called from ../math.c. See their doc comments in complex.c. */
 zend_result complex_minit(void);
 zend_result complex_rinit(int module_number);

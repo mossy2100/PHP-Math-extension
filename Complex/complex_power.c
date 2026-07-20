@@ -18,14 +18,91 @@
 #include "complex_arginfo.h"
 #include "exceptions.h"
 
-/* {{{ OceanMoon\Math\Complex::pow(Complex|float $other): Complex
+/* {{{ complex_calc_pow
+ *
+ * The computational core of pow(), factored out so complex_do_operation() (complex_operators.c)
+ * can reuse it for the `**` operator without going through a full PHP method dispatch -- matching
+ * the "read the base's own magnitude/phase" behavior below exactly, base_obj plays the role
+ * Z_OBJ_P(ZEND_THIS) plays for the method call.
  *
  * Matches the PHP package's Complex::pow(): z^w. Only the principal value is returned for
  * multivalued cases. Uses the same shortcuts as the PHP source (0 exponent, 0 base, exponent 1/
  * 2/-1, base e), falling back to z^w = e^(w * ln(z)) for the general case -- calling
- * complex_calc_exp()/complex_calc_ln() directly (complex_transcendental.c) rather than going
- * through a full PHP method dispatch.
+ * complex_calc_exp()/complex_calc_ln() directly rather than going through a full PHP method
+ * dispatch.
+ *
+ * Returns FAILURE (with an exception already thrown) for 0 raised to a complex or negative power.
  */
+zend_result complex_calc_pow(zend_object *base_obj, double other_real, double other_imag, double *out_real, double *out_imag)
+{
+	double real, imag;
+	complex_read_parts(base_obj, &real, &imag);
+
+	/* Exponent 0: any number to power 0 is 1 (including 0^0 by convention). */
+	if (other_real == 0.0 && other_imag == 0.0) {
+		*out_real = 1.0;
+		*out_imag = 0.0;
+		return SUCCESS;
+	}
+
+	/* Base 0. */
+	if (real == 0.0 && imag == 0.0) {
+		if (other_imag != 0.0) {
+			zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to a complex power.", 0);
+			return FAILURE;
+		}
+		if (other_real < 0) {
+			zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to a negative power.", 0);
+			return FAILURE;
+		}
+		*out_real = 0.0;
+		*out_imag = 0.0;
+		return SUCCESS;
+	}
+
+	/* Exponent 1: any number to power 1 is itself. */
+	if (other_real == 1.0 && other_imag == 0.0) {
+		*out_real = real;
+		*out_imag = imag;
+		return SUCCESS;
+	}
+
+	/* Exponent 2: delegate to sqr(). */
+	if (other_real == 2.0 && other_imag == 0.0) {
+		*out_real = real * real - imag * imag;
+		*out_imag = 2 * real * imag;
+		return SUCCESS;
+	}
+
+	/* Exponent -1: delegate to inv(). Safe -- base != 0 already established above. */
+	if (other_real == -1.0 && other_imag == 0.0) {
+		double f = (real * real) + (imag * imag);
+		*out_real = real / f;
+		*out_imag = -imag / f;
+		return SUCCESS;
+	}
+
+	/* Base e: z^w = e^w, saving unnecessary ln()/mul() calls. */
+	if (real == M_E && imag == 0.0) {
+		complex_calc_exp(other_real, other_imag, out_real, out_imag);
+		return SUCCESS;
+	}
+
+	/* General solution: z^w = e^(w * ln(z)). */
+	double ln_real, ln_imag;
+	if (complex_calc_ln(base_obj, &ln_real, &ln_imag) == FAILURE) {
+		return FAILURE;
+	}
+
+	double mul_real = other_real * ln_real - other_imag * ln_imag;
+	double mul_imag = other_real * ln_imag + other_imag * ln_real;
+
+	complex_calc_exp(mul_real, mul_imag, out_real, out_imag);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::pow(Complex|float $other): Complex */
 PHP_METHOD(OceanMoon_Math_Complex, pow)
 {
 	zval *other;
@@ -39,81 +116,12 @@ PHP_METHOD(OceanMoon_Math_Complex, pow)
 		RETURN_THROWS();
 	}
 
-	double real, imag;
-	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
-
-	/* Exponent 0: any number to power 0 is 1 (including 0^0 by convention). */
-	if (other_real == 0.0 && other_imag == 0.0) {
-		if (complex_create(return_value, 1.0, 0.0) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Base 0. */
-	if (real == 0.0 && imag == 0.0) {
-		if (other_imag != 0.0) {
-			zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to a complex power.", 0);
-			RETURN_THROWS();
-		}
-		if (other_real < 0) {
-			zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to a negative power.", 0);
-			RETURN_THROWS();
-		}
-		if (complex_create(return_value, 0.0, 0.0) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Exponent 1: any number to power 1 is itself. */
-	if (other_real == 1.0 && other_imag == 0.0) {
-		if (complex_create(return_value, real, imag) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Exponent 2: delegate to sqr(). */
-	if (other_real == 2.0 && other_imag == 0.0) {
-		if (complex_create(return_value, real * real - imag * imag, 2 * real * imag) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Exponent -1: delegate to inv(). Safe -- base != 0 already established above. */
-	if (other_real == -1.0 && other_imag == 0.0) {
-		double f = (real * real) + (imag * imag);
-		if (complex_create(return_value, real / f, -imag / f) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Base e: z^w = e^w, saving unnecessary ln()/mul() calls. */
-	if (real == M_E && imag == 0.0) {
-		double exp_real, exp_imag;
-		complex_calc_exp(other_real, other_imag, &exp_real, &exp_imag);
-		if (complex_create(return_value, exp_real, exp_imag) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* General solution: z^w = e^(w * ln(z)). */
-	double ln_real, ln_imag;
-	if (complex_calc_ln(Z_OBJ_P(ZEND_THIS), &ln_real, &ln_imag) == FAILURE) {
+	double out_real, out_imag;
+	if (complex_calc_pow(Z_OBJ_P(ZEND_THIS), other_real, other_imag, &out_real, &out_imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	double mul_real = other_real * ln_real - other_imag * ln_imag;
-	double mul_imag = other_real * ln_imag + other_imag * ln_real;
-
-	double exp_real, exp_imag;
-	complex_calc_exp(mul_real, mul_imag, &exp_real, &exp_imag);
-
-	if (complex_create(return_value, exp_real, exp_imag) == FAILURE) {
+	if (complex_create(return_value, out_real, out_imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
