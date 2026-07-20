@@ -61,6 +61,16 @@ static double complex_compute_phase(zend_object *obj)
  * zend_std_read_property() directly (not through the object's own handlers) to peek at the
  * current stored value -- going through the handler vtable here would recurse into this same
  * function.
+ *
+ * Deliberately passes NULL for cache_slot on every zend_std_read_property() call in this function,
+ * including the final one -- never the real cache_slot the opcode handed us. The opcode that
+ * fetches an object property (e.g. ZEND_FETCH_OBJ_R) uses *cache_slot to remember "this class's
+ * property X is at offset N" across repeated executions of the *same* bytecode location (e.g. a
+ * loop body). If that cache gets populated here, the engine's fast path can, on the next
+ * iteration, read the raw property slot directly -- bypassing this handler (and so our lazy
+ * compute-and-cache logic) entirely -- and return the still-uncomputed null. Forcing NULL here
+ * means every access genuinely goes through this function, at a small, deliberate cost to the
+ * opcode-level fast path for magnitude/phase/real/imaginary alike.
  */
 static zval *complex_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
@@ -76,7 +86,7 @@ static zval *complex_read_property(zend_object *object, zend_string *member, int
 		}
 	}
 
-	return zend_std_read_property(object, member, type, cache_slot, rv);
+	return zend_std_read_property(object, member, type, NULL, rv);
 }
 /* }}} */
 

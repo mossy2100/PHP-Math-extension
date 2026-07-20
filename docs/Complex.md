@@ -51,10 +51,10 @@ $conjugate = ~$z;
 ```
 
 Equivalent to `$z->conj()`. There's no natural PHP operator for "complex conjugate", so `~` (usually bitwise NOT) is
-repurposed for it - the closest visual/conceptual fit among the operators PHP allows a `do_operation` handler to
-intercept for a single operand. This notation originated with GCC (GNU Compiler Collection), which extends standard C
-the same way, giving `~` complex-conjugate behavior when applied to its built-in `_Complex` types, alongside its
-traditional bitwise-NOT meaning for integers.
+repurposed for it, being the closest visual/conceptual fit among the operators PHP allows a `do_operation` handler to
+intercept for a single operand.
+
+This notation originated with GCC (GNU Compiler Collection), which extends standard C the same way, giving `~` complex-conjugate behavior when applied to its built-in `_Complex` types (alongside its traditional bitwise-NOT meaning for integers).
 
 **Example:**
 
@@ -80,8 +80,10 @@ $sum = $z1 + $z2;
 Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add). There are 2 ways
 this operator can be used:
 
+Forms:
 1. `Complex + Complex`.
-2. `Complex + int|float` or `int|float + Complex`. Addition is commutative, so both give the same result.
+2. `Complex + int|float`.
+3. `int|float + Complex`. Addition is commutative, so this gives the same result as #2.
 
 ```php
 $z1 = new Complex(3, 4);
@@ -97,9 +99,9 @@ $z1 + 2;    // 5 + 4i   (Complex + int|float)
 $diff = $z1 - $z2;
 ```
 
-Equivalent to [`$z1->sub($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub). There are 3 ways
-this operator can be used:
+Equivalent to [`$z1->sub($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub).
 
+Forms:
 1. `Complex - Complex`.
 2. `Complex - int|float`.
 3. `int|float - Complex`. Subtraction isn't commutative, so this is a distinct case from #2 - the scalar is promoted to
@@ -119,11 +121,12 @@ $z1 - 2;    // 3 + 7i   (Complex - int|float)
 $product = $z1 * $z2;
 ```
 
-Equivalent to [`$z1->mul($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul). There are 2 ways
-this operator can be used:
+Equivalent to [`$z1->mul($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul).
 
+Forms:
 1. `Complex * Complex`.
-2. `Complex * int|float` or `int|float * Complex`. Multiplication is commutative, so both give the same result.
+2. `Complex * int|float`.
+3. `int|float * Complex`. Multiplication is commutative, so this give the same result as #2.
 
 ```php
 $z1 = new Complex(1, 2);
@@ -139,9 +142,9 @@ $z1 * 2;    // 2 + 4i   (Complex * int|float)
 $quotient = $z1 / $z2;
 ```
 
-Equivalent to [`$z1->div($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div). There are 3 ways
-this operator can be used:
+Equivalent to [`$z1->div($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div).
 
+Forms:
 1. `Complex / Complex`.
 2. `Complex / int|float`.
 3. `int|float / Complex`. Division isn't commutative, so this is a distinct case from #2 - the scalar is promoted to a
@@ -162,11 +165,12 @@ $z1 / 2;    // 3 + 4i   (Complex / int|float)
 $result = $z ** $other;
 ```
 
-Equivalent to [`$z->pow($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow). There are 2 ways
-this operator can be used:
+Equivalent to [`$z->pow($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow).
 
-1. `Complex ** Complex|int|float`.
-2. `int|float ** Complex`. Not commutative with #1 in general - the scalar is promoted to a `Complex` with a zero
+Forms:
+1. `Complex ** Complex`.
+2. `Complex ** int|float`.
+3. `int|float ** Complex`. Not commutative with #2 in general - the scalar is promoted to a `Complex` with a zero
    imaginary part, then raised to the (possibly complex) power on the right, using the same `pow()` method (which
    already accepts a `Complex` exponent for exactly this reason).
 

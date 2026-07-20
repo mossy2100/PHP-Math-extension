@@ -19,17 +19,17 @@
 
 /* {{{ complex_read_other
  *
- * Shared by add()/sub()/mul()/div(): resolves $other (declared `Complex|float` in the stub) into a
- * (real, imaginary) pair. Unlike a userland-typed parameter, an internal function's zval parameter
- * isn't automatically coerced or validated against its declared arginfo type before the function
- * body runs, so both `int` (PHP's usual float-parameter widening) and `float` are accepted and
- * treated as a Complex with a zero imaginary part here -- matching the PHP package's
- * `new self($other)` conversion, including its finite-value validation. Anything else (including a
- * non-Complex object) throws TypeError.
+ * Shared by add()/sub()/mul()/div() here, and by pow() (complex_power.c): resolves $other
+ * (declared `Complex|float` in the stub) into a (real, imaginary) pair. Unlike a userland-typed
+ * parameter, an internal function's zval parameter isn't automatically coerced or validated
+ * against its declared arginfo type before the function body runs, so both `int` (PHP's usual
+ * float-parameter widening) and `float` are accepted and treated as a Complex with a zero
+ * imaginary part here -- matching the PHP package's `new self($other)` conversion, including its
+ * finite-value validation. Anything else (including a non-Complex object) throws TypeError.
  *
  * Returns FAILURE (with an exception already thrown) for a non-finite float/int or a wrong type.
  */
-static zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
+zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
 {
 	double d;
 

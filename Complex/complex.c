@@ -91,6 +91,24 @@ void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
 }
 /* }}} */
 
+/* {{{ complex_read_magnitude_phase
+ *
+ * Reads the magnitude/phase computed properties off a zend_object already known to be a Complex
+ * instance, via zend_read_property() (not complex_read_parts()'s real/imaginary) -- this goes
+ * through the object's own read_property handler, so it triggers the lazy compute-and-cache logic
+ * in complex_properties.c rather than recomputing hypot()/atan2() directly. Shared by ln()
+ * (complex_transcendental.c) and roots()/sqrt() (complex_power.c).
+ */
+void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase)
+{
+	zval rv1, rv2;
+	*out_magnitude = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, 1, &rv1));
+	*out_phase = zval_get_double(
+		zend_read_property(complex_ce_Complex, obj, "phase", sizeof("phase") - 1, 1, &rv2));
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Complex::__construct(float $real = 0, float $imag = 0) */
 PHP_METHOD(OceanMoon_Math_Complex, __construct)
 {
@@ -394,16 +412,51 @@ PHP_METHOD(OceanMoon_Math_Complex, fromString)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::fromPolar(float $mag, float $phase): Complex
+/* {{{ complex_from_polar
  *
- * Matches the PHP package's Complex::fromPolar(): constructs a Complex from polar coordinates
- * (magnitude, phase in radians). The phase is wrapped into (-pi, pi] via math_floats_wrap() before
- * use, mirroring the PHP package's Floats::wrap($phase) call. Also pre-populates the magnitude/
- * phase computed properties with the exact input values (rather than leaving them to be lazily
- * recomputed from real/imaginary via hypot()/atan2()), matching the package's
- * `$z->magnitude = $mag; $z->phase = $phase;` -- avoids any round-trip floating-point difference
- * between the input and what recomputing from cos($phase)/sin($phase) would give back.
+ * Shared by fromPolar() and internal callers (exp(), sqrt(), roots() in complex_power.c/
+ * complex_transcendental.c) that construct a Complex from polar coordinates (magnitude, phase in
+ * radians). The phase is wrapped into (-pi, pi] via math_floats_wrap(), mirroring the PHP
+ * package's Floats::wrap($phase) call. Also pre-populates the magnitude/phase computed properties
+ * with the exact input values (rather than leaving them to be lazily recomputed from real/
+ * imaginary via hypot()/atan2()), matching the package's `$z->magnitude = $mag; $z->phase =
+ * $phase;` -- avoids any round-trip floating-point difference between the input and what
+ * recomputing from cos($phase)/sin($phase) would give back.
  */
+zend_result complex_from_polar(zval *return_value, double mag, double phase)
+{
+	if (!zend_finite(mag)) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Magnitude must be finite.", 0);
+		return FAILURE;
+	}
+	if (!zend_finite(phase)) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Phase must be finite.", 0);
+		return FAILURE;
+	}
+	if (mag < 0) {
+		char mag_buf[64];
+		snprintf(mag_buf, sizeof(mag_buf), "%g", mag);
+		zend_string *msg = strpprintf(0, "Invalid magnitude: %s. Cannot be negative.", mag_buf);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	phase = math_floats_wrap(phase, 2 * M_PI, true);
+
+	if (complex_create(return_value, mag * cos(phase), mag * sin(phase)) == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_object *obj = Z_OBJ_P(return_value);
+	zend_update_property_double(complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, mag);
+	zend_update_property_double(complex_ce_Complex, obj, "phase", sizeof("phase") - 1, phase);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Complex::fromPolar(float $mag, float $phase): Complex */
 PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
 {
 	double mag, phase;
@@ -413,32 +466,9 @@ PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
 		Z_PARAM_DOUBLE(phase)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_finite(mag)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Magnitude must be finite.", 0);
+	if (complex_from_polar(return_value, mag, phase) == FAILURE) {
 		RETURN_THROWS();
 	}
-	if (!zend_finite(phase)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Phase must be finite.", 0);
-		RETURN_THROWS();
-	}
-	if (mag < 0) {
-		char mag_buf[64];
-		snprintf(mag_buf, sizeof(mag_buf), "%g", mag);
-		zend_string *msg = strpprintf(0, "Invalid magnitude: %s. Cannot be negative.", mag_buf);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
-		RETURN_THROWS();
-	}
-
-	phase = math_floats_wrap(phase, 2 * M_PI, true);
-
-	if (complex_create(return_value, mag * cos(phase), mag * sin(phase)) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	zend_object *obj = Z_OBJ_P(return_value);
-	zend_update_property_double(complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, mag);
-	zend_update_property_double(complex_ce_Complex, obj, "phase", sizeof("phase") - 1, phase);
 }
 /* }}} */
 

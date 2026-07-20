@@ -1,18 +1,21 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5a8a81419645d47287de818e7ed4b8f47d5962f6 */
+ * Stub hash: 382be597b4445130abc685fa8c7243957cd18d16 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, imag, IS_DOUBLE, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_fromString, 0, 1, OceanMoon\\Math\\Complex, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_fromPolar, 0, 2, OceanMoon\\Math\\Complex, 0)
+	ZEND_ARG_TYPE_INFO(0, mag, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, phase, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Complex___toString, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Complex_toArray, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_toObject, 0, 0, stdClass, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Complex_isReal, 0, 0, _IS_BOOL, 0)
@@ -26,15 +29,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Complex_app
 	ZEND_ARG_TYPE_INFO(0, other, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, relTol, IS_DOUBLE, 0, "1.0E-9")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, absTol, IS_DOUBLE, 0, "PHP_FLOAT_EPSILON")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_fromString, 0, 1, OceanMoon\\Math\\Complex, 0)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_fromPolar, 0, 2, OceanMoon\\Math\\Complex, 0)
-	ZEND_ARG_TYPE_INFO(0, mag, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, phase, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_neg, 0, 0, OceanMoon\\Math\\Complex, 0)
@@ -54,15 +48,31 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Complex_div arginfo_class_OceanMoon_Math_Complex_add
 
+#define arginfo_class_OceanMoon_Math_Complex_pow arginfo_class_OceanMoon_Math_Complex_add
+
+#define arginfo_class_OceanMoon_Math_Complex_sqr arginfo_class_OceanMoon_Math_Complex_neg
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Complex_roots, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, degree, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OceanMoon_Math_Complex_sqrt arginfo_class_OceanMoon_Math_Complex_neg
+
+#define arginfo_class_OceanMoon_Math_Complex_exp arginfo_class_OceanMoon_Math_Complex_neg
+
+#define arginfo_class_OceanMoon_Math_Complex_ln arginfo_class_OceanMoon_Math_Complex_neg
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_log, 0, 1, OceanMoon\\Math\\Complex, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, base, OceanMoon\\Math\\Complex, MAY_BE_DOUBLE, NULL)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(OceanMoon_Math_Complex, __construct);
+ZEND_METHOD(OceanMoon_Math_Complex, fromString);
+ZEND_METHOD(OceanMoon_Math_Complex, fromPolar);
 ZEND_METHOD(OceanMoon_Math_Complex, __toString);
-ZEND_METHOD(OceanMoon_Math_Complex, toArray);
-ZEND_METHOD(OceanMoon_Math_Complex, toObject);
 ZEND_METHOD(OceanMoon_Math_Complex, isReal);
 ZEND_METHOD(OceanMoon_Math_Complex, equal);
 ZEND_METHOD(OceanMoon_Math_Complex, approxEqual);
-ZEND_METHOD(OceanMoon_Math_Complex, fromString);
-ZEND_METHOD(OceanMoon_Math_Complex, fromPolar);
 ZEND_METHOD(OceanMoon_Math_Complex, neg);
 ZEND_METHOD(OceanMoon_Math_Complex, inv);
 ZEND_METHOD(OceanMoon_Math_Complex, conj);
@@ -70,17 +80,22 @@ ZEND_METHOD(OceanMoon_Math_Complex, add);
 ZEND_METHOD(OceanMoon_Math_Complex, sub);
 ZEND_METHOD(OceanMoon_Math_Complex, mul);
 ZEND_METHOD(OceanMoon_Math_Complex, div);
+ZEND_METHOD(OceanMoon_Math_Complex, pow);
+ZEND_METHOD(OceanMoon_Math_Complex, sqr);
+ZEND_METHOD(OceanMoon_Math_Complex, roots);
+ZEND_METHOD(OceanMoon_Math_Complex, sqrt);
+ZEND_METHOD(OceanMoon_Math_Complex, exp);
+ZEND_METHOD(OceanMoon_Math_Complex, ln);
+ZEND_METHOD(OceanMoon_Math_Complex, log);
 
 static const zend_function_entry class_OceanMoon_Math_Complex_methods[] = {
 	ZEND_ME(OceanMoon_Math_Complex, __construct, arginfo_class_OceanMoon_Math_Complex___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, fromString, arginfo_class_OceanMoon_Math_Complex_fromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OceanMoon_Math_Complex, fromPolar, arginfo_class_OceanMoon_Math_Complex_fromPolar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(OceanMoon_Math_Complex, __toString, arginfo_class_OceanMoon_Math_Complex___toString, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Complex, toArray, arginfo_class_OceanMoon_Math_Complex_toArray, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Complex, toObject, arginfo_class_OceanMoon_Math_Complex_toObject, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, isReal, arginfo_class_OceanMoon_Math_Complex_isReal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, equal, arginfo_class_OceanMoon_Math_Complex_equal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, approxEqual, arginfo_class_OceanMoon_Math_Complex_approxEqual, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Complex, fromString, arginfo_class_OceanMoon_Math_Complex_fromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(OceanMoon_Math_Complex, fromPolar, arginfo_class_OceanMoon_Math_Complex_fromPolar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(OceanMoon_Math_Complex, neg, arginfo_class_OceanMoon_Math_Complex_neg, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, inv, arginfo_class_OceanMoon_Math_Complex_inv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, conj, arginfo_class_OceanMoon_Math_Complex_conj, ZEND_ACC_PUBLIC)
@@ -88,6 +103,13 @@ static const zend_function_entry class_OceanMoon_Math_Complex_methods[] = {
 	ZEND_ME(OceanMoon_Math_Complex, sub, arginfo_class_OceanMoon_Math_Complex_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, mul, arginfo_class_OceanMoon_Math_Complex_mul, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, div, arginfo_class_OceanMoon_Math_Complex_div, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, pow, arginfo_class_OceanMoon_Math_Complex_pow, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, sqr, arginfo_class_OceanMoon_Math_Complex_sqr, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, roots, arginfo_class_OceanMoon_Math_Complex_roots, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, sqrt, arginfo_class_OceanMoon_Math_Complex_sqrt, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, exp, arginfo_class_OceanMoon_Math_Complex_exp, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, ln, arginfo_class_OceanMoon_Math_Complex_ln, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, log, arginfo_class_OceanMoon_Math_Complex_log, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

@@ -25,21 +25,17 @@ final class Complex implements \Stringable
 
     public function __construct(float $real = 0, float $imag = 0) {}
 
+    public static function fromString(string $str): Complex {}
+
+    public static function fromPolar(float $mag, float $phase): Complex {}
+
     public function __toString(): string {}
-
-    public function toArray(): array {}
-
-    public function toObject(): \stdClass {}
 
     public function isReal(): bool {}
 
     public function equal(mixed $other): bool {}
 
     public function approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool {}
-
-    public static function fromString(string $str): Complex {}
-
-    public static function fromPolar(float $mag, float $phase): Complex {}
 
     public function neg(): Complex {}
 
@@ -54,4 +50,21 @@ final class Complex implements \Stringable
     public function mul(Complex|float $other): Complex {}
 
     public function div(Complex|float $other): Complex {}
+
+    public function pow(Complex|float $other): Complex {}
+
+    public function sqr(): Complex {}
+
+    /**
+     * @return list<Complex>
+     */
+    public function roots(int $degree): array {}
+
+    public function sqrt(): Complex {}
+
+    public function exp(): Complex {}
+
+    public function ln(): Complex {}
+
+    public function log(Complex|float $base): Complex {}
 }

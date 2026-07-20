@@ -6,5 +6,5 @@ PHP_ARG_ENABLE([oceanmoon_math],
 
 if test "$PHP_OCEANMOON_MATH" != "no"; then
   AC_DEFINE(HAVE_OCEANMOON_MATH, 1, [ Have OceanMoon math support ])
-  PHP_NEW_EXTENSION(oceanmoon_math, math.c floats.c integers.c types.c exceptions.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c Complex/complex_properties.c Complex/complex_arithmetic.c, $ext_shared)
+  PHP_NEW_EXTENSION(oceanmoon_math, math.c floats.c integers.c types.c exceptions.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c Complex/complex_properties.c Complex/complex_arithmetic.c Complex/complex_transcendental.c Complex/complex_power.c, $ext_shared)
 fi

@@ -1,9 +1,8 @@
 /*
  * complex_conversion.c
  *
- * Conversion methods for OceanMoon\Math\Complex: toArray(), toObject(), and
- * __toString(). Mirrors the "Conversion Methods" region of the PHP package's
- * Complex class.
+ * Conversion methods for OceanMoon\Math\Complex: __toString(). Mirrors the
+ * "Conversion Methods" region of the PHP package's Complex class.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -96,47 +95,3 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::toArray(): array
- *
- * Matches the PHP package's Complex::toArray(): a list [real, imaginary].
- */
-PHP_METHOD(OceanMoon_Math_Complex, toArray)
-{
-	zval rv1, rv2;
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
-
-	array_init(return_value);
-	add_next_index_double(return_value, real);
-	add_next_index_double(return_value, imag);
-}
-/* }}} */
-
-/* {{{ OceanMoon\Math\Complex::toObject(): stdClass
- *
- * Matches the PHP package's Complex::toObject(): a plain stdClass with "real"
- * and "imaginary" properties.
- */
-PHP_METHOD(OceanMoon_Math_Complex, toObject)
-{
-	zval rv1, rv2;
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
-
-	object_init(return_value);
-	add_property_double(return_value, "real", real);
-	add_property_double(return_value, "imaginary", imag);
-}
-/* }}} */
