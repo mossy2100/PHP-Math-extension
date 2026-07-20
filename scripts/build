@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#
+# Compile the extension into modules/oceanmoon_math.so. Runs the full phpize/configure/make
+# pipeline every time (not just `make`), since config.m4/config.w32 changes (e.g. adding a new
+# .c file) require phpize/configure to be re-run to pick them up -- `make` alone would silently
+# keep building the old file list.
+#
+# Usage:
+#   scripts/build   # composer make
+#
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+phpize
+./configure --enable-oceanmoon_math
+make

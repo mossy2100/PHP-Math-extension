@@ -30,7 +30,11 @@
         "configure-options": []
     },
     "scripts": {
-        "test": "./scripts/test-phpunit",
-        "analyze": "scripts/analyze"
+        "test": "scripts/test-phpunit",
+        "analyze": "scripts/analyze",
+        "make": "scripts/build",
+        "deploy": "scripts/deploy",
+        "enable": "scripts/global-install on",
+        "disable": "scripts/global-install off"
     }
 }

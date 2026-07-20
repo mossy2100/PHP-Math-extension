@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Enable or disable oceanmoon_math globally on this machine, by writing/removing a conf.d ini
+# file that points directly at this repo's own built module (modules/oceanmoon_math.so) -- so
+# enabling always picks up the latest local build, with no separate "copy the .so somewhere"
+# step needed. Useful for ad-hoc scripts/demos that expect the extension to "just be there"
+# without an explicit -d extension=... flag on every invocation.
+#
+# Usage:
+#   scripts/global-install on     # composer enable
+#   scripts/global-install off    # composer disable
+#
+# Disabled is the right default for day-to-day development: enabling this globally will silently
+# shadow oceanmoon/math's own userland Complex/Rational/Vector/Matrix classes in EVERY OTHER PHP
+# project on this machine too (not just this one), since PHP registers internal (C extension)
+# classes before autoloading ever runs. See packages/Math's tests/bootstrap.php for the guard
+# rail that necessitated on the package side.
+#
+set -euo pipefail
+
+if [[ $# -ne 1 || ("$1" != "on" && "$1" != "off") ]]; then
+    echo "Usage: $0 on|off" >&2
+    exit 1
+fi
+
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MODULE="$EXT_DIR/modules/oceanmoon_math.so"
+SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
+INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
+
+if [[ "$1" == "on" ]]; then
+    if [[ ! -f "$MODULE" ]]; then
+        echo "oceanmoon_math.so not found at $MODULE -- run 'make' first." >&2
+        exit 1
+    fi
+    if [[ -z "$SCAN_DIR" ]]; then
+        echo "No php.ini scan directory configured for this PHP build -- can't enable globally." >&2
+        exit 1
+    fi
+    mkdir -p "$SCAN_DIR"
+    echo "extension=$MODULE" > "$INI_FILE"
+    echo "Enabled globally: $INI_FILE -> $MODULE"
+else
+    if [[ -f "$INI_FILE" ]]; then
+        rm "$INI_FILE"
+        echo "Disabled globally: removed $INI_FILE"
+    else
+        echo "Already disabled ($INI_FILE doesn't exist)."
+    fi
+fi
