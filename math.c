@@ -3,7 +3,7 @@
  *
  * Module-wide lifecycle for the `math` extension: MINIT/RINIT/MINFO and the
  * module entry. This is the one extension-wide file; everything class-specific
- * lives in its own subdirectory (Complex/ so far; Rational/, Vector/, Matrix/
+ * lives in its own subdirectory (Complex/ and Rational/ so far; Vector/, Matrix/
  * will follow the same pattern). MINIT/RINIT delegate to each class's own
  * complex_minit()/complex_rinit()-style hooks rather than doing class-specific
  * work here directly.
@@ -24,6 +24,7 @@
 #include "php_math.h"
 #include "exceptions.h"
 #include "Complex/complex_internal.h"
+#include "Rational/rational_internal.h"
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(oceanmoon_math)
@@ -34,6 +35,10 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 	}
 
 	if (complex_minit() == FAILURE) {
+		return FAILURE;
+	}
+
+	if (rational_minit() == FAILURE) {
 		return FAILURE;
 	}
 

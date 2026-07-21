@@ -32,8 +32,6 @@ typedef enum {
 	MATH_INTEGERS_OVERFLOW,
 	/* pow() only: the exponent was negative. */
 	MATH_INTEGERS_NEGATIVE_EXPONENT,
-	/* gcd() only: one of the inputs was ZEND_LONG_MIN, which abs() can't safely negate. */
-	MATH_INTEGERS_MIN_LONG,
 	/* gcd() only: zero arguments were given. */
 	MATH_INTEGERS_EMPTY,
 } math_integers_result;
@@ -66,11 +64,12 @@ math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
 /* {{{ math_integers_gcd
  *
  * Ports OceanMoon\Core\Integers::gcd(): the greatest common divisor of `count` integers via
- * Euclid's algorithm. `nums` must have at least one element (MATH_INTEGERS_EMPTY if count == 0,
- * matching the PHP version's ArgumentCountError); every element must be safely negatable
- * (MATH_INTEGERS_MIN_LONG if any element is ZEND_LONG_MIN, matching the PHP version's
- * DomainException -- abs(ZEND_LONG_MIN) itself overflows, since the type's negative range is one
- * wider than its positive range).
+ * Euclid's algorithm, run on the raw signed values (abs() applied only once, to the final
+ * result) so a ZEND_LONG_MIN input combined with any other non-zero, non-ZEND_LONG_MIN value
+ * still produces the correct result. `nums` must have at least one element (MATH_INTEGERS_EMPTY
+ * if count == 0, matching the PHP version's LengthException). Returns MATH_INTEGERS_OVERFLOW only
+ * for the genuinely unrepresentable case -- the true result is ZEND_LONG_MIN's own magnitude,
+ * which doesn't fit in a zend_long -- matching the PHP version's OverflowException.
  */
 math_integers_result math_integers_gcd(const zend_long *nums, size_t count, zend_long *out);
 /* }}} */

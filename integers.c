@@ -75,29 +75,31 @@ math_integers_result math_integers_gcd(const zend_long *nums, size_t count, zend
 		return MATH_INTEGERS_EMPTY;
 	}
 
-	if (nums[0] == ZEND_LONG_MIN) {
-		return MATH_INTEGERS_MIN_LONG;
-	}
-
-	zend_long result = nums[0] < 0 ? -nums[0] : nums[0];
+	/* Run Euclid's algorithm on the raw (signed) values, without calling abs() on any
+	 * intermediate value. A remainder's magnitude is always smaller than the divisor's, so it
+	 * can never itself be ZEND_LONG_MIN -- abs() is only ever needed once, on the final result. */
+	zend_long result = nums[0];
 
 	for (size_t i = 1; i < count; i++) {
-		if (nums[i] == ZEND_LONG_MIN) {
-			return MATH_INTEGERS_MIN_LONG;
-		}
-
-		zend_long a = result;
-		zend_long b = nums[i] < 0 ? -nums[i] : nums[i];
+		zend_long b = nums[i];
 
 		while (b != 0) {
 			zend_long temp = b;
-			b = a % b;
-			a = temp;
+			/* result % -1 is always 0, but evaluating that expression directly is undefined
+			 * behavior in C when result == ZEND_LONG_MIN (INT_MIN % -1 overflows, unlike PHP's %
+			 * operator, which handles it safely) -- special-case it instead. */
+			b = (b == -1) ? 0 : result % b;
+			result = temp;
 		}
-
-		result = a;
 	}
 
-	*out = result;
+	/* The only way the final result can still be ZEND_LONG_MIN is if nothing above ever reduced
+	 * it, i.e. every other argument was 0 or ZEND_LONG_MIN itself. In that case the true GCD is
+	 * ZEND_LONG_MIN's magnitude, which doesn't fit in a zend_long. */
+	if (result == ZEND_LONG_MIN) {
+		return MATH_INTEGERS_OVERFLOW;
+	}
+
+	*out = result < 0 ? -result : result;
 	return MATH_INTEGERS_OK;
 }
