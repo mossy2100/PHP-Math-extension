@@ -3,6 +3,6 @@
 ARG_ENABLE("oceanmoon_math", "enable OceanMoon math support", "no");
 
 if (PHP_OCEANMOON_MATH != "no") {
-  EXTENSION("oceanmoon_math", "math.c floats.c integers.c types.c exceptions.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c Complex/complex_properties.c Complex/complex_arithmetic.c Complex/complex_transcendental.c Complex/complex_power.c Complex/complex_operators.c Complex/complex_rounding.c Complex/complex_trigonometric.c Complex/complex_hyperbolic.c Complex/complex_arrayaccess.c Rational/rational.c");
+  EXTENSION("oceanmoon_math", "math.c floats.c integers.c types.c exceptions.c Complex/complex.c Complex/complex_conversion.c Complex/complex_inspection.c Complex/complex_comparison.c Complex/complex_properties.c Complex/complex_arithmetic.c Complex/complex_transcendental.c Complex/complex_power.c Complex/complex_operators.c Complex/complex_rounding.c Complex/complex_trigonometric.c Complex/complex_hyperbolic.c Complex/complex_arrayaccess.c Rational/rational.c Rational/rational_factory.c Rational/rational_conversion.c Rational/rational_comparison.c Rational/rational_arithmetic.c");
   AC_DEFINE("HAVE_OCEANMOON_MATH", 1, "OceanMoon math support");
 }

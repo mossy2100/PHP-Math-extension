@@ -77,4 +77,17 @@ bool math_floats_is_int(double value);
 bool math_floats_to_int(double f, zend_long *out);
 /* }}} */
 
+/* {{{ math_floats_to_str
+ *
+ * Ports OceanMoon\Core\Stringify::stringifyFloat(): NAN/+INF/-INF stringify to their literal
+ * names ("NAN", "INF", "-INF"); every other (finite) value goes through the engine's normal
+ * (string) cast machinery, for byte-for-byte parity with what `(string) $value` would produce in
+ * PHP (governed by the `precision` ini setting). Used for embedding a float value in an exception
+ * message.
+ *
+ * Returns a new zend_string the caller owns and must eventually release.
+ */
+zend_string *math_floats_to_str(double value);
+/* }}} */
+
 #endif /* PHP_MATH_FLOATS_H */

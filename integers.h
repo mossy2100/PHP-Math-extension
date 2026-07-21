@@ -43,6 +43,13 @@ typedef enum {
 math_integers_result math_integers_add(zend_long a, zend_long b, zend_long *out);
 /* }}} */
 
+/* {{{ math_integers_sub
+ *
+ * Ports OceanMoon\Core\Integers::sub(): a - b, with overflow detection.
+ */
+math_integers_result math_integers_sub(zend_long a, zend_long b, zend_long *out);
+/* }}} */
+
 /* {{{ math_integers_mul
  *
  * Ports OceanMoon\Core\Integers::mul(): a * b, with overflow detection.

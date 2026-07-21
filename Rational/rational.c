@@ -3,8 +3,10 @@
  *
  * OceanMoon\Math\Rational: class registration, the constructor, and the shared internal helpers
  * (rational_init/rational_create/rational_read_parts) declared in rational_internal.h and used by
- * this file as well as the other rational_*.c implementation files in this directory (none yet --
- * this is the first slice, mirroring how Complex/complex.c started).
+ * this file as well as the other rational_*.c implementation files in this directory.
+ *
+ * Factory methods (fromFloat/fromString) live in rational_factory.c; conversion methods
+ * (toFloat/toMixedNumber/__toString) live in rational_conversion.c.
  *
  * rational_minit() is called from the module's real PHP_MINIT_FUNCTION in ../math.c, which owns
  * module lifecycle for the whole `math` extension.
@@ -17,6 +19,7 @@
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 #include "rational_internal.h"
 #include "rational_arginfo.h"
 #include "exceptions.h"
@@ -163,7 +166,7 @@ PHP_METHOD(OceanMoon_Math_Rational, __construct)
  */
 zend_result rational_minit(void)
 {
-	rational_ce_Rational = register_class_OceanMoon_Math_Rational();
+	rational_ce_Rational = register_class_OceanMoon_Math_Rational(zend_ce_stringable);
 
 	return SUCCESS;
 }

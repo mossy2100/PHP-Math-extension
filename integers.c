@@ -22,6 +22,18 @@ math_integers_result math_integers_add(zend_long a, zend_long b, zend_long *out)
 	return MATH_INTEGERS_OK;
 }
 
+math_integers_result math_integers_sub(zend_long a, zend_long b, zend_long *out)
+{
+	zend_long c;
+
+	if (__builtin_sub_overflow(a, b, &c)) {
+		return MATH_INTEGERS_OVERFLOW;
+	}
+
+	*out = c;
+	return MATH_INTEGERS_OK;
+}
+
 math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out)
 {
 	zend_long c;

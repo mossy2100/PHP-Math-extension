@@ -87,3 +87,20 @@ bool math_floats_to_int(double f, zend_long *out)
 
 	return false;
 }
+
+zend_string *math_floats_to_str(double value)
+{
+	if (zend_isnan(value)) {
+		return zend_string_init("NAN", sizeof("NAN") - 1, 0);
+	}
+	if (zend_isinf(value)) {
+		return value > 0
+			? zend_string_init("INF", sizeof("INF") - 1, 0)
+			: zend_string_init("-INF", sizeof("-INF") - 1, 0);
+	}
+
+	zval tmp;
+	ZVAL_DOUBLE(&tmp, value);
+	convert_to_string(&tmp);
+	return Z_STR(tmp);
+}
