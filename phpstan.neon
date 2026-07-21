@@ -3,7 +3,7 @@ parameters:
         - tests/phpunit
     scanFiles:
         - Complex/complex.stub.php
-        - Complex/complex_constants.phpstan.php
+        - phpstan/complex_constants.php
         - Rational/rational.stub.php
     bootstrapFiles:
         - tests/bootstrap.php
