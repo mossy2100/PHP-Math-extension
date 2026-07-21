@@ -20,6 +20,11 @@ zend_result rational_init(zend_object *obj, zend_long num, zend_long den);
 zend_result rational_create(zval *return_value, zend_long num, zend_long den);
 void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_den);
 
+/* The computational cores of mul()/inv(), defined in rational_arithmetic.c. Shared with div()
+ * (same file) and pow() (rational_power.c) -- see their doc comments there. */
+zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value);
+zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value);
+
 /* Module lifecycle hook, called from ../math.c. See its doc comment in rational.c. */
 zend_result rational_minit(void);
 

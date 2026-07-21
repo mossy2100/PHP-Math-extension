@@ -71,6 +71,54 @@ static zend_long rational_gcd2(zend_long a, zend_long b)
 }
 /* }}} */
 
+/* {{{ rational_calc_mul
+ *
+ * The computational core of mul(), factored out (declared in rational_internal.h) so div() below
+ * and pow() (rational_power.c) can reuse the same gcd-based cross-cancellation instead of
+ * duplicating it: (a/b) * (c/d) = ac/bd, cancelling gcd(a,d) and gcd(b,c) first to avert overflow.
+ * div() calls this as rational_calc_mul(a, b, d, c, ...) -- (a/b) / (c/d) = (a/b) * (d/c) -- and
+ * pow()'s exponent-2/exponent-PHP_INT_MIN shortcuts call it directly too.
+ */
+zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value)
+{
+	zend_long gcd1 = rational_gcd2(a, d);
+	if (gcd1 != 1) {
+		a /= gcd1;
+		d /= gcd1;
+	}
+	zend_long gcd2 = rational_gcd2(b, c);
+	if (gcd2 != 1) {
+		b /= gcd2;
+		c /= gcd2;
+	}
+
+	zend_long h, k;
+	if (rational_mul_checked(a, c, &h) == FAILURE || rational_mul_checked(b, d, &k) == FAILURE) {
+		return FAILURE;
+	}
+
+	return rational_create(return_value, h, k);
+}
+/* }}} */
+
+/* {{{ rational_calc_inv
+ *
+ * The computational core of inv(), factored out (declared in rational_internal.h) so pow()'s
+ * exponent-(-1)/exponent-PHP_INT_MIN shortcuts (rational_power.c) can reuse it directly.
+ */
+zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value)
+{
+	if (num == 0) {
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+		return FAILURE;
+	}
+
+	return num > 0
+		? rational_create(return_value, den, num)
+		: rational_create(return_value, -den, -num);
+}
+/* }}} */
+
 /* {{{ rational_operand_components
  *
  * Shared by add()/sub()/mul()/div(): resolves $other (declared `Rational|int` in the stub) into a
@@ -148,15 +196,7 @@ PHP_METHOD(OceanMoon_Math_Rational, inv)
 	zend_long num, den;
 	rational_read_parts(Z_OBJ_P(ZEND_THIS), &num, &den);
 
-	if (num == 0) {
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-		RETURN_THROWS();
-	}
-
-	zend_result result = num > 0
-		? rational_create(return_value, den, num)
-		: rational_create(return_value, -den, -num);
-	if (result == FAILURE) {
+	if (rational_calc_inv(num, den, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -242,23 +282,7 @@ PHP_METHOD(OceanMoon_Math_Rational, mul)
 		RETURN_THROWS();
 	}
 
-	zend_long gcd1 = rational_gcd2(a, d);
-	if (gcd1 != 1) {
-		a /= gcd1;
-		d /= gcd1;
-	}
-	zend_long gcd2 = rational_gcd2(b, c);
-	if (gcd2 != 1) {
-		b /= gcd2;
-		c /= gcd2;
-	}
-
-	zend_long h, k;
-	if (rational_mul_checked(a, c, &h) == FAILURE || rational_mul_checked(b, d, &k) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (rational_create(return_value, h, k) == FAILURE) {
+	if (rational_calc_mul(a, b, c, d, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -306,23 +330,8 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
 		RETURN_THROWS();
 	}
 
-	zend_long gcd1 = rational_gcd2(a, c);
-	if (gcd1 != 1) {
-		a /= gcd1;
-		c /= gcd1;
-	}
-	zend_long gcd2 = rational_gcd2(b, d);
-	if (gcd2 != 1) {
-		b /= gcd2;
-		d /= gcd2;
-	}
-
-	zend_long h, k;
-	if (rational_mul_checked(a, d, &h) == FAILURE || rational_mul_checked(b, c, &k) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (rational_create(return_value, h, k) == FAILURE) {
+	/* (a/b) / (c/d) = (a/b) * (d/c) -- reuse rational_calc_mul() with c/d swapped. */
+	if (rational_calc_mul(a, b, d, c, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

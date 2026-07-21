@@ -63,4 +63,14 @@ final class Rational implements \Stringable
     public function mul(Rational|int $other): Rational {}
 
     public function div(Rational|int $other): Rational {}
+
+    public function pow(int $exponent): Rational {}
+
+    public function sqr(): Rational {}
+
+    public function round(\RoundingMode $mode = \RoundingMode::HalfAwayFromZero): int {}
+
+    public function floor(): int {}
+
+    public function ceil(): int {}
 }
