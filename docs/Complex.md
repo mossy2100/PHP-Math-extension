@@ -15,8 +15,8 @@ $copy = +$z;
 ```
 
 Returns an equal `Complex` with the same real and imaginary parts. There's no package method this maps to - value
-identity needs no explicit method call in ordinary PHP code - but the extension implements the `ZEND_UNARY_PLUS` handler
-anyway, for parity with PHP's built-in `+$x` on `int`/`float`.
+identity needs no explicit method call in ordinary PHP code. PHP has no dedicated opcode for unary `+`/`-`; the compiler
+lowers `+$z` to `$z * 1`, which the extension handles via a `Complex * int` operation, as documented below.
 
 **Example:**
 
@@ -92,8 +92,7 @@ main README for the shared precedence table and PHP manual link.
 $sum = $z1 + $z2;
 ```
 
-Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add). There are 2 ways
-this operator can be used:
+Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add).
 
 Forms:
 
@@ -101,12 +100,16 @@ Forms:
 2. `Complex + int|float`.
 3. `int|float + Complex`. Addition is commutative, so this gives the same result as #2.
 
+**Example:**
+
 ```php
 $z1 = new Complex(3, 4);
 $z2 = new Complex(1, 2);
-$z1 + $z2;  // 4 + 6i   (Complex + Complex)
-$z1 + 2;    // 5 + 4i   (Complex + int|float)
-2 + $z1;    // 5 + 4i   (int|float + Complex - same result, addition is commutative)
+$z1 + $z2;  // 4 + 6i    (Complex + Complex)
+$z1 + 2;    // 5 + 4i    (Complex + int)
+2 + $z1;    // 5 + 4i    (int + Complex - same result, addition is commutative)
+$z1 + 2.5;  // 5.5 + 4i  (Complex + float)
+2.5 + $z1;  // 5.5 + 4i  (float + Complex - same result, addition is commutative)
 ```
 
 ### - (subtract)
@@ -124,12 +127,16 @@ Forms:
 3. `int|float - Complex`. Subtraction isn't commutative, so this is a distinct case from #2 - the scalar is promoted to
    a `Complex` with a zero imaginary part, then subtracted normally.
 
+**Example:**
+
 ```php
 $z1 = new Complex(5, 7);
 $z2 = new Complex(2, 3);
-$z1 - $z2;  // 3 + 4i   (Complex - Complex)
-$z1 - 2;    // 3 + 7i   (Complex - int|float)
-2 - $z1;    // -3 - 7i  (int|float - Complex)
+$z1 - $z2;  // 3 + 4i     (Complex - Complex)
+$z1 - 2;    // 3 + 7i     (Complex - int)
+2 - $z1;    // -3 - 7i    (int - Complex)
+$z1 - 2.5;  // 2.5 + 7i   (Complex - float)
+2.5 - $z1;  // -2.5 - 7i  (float - Complex)
 ```
 
 ### \* (multiply)
@@ -144,14 +151,18 @@ Forms:
 
 1. `Complex * Complex`.
 2. `Complex * int|float`.
-3. `int|float * Complex`. Multiplication is commutative, so this give the same result as #2.
+3. `int|float * Complex`. Multiplication is commutative, so this gives the same result as #2.
+
+**Example:**
 
 ```php
 $z1 = new Complex(1, 2);
 $z2 = new Complex(3, 4);
-$z1 * $z2;  // -5 + 10i (Complex * Complex)
-$z1 * 2;    // 2 + 4i   (Complex * int|float)
-2 * $z1;    // 2 + 4i   (int|float * Complex - same result, multiplication is commutative)
+$z1 * $z2;  // -5 + 10i   (Complex * Complex)
+$z1 * 2;    // 2 + 4i     (Complex * int)
+2 * $z1;    // 2 + 4i     (int * Complex - same result, multiplication is commutative)
+$z1 * 2.5;  // 2.5 + 5i   (Complex * float)
+2.5 * $z1;  // 2.5 + 5i   (float * Complex - same result, multiplication is commutative)
 ```
 
 ### / (divide)
@@ -170,12 +181,16 @@ Forms:
    `Complex` with a zero imaginary part, then divided normally. This also gives a way to compute a multiplicative
    inverse - see "Inverting with `1 / z` or `z ** -1`" below.
 
+**Example:**
+
 ```php
 $z1 = new Complex(6, 8);
 $z2 = new Complex(3, 4);
-$z1 / $z2;  // 2 (real only - the imaginary parts cancel here)
-$z1 / 2;    // 3 + 4i   (Complex / int|float)
-1 / $z2;    // 0.12 - 0.16i (int|float / Complex - the inverse of $z2)
+$z1 / $z2;  // 2               (Complex / Complex; real only - the imaginary parts cancel here)
+$z1 / 2;    // 3 + 4i          (Complex / int)
+1 / $z2;    // 0.12 - 0.16i    (int / Complex - the inverse of $z2)
+$z1 / 2.5;  // 2.4 + 3.2i      (Complex / float)
+2.5 / $z1;  // 0.15 - 0.2i     (float / Complex)
 ```
 
 ### \*\* (power)
@@ -194,10 +209,16 @@ Forms:
    imaginary part, then raised to the (possibly complex) power on the right, using the same `pow()` method (which
    already accepts a `Complex` exponent for exactly this reason).
 
+**Example:**
+
 ```php
 $z = new Complex(3, 4);
-$z ** 2;  // -7 + 24i (Complex ** int|float)
-2 ** $z;  // -7.46 + 2.89i (int|float ** Complex)
+$w = new Complex(1, 1);
+$z ** $w;   // -1.63 + 1.12i   (Complex ** Complex)
+$z ** 2;    // -7 + 24i        (Complex ** int)
+2 ** $z;    // -7.46 + 2.89i   (int ** Complex)
+$z ** 0.5;  // 2 + i           (Complex ** float; principal square root)
+2.5 ** $z;  // -13.53 - 7.81i  (float ** Complex)
 ```
 
 ---
@@ -211,6 +232,8 @@ Since `int|float / Complex` is supported (see `/` above), `1 / $z` computes the 
 [`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via
 `pow()` too, since raising to the power -1 is the mathematical definition of a multiplicative inverse. All three throw
 `ArithmeticException` if `$z` is zero, matching `inv()`.
+
+**Example:**
 
 ```php
 $z = new Complex(3, 4);

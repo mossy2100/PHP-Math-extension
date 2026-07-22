@@ -168,6 +168,6 @@ zend_result rational_minit(void)
 {
 	rational_ce_Rational = register_class_OceanMoon_Math_Rational(zend_ce_stringable);
 
-	return SUCCESS;
+	return rational_operators_minit();
 }
 /* }}} */

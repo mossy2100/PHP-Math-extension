@@ -18,3 +18,15 @@ services:
         class: OceanMoon\Math\PHPStan\ComplexUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\RationalBinaryOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\RationalUnaryOperatorExtension
+        tags:
+            - phpstan.broker.unaryOperatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\RationalComparisonOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension

@@ -56,7 +56,7 @@ static zend_result rational_pow_checked(zend_long a, zend_long b, zend_long *out
  * reuse rational_calc_mul()/rational_calc_inv() (rational_arithmetic.c) directly, same as the PHP
  * source's sqr()/mul()/inv() delegations.
  */
-static zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, zval *return_value)
+zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, zval *return_value)
 {
 	/* Any number to the power of 0 is 1, including 0 (by convention). */
 	if (exponent == 0) {

@@ -69,7 +69,7 @@ static void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b
  * Rational can never equal PHP_INT_MIN (promoting it to a Rational would throw), but a Rational is
  * always greater than it.
  */
-static zend_result rational_calc_compare(zend_object *self_obj, zval *other, int *out)
+zend_result rational_calc_compare(zend_object *self_obj, zval *other, int *out)
 {
 	zend_long self_num, self_den;
 	rational_read_parts(self_obj, &self_num, &self_den);

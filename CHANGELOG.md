@@ -28,6 +28,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Operator overloading for `Complex`** (not possible in the userland package): `+`, `-`, `*`,
   `/`, `**` each accept a `Complex` or `int|float` operand on either side, and `~` for the complex
   conjugate. See `docs/Complex.md`.
+- **`OceanMoon\Math\Rational` is now fully implemented natively**, matching the userland package
+  method-for-method:
+  - Construction, factory methods (`fromFloat()`, `fromString()`), conversion (`toFloat()`,
+    `toMixedNumber()`, `__toString()`), and comparison (`compare()`, `equal()`, `approxEqual()`,
+    `lessThan()`, etc.).
+  - Unary and binary arithmetic (`neg()`, `inv()`, `add()`, `sub()`, `mul()`, `div()`).
+  - `pow()` and `round()`, including full `RoundingMode` support.
+- **Operator overloading for `Rational`** (not possible in the userland package): `+`, `-`, `*`,
+  `/` each accept a `Rational`, `int`, or `float` operand on either side, and `**` accepts
+  `Rational ** int`, `Rational ** float`, or `float ** Rational`. A genuine `float` operand widens
+  the whole operation to `float` -- something none of the equivalent methods support -- while an
+  `int` operand widens to an exact `Rational`. `Rational` also gets comparison operators (`<`,
+  `<=`, `>`, `>=`, `<=>`, `==`, `!=`), the only one of the four classes to do so, since it has a
+  genuine natural ordering. See `docs/Rational.md`.
 
 ### Fixed
 

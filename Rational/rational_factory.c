@@ -41,7 +41,7 @@
  * backstop against a case the algorithm's own real-world behavior never actually reaches (matched
  * by every input this package's test suite exercises, including its extreme-magnitude cases).
  */
-static zend_result rational_calc_from_float(double value, zval *return_value)
+zend_result rational_calc_from_float(double value, zval *return_value)
 {
 	if (!zend_finite(value)) {
 		zend_string *value_str = math_floats_to_str(value);
