@@ -92,10 +92,10 @@ method call in any order - the operator instead widens per the rule above and re
 ### + (add)
 
 ```php
-$sum = $r1 + $r2;
+$sum = $r + $q;
 ```
 
-Equivalent to [`$r1->add($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#add).
+Equivalent to [`$r->add($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#add).
 
 Forms:
 
@@ -106,35 +106,35 @@ Forms:
 **Example:**
 
 ```php
-$r1 = new Rational(1, 2);
-$r2 = new Rational(1, 3);
-$r1 + $r2;    // 5/6   (Rational + Rational)
-$r1 + 1;      // 3/2   (Rational + int)
-1 + $r1;      // 3/2   (int + Rational - same result, addition is commutative)
-$r1 + 1.23;   // 1.73  (Rational + float)
-1.23 + $r1;   // 1.73  (float + Rational - same result, addition is commutative)
+$r = new Rational(1, 2);
+$q = new Rational(1, 3);
+$r + $q;    // 5/6   (Rational + Rational)
+$r + 1;      // 3/2   (Rational + int)
+1 + $r;      // 3/2   (int + Rational - same result, addition is commutative)
+$r + 1.23;   // 1.73  (Rational + float)
+1.23 + $r;   // 1.73  (float + Rational - same result, addition is commutative)
 ```
 
-Equivalence table for the `+` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
+Equivalence table for the `+` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation  | Equivalent to               |
-| ---------- | --------------------------- |
-| `$r + $r2` | `$r->add($r2)`              |
-| `$r + $i`  | `$r->add($i)`               |
-| `$i + $r`  | `new Rational($i)->add($r)` |
-| `$r + $f`  | `$r->toFloat() + $f`        |
-| `$f + $r`  | `$f + $r->toFloat()`        |
+| Operation | Equivalent to               |
+| --------- | --------------------------- |
+| `$r + $q` | `$r->add($q)`               |
+| `$r + $i` | `$r->add($i)`               |
+| `$i + $r` | `new Rational($i)->add($r)` |
+| `$r + $f` | `$r->toFloat() + $f`        |
+| `$f + $r` | `$f + $r->toFloat()`        |
 
 ---
 
 ### - (subtract)
 
 ```php
-$diff = $r1 - $r2;
+$diff = $r - $q;
 ```
 
-Equivalent to [`$r1->sub($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#sub).
+Equivalent to [`$r->sub($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#sub).
 
 Forms:
 
@@ -146,35 +146,35 @@ Forms:
 **Example:**
 
 ```php
-$r1 = new Rational(3, 4);
-$r2 = new Rational(1, 4);
-$r1 - $r2;    // 1/2   (Rational - Rational)
-$r1 - 1;      // -1/4  (Rational - int)
-1 - $r1;      // 1/4   (int - Rational)
-$r1 - 0.25;   // 0.5   (Rational - float)
-0.25 - $r1;   // -0.5  (float - Rational)
+$r = new Rational(3, 4);
+$q = new Rational(1, 4);
+$r - $q;    // 1/2   (Rational - Rational)
+$r - 1;      // -1/4  (Rational - int)
+1 - $r;      // 1/4   (int - Rational)
+$r - 0.25;   // 0.5   (Rational - float)
+0.25 - $r;   // -0.5  (float - Rational)
 ```
 
-Equivalence table for the `-` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
+Equivalence table for the `-` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation  | Equivalent to               |
-| ---------- | --------------------------- |
-| `$r - $r2` | `$r->sub($r2)`              |
-| `$r - $i`  | `$r->sub($i)`               |
-| `$i - $r`  | `new Rational($i)->sub($r)` |
-| `$r - $f`  | `$r->toFloat() - $f`        |
-| `$f - $r`  | `$f - $r->toFloat()`        |
+| Operation | Equivalent to               |
+| --------- | --------------------------- |
+| `$r - $q` | `$r->sub($q)`               |
+| `$r - $i` | `$r->sub($i)`               |
+| `$i - $r` | `new Rational($i)->sub($r)` |
+| `$r - $f` | `$r->toFloat() - $f`        |
+| `$f - $r` | `$f - $r->toFloat()`        |
 
 ---
 
 ### \* (multiply)
 
 ```php
-$product = $r1 * $r2;
+$product = $r * $q;
 ```
 
-Equivalent to [`$r1->mul($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#mul).
+Equivalent to [`$r->mul($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#mul).
 
 Forms:
 
@@ -185,35 +185,35 @@ Forms:
 **Example:**
 
 ```php
-$r1 = new Rational(2, 3);
-$r2 = new Rational(3, 4);
-$r1 * $r2;    // 1/2  (Rational * Rational)
-$r1 * 3;      // 2    (Rational * int)
-3 * $r1;      // 2    (int * Rational - same result, multiplication is commutative)
-$r1 * 0.75;   // 0.5  (Rational * float)
-0.75 * $r1;   // 0.5  (float * Rational - same result, multiplication is commutative)
+$r = new Rational(2, 3);
+$q = new Rational(3, 4);
+$r * $q;    // 1/2  (Rational * Rational)
+$r * 3;      // 2    (Rational * int)
+3 * $r;      // 2    (int * Rational - same result, multiplication is commutative)
+$r * 0.75;   // 0.5  (Rational * float)
+0.75 * $r;   // 0.5  (float * Rational - same result, multiplication is commutative)
 ```
 
-Equivalence table for the `*` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
+Equivalence table for the `*` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation  | Equivalent to               |
-| ---------- | --------------------------- |
-| `$r * $r2` | `$r->mul($r2)`              |
-| `$r * $i`  | `$r->mul($i)`               |
-| `$i * $r`  | `new Rational($i)->mul($r)` |
-| `$r * $f`  | `$r->toFloat() * $f`        |
-| `$f * $r`  | `$f * $r->toFloat()`        |
+| Operation | Equivalent to               |
+| --------- | --------------------------- |
+| `$r * $q` | `$r->mul($q)`               |
+| `$r * $i` | `$r->mul($i)`               |
+| `$i * $r` | `new Rational($i)->mul($r)` |
+| `$r * $f` | `$r->toFloat() * $f`        |
+| `$f * $r` | `$f * $r->toFloat()`        |
 
 ---
 
 ### / (divide)
 
 ```php
-$quotient = $r1 / $r2;
+$quotient = $r / $q;
 ```
 
-Equivalent to [`$r1->div($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#div).
+Equivalent to [`$r->div($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#div).
 
 Forms:
 
@@ -226,29 +226,29 @@ Forms:
 **Example:**
 
 ```php
-$r1 = new Rational(2, 3);
-$r2 = new Rational(3, 4);
-$r1 / $r2;    // 8/9        (Rational / Rational)
-$r1 / 2;      // 1/3        (Rational / int)
-1 / $r1;      // 3/2        (int / Rational - the inverse of $r1)
-$r1 / 0.75;   // 0.8888...  (Rational / float)
-0.75 / $r1;   // 1.125      (float / Rational)
+$r = new Rational(2, 3);
+$q = new Rational(3, 4);
+$r / $q;    // 8/9        (Rational / Rational)
+$r / 2;      // 1/3        (Rational / int)
+1 / $r;      // 3/2        (int / Rational - the inverse of $r)
+$r / 0.75;   // 0.8888...  (Rational / float)
+0.75 / $r;   // 1.125      (float / Rational)
 ```
 
 Dividing by zero always throws `ArithmeticException`, matching `div()` - including `$r / 0.0`. This is a deliberate
 departure from ordinary `float` division, which returns `INF`/`-INF`/`NAN` rather than throwing; this can be a hidden
 source of bugs.
 
-Equivalence table for the `/` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
+Equivalence table for the `/` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation  | Equivalent to               |
-| ---------- | --------------------------- |
-| `$r / $r2` | `$r->div($r2)`              |
-| `$r / $i`  | `$r->div($i)`               |
-| `$i / $r`  | `new Rational($i)->div($r)` |
-| `$r / $f`  | `$r->toFloat() / $f`        |
-| `$f / $r`  | `$f / $r->toFloat()`        |
+| Operation | Equivalent to               |
+| --------- | --------------------------- |
+| `$r / $q` | `$r->div($q)`               |
+| `$r / $i` | `$r->div($i)`               |
+| `$i / $r` | `new Rational($i)->div($r)` |
+| `$r / $f` | `$r->toFloat() / $f`        |
+| `$f / $r` | `$f / $r->toFloat()`        |
 
 ---
 
@@ -279,13 +279,13 @@ Forms:
 
 Equivalence table for the `**` operator, where `$r` is a `Rational`, `$i` is an `int`, and `$f` is a `float`.
 
-| Operation   | Equivalent to         |
-| ----------- | --------------------- |
-| `$r ** $i`  | `$r->pow($i)`         |
-| `$r ** $f`  | `$r->toFloat() ** $f` |
-| `$f ** $r`  | `$f ** $r->toFloat()` |
-| `$r ** $r2` | throws `TypeError`    |
-| `$i ** $r`  | throws `TypeError`    |
+| Operation  | Equivalent to         |
+| ---------- | --------------------- |
+| `$r ** $i` | `$r->pow($i)`         |
+| `$r ** $f` | `$r->toFloat() ** $f` |
+| `$f ** $r` | `$f ** $r->toFloat()` |
+| `$r ** $q` | throws `TypeError`    |
+| `$i ** $r` | throws `TypeError`    |
 
 **Example:**
 
@@ -374,248 +374,236 @@ the event of integer overflow an `OverflowException` will occur; to avoid this, 
 Returns `-1` for "less than", `0` for "equal" (that is, _numerically_ equal), and `1` for "greater than".
 
 ```php
-$result = $r1 <=> $r2;  // -1, 0, or 1
+$result = $r <=> $q;  // -1, 0, or 1
 ```
 
-Equivalent to [`$r1->compare($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare).
+Equivalent to [`$r->compare($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare).
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 2);
-$r2 = new Rational(1, 3);
-$r1 <=> $r2;   // 1   (1/2 > 1/3; Rational <=> Rational)
-$r1 <=> 1;     // -1  (1/2 < 1; Rational <=> int)
-$r1 <=> 0.5;   // 0   (1/2 == 0.5 exactly; Rational <=> float)
-1 <=> $r1;     // 1   (1 > 1/2; int <=> Rational)
-0.5 <=> $r1;   // 0   (0.5 == 1/2 exactly; float <=> Rational)
+$r = new Rational(1, 2);
+$q = new Rational(1, 3);
+$r <=> $q;    // 1   (1/2 > 1/3; Rational <=> Rational)
+$r <=> 1;     // -1  (1/2 < 1; Rational <=> int)
+$r <=> 0.5;   // 0   (1/2 == 0.5 exactly; Rational <=> float)
+1 <=> $r;     // 1   (1 > 1/2; int <=> Rational)
+0.5 <=> $r;   // 0   (0.5 == 1/2 exactly; float <=> Rational)
 ```
 
-Equivalence table for the `<=>` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`.
+Equivalence table for the `<=>` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
 
-| Operation    | Equivalent to      |
-| ------------ | ------------------ |
-| `$r <=> $r2` | `$r->compare($r2)` |
-| `$r <=> $i`  | `$r->compare($i)`  |
-| `$i <=> $r`  | `-$r->compare($i)` |
-| `$r <=> $f`  | `$r->compare($f)`  |
-| `$f <=> $r`  | `-$r->compare($f)` |
+| Operation   | Equivalent to                                         |
+| ----------- | ----------------------------------------------------- |
+| `$r <=> $q` | `$r->compare($q)`                                     |
+| `$r <=> $i` | `$r->compare($i)`                                     |
+| `$i <=> $r` | `new Rational($i)->compare($r)` or `-$r->compare($i)` |
+| `$r <=> $f` | `$r->toFloat() <=> $f` or `$r->compare($f)`           |
+| `$f <=> $r` | `$f <=> $r->toFloat()` or `-$r->compare($f)`          |
 
 ---
 
 ### < (less than)
 
 ```php
-$result = $r1 < $r2;
+$result = $r < $q;
 ```
 
 Equivalent to
-[`$r1->lessThan($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
+[`$r->lessThan($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
 
 Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 3);
-$r2 = new Rational(1, 2);
-$r1 < $r2;  // true   (1/3 < 1/2; Rational < Rational)
-$r1 < 1;    // true   (1/3 < 1; Rational < int)
-1 < $r1;    // false  (int < Rational)
-$r1 < 0.5;  // true   (1/3 < 0.5; Rational < float)
-0.5 < $r1;  // false  (float < Rational)
+$r = new Rational(1, 3);
+$q = new Rational(1, 2);
+$r < $q;  // true   (1/3 < 1/2; Rational < Rational)
+$r < 1;    // true   (1/3 < 1; Rational < int)
+1 < $r;    // false  (int < Rational)
+$r < 0.5;  // true   (1/3 < 0.5; Rational < float)
+0.5 < $r;  // false  (float < Rational)
 ```
 
-Equivalence table for the `<` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. When the scalar is on the left, the method flips to `greaterThan()`, since `$x < $r` means `$r > $x`.
+Equivalence table for the `<` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`. When
+the scalar is on the left, the method flips to `greaterThan()`, since `$x < $r` means `$r > $x`.
 
-| Operation  | Equivalent to         |
-| ---------- | --------------------- |
-| `$r < $r2` | `$r->lessThan($r2)`   |
-| `$r < $i`  | `$r->lessThan($i)`    |
-| `$i < $r`  | `$r->greaterThan($i)` |
-| `$r < $f`  | `$r->lessThan($f)`    |
-| `$f < $r`  | `$r->greaterThan($f)` |
+| Operation | Equivalent to                                             |
+| --------- | --------------------------------------------------------- |
+| `$r < $q` | `$r->lessThan($q)`                                        |
+| `$r < $x` | `$r->lessThan($x)`                                        |
+| `$i < $r` | `new Rational($i)->lessThan($r)` or `$r->greaterThan($i)` |
+| `$r < $f` | `$r->toFloat() < $f` or `$r->lessThan($f)`                |
+| `$i < $r` | `new Rational($i)->lessThan($r)` or `$r->greaterThan($i)` |
 
 ---
 
 ### <= (less than or equal)
 
 ```php
-$result = $r1 <= $r2;
+$result = $r <= $q;
 ```
 
 Equivalent to
-[`$r1->lessThanOrEqual($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
+[`$r->lessThanOrEqual($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
 
 Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 3);
-$r2 = new Rational(1, 2);
-$r1 <= $r2;  // true   (1/3 <= 1/2; Rational <= Rational)
-$r1 <= 1;    // true   (1/3 <= 1; Rational <= int)
-1 <= $r1;    // false  (int <= Rational)
-$r1 <= 0.5;  // true   (1/3 <= 0.5; Rational <= float)
-0.5 <= $r1;  // false  (float <= Rational)
+$r = new Rational(1, 3);
+$q = new Rational(1, 2);
+$r <= $q;  // true   (1/3 <= 1/2; Rational <= Rational)
+$r <= 1;    // true   (1/3 <= 1; Rational <= int)
+1 <= $r;    // false  (int <= Rational)
+$r <= 0.5;  // true   (1/3 <= 0.5; Rational <= float)
+0.5 <= $r;  // false  (float <= Rational)
 ```
 
-Equivalence table for the `<=` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. When the scalar is on the left, the method flips to `greaterThanOrEqual()`, since `$x <= $r` means `$r >= $x`.
+Equivalence table for the `<=` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
+When the scalar is on the left, the method flips to `greaterThanOrEqual()`, since `$x <= $r` means `$r >= $x`.
 
-| Operation   | Equivalent to                |
-| ----------- | ---------------------------- |
-| `$r <= $r2` | `$r->lessThanOrEqual($r2)`   |
-| `$r <= $i`  | `$r->lessThanOrEqual($i)`    |
-| `$i <= $r`  | `$r->greaterThanOrEqual($i)` |
-| `$r <= $f`  | `$r->lessThanOrEqual($f)`    |
-| `$f <= $r`  | `$r->greaterThanOrEqual($f)` |
+| Operation  | Equivalent to                |
+| ---------- | ---------------------------- |
+| `$r <= $q` | `$r->lessThanOrEqual($q)`    |
+| `$r <= $x` | `$r->lessThanOrEqual($x)`    |
+| `$x <= $r` | `$r->greaterThanOrEqual($x)` |
 
 ---
 
 ### > (greater than)
 
 ```php
-$result = $r1 > $r2;
+$result = $r > $q;
 ```
 
 Equivalent to
-[`$r1->greaterThan($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
+[`$r->greaterThan($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
 
 Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 3);
-$r2 = new Rational(1, 2);
-$r2 > $r1;   // true   (1/2 > 1/3; Rational > Rational)
-$r1 > 1;     // false  (Rational > int)
-1 > $r1;     // true   (1 > 1/3; int > Rational)
-$r1 > 0.5;   // false  (Rational > float)
-0.5 > $r1;   // true   (0.5 > 1/3; float > Rational)
+$r = new Rational(1, 3);
+$q = new Rational(1, 2);
+$q > $r;   // true   (1/2 > 1/3; Rational > Rational)
+$r > 1;     // false  (Rational > int)
+1 > $r;     // true   (1 > 1/3; int > Rational)
+$r > 0.5;   // false  (Rational > float)
+0.5 > $r;   // true   (0.5 > 1/3; float > Rational)
 ```
 
-Equivalence table for the `>` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. When the scalar is on the left, the method flips to `lessThan()`, since `$x > $r` means `$r < $x`.
+Equivalence table for the `>` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`. When
+the scalar is on the left, the method flips to `lessThan()`, since `$x > $r` means `$r < $x`.
 
-| Operation  | Equivalent to          |
-| ---------- | ---------------------- |
-| `$r > $r2` | `$r->greaterThan($r2)` |
-| `$r > $i`  | `$r->greaterThan($i)`  |
-| `$i > $r`  | `$r->lessThan($i)`     |
-| `$r > $f`  | `$r->greaterThan($f)`  |
-| `$f > $r`  | `$r->lessThan($f)`     |
+| Operation | Equivalent to         |
+| --------- | --------------------- |
+| `$r > $q` | `$r->greaterThan($q)` |
+| `$r > $x` | `$r->greaterThan($x)` |
+| `$x > $r` | `$r->lessThan($x)`    |
 
 ---
 
 ### >= (greater than or equal)
 
 ```php
-$result = $r1 >= $r2;
+$result = $r >= $q;
 ```
 
 Equivalent to
-[`$r1->greaterThanOrEqual($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
+[`$r->greaterThanOrEqual($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#lessthan-greaterthan-etc).
 
 Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 3);
-$r2 = new Rational(1, 2);
-$r2 >= $r1;  // true   (1/2 >= 1/3; Rational >= Rational)
-$r1 >= 1;    // false  (Rational >= int)
-1 >= $r1;    // true   (1 >= 1/3; int >= Rational)
-$r1 >= 0.5;  // false  (Rational >= float)
-0.5 >= $r1;  // true   (0.5 >= 1/3; float >= Rational)
+$r = new Rational(1, 3);
+$q = new Rational(1, 2);
+$q >= $r;  // true   (1/2 >= 1/3; Rational >= Rational)
+$r >= 1;    // false  (Rational >= int)
+1 >= $r;    // true   (1 >= 1/3; int >= Rational)
+$r >= 0.5;  // false  (Rational >= float)
+0.5 >= $r;  // true   (0.5 >= 1/3; float >= Rational)
 ```
 
-Equivalence table for the `>=` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. When the scalar is on the left, the method flips to `lessThanOrEqual()`, since `$x >= $r` means `$r <= $x`.
+Equivalence table for the `>=` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
+When the scalar is on the left, the method flips to `lessThanOrEqual()`, since `$x >= $r` means `$r <= $x`.
 
-| Operation   | Equivalent to                 |
-| ----------- | ----------------------------- |
-| `$r >= $r2` | `$r->greaterThanOrEqual($r2)` |
-| `$r >= $i`  | `$r->greaterThanOrEqual($i)`  |
-| `$i >= $r`  | `$r->lessThanOrEqual($i)`     |
-| `$r >= $f`  | `$r->greaterThanOrEqual($f)`  |
-| `$f >= $r`  | `$r->lessThanOrEqual($f)`     |
+| Operation  | Equivalent to                |
+| ---------- | ---------------------------- |
+| `$r >= $q` | `$r->greaterThanOrEqual($q)` |
+| `$r >= $x` | `$r->greaterThanOrEqual($x)` |
+| `$x >= $r` | `$r->lessThanOrEqual($x)`    |
 
 ---
 
 ### == (equal)
 
 ```php
-$result = $r1 == $r2;
+$result = $r == $q;
 ```
 
-Equivalent to [`$r1->equal($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#equal).
+Equivalent to [`$r->equal($q)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#equal).
 
 Numeric equality, derived from the `<=>` handler - see "A note on equality testing" above. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 2);
-$r2 = new Rational(2, 4);
-$r1 == $r2;  // true   (1/2 == 2/4 exactly, not identity; Rational == Rational)
-$r1 == 1;    // false  (Rational == int)
-1 == $r1;    // false  (int == Rational)
-$r1 == 0.5;  // true   (1/2 == 0.5 exactly; Rational == float)
-0.5 == $r1;  // true   (float == Rational)
+$r = new Rational(1, 2);
+$q = new Rational(2, 4);
+$r == $q;  // true   (1/2 == 2/4 exactly, not identity; Rational == Rational)
+$r == 1;    // false  (Rational == int)
+1 == $r;    // false  (int == Rational)
+$r == 0.5;  // true   (1/2 == 0.5 exactly; Rational == float)
+0.5 == $r;  // true   (float == Rational)
 ```
 
-Equivalence table for the `==` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. Equality is symmetric, so the reversed-operand rows are identical to their un-reversed counterparts.
+Equivalence table for the `==` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
+Equality is symmetric, so the reversed-operand row is identical to its un-reversed counterpart.
 
-| Operation   | Equivalent to    |
-| ----------- | ---------------- |
-| `$r == $r2` | `$r->equal($r2)` |
-| `$r == $i`  | `$r->equal($i)`  |
-| `$i == $r`  | `$r->equal($i)`  |
-| `$r == $f`  | `$r->equal($f)`  |
-| `$f == $r`  | `$r->equal($f)`  |
+| Operation  | Equivalent to   |
+| ---------- | --------------- |
+| `$r == $q` | `$r->equal($q)` |
+| `$r == $x` | `$r->equal($x)` |
+| `$x == $r` | `$r->equal($x)` |
 
 ---
 
 ### != (not equal)
 
 ```php
-$result = $r1 != $r2;
+$result = $r != $q;
 ```
 
-There's no `notEqual()` method; the negation `!$r1->equal($r2)` is the equivalent.
+There's no `notEqual()` method; the negation `!$r->equal($q)` is the equivalent.
 
 Numeric inequality, derived from the `<=>` handler - see "A note on equality testing" above. Returns a `bool`.
 
 **Example:**
 
 ```php
-$r1 = new Rational(1, 2);
-$r2 = new Rational(2, 4);
-$r1 != $r2;  // false  (1/2 == 2/4 exactly; Rational != Rational)
-$r1 != 1;    // true   (Rational != int)
-1 != $r1;    // true   (int != Rational)
-$r1 != 0.5;  // false  (1/2 == 0.5 exactly; Rational != float)
-0.5 != $r1;  // false  (float != Rational)
+$r = new Rational(1, 2);
+$q = new Rational(2, 4);
+$r != $q;  // false  (1/2 == 2/4 exactly; Rational != Rational)
+$r != 1;    // true   (Rational != int)
+1 != $r;    // true   (int != Rational)
+$r != 0.5;  // false  (1/2 == 0.5 exactly; Rational != float)
+0.5 != $r;  // false  (float != Rational)
 ```
 
-Equivalence table for the `!=` operator, where `$r` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. As with `==`, equality is symmetric, so the reversed-operand rows are identical to their un-reversed
-counterparts.
+Equivalence table for the `!=` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`. As
+with `==`, equality is symmetric, so the reversed-operand row is identical to its un-reversed counterpart.
 
-| Operation   | Equivalent to     |
-| ----------- | ----------------- |
-| `$r != $r2` | `!$r->equal($r2)` |
-| `$r != $i`  | `!$r->equal($i)`  |
-| `$i != $r`  | `!$r->equal($i)`  |
-| `$r != $f`  | `!$r->equal($f)`  |
-| `$f != $r`  | `!$r->equal($f)`  |
+| Operation  | Equivalent to    |
+| ---------- | ---------------- |
+| `$r != $q` | `!$r->equal($q)` |
+| `$r != $x` | `!$r->equal($x)` |
+| `$x != $r` | `!$r->equal($x)` |
 
 ---
 

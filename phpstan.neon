@@ -5,6 +5,8 @@ parameters:
         - Complex/complex.stub.php
         - phpstan/complex_constants.php
         - Rational/rational.stub.php
+        - Vector/vector.stub.php
+        - Matrix/matrix.stub.php
     bootstrapFiles:
         - tests/bootstrap.php
     treatPhpDocTypesAsCertain: false

@@ -33,6 +33,8 @@ $v = Vector::fromArray([1, 2, 3]);
 $copy = +$v;  // [1, 2, 3]
 ```
 
+---
+
 ### - (negate)
 
 ```php
@@ -49,6 +51,12 @@ $v = Vector::fromArray([1, -2, 3]);
 $negated = -$v;  // [-1, 2, -3]
 ```
 
+Equivalence table for the unary `-` operator, where `$v` is a `Vector`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `-$v`     | `$v->neg()`   |
+
 ---
 
 ## Binary Arithmetic Operators
@@ -56,13 +64,15 @@ $negated = -$v;  // [-1, 2, -3]
 Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
 conditions, as that method - see the linked method docs for specifics.
 
+---
+
 ### + (add)
 
 ```php
-$sum = $v1 + $v2;
+$sum = $v + $u;
 ```
 
-Equivalent to [`$v1->add($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#add). Element-wise; both
+Equivalent to [`$v->add($u)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#add). Element-wise; both
 vectors must be the same size.
 
 Forms:
@@ -72,18 +82,26 @@ Forms:
 **Example:**
 
 ```php
-$v1 = Vector::fromArray([1, 2, 3]);
-$v2 = Vector::fromArray([4, 5, 6]);
-$v1 + $v2;  // [5, 7, 9]  (Vector + Vector)
+$v = Vector::fromArray([1, 2, 3]);
+$u = Vector::fromArray([4, 5, 6]);
+$v + $u;  // [5, 7, 9]  (Vector + Vector)
 ```
+
+Equivalence table for the `+` operator, where `$v` and `$u` are `Vector` values.
+
+| Operation | Equivalent to  |
+| --------- | --------------- |
+| `$v + $u` | `$v->add($u)`   |
+
+---
 
 ### - (subtract)
 
 ```php
-$diff = $v1 - $v2;
+$diff = $v - $u;
 ```
 
-Equivalent to [`$v1->sub($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#sub). Element-wise; both
+Equivalent to [`$v->sub($u)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#sub). Element-wise; both
 vectors must be the same size.
 
 Forms:
@@ -93,10 +111,18 @@ Forms:
 **Example:**
 
 ```php
-$v1 = Vector::fromArray([4, 5, 6]);
-$v2 = Vector::fromArray([1, 2, 3]);
-$v1 - $v2;  // [3, 3, 3]  (Vector - Vector)
+$v = Vector::fromArray([4, 5, 6]);
+$u = Vector::fromArray([1, 2, 3]);
+$v - $u;  // [3, 3, 3]  (Vector - Vector)
 ```
+
+Equivalence table for the `-` operator, where `$v` and `$u` are `Vector` values.
+
+| Operation | Equivalent to  |
+| --------- | --------------- |
+| `$v - $u` | `$v->sub($u)`   |
+
+---
 
 ### \* (multiply)
 
@@ -132,10 +158,20 @@ $v * 2;    // [2, 4, 6]      (Vector * int)
 $v * 2.5;  // [2.5, 5, 7.5]  (Vector * float)
 2.5 * $v;  // [2.5, 5, 7.5]  (float * Vector - same result, scalar multiplication is commutative)
 
-$m = Matrix::fromArray([[1, 0], [0, 1]]);
-$v3 = Vector::fromArray([1, 2]);
-$v3 * $m;  // [1, 2]  (Vector * Matrix - $v3 treated as a 1x2 row matrix)
+$A = Matrix::fromArray([[1, 0], [0, 1]]);
+$u = Vector::fromArray([1, 2]);
+$u * $A;  // [1, 2]  (Vector * Matrix - $u treated as a 1x2 row matrix)
 ```
+
+Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and `$A` is a `Matrix`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `$v * $x` | `$v->mul($x)` |
+| `$x * $v` | `$v->mul($x)` |
+| `$v * $A` | `$v->mul($A)` |
+
+---
 
 ### / (divide)
 
@@ -156,8 +192,8 @@ Unsupported forms:
    between "no defined operation" and "divide `x` by every element of `V`" (element-wise) - for the latter, use
    [`$x * $v->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal).
 2. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by. If you want element-wise
-   (Hadamard) division, use `$v1->hadamardDiv($v2)` directly - see
-   [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
+   (Hadamard) division, use
+   [`$v->hadamardDiv($u)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
 3. `Vector / Matrix`. Division by a `Matrix` isn't a typical operation, and using a division operator for this purpose
    is ambiguous, since V/M can mean M⁻¹\*V or V\*M⁻¹, and these are not necessarily equal because matrix multiplication
    is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute V\*M⁻¹) using methods, e.g.
@@ -171,6 +207,12 @@ $v = Vector::fromArray([2, 4, 6]);
 $v / 2;    // [1, 2, 3]        (Vector / int)
 $v / 2.5;  // [0.8, 1.6, 2.4]  (Vector / float)
 ```
+
+Equivalence table for the `/` operator, where `$v` is a `Vector`, and `$x` is an `int` or `float`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `$v / $x` | `$v->div($x)` |
 
 ---
 

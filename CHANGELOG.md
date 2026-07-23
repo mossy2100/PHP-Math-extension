@@ -35,6 +35,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   equivalent methods support -- while an `int` operand widens to an exact `Rational`. `Rational` also gets comparison
   operators (`<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=`), the only one of the four classes to do so, since it has a genuine
   natural ordering. See `docs/Rational.md`.
+- **`OceanMoon\Math\Vector` and `OceanMoon\Math\Matrix` are now fully implemented natively**, ported together since
+  they're mutually dependent in the userland package, matching it method-for-method:
+  - `Vector`: construction, `fromArray()`, conversion (`toArray()`, `toRowMatrix()`, `toColumnMatrix()`,
+    `__toString()`), inspection (`get()`), modification (`set()`, `normalize()`), and comparison (`equal()`,
+    `approxEqual()`).
+  - `Vector` unary and binary arithmetic (`neg()`, `reciprocal()`, `add()`, `sub()`, `mul()`, `div()`, `hadamardMul()`,
+    `hadamardDiv()`), linear algebra (`dot()`, `cross()`, `outer()`, `normalized()`), and aggregation (`sum()`,
+    `prod()`, `count()`).
+  - `Matrix`: construction, factory methods (`fromArray()`, `identity()`), conversion (`toArray()`, `__toString()`),
+    inspection (`isSquare()`, `get()`, `getRow()`, `getColumn()`, `copy()`), modification (`set()`, `setRow()`,
+    `setColumn()`, `paste()`), comparison (`equal()`, `approxEqual()`), and transformation (`resize()`).
+  - `Matrix` unary and binary arithmetic (`neg()`, `reciprocal()`, `inv()`, `add()`, `sub()`, `mul()`, `div()`,
+    `hadamardMul()`, `hadamardDiv()`), power methods (`pow()`, `sqr()`), linear algebra (`mulVector()`, `t()`, `det()`,
+    `trace()`), and norm methods (`norm()`, `p1Norm()`, `pInfNorm()`).
+  - Both implement `Countable`/`ArrayAccess` (mutable, unlike `Complex`); `Matrix::offsetGet()` returns a live row
+    `Vector` reference, matching the userland package's semantics for `$m[$row][$col] = $x`.
+  - Cloning a `Matrix` deep-clones its row `Vector`s via a custom `clone_obj` object handler -- the one genuinely new
+    C pattern this port required -- matching `Matrix::__clone()`'s fix for the same shared-row-identity bug.
+  - Operator overloading for both is deferred to a later pass, matching how `Rational` shipped its full method API
+    before its own operators.
 
 ### Changed
 

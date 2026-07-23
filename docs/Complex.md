@@ -25,6 +25,8 @@ $z = new Complex(3, 4);
 $copy = +$z;  // 3 + 4i
 ```
 
+---
+
 ### - (negate)
 
 ```php
@@ -39,6 +41,14 @@ Equivalent to `$z->neg()`.
 $z = new Complex(3, 4);
 $negated = -$z;  // -3 - 4i
 ```
+
+Equivalence table for the unary `-` operator, where `$z` is a `Complex`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `-$z`     | `$z->neg()`   |
+
+---
 
 ### ~ (conjugate)
 
@@ -61,6 +71,12 @@ $z = new Complex(3, 4);
 $result = ~$z;  // 3 - 4i
 ```
 
+Equivalence table for the `~` operator, where `$z` is a `Complex`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `~$z`     | `$z->conj()`  |
+
 ---
 
 ## Binary Arithmetic Operators
@@ -80,19 +96,21 @@ promotion detour.
 
 Operators also come with precedence and associativity rules that PHP itself resolves, whereas a fluent chain of method
 calls has no notion of precedence at all - it only ever evaluates in the order you nest the calls, so you have to work
-out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
-ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
-requires you to have already done that grouping in your head before writing a single method call. This applies equally
-to every class this extension adds operators to, so see [Operator Precedence](../README.md#operator-precedence) in the
-main README for the shared precedence table and PHP manual link.
+out the correct grouping yourself and encode it directly as nested `->` calls. `$z + $w * $c` reads the same as ordinary
+arithmetic and PHP evaluates `$w * $c` first automatically; the fluent equivalent, `$z->add($w->mul($c))`, requires you
+to have already done that grouping in your head before writing a single method call. This applies equally to every class
+this extension adds operators to, so see [Operator Precedence](../README.md#operator-precedence) in the main README for
+the shared precedence table and PHP manual link.
+
+---
 
 ### + (add)
 
 ```php
-$sum = $z1 + $z2;
+$sum = $z + $w;
 ```
 
-Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add).
+Equivalent to [`$z->add($w)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add).
 
 Forms:
 
@@ -103,22 +121,32 @@ Forms:
 **Example:**
 
 ```php
-$z1 = new Complex(3, 4);
-$z2 = new Complex(1, 2);
-$z1 + $z2;  // 4 + 6i    (Complex + Complex)
-$z1 + 2;    // 5 + 4i    (Complex + int)
-2 + $z1;    // 5 + 4i    (int + Complex - same result, addition is commutative)
-$z1 + 2.5;  // 5.5 + 4i  (Complex + float)
-2.5 + $z1;  // 5.5 + 4i  (float + Complex - same result, addition is commutative)
+$z = new Complex(3, 4);
+$w = new Complex(1, 2);
+$z + $w;    // 4 + 6i    (Complex + Complex)
+$z + 2;     // 5 + 4i    (Complex + int)
+2 + $z;     // 5 + 4i    (int + Complex - same result, addition is commutative)
+$z + 2.5;   // 5.5 + 4i  (Complex + float)
+2.5 + $z;   // 5.5 + 4i  (float + Complex - same result, addition is commutative)
 ```
+
+Equivalence table for the `+` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
+
+| Operation | Equivalent to              |
+| --------- | -------------------------- |
+| `$z + $w` | `$z->add($w)`              |
+| `$z + $x` | `$z->add($x)`              |
+| `$x + $z` | `new Complex($x)->add($z)` |
+
+---
 
 ### - (subtract)
 
 ```php
-$diff = $z1 - $z2;
+$diff = $z - $w;
 ```
 
-Equivalent to [`$z1->sub($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub).
+Equivalent to [`$z->sub($w)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub).
 
 Forms:
 
@@ -130,22 +158,32 @@ Forms:
 **Example:**
 
 ```php
-$z1 = new Complex(5, 7);
-$z2 = new Complex(2, 3);
-$z1 - $z2;  // 3 + 4i     (Complex - Complex)
-$z1 - 2;    // 3 + 7i     (Complex - int)
-2 - $z1;    // -3 - 7i    (int - Complex)
-$z1 - 2.5;  // 2.5 + 7i   (Complex - float)
-2.5 - $z1;  // -2.5 - 7i  (float - Complex)
+$z = new Complex(5, 7);
+$w = new Complex(2, 3);
+$z - $w;    // 3 + 4i     (Complex - Complex)
+$z - 2;     // 3 + 7i     (Complex - int)
+2 - $z;     // -3 - 7i    (int - Complex)
+$z - 2.5;   // 2.5 + 7i   (Complex - float)
+2.5 - $z;   // -2.5 - 7i  (float - Complex)
 ```
+
+Equivalence table for the `-` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
+
+| Operation | Equivalent to              |
+| --------- | -------------------------- |
+| `$z - $w` | `$z->sub($w)`              |
+| `$z - $x` | `$z->sub($x)`              |
+| `$x - $z` | `new Complex($x)->sub($z)` |
+
+---
 
 ### \* (multiply)
 
 ```php
-$product = $z1 * $z2;
+$product = $z * $w;
 ```
 
-Equivalent to [`$z1->mul($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul).
+Equivalent to [`$z->mul($w)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul).
 
 Forms:
 
@@ -156,22 +194,32 @@ Forms:
 **Example:**
 
 ```php
-$z1 = new Complex(1, 2);
-$z2 = new Complex(3, 4);
-$z1 * $z2;  // -5 + 10i   (Complex * Complex)
-$z1 * 2;    // 2 + 4i     (Complex * int)
-2 * $z1;    // 2 + 4i     (int * Complex - same result, multiplication is commutative)
-$z1 * 2.5;  // 2.5 + 5i   (Complex * float)
-2.5 * $z1;  // 2.5 + 5i   (float * Complex - same result, multiplication is commutative)
+$z = new Complex(1, 2);
+$w = new Complex(3, 4);
+$z * $w;    // -5 + 10i   (Complex * Complex)
+$z * 2;     // 2 + 4i     (Complex * int)
+2 * $z;     // 2 + 4i     (int * Complex - same result, multiplication is commutative)
+$z * 2.5;   // 2.5 + 5i   (Complex * float)
+2.5 * $z;   // 2.5 + 5i   (float * Complex - same result, multiplication is commutative)
 ```
+
+Equivalence table for the `*` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
+
+| Operation | Equivalent to              |
+| --------- | -------------------------- |
+| `$z * $w` | `$z->mul($w)`              |
+| `$z * $x` | `$z->mul($x)`              |
+| `$x * $z` | `new Complex($x)->mul($z)` |
+
+---
 
 ### / (divide)
 
 ```php
-$quotient = $z1 / $z2;
+$quotient = $z / $w;
 ```
 
-Equivalent to [`$z1->div($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div).
+Equivalent to [`$z->div($w)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div).
 
 Forms:
 
@@ -184,22 +232,32 @@ Forms:
 **Example:**
 
 ```php
-$z1 = new Complex(6, 8);
-$z2 = new Complex(3, 4);
-$z1 / $z2;  // 2               (Complex / Complex; real only - the imaginary parts cancel here)
-$z1 / 2;    // 3 + 4i          (Complex / int)
-1 / $z2;    // 0.12 - 0.16i    (int / Complex - the inverse of $z2)
-$z1 / 2.5;  // 2.4 + 3.2i      (Complex / float)
-2.5 / $z1;  // 0.15 - 0.2i     (float / Complex)
+$z = new Complex(6, 8);
+$w = new Complex(3, 4);
+$z / $w;    // 2               (Complex / Complex; real only - the imaginary parts cancel here)
+$z / 2;     // 3 + 4i          (Complex / int)
+1 / $w;     // 0.12 - 0.16i    (int / Complex - the inverse of $w)
+$z / 2.5;   // 2.4 + 3.2i      (Complex / float)
+2.5 / $z;   // 0.15 - 0.2i     (float / Complex)
 ```
+
+Equivalence table for the `/` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
+
+| Operation | Equivalent to              |
+| --------- | -------------------------- |
+| `$z / $w` | `$z->div($w)`              |
+| `$z / $x` | `$z->div($x)`              |
+| `$x / $z` | `new Complex($x)->div($z)` |
+
+---
 
 ### \*\* (power)
 
 ```php
-$result = $z ** $other;
+$result = $z ** $w;
 ```
 
-Equivalent to [`$z->pow($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow).
+Equivalent to [`$z->pow($w)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow).
 
 Forms:
 
@@ -220,6 +278,14 @@ $z ** 2;    // -7 + 24i        (Complex ** int)
 $z ** 0.5;  // 2 + i           (Complex ** float; principal square root)
 2.5 ** $z;  // -13.53 - 7.81i  (float ** Complex)
 ```
+
+Equivalence table for the `**` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
+
+| Operation  | Equivalent to              |
+| ---------- | -------------------------- |
+| `$z ** $w` | `$z->pow($w)`              |
+| `$z ** $x` | `$z->pow($x)`              |
+| `$x ** $z` | `new Complex($x)->pow($z)` |
 
 ---
 

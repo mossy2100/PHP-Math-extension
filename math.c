@@ -25,6 +25,8 @@
 #include "exceptions.h"
 #include "Complex/complex_internal.h"
 #include "Rational/rational_internal.h"
+#include "Vector/vector_internal.h"
+#include "Matrix/matrix_internal.h"
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(oceanmoon_math)
@@ -39,6 +41,14 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 	}
 
 	if (rational_minit() == FAILURE) {
+		return FAILURE;
+	}
+
+	if (vector_minit() == FAILURE) {
+		return FAILURE;
+	}
+
+	if (matrix_minit() == FAILURE) {
 		return FAILURE;
 	}
 
