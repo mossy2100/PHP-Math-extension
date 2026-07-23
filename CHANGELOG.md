@@ -53,8 +53,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     `Vector` reference, matching the userland package's semantics for `$m[$row][$col] = $x`.
   - Cloning a `Matrix` deep-clones its row `Vector`s via a custom `clone_obj` object handler -- the one genuinely new
     C pattern this port required -- matching `Matrix::__clone()`'s fix for the same shared-row-identity bug.
-  - Operator overloading for both is deferred to a later pass, matching how `Rational` shipped its full method API
-    before its own operators.
+- **Operator overloading for `Vector` and `Matrix`** (not possible in the userland package): `Vector` gets `+`/`-`
+  (`Vector` operand only), `*` (`int|float` on either side, or `Vector * Matrix`), and `/` (`int|float` divisor only).
+  `Matrix` gets `+`/`-` (`Matrix` operand only), `*` (`int|float` on either side, `Matrix * Matrix`, or
+  `Matrix * Vector` -- equivalent to `mulVector()`, resulting in a `Vector` rather than a `Matrix`), `/` (`int|float`
+  divisor only), and `**` (`int` exponent only, via `pow()`). Every deliberately-unsupported form documented in
+  `docs/Vector.md`/`docs/Matrix.md` (e.g. `Vector * Vector`, `int / Vector`, `Matrix / Matrix`, `int ** Matrix`)
+  throws `TypeError`, matching PHP's own "unsupported operand types" error for ordinary types.
 
 ### Changed
 

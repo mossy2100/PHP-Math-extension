@@ -292,6 +292,7 @@ zend_result matrix_minit(void)
 
 	memcpy(&matrix_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	matrix_object_handlers.clone_obj = matrix_clone_obj;
+	matrix_object_handlers.do_operation = matrix_do_operation;
 	matrix_ce_Matrix->create_object = matrix_create_object;
 
 	return SUCCESS;

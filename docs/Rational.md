@@ -391,15 +391,16 @@ $r <=> 0.5;   // 0   (1/2 == 0.5 exactly; Rational <=> float)
 0.5 <=> $r;   // 0   (0.5 == 1/2 exactly; float <=> Rational)
 ```
 
-Equivalence table for the `<=>` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
+Equivalence table for the `<=>` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
+`float`.
 
-| Operation   | Equivalent to                                         |
-| ----------- | ----------------------------------------------------- |
-| `$r <=> $q` | `$r->compare($q)`                                     |
-| `$r <=> $i` | `$r->compare($i)`                                     |
-| `$i <=> $r` | `new Rational($i)->compare($r)` or `-$r->compare($i)` |
-| `$r <=> $f` | `$r->toFloat() <=> $f` or `$r->compare($f)`           |
-| `$f <=> $r` | `$f <=> $r->toFloat()` or `-$r->compare($f)`          |
+| Operation   | Equivalent to                   | Also equivalent        |
+| ----------- | ------------------------------- | ---------------------- |
+| `$r <=> $q` | `$r->compare($q)`               |                        |
+| `$r <=> $i` | `$r->compare($i)`               |                        |
+| `$i <=> $r` | `new Rational($i)->compare($r)` | `-$r->compare($i)`     |
+| `$r <=> $f` | `$r->compare($f)`               | `$r->toFloat() <=> $f` |
+| `$f <=> $r` | `$f <=> $r->toFloat()`          | `-$r->compare($f)`     |
 
 ---
 
@@ -426,16 +427,16 @@ $r < 0.5;  // true   (1/3 < 0.5; Rational < float)
 0.5 < $r;  // false  (float < Rational)
 ```
 
-Equivalence table for the `<` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`. When
-the scalar is on the left, the method flips to `greaterThan()`, since `$x < $r` means `$r > $x`.
+Equivalence table for the `<` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
+`float`. When the scalar is on the left, the method can be flipped to `greaterThan()`, since `$x < $r` means `$r > $x`.
 
-| Operation | Equivalent to                                             |
-| --------- | --------------------------------------------------------- |
-| `$r < $q` | `$r->lessThan($q)`                                        |
-| `$r < $x` | `$r->lessThan($x)`                                        |
-| `$i < $r` | `new Rational($i)->lessThan($r)` or `$r->greaterThan($i)` |
-| `$r < $f` | `$r->toFloat() < $f` or `$r->lessThan($f)`                |
-| `$i < $r` | `new Rational($i)->lessThan($r)` or `$r->greaterThan($i)` |
+| Operation | Equivalent to                    | Also equivalent       |
+| --------- | -------------------------------- | --------------------- |
+| `$r < $q` | `$r->lessThan($q)`               |                       |
+| `$r < $i` | `$r->lessThan($i)`               |                       |
+| `$i < $r` | `new Rational($i)->lessThan($r)` | `$r->greaterThan($i)` |
+| `$r < $f` | `$r->lessThan($f)`               | `$r->toFloat() < $f`  |
+| `$f < $r` | `$f < $r->toFloat()`             | `$r->greaterThan($f)` |
 
 ---
 
@@ -462,14 +463,17 @@ $r <= 0.5;  // true   (1/3 <= 0.5; Rational <= float)
 0.5 <= $r;  // false  (float <= Rational)
 ```
 
-Equivalence table for the `<=` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
-When the scalar is on the left, the method flips to `greaterThanOrEqual()`, since `$x <= $r` means `$r >= $x`.
+Equivalence table for the `<=` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
+`float`. When the scalar is on the left, the method can be flipped to `greaterThanOrEqual()`, since `$x <= $r` means
+`$r >= $x`.
 
-| Operation  | Equivalent to                |
-| ---------- | ---------------------------- |
-| `$r <= $q` | `$r->lessThanOrEqual($q)`    |
-| `$r <= $x` | `$r->lessThanOrEqual($x)`    |
-| `$x <= $r` | `$r->greaterThanOrEqual($x)` |
+| Operation   | Equivalent to                        | Also equivalent              |
+| ----------- | ------------------------------------- | ----------------------------- |
+| `$r <= $q` | `$r->lessThanOrEqual($q)`              |                                |
+| `$r <= $i` | `$r->lessThanOrEqual($i)`              |                                |
+| `$i <= $r` | `new Rational($i)->lessThanOrEqual($r)` | `$r->greaterThanOrEqual($i)` |
+| `$r <= $f` | `$r->lessThanOrEqual($f)`              | `$r->toFloat() <= $f`         |
+| `$f <= $r` | `$f <= $r->toFloat()`                  | `$r->greaterThanOrEqual($f)`  |
 
 ---
 
@@ -496,14 +500,16 @@ $r > 0.5;   // false  (Rational > float)
 0.5 > $r;   // true   (0.5 > 1/3; float > Rational)
 ```
 
-Equivalence table for the `>` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`. When
-the scalar is on the left, the method flips to `lessThan()`, since `$x > $r` means `$r < $x`.
+Equivalence table for the `>` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
+`float`. When the scalar is on the left, the method can be flipped to `lessThan()`, since `$x > $r` means `$r < $x`.
 
-| Operation | Equivalent to         |
-| --------- | --------------------- |
-| `$r > $q` | `$r->greaterThan($q)` |
-| `$r > $x` | `$r->greaterThan($x)` |
-| `$x > $r` | `$r->lessThan($x)`    |
+| Operation | Equivalent to                    | Also equivalent      |
+| --------- | --------------------------------- | --------------------- |
+| `$r > $q` | `$r->greaterThan($q)`             |                        |
+| `$r > $i` | `$r->greaterThan($i)`             |                        |
+| `$i > $r` | `new Rational($i)->greaterThan($r)` | `$r->lessThan($i)`  |
+| `$r > $f` | `$r->greaterThan($f)`             | `$r->toFloat() > $f`   |
+| `$f > $r` | `$f > $r->toFloat()`              | `$r->lessThan($f)`    |
 
 ---
 
@@ -530,14 +536,17 @@ $r >= 0.5;  // false  (Rational >= float)
 0.5 >= $r;  // true   (0.5 >= 1/3; float >= Rational)
 ```
 
-Equivalence table for the `>=` operator, where `$r` and `$q` are `Rational` values, and `$x` is an `int` or `float`.
-When the scalar is on the left, the method flips to `lessThanOrEqual()`, since `$x >= $r` means `$r <= $x`.
+Equivalence table for the `>=` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
+`float`. When the scalar is on the left, the method can be flipped to `lessThanOrEqual()`, since `$x >= $r` means
+`$r <= $x`.
 
-| Operation  | Equivalent to                |
-| ---------- | ---------------------------- |
-| `$r >= $q` | `$r->greaterThanOrEqual($q)` |
-| `$r >= $x` | `$r->greaterThanOrEqual($x)` |
-| `$x >= $r` | `$r->lessThanOrEqual($x)`    |
+| Operation   | Equivalent to                            | Also equivalent           |
+| ----------- | ------------------------------------------ | --------------------------- |
+| `$r >= $q` | `$r->greaterThanOrEqual($q)`                |                              |
+| `$r >= $i` | `$r->greaterThanOrEqual($i)`                |                              |
+| `$i >= $r` | `new Rational($i)->greaterThanOrEqual($r)`  | `$r->lessThanOrEqual($i)`  |
+| `$r >= $f` | `$r->greaterThanOrEqual($f)`                | `$r->toFloat() >= $f`       |
+| `$f >= $r` | `$f >= $r->toFloat()`                       | `$r->lessThanOrEqual($f)`  |
 
 ---
 

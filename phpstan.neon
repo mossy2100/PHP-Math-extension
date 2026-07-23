@@ -32,3 +32,19 @@ services:
         class: OceanMoon\Math\PHPStan\RationalComparisonOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\VectorBinaryOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\VectorUnaryOperatorExtension
+        tags:
+            - phpstan.broker.unaryOperatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\MatrixBinaryOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension
+    -
+        class: OceanMoon\Math\PHPStan\MatrixUnaryOperatorExtension
+        tags:
+            - phpstan.broker.unaryOperatorTypeSpecifyingExtension

@@ -113,6 +113,38 @@ PHP_METHOD(OceanMoon_Math_Vector, reciprocal)
 }
 /* }}} */
 
+/* {{{ vector_calc_add
+ *
+ * The computational core of add(), shared with the `+` operator (vector_operators.c). Matches the
+ * PHP package's Vector::add().
+ */
+zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_value)
+{
+	if (vector_check_same_size(self, other, "add") == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_long size = vector_read_size(self);
+	if (vector_create(return_value, size) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < size; i++) {
+		double a, b;
+		vector_read_element(self, i, &a);
+		vector_read_element(other, i, &b);
+		if (vector_write_element(result, i, a + b) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::add(Vector $other): Vector
  *
  * Matches the PHP package's Vector::add().
@@ -125,29 +157,41 @@ PHP_METHOD(OceanMoon_Math_Vector, add)
 		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
-
-	if (vector_check_same_size(self, other_obj, "add") == FAILURE) {
+	if (vector_calc_add(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ vector_calc_sub
+ *
+ * The computational core of sub(), shared with the `-` operator (vector_operators.c). Matches the
+ * PHP package's Vector::sub().
+ */
+zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_value)
+{
+	if (vector_check_same_size(self, other, "subtract") == FAILURE) {
+		return FAILURE;
 	}
 
 	zend_long size = vector_read_size(self);
 	if (vector_create(return_value, size) == FAILURE) {
-		RETURN_THROWS();
+		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
 	for (zend_long i = 0; i < size; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
-		vector_read_element(other_obj, i, &b);
-		if (vector_write_element(result, i, a + b) == FAILURE) {
+		vector_read_element(other, i, &b);
+		if (vector_write_element(result, i, a - b) == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
+			return FAILURE;
 		}
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -163,29 +207,65 @@ PHP_METHOD(OceanMoon_Math_Vector, sub)
 		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
-
-	if (vector_check_same_size(self, other_obj, "subtract") == FAILURE) {
+	if (vector_calc_sub(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
+}
+/* }}} */
 
+/* {{{ vector_calc_mul_scalar
+ *
+ * The computational core of mul()'s scalar branch, shared with the `*` operator
+ * (vector_operators.c).
+ */
+zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
+{
 	zend_long size = vector_read_size(self);
 	if (vector_create(return_value, size) == FAILURE) {
-		RETURN_THROWS();
+		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
 	for (zend_long i = 0; i < size; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other_obj, i, &b);
-		if (vector_write_element(result, i, a - b) == FAILURE) {
+		double element;
+		vector_read_element(self, i, &element);
+		if (vector_write_element(result, i, element * scalar) == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
+			return FAILURE;
 		}
 	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ vector_calc_mul_matrix
+ *
+ * The computational core of mul()'s Matrix branch, shared with the `*` operator
+ * (vector_operators.c): converts this Vector to a row Matrix, multiplies by $other, and extracts
+ * the (only) resulting row as a Vector -- `$this->toRowMatrix()->mul($other)->getRow(0)`.
+ */
+zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value)
+{
+	zval row_matrix;
+	if (vector_to_row_matrix(self, &row_matrix) == FAILURE) {
+		return FAILURE;
+	}
+
+	zval product;
+	zend_result mul_result = matrix_calc_mul_matrix(Z_OBJ(row_matrix), other, &product);
+	zval_ptr_dtor(&row_matrix);
+	if (mul_result == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_object *row0 = matrix_read_row(Z_OBJ(product), 0);
+	zend_object *cloned = row0->handlers->clone_obj(row0);
+	zval_ptr_dtor(&product);
+
+	ZVAL_OBJ(return_value, cloned);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -193,7 +273,7 @@ PHP_METHOD(OceanMoon_Math_Vector, sub)
  *
  * Matches the PHP package's Vector::mul(): scalar branch scales every element; Matrix branch
  * converts this Vector to a row Matrix, multiplies by $other, and extracts the (only) resulting
- * row as a Vector -- `$this->toRowMatrix()->mul($other)->getRow(0)`.
+ * row as a Vector.
  */
 PHP_METHOD(OceanMoon_Math_Vector, mul)
 {
@@ -204,24 +284,11 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
 
 	if (Z_TYPE_P(other) == IS_DOUBLE || Z_TYPE_P(other) == IS_LONG) {
 		double scalar = Z_TYPE_P(other) == IS_DOUBLE ? Z_DVAL_P(other) : (double) Z_LVAL_P(other);
-
-		if (vector_create(return_value, size) == FAILURE) {
+		if (vector_calc_mul_scalar(self, scalar, return_value) == FAILURE) {
 			RETURN_THROWS();
-		}
-		zend_object *result = Z_OBJ_P(return_value);
-
-		for (zend_long i = 0; i < size; i++) {
-			double element;
-			vector_read_element(self, i, &element);
-			if (vector_write_element(result, i, element * scalar) == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
 		}
 		return;
 	}
@@ -231,23 +298,9 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 		RETURN_THROWS();
 	}
 
-	zval row_matrix;
-	if (vector_to_row_matrix(self, &row_matrix) == FAILURE) {
+	if (vector_calc_mul_matrix(self, Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	zval product;
-	zend_result mul_result = matrix_calc_mul_matrix(Z_OBJ(row_matrix), Z_OBJ_P(other), &product);
-	zval_ptr_dtor(&row_matrix);
-	if (mul_result == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	zend_object *row0 = matrix_read_row(Z_OBJ(product), 0);
-	zend_object *cloned = row0->handlers->clone_obj(row0);
-	zval_ptr_dtor(&product);
-
-	RETVAL_OBJ(cloned);
 }
 /* }}} */
 

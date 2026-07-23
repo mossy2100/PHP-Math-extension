@@ -106,6 +106,7 @@ zend_result vector_properties_minit(void)
 {
 	memcpy(&vector_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	vector_object_handlers.read_property = vector_read_property;
+	vector_object_handlers.do_operation = vector_do_operation;
 	vector_ce_Vector->create_object = vector_create_object;
 
 	return SUCCESS;

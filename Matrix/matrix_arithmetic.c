@@ -185,6 +185,51 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 }
 /* }}} */
 
+/* {{{ matrix_calc_add
+ *
+ * The computational core of add(), shared with the `+` operator (matrix_operators.c). Matches the
+ * PHP package's Matrix::add().
+ */
+zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+	zend_long other_row_count = matrix_read_row_count(other);
+	zend_long other_column_count = matrix_read_column_count(other);
+
+	if (row_count != other_row_count || column_count != other_column_count) {
+		zend_string *msg = strpprintf(
+			0, "Cannot add Matrix of incorrect dimensions: " ZEND_LONG_FMT "x" ZEND_LONG_FMT ". "
+			"Expected " ZEND_LONG_FMT "x" ZEND_LONG_FMT ".",
+			other_row_count, other_column_count, row_count, column_count
+		);
+		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < row_count; i++) {
+		for (zend_long j = 0; j < column_count; j++) {
+			double a, b;
+			matrix_read_element(self, i, j, &a);
+			matrix_read_element(other, i, j, &b);
+			if (matrix_write_element(result, i, j, a + b) == FAILURE) {
+				zval_ptr_dtor(return_value);
+				ZVAL_UNDEF(return_value);
+				return FAILURE;
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::add(Matrix $other): Matrix
  *
  * Matches the PHP package's Matrix::add().
@@ -197,27 +242,37 @@ PHP_METHOD(OceanMoon_Math_Matrix, add)
 		Z_PARAM_OBJECT_OF_CLASS(other, matrix_ce_Matrix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
+	if (matrix_calc_add(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
 
+/* {{{ matrix_calc_sub
+ *
+ * The computational core of sub(), shared with the `-` operator (matrix_operators.c). Matches the
+ * PHP package's Matrix::sub().
+ */
+zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_value)
+{
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
-	zend_long other_row_count = matrix_read_row_count(other_obj);
-	zend_long other_column_count = matrix_read_column_count(other_obj);
+	zend_long other_row_count = matrix_read_row_count(other);
+	zend_long other_column_count = matrix_read_column_count(other);
 
 	if (row_count != other_row_count || column_count != other_column_count) {
 		zend_string *msg = strpprintf(
-			0, "Cannot add Matrix of incorrect dimensions: " ZEND_LONG_FMT "x" ZEND_LONG_FMT ". "
+			0, "Cannot subtract Matrix of incorrect dimensions: " ZEND_LONG_FMT "x" ZEND_LONG_FMT ". "
 			"Expected " ZEND_LONG_FMT "x" ZEND_LONG_FMT ".",
 			other_row_count, other_column_count, row_count, column_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
-		RETURN_THROWS();
+		return FAILURE;
 	}
 
 	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		RETURN_THROWS();
+		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
@@ -225,14 +280,16 @@ PHP_METHOD(OceanMoon_Math_Matrix, add)
 		for (zend_long j = 0; j < column_count; j++) {
 			double a, b;
 			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other_obj, i, j, &b);
-			if (matrix_write_element(result, i, j, a + b) == FAILURE) {
+			matrix_read_element(other, i, j, &b);
+			if (matrix_write_element(result, i, j, a - b) == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
+				return FAILURE;
 			}
 		}
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -248,42 +305,40 @@ PHP_METHOD(OceanMoon_Math_Matrix, sub)
 		Z_PARAM_OBJECT_OF_CLASS(other, matrix_ce_Matrix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
-
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-	zend_long other_row_count = matrix_read_row_count(other_obj);
-	zend_long other_column_count = matrix_read_column_count(other_obj);
-
-	if (row_count != other_row_count || column_count != other_column_count) {
-		zend_string *msg = strpprintf(
-			0, "Cannot subtract Matrix of incorrect dimensions: " ZEND_LONG_FMT "x" ZEND_LONG_FMT ". "
-			"Expected " ZEND_LONG_FMT "x" ZEND_LONG_FMT ".",
-			other_row_count, other_column_count, row_count, column_count
-		);
-		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (matrix_calc_sub(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
+}
+/* }}} */
+
+/* {{{ matrix_calc_mul_scalar
+ *
+ * The computational core of mul()'s scalar branch, shared with the `*` operator
+ * (matrix_operators.c).
+ */
+zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
 
 	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		RETURN_THROWS();
+		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other_obj, i, j, &b);
-			if (matrix_write_element(result, i, j, a - b) == FAILURE) {
+			double value;
+			matrix_read_element(self, i, j, &value);
+			if (matrix_write_element(result, i, j, value * scalar) == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
+				return FAILURE;
 			}
 		}
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -301,27 +356,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, mul)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
 
 	if (Z_TYPE_P(other) == IS_DOUBLE || Z_TYPE_P(other) == IS_LONG) {
 		double scalar = Z_TYPE_P(other) == IS_DOUBLE ? Z_DVAL_P(other) : (double) Z_LVAL_P(other);
-
-		if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+		if (matrix_calc_mul_scalar(self, scalar, return_value) == FAILURE) {
 			RETURN_THROWS();
-		}
-		zend_object *result = Z_OBJ_P(return_value);
-
-		for (zend_long i = 0; i < row_count; i++) {
-			for (zend_long j = 0; j < column_count; j++) {
-				double value;
-				matrix_read_element(self, i, j, &value);
-				if (matrix_write_element(result, i, j, value * scalar) == FAILURE) {
-					zval_ptr_dtor(return_value);
-					ZVAL_UNDEF(return_value);
-					RETURN_THROWS();
-				}
-			}
 		}
 		return;
 	}
@@ -385,6 +424,41 @@ zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 }
 /* }}} */
 
+/* {{{ matrix_calc_div_scalar
+ *
+ * The computational core of div(), shared with the `/` operator (matrix_operators.c).
+ */
+zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *return_value)
+{
+	if (scalar == 0.0) {
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+		return FAILURE;
+	}
+
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+
+	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < row_count; i++) {
+		for (zend_long j = 0; j < column_count; j++) {
+			double value;
+			matrix_read_element(self, i, j, &value);
+			if (matrix_write_element(result, i, j, value / scalar) == FAILURE) {
+				zval_ptr_dtor(return_value);
+				ZVAL_UNDEF(return_value);
+				return FAILURE;
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::div(float $scalar): Matrix
  *
  * Matches the PHP package's Matrix::div().
@@ -397,30 +471,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, div)
 		Z_PARAM_DOUBLE(scalar)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (scalar == 0.0) {
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+	if (matrix_calc_div_scalar(Z_OBJ_P(ZEND_THIS), scalar, return_value) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_element(result, i, j, value / scalar) == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-		}
 	}
 }
 /* }}} */

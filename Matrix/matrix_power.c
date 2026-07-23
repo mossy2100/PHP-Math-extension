@@ -92,11 +92,74 @@ static zend_result matrix_pow_positive(zend_object *self, zend_long exponent, zv
 }
 /* }}} */
 
+/* {{{ matrix_calc_pow
+ *
+ * The computational core of pow(), shared with the `**` operator (matrix_operators.c): identity
+ * for 0, clone for 1, exponentiation by squaring for larger positive exponents, and
+ * inv()->pow(-exponent) for negative ones (with a special case for PHP_INT_MIN, whose negation
+ * overflows: pow(PHP_INT_MAX)->mul(this)->inv()).
+ */
+zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+
+	if (row_count != column_count) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot raise non-square Matrix to a power.", 0);
+		return FAILURE;
+	}
+
+	/* Handle power of 0. */
+	if (exponent == 0) {
+		return matrix_identity(row_count, return_value);
+	}
+
+	/* Handle power of 1. */
+	if (exponent == 1) {
+		zend_object *cloned = self->handlers->clone_obj(self);
+		ZVAL_OBJ(return_value, cloned);
+		return SUCCESS;
+	}
+
+	/* Handle exponent = PHP_INT_MIN: pow(PHP_INT_MAX)->mul(this)->inv(). */
+	if (exponent == ZEND_LONG_MIN) {
+		zval max_pow;
+		if (matrix_pow_positive(self, ZEND_LONG_MAX, &max_pow) == FAILURE) {
+			return FAILURE;
+		}
+
+		zval mul_result;
+		if (matrix_calc_mul_matrix(Z_OBJ(max_pow), self, &mul_result) == FAILURE) {
+			zval_ptr_dtor(&max_pow);
+			return FAILURE;
+		}
+		zval_ptr_dtor(&max_pow);
+
+		zend_result result = matrix_calc_inv(Z_OBJ(mul_result), return_value);
+		zval_ptr_dtor(&mul_result);
+		return result;
+	}
+
+	/* Handle negative powers. */
+	if (exponent < 0) {
+		zval inv_result;
+		if (matrix_calc_inv(self, &inv_result) == FAILURE) {
+			return FAILURE;
+		}
+
+		zend_result result = matrix_pow_positive(Z_OBJ(inv_result), -exponent, return_value);
+		zval_ptr_dtor(&inv_result);
+		return result;
+	}
+
+	/* Handle positive powers greater than 1. */
+	return matrix_pow_positive(self, exponent, return_value);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::pow(int $exponent): Matrix
  *
- * Matches the PHP package's Matrix::pow(): identity for 0, clone for 1, exponentiation by squaring
- * for larger positive exponents, and inv()->pow(-exponent) for negative ones (with a special case
- * for PHP_INT_MIN, whose negation overflows: pow(PHP_INT_MAX)->mul(this)->inv()).
+ * Matches the PHP package's Matrix::pow().
  */
 PHP_METHOD(OceanMoon_Math_Matrix, pow)
 {
@@ -106,69 +169,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, pow)
 		Z_PARAM_LONG(exponent)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (row_count != column_count) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot raise non-square Matrix to a power.", 0);
-		RETURN_THROWS();
-	}
-
-	/* Handle power of 0. */
-	if (exponent == 0) {
-		if (matrix_identity(row_count, return_value) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Handle power of 1. */
-	if (exponent == 1) {
-		zend_object *cloned = self->handlers->clone_obj(self);
-		RETVAL_OBJ(cloned);
-		return;
-	}
-
-	/* Handle exponent = PHP_INT_MIN: pow(PHP_INT_MAX)->mul(this)->inv(). */
-	if (exponent == ZEND_LONG_MIN) {
-		zval max_pow;
-		if (matrix_pow_positive(self, ZEND_LONG_MAX, &max_pow) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		zval mul_result;
-		if (matrix_calc_mul_matrix(Z_OBJ(max_pow), self, &mul_result) == FAILURE) {
-			zval_ptr_dtor(&max_pow);
-			RETURN_THROWS();
-		}
-		zval_ptr_dtor(&max_pow);
-
-		if (matrix_calc_inv(Z_OBJ(mul_result), return_value) == FAILURE) {
-			zval_ptr_dtor(&mul_result);
-			RETURN_THROWS();
-		}
-		zval_ptr_dtor(&mul_result);
-		return;
-	}
-
-	/* Handle negative powers. */
-	if (exponent < 0) {
-		zval inv_result;
-		if (matrix_calc_inv(self, &inv_result) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		zend_result result = matrix_pow_positive(Z_OBJ(inv_result), -exponent, return_value);
-		zval_ptr_dtor(&inv_result);
-		if (result == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	/* Handle positive powers greater than 1. */
-	if (matrix_pow_positive(self, exponent, return_value) == FAILURE) {
+	if (matrix_calc_pow(Z_OBJ_P(ZEND_THIS), exponent, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
