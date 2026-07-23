@@ -112,8 +112,7 @@ Forms:
 3. `Vector * Matrix`. This `Vector` is treated as a 1×n row matrix, multiplied by a `Matrix` using standard matrix
    multiplication. The number of rows in the `Matrix` must equal the `Vector` size. This operation is equivalent to
    [`$vec->mul($mat)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul). Not commutative - the
-   `Matrix * Vector` operation is a distinct calculation, documented in
-   [Matrix Operators](Matrix.md#-multiply).
+   `Matrix * Vector` operation is a distinct calculation, documented in [Matrix Operators](Matrix.md#-multiply).
 
 Unsupported form:
 
@@ -153,8 +152,12 @@ Forms:
 
 Unsupported forms:
 
-1. `int|float / Vector`. Vectors have no multiplicative inverse for a scalar to be divided by.
-2. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by.
+1. `int|float / Vector`. Vectors have no multiplicative inverse for a scalar to be divided by. `x / V` is ambiguous
+   between "no defined operation" and "divide `x` by every element of `V`" (element-wise) - for the latter, use
+   [`$x * $v->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal).
+2. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by. If you want element-wise
+   (Hadamard) division, use `$v1->hadamardDiv($v2)` directly - see
+   [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
 3. `Vector / Matrix`. Division by a `Matrix` isn't a typical operation, and using a division operator for this purpose
    is ambiguous, since V/M can mean M⁻¹\*V or V\*M⁻¹, and these are not necessarily equal because matrix multiplication
    is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute V\*M⁻¹) using methods, e.g.

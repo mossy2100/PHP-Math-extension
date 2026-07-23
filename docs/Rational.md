@@ -331,20 +331,21 @@ $r ** -1;   // 4/3, same result
 
 The `==` and `!=` operators are implemented as an unavoidable side effect of implementing the "compare" object handler
 in the extension. Note, however, several PHP coding standards forbid the use of these operators, since they can lead to
-unpredictable type conversion and be a source of bugs. These include
+unpredictable type conversion and can therefore be a source of bugs. These include
 [PHPStan strict rules](https://github.com/phpstan/phpstan-strict-rules) and the
 [Slevomat](https://github.com/slevomat/coding-standard) standard. The PHP coding standard for WordPress also
 [discourages them](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/#clever-code).
 
-The `===` and `!==` operators can't be overridden in a PHP extension, so they behave as normal. However, unlike scalars,
-for objects they test _identity_ equality, i.e. whether both operands refer to the exact same object.
+The `===` and `!==` operators can't be overridden in a PHP extension, so they behave as normal. However, be aware that,
+unlike scalars, for objects these operators test _identity_ equality, i.e. whether both operands refer to the exact same
+object.
 
-Of the four types provided by the extension, only `Rational` implements the comparison operators because it has a
-natural sort ordering. Therefore, none of the comparison operators - `==`/`!=` included - are implemented for
-`Complex`, `Vector`, and `Matrix`, even though an equality comparison is valid for these types.
+Of the four types provided by the extension, only `Rational` implements the comparison operators, because it has a
+natural sort ordering. Therefore, none of the comparison operators (`==`/`!=` included) are implemented for `Complex`,
+`Vector`, and `Matrix`, even though an equality comparison is valid for these types.
 
-With all this in mind, it's recommended to use the `equal()` or `approxEqual()` methods for testing numeric equality
-for all four types.
+With all this in mind, it's recommended to use the `equal()` or `approxEqual()` methods for testing numeric equality for
+all four types.
 
 See:
 
@@ -362,10 +363,9 @@ The same forms apply to all comparison operators:
 5. `float # Rational`
 
 If either operand is a `float`, the `Rational` operand will be widened to a `float`, and the two values compared
-normally as floats.
-
-Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. In the event of
-integer overflow an `OverflowException` will occur; to avoid this, convert at least one operand to a `float`.
+normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. In
+the event of integer overflow an `OverflowException` will occur; to avoid this, convert at least one operand to a
+`float`.
 
 ---
 

@@ -113,7 +113,8 @@ Forms:
 4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector` - equivalent to
    [`$mat->mulVector($vec)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mulvector). Not commutative
    - see #5.
-5. `Vector * Matrix`. A distinct calculation, documented in [Vector Operators](Vector.md#-multiply).
+
+`Vector * Matrix` is a distinct calculation, documented in [Vector Operators](Vector.md#-multiply).
 
 **Example:**
 
@@ -132,7 +133,7 @@ $m * $v;  // Vector(5, 11)   (Matrix * Vector - $v treated as a 2x1 column matri
 ### / (divide)
 
 ```php
-$result = $a / $other;
+$result = $a / $scalar;
 ```
 
 Equivalent to [`$a->div($scalar)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#div).
@@ -146,15 +147,19 @@ Unsupported forms:
 1. `Matrix / Matrix`
 2. `int|float / Matrix`
 
-These forms are unsupported because - aside from division by a matrix being an uncommon operation - this expression is
-ambiguous, since A / B can mean either A \* B⁻¹ or B⁻¹ \* A. It's preferable to make the desired operation explicit,
-e.g. `$a * $b ** -1` (or, equivalently, `$a * $b->inv()`).
+`Matrix / Matrix` is unsupported because it's ambiguous in two different ways: it could mean `A * B⁻¹` or `B⁻¹ * A`
+(these differ in general, since matrix multiplication isn't commutative), or it could mean Hadamard division -
+element-wise division of two same-shaped matrices. Rather than guess which one you mean, make it explicit:
+`$a * $b ** -1` (or [`$a * $b->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv)) for
+`A * B⁻¹`, `$b ** -1 * $a` for `B⁻¹ * A`, or
+[`$a->hadamardDiv($b)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#hadamarddiv) for the element-wise
+quotient.
 
-Similarly, an `int|float / Matrix` operation (i.e. x / A = x \* A⁻¹) can be achieved by `$x * $a ** -1` (or
-`$x * $a->inv()`).
-
-Hadamard division, where element-wise division is performed on two matrixes of equal dimensions to generate a new one is
-available via the [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#hadamarddiv) method.
+`int|float / Matrix` is unsupported for a related but distinct reason. Unlike `Matrix / Matrix`, scalar multiplication
+with a matrix is commutative (i.e. `x * A` and `A * x` are always equal), so there's no order ambiguity here - but
+`x / A` is still ambiguous, between `x * A⁻¹` (inverse scaling) and dividing `x` by every element of `A` element-wise.
+Use `$x * $a ** -1` (or `$x * $a->inv()`) for the former; use
+[`$x * $a->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#reciprocal) for the latter.
 
 **Example:**
 
