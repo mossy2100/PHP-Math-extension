@@ -6,7 +6,8 @@ factory methods, conversion, comparison, transpose/determinant/inverse, `ArrayAc
 [Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md) - this page covers only the
 operators the extension adds on top of it.
 
-_Planned - not yet implemented. See `docs/planning/MATH_EXTENSION.md` in the main repo for current status._
+`Matrix` gets the four basic arithmetic operators (`+`, `-`, `*`, `/`) plus `**` for matrix powers. No comparison
+operators are provided, since matrices have no natural sort order.
 
 ---
 
@@ -18,11 +19,11 @@ _Planned - not yet implemented. See `docs/planning/MATH_EXTENSION.md` in the mai
 $copy = +$m;
 ```
 
-Returns a new `Matrix` with the same elements. There's no package method this maps to - value identity needs no explicit
-method call in ordinary PHP code - but the extension implements the `ZEND_UNARY_PLUS` handler anyway, for parity with
-PHP's built-in `+$x` on `int`/`float`. Since `Matrix` is mutable, this returns a distinct copy rather than `$this`, so
-mutating the result never affects the original - the same rule the package's own arithmetic methods follow (see the note
-on `pow(1)` in the package's `Matrix` docs).
+Returns a new `Matrix` with the same elements. There's no package method this maps to; value identity needs no explicit
+method call in ordinary PHP code. PHP has no dedicated opcode for unary `+`/`-`; the compiler lowers `+$m` to `$m * 1`,
+which the extension handles via the scalar form of `*` (see below). Since `Matrix` is mutable, this returns a distinct
+copy rather than `$this`, so mutating the result never affects the original - the same rule the package's own arithmetic
+methods follow (see the note on `pow(1)` in the package's `Matrix` docs).
 
 **Example:**
 
@@ -60,7 +61,13 @@ $sum = $a + $b;
 ```
 
 Equivalent to [`$a->add($b)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#add). Both matrices must
-have the same dimensions. Only `Matrix + Matrix` is supported.
+have the same dimensions.
+
+Forms:
+
+1. `Matrix + Matrix`. No other form is supported - there's no scalar addition for `Matrix`.
+
+**Example:**
 
 ```php
 $a = Matrix::fromArray([[1, 2], [3, 4]]);
@@ -75,7 +82,13 @@ $diff = $a - $b;
 ```
 
 Equivalent to [`$a->sub($b)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#sub). Both matrices must
-have the same dimensions. As with `+`, only `Matrix - Matrix` is supported.
+have the same dimensions.
+
+Forms:
+
+1. `Matrix - Matrix`. As with `+`, no other form is supported.
+
+**Example:**
 
 ```php
 $a = Matrix::fromArray([[5, 6], [7, 8]]);
@@ -89,19 +102,25 @@ $a - $b;  // [[4, 4], [4, 4]]
 $result = $a * $other;
 ```
 
-Equivalent to [`$a->mul($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul). There are 3 ways
-this operator can be used.
+Forms:
 
-1. `Matrix` \* `int|float` or `int|float` \* `Matrix`. Scalar multiplication is commutative, so `int|float * Matrix`
-   gives the same result.
-2. `Matrix` \* `Matrix`. Standard matrix multiplication - the result is a Matrix.
-3. `Matrix` \* `Vector`. The Vector is treated as a single-column Matrix, and the result is a Vector. This operation is
-   not commutative; for `Vector` \* `Matrix`, see [Vector Operators](Vector.md#-multiply).
+1. `Matrix * int|float`. Element-wise multiplication of every element by a scalar - equivalent to
+   [`$a->mul($scalar)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul).
+2. `int|float * Matrix`. Scalar multiplication is commutative, so this gives the same result as #1.
+3. `Matrix * Matrix`. Standard matrix multiplication - the result is a `Matrix` - equivalent to
+   [`$a->mul($b)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul). The number of columns in the
+   first `Matrix` must equal the number of rows in the second `Matrix`.
+4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector` - equivalent to
+   [`$mat->mulVector($vec)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mulvector). Not commutative
+   - see #5.
+5. `Vector * Matrix`. A distinct calculation, documented in [Vector Operators](Vector.md#-multiply).
+
+**Example:**
 
 ```php
 $m = Matrix::fromArray([[1, 2], [3, 4]]);
-$m * 2;  // [[2, 4], [6, 8]]   (Matrix * int|float)
-2 * $m;  // [[2, 4], [6, 8]]   (int|float * Matrix - same result, scalar multiplication is commutative)
+$m * 2;  // [[2, 4], [6, 8]]   (Matrix * int)
+2 * $m;  // [[2, 4], [6, 8]]   (int * Matrix - same result, scalar multiplication is commutative)
 
 $m2 = Matrix::fromArray([[5, 6], [7, 8]]);
 $m * $m2;  // [[19, 22], [43, 50]]   (Matrix * Matrix)
@@ -116,21 +135,26 @@ $m * $v;  // Vector(5, 11)   (Matrix * Vector - $v treated as a 2x1 column matri
 $result = $a / $other;
 ```
 
-Equivalent to [`$a->div($other)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#div). There are 3 ways
-this operator can be used:
+Equivalent to [`$a->div($scalar)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#div).
 
-1. `Matrix / int|float`. Scalar division.
-2. `Matrix / Matrix`. Division defined as A × B⁻¹ (i.e. `$a * $b->inv()`, equivalent to `$a * $b ** -1`)
-3. `int|float / Matrix`. Computed as `$scalar * $other->inv()`. This also gives a way to compute a matrix inverse - see
-   "Inverting with `1 / m` or `m ** -1`" below.
+Forms:
+
+1. `Matrix / int|float`. Element-wise division of every element by a scalar.
+
+Unsupported forms:
+
+1. `Matrix / Matrix`
+2. `int|float / Matrix`
+
+These forms are unsupported for the same reason `Vector / Matrix` is unsupported. Division by a matrix is not a common
+operation, and can be ambiguous, since A/B can mean B⁻¹\*A or A\*B⁻¹. A `Matrix / Matrix` operation can be achieved by
+`$a->mul($b->inv())` (i.e. A\*B⁻¹). A `int|float / Matrix` operation can be achieved by `$x * $a->inv()` (i.e. x\*A⁻¹).
+
+**Example:**
 
 ```php
 $m = Matrix::fromArray([[2, 4], [6, 8]]);
-$m / 2;  // [[1, 2], [3, 4]]   (Matrix / int|float)
-
-$a = Matrix::fromArray([[1, 0], [0, 1]]);
-$b = Matrix::fromArray([[2, 0], [0, 2]]);
-$a / $b;  // [[0.5, 0], [0, 0.5]]   (Matrix / Matrix, A x B^-1)
+$m / 2;  // [[1, 2], [3, 4]]   (Matrix / int)
 ```
 
 ### \*\* (power)
@@ -139,10 +163,17 @@ $a / $b;  // [[0.5, 0], [0, 0.5]]   (Matrix / Matrix, A x B^-1)
 $result = $m ** $exponent;
 ```
 
-Equivalent to [`$m->pow($exponent)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#pow). Only
-`Matrix ** int` is supported - the operand must be an `int` (matching `pow()`'s signature), and there's no
-`int ** Matrix` case, since a scalar raised to a matrix power isn't a standard operation in linear algebra. The matrix
-must be square; negative exponents use the matrix inverse.
+Equivalent to [`$m->pow($exponent)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#pow).
+
+Forms:
+
+1. `Matrix ** int`. The matrix must be square; negative exponents use the matrix inverse.
+
+Unsupported forms:
+
+1. `int ** Matrix`. A scalar raised to a matrix power isn't a standard operation in linear algebra.
+
+**Example:**
 
 ```php
 $m = Matrix::fromArray([[1, 1], [0, 1]]);
@@ -152,17 +183,18 @@ $m ** -1;  // inverse matrix
 
 ---
 
-## Inverting with `1 / m` or `m ** -1`
+## Inverting with `m ** -1`
 
-Since `int|float / Matrix` is supported (see `/` above), `1 / $m` computes the same inverse as
-[`$m->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv). `$m ** -1` gives the same result too,
-since raising to the power -1 is the mathematical definition of a matrix inverse. All three throw `DomainException` if
-`$m` isn't square, and `ArithmeticException` if `$m` isn't invertible (zero determinant), matching `inv()`.
+Since `Matrix ** int` is supported, `$m ** -1` computes the same inverse as
+[`$m->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv), since raising to the power -1 is the
+mathematical definition of a matrix inverse. Either will throw `DomainException` if `$m` isn't square, and
+`ArithmeticException` if `$m` isn't invertible (zero determinant).
+
+**Example:**
 
 ```php
 $m = Matrix::fromArray([[1, 2], [3, 4]]);
 $m->inv();  // [[-2, 1], [1.5, -0.5]]
-1 / $m;     // [[-2, 1], [1.5, -0.5]], same result
 $m ** -1;   // [[-2, 1], [1.5, -0.5]], same result
 ```
 

@@ -37,3 +37,6 @@
 /run-tests.php
 /tmp-php.ini
 /php_test_results_*.txt
+
+# Dev files
+_dev/
