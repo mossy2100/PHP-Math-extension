@@ -146,9 +146,15 @@ Unsupported forms:
 1. `Matrix / Matrix`
 2. `int|float / Matrix`
 
-These forms are unsupported for the same reason `Vector / Matrix` is unsupported. Division by a matrix is not a common
-operation, and can be ambiguous, since A/B can mean B⁻¹\*A or A\*B⁻¹. A `Matrix / Matrix` operation can be achieved by
-`$a->mul($b->inv())` (i.e. A\*B⁻¹). A `int|float / Matrix` operation can be achieved by `$x * $a->inv()` (i.e. x\*A⁻¹).
+These forms are unsupported because - aside from division by a matrix being an uncommon operation - this expression is
+ambiguous, since A / B can mean either A \* B⁻¹ or B⁻¹ \* A. It's preferable to make the desired operation explicit,
+e.g. `$a * $b ** -1` (or, equivalently, `$a * $b->inv()`).
+
+Similarly, an `int|float / Matrix` operation (i.e. x / A = x \* A⁻¹) can be achieved by `$x * $a ** -1` (or
+`$x * $a->inv()`).
+
+Hadamard division, where element-wise division is performed on two matrixes of equal dimensions to generate a new one is
+available via the [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#hadamarddiv) method.
 
 **Example:**
 

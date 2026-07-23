@@ -121,7 +121,7 @@ Unsupported form:
    relevant method:
    - [`dot()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#dot)
    - [`cross()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#cross)
-   - [`hadamard()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamard)
+   - [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul)
    - [`outer()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#outer)
 
 **Example:**
