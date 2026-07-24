@@ -136,9 +136,13 @@ Forms:
 3. `Matrix * Matrix`. Standard matrix multiplication - the result is a `Matrix` - equivalent to
    [`$A->mul($B)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul). The number of columns in the
    first `Matrix` must equal the number of rows in the second `Matrix`.
-4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector` - equivalent to
-   [`$mat->mulVector($vec)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mulvector). Not commutative
-   - see #5.
+4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector`. Not
+   commutative - see #5. `Matrix::mul()` doesn't accept a `Vector` (a dedicated method can't return a `Vector` for
+   one argument type and a `Matrix` for another without a union return type PHPStan can't narrow without
+   `assert()`), so this operator form has no equivalent named-method call - without this extension loaded, compose
+   it explicitly instead: `$A->mul($vec->toColumnMatrix())->getColumn(0)`, or, via the transpose identity
+   (Av)ᵀ = vᵀAᵀ, `$vec->mul($A->t())`. See the userland package's `Matrix::mul()` docblock for the fuller
+   explanation.
 
 `Vector * Matrix` is a distinct calculation, documented in [Vector Operators](Vector.md#-multiply).
 
@@ -159,12 +163,12 @@ $A * $v;  // Vector(5, 11)   (Matrix * Vector - $v treated as a 2x1 column matri
 Equivalence table for the `*` operator, where `$A` and `$B` are `Matrix` values, `$x` is an `int` or `float`, and `$v`
 is a `Vector`.
 
-| Operation | Equivalent to       |
-| --------- | ------------------- |
-| `$A * $x` | `$A->mul($x)`       |
-| `$x * $A` | `$A->mul($x)`       |
-| `$A * $B` | `$A->mul($B)`       |
-| `$A * $v` | `$A->mulVector($v)` |
+| Operation | Equivalent to                                                            |
+| --------- | -------------------------------------------------------------------------- |
+| `$A * $x` | `$A->mul($x)`                                                             |
+| `$x * $A` | `$A->mul($x)`                                                             |
+| `$A * $B` | `$A->mul($B)`                                                             |
+| `$A * $v` | `$A->mul($v->toColumnMatrix())->getColumn(0)` or `$v->mul($A->t())`              |
 
 ---
 

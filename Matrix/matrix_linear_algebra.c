@@ -1,8 +1,8 @@
 /*
  * matrix_linear_algebra.c
  *
- * Linear algebra methods for OceanMoon\Math\Matrix: mulVector(), t(), det(), trace(). Mirrors the
- * "Linear algebra methods" region of the PHP package's Matrix class.
+ * Linear algebra methods for OceanMoon\Math\Matrix: t(), det(), trace(). Mirrors the "Linear
+ * algebra methods" region of the PHP package's Matrix class.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -17,11 +17,12 @@
 
 /* {{{ matrix_calc_mul_vector
  *
- * The computational core of mulVector(), shared with the `*` operator's `Matrix * Vector` form
- * (matrix_operators.c). Matches the PHP package's Matrix::mulVector(): `$this->mul($vector->
- * toColumnMatrix())->getColumn(0)`. Implemented directly here (rather than building an
- * intermediate column Matrix) since the result is equivalent: row i of the product is the dot
- * product of this Matrix's row i with $vector.
+ * Computes "matrix times vector" (Ax): row i of the result is the dot product of this Matrix's
+ * row i with $vector. Matches the PHP package's `$this->mul($vector->toColumnMatrix())->
+ * getColumn(0)`, computed directly here (rather than building an intermediate column Matrix) for
+ * efficiency. Used only by the `*` operator's `Matrix * Vector` form (matrix_operators.c) --
+ * Matrix has no mulVector() method of its own (see Matrix::mul()'s doc comment in the PHP
+ * package for why).
  */
 zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval *return_value)
 {
@@ -60,24 +61,6 @@ zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval 
 	}
 
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ OceanMoon\Math\Matrix::mulVector(Vector $vector): Vector
- *
- * Matches the PHP package's Matrix::mulVector().
- */
-PHP_METHOD(OceanMoon_Math_Matrix, mulVector)
-{
-	zval *vector;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(vector, vector_ce_Vector)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (matrix_calc_mul_vector(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(vector), return_value) == FAILURE) {
-		RETURN_THROWS();
-	}
 }
 /* }}} */
 

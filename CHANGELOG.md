@@ -47,8 +47,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     inspection (`isSquare()`, `get()`, `getRow()`, `getColumn()`, `copy()`), modification (`set()`, `setRow()`,
     `setColumn()`, `paste()`), comparison (`equal()`, `approxEqual()`), and transformation (`resize()`).
   - `Matrix` unary and binary arithmetic (`neg()`, `reciprocal()`, `inv()`, `add()`, `sub()`, `mul()`, `div()`,
-    `hadamardMul()`, `hadamardDiv()`), power methods (`pow()`, `sqr()`), linear algebra (`mulVector()`, `t()`, `det()`,
-    `trace()`), and norm methods (`norm()`, `p1Norm()`, `pInfNorm()`).
+    `hadamardMul()`, `hadamardDiv()`), power methods (`pow()`, `sqr()`), linear algebra (`t()`, `det()`, `trace()`),
+    and norm methods (`norm()`, `p1Norm()`, `pInfNorm()`).
   - Both implement `Countable`/`ArrayAccess` (mutable, unlike `Complex`); `Matrix::offsetGet()` returns a live row
     `Vector` reference, matching the userland package's semantics for `$m[$row][$col] = $x`.
   - Cloning a `Matrix` deep-clones its row `Vector`s via a custom `clone_obj` object handler -- the one genuinely new
@@ -56,10 +56,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Operator overloading for `Vector` and `Matrix`** (not possible in the userland package): `Vector` gets `+`/`-`
   (`Vector` operand only), `*` (`int|float` on either side, or `Vector * Matrix`), and `/` (`int|float` divisor only).
   `Matrix` gets `+`/`-` (`Matrix` operand only), `*` (`int|float` on either side, `Matrix * Matrix`, or
-  `Matrix * Vector` -- equivalent to `mulVector()`, resulting in a `Vector` rather than a `Matrix`), `/` (`int|float`
-  divisor only), and `**` (`int` exponent only, via `pow()`). Every deliberately-unsupported form documented in
-  `docs/Vector.md`/`docs/Matrix.md` (e.g. `Vector * Vector`, `int / Vector`, `Matrix / Matrix`, `int ** Matrix`)
-  throws `TypeError`, matching PHP's own "unsupported operand types" error for ordinary types.
+  `Matrix * Vector` -- resulting in a `Vector` rather than a `Matrix`, with no equivalent named method; see
+  `Vector::mul()`/`Matrix::mul()`), `/` (`int|float` divisor only), and `**` (`int` exponent only, via `pow()`).
+  Every deliberately-unsupported form documented in `docs/Vector.md`/`docs/Matrix.md` (e.g. `Vector * Vector`,
+  `int / Vector`, `Matrix / Matrix`, `int ** Matrix`) throws `TypeError`, matching PHP's own "unsupported operand
+  types" error for ordinary types.
+- **`Matrix::mulVector()`** — added earlier in this Unreleased cycle, removed again for the same reason
+  `Vector::mul()` dropped its `Matrix` operand (see the PHP package's CHANGELOG): a dedicated method for "matrix
+  times vector" (_Ax_) forces an unsatisfying choice between a `self|Vector` union return type (which PHPStan can't
+  narrow without `assert()`, and which breaks the fluent API) or a single-column `Matrix` (not what callers actually
+  want from _Ax_). Use the `*` operator instead (`$A * $v`), which isn't constrained by a declared return type; see
+  `docs/Matrix.md` and the PHP package's `Matrix::mul()` docblock for the named-method alternative.
 
 ### Changed
 

@@ -157,8 +157,12 @@ class MatrixBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Matrix * Vector: the Vector is treated as a single-column matrix, result is a Vector --
-     * equivalent to mulVector(), not mul().
+     * Test Matrix * Vector: the Vector is treated as a single-column matrix, result is a Vector.
+     * Matrix::mulVector() no longer exists (see Matrix::mul()'s docblock in the PHP package), so
+     * this also confirms both named-method alternatives documented there give the same result as
+     * the operator: $A->mul($v->toColumnMatrix())->getColumn(0), and, via the transpose identity
+     * (Av)^T = v^T A^T, $v->mul($A->t()) (Vector::mul()'s own Matrix branch already does the
+     * toRowMatrix()->mul()->getRow(0) dance internally).
      */
     public function testMulMatrixTimesVector(): void
     {
@@ -167,7 +171,8 @@ class MatrixBinaryOperatorsTest extends TestCase
         $result = $A * $v;
 
         $this->assertSame([5.0, 11.0], $result->toArray());
-        $this->assertEquals($A->mulVector($v), $result);
+        $this->assertEquals($A->mul($v->toColumnMatrix())->getColumn(0), $result);
+        $this->assertEquals($v->mul($A->t()), $result);
     }
 
     /**

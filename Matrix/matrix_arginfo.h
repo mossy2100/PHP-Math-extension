@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6d6f3cdad00d835ccc3bdc207c24f6b196ee0042 */
+ * Stub hash: df5f5333daf0c1359acddb056fe4ac1e4ae2870c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Matrix___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, rowCount, IS_LONG, 0)
@@ -112,10 +112,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Matrix_sqr arginfo_class_OceanMoon_Math_Matrix_neg
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Matrix_mulVector, 0, 1, OceanMoon\\Math\\Vector, 0)
-	ZEND_ARG_OBJ_INFO(0, vector, OceanMoon\\Math\\Vector, 0)
-ZEND_END_ARG_INFO()
-
 #define arginfo_class_OceanMoon_Math_Matrix_t arginfo_class_OceanMoon_Math_Matrix_neg
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Matrix_det, 0, 0, IS_DOUBLE, 0)
@@ -177,7 +173,6 @@ ZEND_METHOD(OceanMoon_Math_Matrix, hadamardMul);
 ZEND_METHOD(OceanMoon_Math_Matrix, hadamardDiv);
 ZEND_METHOD(OceanMoon_Math_Matrix, pow);
 ZEND_METHOD(OceanMoon_Math_Matrix, sqr);
-ZEND_METHOD(OceanMoon_Math_Matrix, mulVector);
 ZEND_METHOD(OceanMoon_Math_Matrix, t);
 ZEND_METHOD(OceanMoon_Math_Matrix, det);
 ZEND_METHOD(OceanMoon_Math_Matrix, trace);
@@ -219,7 +214,6 @@ static const zend_function_entry class_OceanMoon_Math_Matrix_methods[] = {
 	ZEND_ME(OceanMoon_Math_Matrix, hadamardDiv, arginfo_class_OceanMoon_Math_Matrix_hadamardDiv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, pow, arginfo_class_OceanMoon_Math_Matrix_pow, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, sqr, arginfo_class_OceanMoon_Math_Matrix_sqr, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Matrix, mulVector, arginfo_class_OceanMoon_Math_Matrix_mulVector, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, t, arginfo_class_OceanMoon_Math_Matrix_t, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, det, arginfo_class_OceanMoon_Math_Matrix_det, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, trace, arginfo_class_OceanMoon_Math_Matrix_trace, ZEND_ACC_PUBLIC)
