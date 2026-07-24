@@ -12,7 +12,8 @@ replaces the userland class - no code changes required. Without the extension lo
 used instead, so this is a purely additive, opt-in performance and ergonomics upgrade.
 
 All four classes - `Complex`, `Rational`, `Vector`, and `Matrix` - are now fully implemented, including operator
-overloading for each. This extension hasn't yet been tagged for release or published to Packagist/[PIE](https://github.com/php/pie).
+overloading for each. This extension hasn't yet been tagged for release or published to
+Packagist/[PIE](https://github.com/php/pie).
 
 ---
 
@@ -50,8 +51,7 @@ operator-type-specifying extensions so static analysis understands the operator 
 ## Requirements
 
 - PHP 8.4+ (NTS or ZTS)
-- To build from source: a C compiler and the PHP development headers (`phpize`, `php-config`) - see Installation,
-  below.
+- To build from source: a C compiler and the PHP development headers (`phpize`, `php-config`) - see Installation, below.
 
 ---
 
@@ -99,7 +99,9 @@ not how tightly it binds relative to other operators - precedence and associativ
 itself, entirely outside any extension's control. So none of `Complex`/`Rational`/`Vector`/`Matrix` get their own
 precedence rules; they all just inherit PHP's, same as `int`/`float`.
 
-This is actually a blessing - most PHP developers will know the most important operator precedence rules already (multiplication before addition, etc.) - so, keeping them fixed should reduce bugs. Refer to the [full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
+This is actually a blessing - most PHP developers will know the most important operator precedence rules already
+(multiplication before addition, etc.) - so, keeping them fixed should reduce bugs. Refer to the
+[full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
 
 The table below shows just the rules relevant to this extension, tightest-binding first:
 
@@ -112,7 +114,10 @@ The table below shows just the rules relevant to this extension, tightest-bindin
 | 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Rational` only                         | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                  |
 | 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Rational` only                         | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here. |
 
-The most tricky thing to remember is that the exponentiation operator `**` has the highest precedence of all, which means, for example, `-$z1 ** 2` is evaluated as `-($z1 ** 2)` rather than `(-$z1) ** 2`. That precedence can be unobvious because typical code formatting omits spaces around unary operators, but includes them around binary ones, suggesting unary always trumps binary. This is usually true, but not in this case.
+The most tricky thing to remember is that the exponentiation operator `**` has the highest precedence of all, which
+means, for example, `-$z1 ** 2` is evaluated as `-($z1 ** 2)` rather than `(-$z1) ** 2`. That precedence can be
+unobvious because typical code formatting omits spaces around unary operators, but includes them around binary ones,
+suggesting unary always trumps binary. This is usually true, but not in this case.
 
 **Examples:**
 
@@ -152,8 +157,8 @@ scripts/test-phpunit    # PHPUnit conformance tests against the Math package's o
 
 - Top level: module-wide files only (`math.c` - MINIT/RINIT/MINFO/module entry; `floats.c`/`floats.h` - shared helpers
   with no class affinity).
-- One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class - its
-  `.c` implementation files, its `_internal.h`, its stub, and its generated arginfo header.
+- One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class - its `.c`
+  implementation files, its `_internal.h`, its stub, and its generated arginfo header.
 
 ---
 

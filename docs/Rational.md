@@ -119,12 +119,12 @@ Equivalence table for the `+` operator, where `$r` and `$q` are `Rational` value
 `float`.
 
 | Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | ---------------- |
-| `$r + $q` | `$r->add($q)`               |                  |
-| `$r + $i` | `$r->add($i)`               |                  |
-| `$i + $r` | `new Rational($i)->add($r)` | `$r->add($i)`    |
-| `$r + $f` | `$r->toFloat() + $f`        |                  |
-| `$f + $r` | `$f + $r->toFloat()`        |                  |
+| --------- | --------------------------- | --------------- |
+| `$r + $q` | `$r->add($q)`               |                 |
+| `$r + $i` | `$r->add($i)`               |                 |
+| `$i + $r` | `new Rational($i)->add($r)` | `$r->add($i)`   |
+| `$r + $f` | `$r->toFloat() + $f`        |                 |
+| `$f + $r` | `$f + $r->toFloat()`        |                 |
 
 ---
 
@@ -159,12 +159,12 @@ Equivalence table for the `-` operator, where `$r` and `$q` are `Rational` value
 `float`.
 
 | Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | ---------------- |
-| `$r - $q` | `$r->sub($q)`               |                  |
-| `$r - $i` | `$r->sub($i)`               |                  |
-| `$i - $r` | `new Rational($i)->sub($r)` | `-$r->sub($i)`   |
-| `$r - $f` | `$r->toFloat() - $f`        |                  |
-| `$f - $r` | `$f - $r->toFloat()`        |                  |
+| --------- | --------------------------- | --------------- |
+| `$r - $q` | `$r->sub($q)`               |                 |
+| `$r - $i` | `$r->sub($i)`               |                 |
+| `$i - $r` | `new Rational($i)->sub($r)` | `-$r->sub($i)`  |
+| `$r - $f` | `$r->toFloat() - $f`        |                 |
+| `$f - $r` | `$f - $r->toFloat()`        |                 |
 
 ---
 
@@ -198,12 +198,12 @@ Equivalence table for the `*` operator, where `$r` and `$q` are `Rational` value
 `float`.
 
 | Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | ---------------- |
-| `$r * $q` | `$r->mul($q)`               |                  |
-| `$r * $i` | `$r->mul($i)`               |                  |
-| `$i * $r` | `new Rational($i)->mul($r)` | `$r->mul($i)`    |
-| `$r * $f` | `$r->toFloat() * $f`        |                  |
-| `$f * $r` | `$f * $r->toFloat()`        |                  |
+| --------- | --------------------------- | --------------- |
+| `$r * $q` | `$r->mul($q)`               |                 |
+| `$r * $i` | `$r->mul($i)`               |                 |
+| `$i * $r` | `new Rational($i)->mul($r)` | `$r->mul($i)`   |
+| `$r * $f` | `$r->toFloat() * $f`        |                 |
+| `$f * $r` | `$f * $r->toFloat()`        |                 |
 
 ---
 
@@ -397,13 +397,13 @@ $r <=> 0.5;   // 0   (1/2 == 0.5 exactly; Rational <=> float)
 Equivalence table for the `<=>` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation   | Equivalent to                   | Also equivalent        |
-| ----------- | ------------------------------- | ---------------------- |
-| `$r <=> $q` | `$r->compare($q)`               |                        |
-| `$r <=> $i` | `$r->compare($i)`               |                        |
-| `$i <=> $r` | `new Rational($i)->compare($r)` | `-$r->compare($i)`     |
-| `$r <=> $f` | `$r->compare($f)`               |                        |
-| `$f <=> $r` | `$f <=> $r->toFloat()`          | `-$r->compare($f)`     |
+| Operation   | Equivalent to                   | Also equivalent    |
+| ----------- | ------------------------------- | ------------------ |
+| `$r <=> $q` | `$r->compare($q)`               |                    |
+| `$r <=> $i` | `$r->compare($i)`               |                    |
+| `$i <=> $r` | `new Rational($i)->compare($r)` | `-$r->compare($i)` |
+| `$r <=> $f` | `$r->compare($f)`               |                    |
+| `$f <=> $r` | `$f <=> $r->toFloat()`          | `-$r->compare($f)` |
 
 ---
 
@@ -506,13 +506,13 @@ $r > 0.5;   // false  (Rational > float)
 Equivalence table for the `>` operator, where `$r` and `$q` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`. When the scalar is on the left, the method can be flipped to `lessThan()`, since `$x > $r` means `$r < $x`.
 
-| Operation | Equivalent to                       | Also equivalent      |
-| --------- | ----------------------------------- | -------------------- |
-| `$r > $q` | `$r->greaterThan($q)`               |                      |
-| `$r > $i` | `$r->greaterThan($i)`               |                      |
-| `$i > $r` | `new Rational($i)->greaterThan($r)` | `$r->lessThan($i)`   |
-| `$r > $f` | `$r->greaterThan($f)`               |                      |
-| `$f > $r` | `$f > $r->toFloat()`                | `$r->lessThan($f)`   |
+| Operation | Equivalent to                       | Also equivalent    |
+| --------- | ----------------------------------- | ------------------ |
+| `$r > $q` | `$r->greaterThan($q)`               |                    |
+| `$r > $i` | `$r->greaterThan($i)`               |                    |
+| `$i > $r` | `new Rational($i)->greaterThan($r)` | `$r->lessThan($i)` |
+| `$r > $f` | `$r->greaterThan($f)`               |                    |
+| `$f > $r` | `$f > $r->toFloat()`                | `$r->lessThan($f)` |
 
 ---
 

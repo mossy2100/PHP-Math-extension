@@ -89,9 +89,9 @@ $v + $u;  // [5, 7, 9]  (Vector + Vector)
 
 Equivalence table for the `+` operator, where `$v` and `$u` are `Vector` values.
 
-| Operation | Equivalent to  |
-| --------- | --------------- |
-| `$v + $u` | `$v->add($u)`   |
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `$v + $u` | `$v->add($u)` |
 
 ---
 
@@ -118,9 +118,9 @@ $v - $u;  // [3, 3, 3]  (Vector - Vector)
 
 Equivalence table for the `-` operator, where `$v` and `$u` are `Vector` values.
 
-| Operation | Equivalent to  |
-| --------- | --------------- |
-| `$v - $u` | `$v->sub($u)`   |
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `$v - $u` | `$v->sub($u)` |
 
 ---
 
@@ -133,11 +133,11 @@ $result = $v * $other;
 Forms:
 
 1. `Vector * int|float`. Scalar multiplication, element-wise - equivalent to
-   [`$v->mul($scalar)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul).
+   [`$v->mul($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul).
 2. `int|float * Vector`. Multiplication of vector by a scalar is commutative, so this gives the same result as #1.
 3. `Vector * Matrix`. This `Vector` is treated as a 1×n row matrix, multiplied by a `Matrix` using standard matrix
    multiplication. The number of rows in the `Matrix` must equal the `Vector` size. This operation is equivalent to
-   [`$vec->mul($mat)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul). Not commutative - the
+   [`$v->mul($A)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul). Not commutative - the
    `Matrix * Vector` operation is a distinct calculation, documented in [Matrix Operators](Matrix.md#-multiply).
 
 Unsupported form:
@@ -165,11 +165,11 @@ $u * $A;  // [1, 2]  (Vector * Matrix - $u treated as a 1x2 row matrix)
 
 Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and `$A` is a `Matrix`.
 
-| Operation | Equivalent to      |
-| --------- | ------------------ |
-| `$v * $x` | `$v->mul($x)`      |
-| `$x * $v` | `$v->mul($x)`      |
-| `$v * $A` | `$v->mul($A)`      |
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `$v * $x` | `$v->mul($x)` |
+| `$x * $v` | `$v->mul($x)` |
+| `$v * $A` | `$v->mul($A)` |
 
 ---
 
@@ -195,10 +195,10 @@ Unsupported forms:
    (Hadamard) division, use
    [`$v->hadamardDiv($u)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
 3. `Vector / Matrix`. Division by a `Matrix` isn't a typical operation, and using a division operator for this purpose
-   is technically ambiguous, since v/M could mean M⁻¹\*v or v\*M⁻¹, and these are not necessarily equal because matrix multiplication
-   is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute v\*M⁻¹) using methods, e.g.
-   `$v * $A->inv()`. This requires the matrix to be square, in addition to having the same number of columns as the
-   vector has elements.
+   is technically ambiguous, since v/M could mean M⁻¹\*v or v\*M⁻¹, and these are not necessarily equal because matrix
+   multiplication is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute v\*M⁻¹) using
+   methods, e.g. `$v * $A->inv()`. This requires the matrix to be square, in addition to having the same number of
+   columns as the vector has elements.
 
 **Example:**
 

@@ -2,10 +2,10 @@
 
 ## Installation via PIE (recommended)
 
-[PIE](https://github.com/php/pie) (PHP Installer for Extensions) is the official successor to PECL for installing
-native PHP extensions, and is what this package's `composer.json` `"type": "php-ext"` configuration
-(`extension-name`, `support-zts`, `support-nts`, `configure-options`) is designed for - plain `composer require`
-can't compile and install a native extension, since Composer only manages PHP-space autoloading, not native builds.
+[PIE](https://github.com/php/pie) (PHP Installer for Extensions) is the official successor to PECL for installing native
+PHP extensions, and is what this package's `composer.json` `"type": "php-ext"` configuration (`extension-name`,
+`support-zts`, `support-nts`, `configure-options`) is designed for - plain `composer require` can't compile and install
+a native extension, since Composer only manages PHP-space autoloading, not native builds.
 
 ```bash
 pie install oceanmoon/math-ext
@@ -18,8 +18,8 @@ pie repository:add vcs https://github.com/mossy2100/PHP-Math-extension.git
 pie install oceanmoon/math-ext
 ```
 
-PIE requires the same build tools as a manual build (below) - a C compiler and the PHP development headers - since,
-on Mac/Linux, it runs the standard `phpize`/`configure`/`make`/`make install` pipeline itself rather than fetching a
+PIE requires the same build tools as a manual build (below) - a C compiler and the PHP development headers - since, on
+Mac/Linux, it runs the standard `phpize`/`configure`/`make`/`make install` pipeline itself rather than fetching a
 prebuilt binary.
 
 ---
@@ -39,14 +39,14 @@ Go to the local folder containing the git repository for the extension. Let's ca
 
 Run `composer enable`.
 
-This will set up a custom `oceanmoon_math.ini` file in the PHP scan directory (as described below), telling PHP to
-load the compiled `oceanmoon_math.so` extension directly from the `extension-dir/modules` subfolder.
+This will set up a custom `oceanmoon_math.ini` file in the PHP scan directory (as described below), telling PHP to load
+the compiled `oceanmoon_math.so` extension directly from the `extension-dir/modules` subfolder.
 
 The advantage of this approach is that PHP is linked to the repo's own build rather than a copied file, so every
 subsequent rebuild is picked up automatically without redeploying.
 
-Run `composer disable` to disable the extension. This doesn't affect the `.so` file but will remove
-`oceanmoon_math.ini` so the extension isn't loaded by PHP.
+Run `composer disable` to disable the extension. This doesn't affect the `.so` file but will remove `oceanmoon_math.ini`
+so the extension isn't loaded by PHP.
 
 #### Option 2 - Manual setup
 
@@ -122,5 +122,5 @@ The response should just be `oceanmoon_math`.
 
 **Note:** this only confirms the CLI SAPI has it loaded. If your actual use case is a web request handled by
 `php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list - `php -m`
-here says nothing about whether *that* process has it. Confirm via a script executed through the web server itself
-(e.g. `<?php var_dump(extension_loaded('oceanmoon_math'));`), not just the command line.
+here says nothing about whether _that_ process has it. Confirm via a script executed through the web server itself (e.g.
+`<?php var_dump(extension_loaded('oceanmoon_math'));`), not just the command line.
