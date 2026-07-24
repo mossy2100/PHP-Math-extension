@@ -45,27 +45,31 @@ final class VectorBinaryOperatorExtension implements OperatorTypeSpecifyingExten
         $leftIsVector = $vectorType->isSuperTypeOf($leftSide)->yes();
         $rightIsVector = $vectorType->isSuperTypeOf($rightSide)->yes();
 
-        // + and - only accept Vector + Vector -- no scalar form exists.
+        // The `+` and `-` operators only accept Vector +/- Vector. No scalar form exists.
         if ($operatorSigil === '+' || $operatorSigil === '-') {
             return $leftIsVector && $rightIsVector;
         }
 
-        // / only accepts Vector / int|float, with the Vector on the left -- matching
-        // vector_do_operation()'s ZEND_DIV case exactly (no scalar/Vector, no Vector/Vector, no
-        // Vector/Matrix).
+        // The `/` operator only accepts Vector / int|float.
+        // Vector / Vector and int|float / Vector forms are unsupported.
         if ($operatorSigil === '/') {
             return $leftIsVector && $this->isScalar($rightSide);
         }
 
-        // * accepts Vector * int|float, int|float * Vector (commutative), or Vector * Matrix
-        // (Vector on the left only -- Matrix * Vector is a distinct calculation handled by
-        // MatrixBinaryOperatorExtension instead). No Vector * Vector.
+        // The `*` accepts:
+        // 1. Vector * int|float
+        // 2. int|float * Vector
+        // 3. Vector * Matrix
+        // Matrix * Vector is supported, but not here; see MatrixBinaryOperatorExtension.
+        // Vector * Vector is unsupported, as there's no unambiguous meaning.
         if ($leftIsVector && $this->isScalar($rightSide)) {
             return true;
         }
+        // Check for .
         if ($rightIsVector && $this->isScalar($leftSide)) {
             return true;
         }
+        // Check for .
         return $leftIsVector && (new ObjectType(Matrix::class))->isSuperTypeOf($rightSide)->yes();
     }
 

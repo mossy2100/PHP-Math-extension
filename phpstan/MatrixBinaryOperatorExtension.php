@@ -45,26 +45,29 @@ final class MatrixBinaryOperatorExtension implements OperatorTypeSpecifyingExten
         $leftIsMatrix = $matrixType->isSuperTypeOf($leftSide)->yes();
         $rightIsMatrix = $matrixType->isSuperTypeOf($rightSide)->yes();
 
-        // + and - only accept Matrix + Matrix -- no scalar form exists.
+        // The `+` and `-` operators only accept Matrix +/- Matrix. No scalar form exists.
         if ($operatorSigil === '+' || $operatorSigil === '-') {
             return $leftIsMatrix && $rightIsMatrix;
         }
 
-        // / only accepts Matrix / int|float, with the Matrix on the left -- no Matrix / Matrix, no
-        // int|float / Matrix.
+        // The `/` operator only accepts Matrix / int|float.
+        // Matrix / Matrix and int|float / Matrix forms are unsupported.
         if ($operatorSigil === '/') {
             return $leftIsMatrix && $this->isScalar($rightSide);
         }
 
-        // ** only accepts Matrix ** int, with the Matrix on the left -- no int ** Matrix, no
-        // Matrix ** Matrix.
+        // The `**` operator only accepts Matrix ** int.
+        // int ** Matrix and Matrix ** Matrix forms are unsupported.
         if ($operatorSigil === '**') {
             return $leftIsMatrix && (new IntegerType())->isSuperTypeOf($rightSide)->yes();
         }
 
-        // * accepts Matrix * int|float, int|float * Matrix (commutative), Matrix * Matrix, or
-        // Matrix * Vector (Matrix on the left only -- Vector * Matrix is a distinct calculation
-        // handled by VectorBinaryOperatorExtension instead).
+        // The `*` operator accepts:
+        // 1. Matrix * int|float
+        // 2. int|float * Matrix
+        // 3. Matrix * Matrix
+        // 4. Matrix * Vector
+        // Vector * Matrix is supported, but not here; see VectorBinaryOperatorExtension.
         if ($leftIsMatrix && $this->isScalar($rightSide)) {
             return true;
         }
