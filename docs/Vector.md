@@ -142,12 +142,12 @@ Forms:
 
 Unsupported form:
 
-1. `Vector * Vector`. This form is unsupported because there are several ways to multiply 2 vectors. Thus, call the
+1. `Vector * Vector`. This form is unsupported because there are several ways to multiply 2 vectors. Instead, call the
    relevant method:
    - [`dot()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#dot)
    - [`cross()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#cross)
-   - [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul)
    - [`outer()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#outer)
+   - [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul)
 
 **Example:**
 
@@ -165,11 +165,11 @@ $u * $A;  // [1, 2]  (Vector * Matrix - $u treated as a 1x2 row matrix)
 
 Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and `$A` is a `Matrix`.
 
-| Operation | Equivalent to |
-| --------- | ------------- |
-| `$v * $x` | `$v->mul($x)` |
-| `$x * $v` | `$v->mul($x)` |
-| `$v * $A` | `$v->mul($A)` |
+| Operation | Equivalent to      |
+| --------- | ------------------ |
+| `$v * $x` | `$v->mul($x)`      |
+| `$x * $v` | `$v->mul($x)`      |
+| `$v * $A` | `$v->mul($A)`      |
 
 ---
 
@@ -195,9 +195,9 @@ Unsupported forms:
    (Hadamard) division, use
    [`$v->hadamardDiv($u)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
 3. `Vector / Matrix`. Division by a `Matrix` isn't a typical operation, and using a division operator for this purpose
-   is ambiguous, since V/M can mean M⁻¹\*V or V\*M⁻¹, and these are not necessarily equal because matrix multiplication
-   is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute V\*M⁻¹) using methods, e.g.
-   `$vec * $mat->inv()`. This requires the matrix to be square, in addition to having the same number of columns as the
+   is technically ambiguous, since v/M could mean M⁻¹\*v or v\*M⁻¹, and these are not necessarily equal because matrix multiplication
+   is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute v\*M⁻¹) using methods, e.g.
+   `$v * $A->inv()`. This requires the matrix to be square, in addition to having the same number of columns as the
    vector has elements.
 
 **Example:**

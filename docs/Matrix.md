@@ -163,12 +163,12 @@ $A * $v;  // Vector(5, 11)   (Matrix * Vector - $v treated as a 2x1 column matri
 Equivalence table for the `*` operator, where `$A` and `$B` are `Matrix` values, `$x` is an `int` or `float`, and `$v`
 is a `Vector`.
 
-| Operation | Equivalent to                                                            |
-| --------- | -------------------------------------------------------------------------- |
-| `$A * $x` | `$A->mul($x)`                                                             |
-| `$x * $A` | `$A->mul($x)`                                                             |
-| `$A * $B` | `$A->mul($B)`                                                             |
-| `$A * $v` | `$A->mul($v->toColumnMatrix())->getColumn(0)` or `$v->mul($A->t())`              |
+| Operation | Equivalent to                                 | Also equivalent  |
+| --------- | ----------------------------------------------- | ------------------ |
+| `$A * $x` | `$A->mul($x)`                                 |                   |
+| `$x * $A` | `$A->mul($x)`                                 |                   |
+| `$A * $B` | `$A->mul($B)`                                 |                   |
+| `$A * $v` | `$A->mul($v->toColumnMatrix())->getColumn(0)` | `$v->mul($A->t())` |
 
 ---
 

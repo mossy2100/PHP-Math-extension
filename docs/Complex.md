@@ -132,11 +132,11 @@ $z + 2.5;   // 5.5 + 4i  (Complex + float)
 
 Equivalence table for the `+` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
 
-| Operation | Equivalent to              |
-| --------- | -------------------------- |
-| `$z + $w` | `$z->add($w)`              |
-| `$z + $x` | `$z->add($x)`              |
-| `$x + $z` | `new Complex($x)->add($z)` |
+| Operation | Equivalent to              | Also equivalent |
+| --------- | --------------------------- | ---------------- |
+| `$z + $w` | `$z->add($w)`              |                  |
+| `$z + $x` | `$z->add($x)`              |                  |
+| `$x + $z` | `new Complex($x)->add($z)` | `$z->add($x)`    |
 
 ---
 
@@ -169,11 +169,11 @@ $z - 2.5;   // 2.5 + 7i   (Complex - float)
 
 Equivalence table for the `-` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
 
-| Operation | Equivalent to              |
-| --------- | -------------------------- |
-| `$z - $w` | `$z->sub($w)`              |
-| `$z - $x` | `$z->sub($x)`              |
-| `$x - $z` | `new Complex($x)->sub($z)` |
+| Operation | Equivalent to              | Also equivalent |
+| --------- | --------------------------- | ---------------- |
+| `$z - $w` | `$z->sub($w)`              |                  |
+| `$z - $x` | `$z->sub($x)`              |                  |
+| `$x - $z` | `new Complex($x)->sub($z)` | `-$z->sub($x)`   |
 
 ---
 
@@ -205,11 +205,11 @@ $z * 2.5;   // 2.5 + 5i   (Complex * float)
 
 Equivalence table for the `*` operator, where `$z` and `$w` are `Complex` values, and `$x` is an `int` or `float`.
 
-| Operation | Equivalent to              |
-| --------- | -------------------------- |
-| `$z * $w` | `$z->mul($w)`              |
-| `$z * $x` | `$z->mul($x)`              |
-| `$x * $z` | `new Complex($x)->mul($z)` |
+| Operation | Equivalent to              | Also equivalent |
+| --------- | --------------------------- | ---------------- |
+| `$z * $w` | `$z->mul($w)`              |                  |
+| `$z * $x` | `$z->mul($x)`              |                  |
+| `$x * $z` | `new Complex($x)->mul($z)` | `$z->mul($x)`    |
 
 ---
 

@@ -3,7 +3,7 @@ parameters:
         - tests/phpunit
     scanFiles:
         - Complex/complex.stub.php
-        - phpstan/complex_constants.php
+        - phpstan/constants.php
         - Rational/rational.stub.php
         - Vector/vector.stub.php
         - Matrix/matrix.stub.php
