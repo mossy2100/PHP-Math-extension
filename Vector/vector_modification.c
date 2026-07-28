@@ -51,13 +51,7 @@ PHP_METHOD(OceanMoon_Math_Vector, normalize)
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long size = vector_read_size(self);
-
-	double magnitude;
-	{
-		zval rv;
-		magnitude = zval_get_double(
-			zend_read_property(vector_ce_Vector, self, "magnitude", sizeof("magnitude") - 1, 1, &rv));
-	}
+	double magnitude = vector_compute_magnitude(self);
 
 	zval unit;
 	if (vector_calc_div(self, magnitude, &unit) == FAILURE) {

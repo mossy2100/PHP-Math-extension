@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3bb4d8a44094bdb61fecfb77bd35c22563273867 */
+ * Stub hash: 0655a0626877304a75006f989a3f4f25f9c2ea01 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -214,15 +214,15 @@ static zend_class_entry *register_class_OceanMoon_Math_Complex(zend_class_entry 
 	zend_string_release(property_imaginary_name);
 
 	zval property_magnitude_default_value;
-	ZVAL_NULL(&property_magnitude_default_value);
+	ZVAL_DOUBLE(&property_magnitude_default_value, 0.0);
 	zend_string *property_magnitude_name = zend_string_init("magnitude", sizeof("magnitude") - 1, 1);
-	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
 	zend_string_release(property_magnitude_name);
 
 	zval property_phase_default_value;
-	ZVAL_NULL(&property_phase_default_value);
+	ZVAL_DOUBLE(&property_phase_default_value, 0.0);
 	zend_string *property_phase_name = zend_string_init("phase", sizeof("phase") - 1, 1);
-	zend_declare_typed_property(class_entry, property_phase_name, &property_phase_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_phase_name, &property_phase_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
 	zend_string_release(property_phase_name);
 
 	return class_entry;

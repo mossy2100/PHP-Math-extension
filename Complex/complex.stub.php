@@ -19,9 +19,9 @@ final class Complex implements \Stringable, \ArrayAccess
 
     public float $imaginary = 0.0;
 
-    public ?float $magnitude = null;
+    public float $magnitude = 0.0;
 
-    public ?float $phase = null;
+    public float $phase = 0.0;
 
     public function __construct(float $real = 0, float $imag = 0) {}
 

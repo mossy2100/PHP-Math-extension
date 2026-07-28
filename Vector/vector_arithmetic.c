@@ -336,6 +336,45 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 }
 /* }}} */
 
+/* {{{ vector_calc_scalar_div
+ *
+ * The computational core of the `/` operator's `float / Vector` form (vector_operators.c) --
+ * Vector has no named method for this direction, only the operator (`Vector / float` is div(),
+ * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
+ * $vector->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().
+ */
+zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value)
+{
+	zend_long size = vector_read_size(obj);
+	if (vector_create(return_value, size) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < size; i++) {
+		double element;
+		vector_read_element(obj, i, &element);
+
+		if (element == 0.0) {
+			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
+			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+
+		if (vector_write_element(result, i, scalar / element) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::div(float $scalar): Vector */
 PHP_METHOD(OceanMoon_Math_Vector, div)
 {

@@ -10,8 +10,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for Matrix's unary operator overloads (+, -), only available in the extension -- see
- * docs/Matrix.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$A * 1`/
- * `$A * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
+ * docs/Matrix.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$matA * 1`/
+ * `$matA * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
  */
 #[CoversClass(Matrix::class)]
 class MatrixUnaryOperatorsTest extends TestCase
@@ -23,24 +23,33 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $A = Matrix::fromArray([[1, 2], [3, 4]]);
-        $copy = +$A;
+        $matA = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $matB = +$matA;
 
-        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $copy->toArray());
+        $this->assertSame([
+            [1.0, 2.0],
+            [3.0, 4.0],
+        ], $matB->toArray());
     }
 
     /**
-     * Test that unary + returns a new instance, not $A itself (Matrix is mutable, so this matters).
+     * Test that unary + returns a new instance, not $matA itself (Matrix is mutable, so this matters).
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $A = Matrix::fromArray([[1, 2], [3, 4]]);
-        $copy = +$A;
+        $matA = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $matB = +$matA;
 
-        $this->assertNotSame($A, $copy);
+        $this->assertNotSame($matA, $matB);
 
-        $copy->set(0, 0, 99);
-        $this->assertSame(1.0, $A->get(0, 0));
+        $matB->set(0, 0, 99);
+        $this->assertSame(1.0, $matA->get(0, 0));
     }
 
     #endregion
@@ -52,11 +61,17 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinus(): void
     {
-        $A = Matrix::fromArray([[1, -2], [3, -4]]);
-        $negated = -$A;
+        $matA = Matrix::fromArray([
+            [1, -2],
+            [3, -4],
+        ]);
+        $negated = -$matA;
 
-        $this->assertSame([[-1.0, 2.0], [-3.0, 4.0]], $negated->toArray());
-        $this->assertEquals($A->neg(), $negated);
+        $this->assertSame([
+            [-1.0, 2.0],
+            [-3.0, 4.0],
+        ], $negated->toArray());
+        $this->assertEquals($matA->neg(), $negated);
     }
 
     /**
@@ -64,11 +79,17 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinusDoesNotMutate(): void
     {
-        $A = Matrix::fromArray([[1, -2], [3, -4]]);
+        $matA = Matrix::fromArray([
+            [1, -2],
+            [3, -4],
+        ]);
 
-        $result = -$A;
+        $result = -$matA;
 
-        $this->assertSame([[1.0, -2.0], [3.0, -4.0]], $A->toArray());
+        $this->assertSame([
+            [1.0, -2.0],
+            [3.0, -4.0],
+        ], $matA->toArray());
     }
 
     /**
@@ -76,10 +97,16 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testDoubleUnaryMinus(): void
     {
-        $A = Matrix::fromArray([[1, -2], [3, -4]]);
-        $result = -(-$A);
+        $matA = Matrix::fromArray([
+            [1, -2],
+            [3, -4],
+        ]);
+        $result = -(-$matA);
 
-        $this->assertSame([[1.0, -2.0], [3.0, -4.0]], $result->toArray());
+        $this->assertSame([
+            [1.0, -2.0],
+            [3.0, -4.0],
+        ], $result->toArray());
     }
 
     #endregion

@@ -9,12 +9,36 @@
 # include "config.h"
 #endif
 
+#include <math.h>
+
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
 #include "vector_arginfo.h"
 #include "../Matrix/matrix_internal.h"
+
+/* {{{ vector_compute_magnitude
+ *
+ * Matches the PHP package's Vector::$magnitude hook: sqrt(sum of squares). Backs the `magnitude`
+ * computed property (vector_properties.c), and is also called directly (bypassing property read
+ * dispatch) by normalized() below and normalize() (vector_modification.c).
+ */
+double vector_compute_magnitude(zend_object *obj)
+{
+	zend_long size = vector_read_size(obj);
+	double sum = 0.0;
+
+	for (zend_long i = 0; i < size; i++) {
+		double element;
+		/* Bounds are trivially satisfied (0..size-1), so this never fails. */
+		vector_read_element(obj, i, &element);
+		sum += element * element;
+	}
+
+	return sqrt(sum);
+}
+/* }}} */
 
 /* {{{ OceanMoon\Math\Vector::dot(Vector $other): float
  *
@@ -155,10 +179,7 @@ PHP_METHOD(OceanMoon_Math_Vector, normalized)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-
-	zval rv;
-	double magnitude = zval_get_double(
-		zend_read_property(vector_ce_Vector, self, "magnitude", sizeof("magnitude") - 1, 1, &rv));
+	double magnitude = vector_compute_magnitude(self);
 
 	if (vector_calc_div(self, magnitude, return_value) == FAILURE) {
 		RETURN_THROWS();

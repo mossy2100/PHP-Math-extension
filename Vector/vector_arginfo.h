@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 167bf46e06b28eda8f740690e12d7299036070ae */
+ * Stub hash: ce14550e38097d3a359080fd5dee6361521bd543 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Vector___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -188,9 +188,9 @@ static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *
 	zend_string_release(property_size_name);
 
 	zval property_magnitude_default_value;
-	ZVAL_NULL(&property_magnitude_default_value);
+	ZVAL_DOUBLE(&property_magnitude_default_value, 0.0);
 	zend_string *property_magnitude_name = zend_string_init("magnitude", sizeof("magnitude") - 1, 1);
-	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
 	zend_string_release(property_magnitude_name);
 
 	return class_entry;

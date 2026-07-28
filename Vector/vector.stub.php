@@ -19,7 +19,7 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess
 
     public int $size = 0;
 
-    public ?float $magnitude = null;
+    public float $magnitude = 0.0;
 
     public function __construct(int $size) {}
 

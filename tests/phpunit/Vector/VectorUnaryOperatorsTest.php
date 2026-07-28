@@ -23,24 +23,24 @@ class VectorUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $v = Vector::fromArray([1, 2, 3]);
-        $copy = +$v;
+        $v1 = Vector::fromArray([1, 2, 3]);
+        $v2 = +$v1;
 
-        $this->assertSame([1.0, 2.0, 3.0], $copy->toArray());
+        $this->assertSame([1.0, 2.0, 3.0], $v2->toArray());
     }
 
     /**
-     * Test that unary + returns a new instance, not $v itself (Vector is mutable, so this matters).
+     * Test that unary + returns a new instance, not $v1 itself (Vector is mutable, so this matters).
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $v = Vector::fromArray([1, 2, 3]);
-        $copy = +$v;
+        $v1 = Vector::fromArray([1, 2, 3]);
+        $v2 = +$v1;
 
-        $this->assertNotSame($v, $copy);
+        $this->assertNotSame($v1, $v2);
 
-        $copy->set(0, 99);
-        $this->assertSame(1.0, $v->get(0));
+        $v2->set(0, 99);
+        $this->assertSame(1.0, $v1->get(0));
     }
 
     /**
@@ -48,10 +48,10 @@ class VectorUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlusEmpty(): void
     {
-        $v = Vector::fromArray([]);
-        $copy = +$v;
+        $v1 = Vector::fromArray([]);
+        $v2 = +$v1;
 
-        $this->assertSame([], $copy->toArray());
+        $this->assertSame([], $v2->toArray());
     }
 
     #endregion

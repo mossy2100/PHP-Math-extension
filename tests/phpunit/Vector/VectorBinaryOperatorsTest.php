@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OceanMoon\Math\Tests\Vector;
 
+use LengthException;
+use OceanMoon\Core\Exceptions\ArithmeticException;
 use OceanMoon\Math\Matrix;
 use OceanMoon\Math\Vector;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -15,7 +17,8 @@ use TypeError;
  * see docs/Vector.md in this repo. Each is equivalent to calling the same-named method directly,
  * and throws the same exceptions under the same conditions -- except that + and - only accept
  * another Vector (no scalar form exists), * accepts a scalar (either side, commutative) or a
- * Matrix (Vector on the left only), and / only accepts a scalar divisor (Vector on the left only).
+ * Matrix (Vector on the left only), and / accepts a scalar divisor (Vector on the left) or a
+ * scalar dividend (Vector on the right, element-wise, with no equivalent named method).
  */
 #[CoversClass(Vector::class)]
 #[CoversClass(Matrix::class)]
@@ -28,12 +31,12 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testAddVectorPlusVector(): void
     {
-        $v = Vector::fromArray([1, 2, 3]);
-        $u = Vector::fromArray([4, 5, 6]);
-        $result = $v + $u;
+        $v1 = Vector::fromArray([1, 2, 3]);
+        $v2 = Vector::fromArray([4, 5, 6]);
+        $result = $v1 + $v2;
 
         $this->assertSame([5.0, 7.0, 9.0], $result->toArray());
-        $this->assertEquals($v->add($u), $result);
+        $this->assertEquals($v1->add($v2), $result);
     }
 
     /**
@@ -52,13 +55,13 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testAddDoesNotMutate(): void
     {
-        $v = Vector::fromArray([1, 2, 3]);
-        $u = Vector::fromArray([4, 5, 6]);
+        $v1 = Vector::fromArray([1, 2, 3]);
+        $v2 = Vector::fromArray([4, 5, 6]);
 
-        $result = $v + $u;
+        $result = $v1 + $v2;
 
-        $this->assertSame([1.0, 2.0, 3.0], $v->toArray());
-        $this->assertSame([4.0, 5.0, 6.0], $u->toArray());
+        $this->assertSame([1.0, 2.0, 3.0], $v1->toArray());
+        $this->assertSame([4.0, 5.0, 6.0], $v2->toArray());
     }
 
     #endregion
@@ -70,12 +73,12 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testSubVectorMinusVector(): void
     {
-        $v = Vector::fromArray([4, 5, 6]);
-        $u = Vector::fromArray([1, 2, 3]);
-        $result = $v - $u;
+        $v1 = Vector::fromArray([4, 5, 6]);
+        $v2 = Vector::fromArray([1, 2, 3]);
+        $result = $v1 - $v2;
 
         $this->assertSame([3.0, 3.0, 3.0], $result->toArray());
-        $this->assertEquals($v->sub($u), $result);
+        $this->assertEquals($v1->sub($v2), $result);
     }
 
     /**
@@ -94,13 +97,13 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testSubDoesNotMutate(): void
     {
-        $v = Vector::fromArray([4, 5, 6]);
-        $u = Vector::fromArray([1, 2, 3]);
+        $v1 = Vector::fromArray([4, 5, 6]);
+        $v2 = Vector::fromArray([1, 2, 3]);
 
-        $result = $v - $u;
+        $result = $v1 - $v2;
 
-        $this->assertSame([4.0, 5.0, 6.0], $v->toArray());
-        $this->assertSame([1.0, 2.0, 3.0], $u->toArray());
+        $this->assertSame([4.0, 5.0, 6.0], $v1->toArray());
+        $this->assertSame([1.0, 2.0, 3.0], $v2->toArray());
     }
 
     #endregion
@@ -135,12 +138,15 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrix(): void
     {
-        $A = Matrix::fromArray([[1, 0], [0, 1]]);
-        $u = Vector::fromArray([1, 2]);
-        $result = $u * $A;
+        $matA = Matrix::fromArray([
+            [1, 0],
+            [0, 1],
+        ]);
+        $v = Vector::fromArray([1, 2]);
+        $result = $v * $matA;
 
         $this->assertSame([1.0, 2.0], $result->toArray());
-        $this->assertEquals($u->mul($A), $result);
+        $this->assertEquals($v->mul($matA), $result);
     }
 
     /**
@@ -148,11 +154,15 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrixIncompatibleDimensionsThrows(): void
     {
-        $A = Matrix::fromArray([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
-        $u = Vector::fromArray([1, 2]);
+        $matA = Matrix::fromArray([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+        ]);
+        $v = Vector::fromArray([1, 2]);
 
-        $this->expectException(\LengthException::class);
-        $result = $u * $A;
+        $this->expectException(LengthException::class);
+        $result = $v * $matA;
     }
 
     /**
@@ -161,11 +171,11 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesVectorThrows(): void
     {
-        $v = Vector::fromArray([1, 2, 3]);
-        $u = Vector::fromArray([4, 5, 6]);
+        $v1 = Vector::fromArray([1, 2, 3]);
+        $v2 = Vector::fromArray([4, 5, 6]);
 
         $this->expectException(TypeError::class);
-        $result = $v * $u; // @phpstan-ignore binaryOp.invalid
+        $result = $v1 * $v2; // @phpstan-ignore binaryOp.invalid
     }
 
     /**
@@ -196,15 +206,28 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test int|float / Vector is unsupported: Vector has no multiplicative inverse for a scalar to
-     * be divided by.
+     * Test int|float / Vector: not commutative with Vector / int|float -- element-wise, divides the
+     * scalar by each element in turn, equivalent to $x * $v->reciprocal().
      */
-    public function testDivScalarOverVectorThrows(): void
+    public function testDivScalarOverVector(): void
     {
-        $v = Vector::fromArray([2, 4, 6]);
+        $v = Vector::fromArray([1, 2, 4]);
+        $result = 8 / $v;
 
-        $this->expectException(TypeError::class);
-        $result = 2 / $v; // @phpstan-ignore binaryOp.invalid
+        $this->assertSame([8.0, 4.0, 2.0], $result->toArray());
+        $this->assertEquals(8 * $v->reciprocal(), $result);
+    }
+
+    /**
+     * Test int|float / Vector with a zero element throws ArithmeticException, matching
+     * reciprocal().
+     */
+    public function testDivScalarOverVectorZeroElementThrows(): void
+    {
+        $v = Vector::fromArray([1, 0, 4]);
+
+        $this->expectException(ArithmeticException::class);
+        $result = 8 / $v;
     }
 
     /**
@@ -212,11 +235,11 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testDivVectorOverVectorThrows(): void
     {
-        $v = Vector::fromArray([2, 4, 6]);
-        $u = Vector::fromArray([1, 2, 3]);
+        $v1 = Vector::fromArray([2, 4, 6]);
+        $v2 = Vector::fromArray([1, 2, 3]);
 
         $this->expectException(TypeError::class);
-        $result = $v / $u; // @phpstan-ignore binaryOp.invalid
+        $result = $v1 / $v2; // @phpstan-ignore binaryOp.invalid
     }
 
     /**
@@ -225,10 +248,13 @@ class VectorBinaryOperatorsTest extends TestCase
     public function testDivVectorOverMatrixThrows(): void
     {
         $v = Vector::fromArray([1, 2]);
-        $A = Matrix::fromArray([[1, 0], [0, 1]]);
+        $matA = Matrix::fromArray([
+            [1, 0],
+            [0, 1],
+        ]);
 
         $this->expectException(TypeError::class);
-        $result = $v / $A; // @phpstan-ignore binaryOp.invalid
+        $result = $v / $matA; // @phpstan-ignore binaryOp.invalid
     }
 
     /**
@@ -238,7 +264,7 @@ class VectorBinaryOperatorsTest extends TestCase
     {
         $v = Vector::fromArray([2, 4, 6]);
 
-        $this->expectException(\OceanMoon\Core\Exceptions\ArithmeticException::class);
+        $this->expectException(ArithmeticException::class);
         $v / 0; // @phpstan-ignore binaryOp.invalid
     }
 

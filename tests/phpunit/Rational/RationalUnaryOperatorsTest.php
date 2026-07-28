@@ -23,22 +23,22 @@ class RationalUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $r = new Rational(2, 3);
-        $copy = +$r;
+        $r1 = new Rational(2, 3);
+        $r2 = +$r1;
 
-        $this->assertSame(2, $copy->numerator);
-        $this->assertSame(3, $copy->denominator);
+        $this->assertSame(2, $r2->numerator);
+        $this->assertSame(3, $r2->denominator);
     }
 
     /**
-     * Test that unary + returns a new instance, not $r itself (immutability).
+     * Test that unary + returns a new instance, not $r1 itself (immutability).
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $r = new Rational(2, 3);
-        $copy = +$r;
+        $r1 = new Rational(2, 3);
+        $r2 = +$r1;
 
-        $this->assertNotSame($r, $copy);
+        $this->assertNotSame($r1, $r2);
     }
 
     /**
@@ -77,12 +77,12 @@ class RationalUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinusDoesNotMutate(): void
     {
-        $r = new Rational(2, 3);
+        $r1 = new Rational(2, 3);
 
-        $r2 = -$r;
+        $r2 = -$r1;
 
-        $this->assertSame(2, $r->numerator);
-        $this->assertSame(3, $r->denominator);
+        $this->assertSame(2, $r1->numerator);
+        $this->assertSame(3, $r1->denominator);
     }
 
     /**

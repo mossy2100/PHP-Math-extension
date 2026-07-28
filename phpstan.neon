@@ -21,6 +21,10 @@ services:
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
     -
+        class: OceanMoon\Math\PHPStan\ComplexComparisonOperatorExtension
+        tags:
+            - phpstan.broker.operatorTypeSpecifyingExtension
+    -
         class: OceanMoon\Math\PHPStan\RationalBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension

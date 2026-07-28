@@ -45,10 +45,16 @@ zend_class_entry *complex_ce_Complex;
 
 /* {{{ complex_init
  *
- * Validate real/imaginary and set them on an already-allocated Complex object. Shared by
- * __construct and complex_create() (used by the from*() factory methods), mirroring how the PHP
- * implementation's factory methods all funnel through `new self(...)`, so the finite-value check
- * lives in exactly one place.
+ * Validate real/imaginary and set them, along with the derived magnitude/phase, on an
+ * already-allocated Complex object. Shared by __construct and complex_create() (used by the
+ * from*() factory methods), mirroring how the PHP implementation's factory methods all funnel
+ * through `new self(...)`, so the finite-value check -- and the magnitude/phase computation --
+ * live in exactly one place.
+ *
+ * magnitude/phase are computed here, eagerly, rather than lazily on first read: Complex is
+ * immutable, so they can never go stale, and PHP's default `==`/`!=` object comparison walks every
+ * property, so both instances being compared need real values (not e.g. one populated, one not)
+ * for that comparison to be correct. Matches the PHP package's constructor exactly.
  *
  * Returns FAILURE (with an exception already thrown) if either value is non-finite.
  */
@@ -61,6 +67,12 @@ zend_result complex_init(zend_object *obj, double real, double imag)
 
 	zend_update_property_double(complex_ce_Complex, obj, "real", sizeof("real") - 1, real);
 	zend_update_property_double(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, imag);
+	zend_update_property_double(
+		complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, complex_compute_magnitude(real, imag)
+	);
+	zend_update_property_double(
+		complex_ce_Complex, obj, "phase", sizeof("phase") - 1, complex_compute_phase(real, imag)
+	);
 
 	return SUCCESS;
 }
@@ -81,7 +93,7 @@ zend_result complex_create(zval *return_value, double real, double imag)
 /* {{{ complex_read_parts
  *
  * Reads the real and imaginary parts off a zend_object already known to be a Complex instance.
- * Shared by complex_comparison.c, complex_properties.c, and complex_arithmetic.c.
+ * Shared by most other files in this directory.
  */
 void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
 {
@@ -95,11 +107,11 @@ void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
 
 /* {{{ complex_read_magnitude_phase
  *
- * Reads the magnitude/phase computed properties off a zend_object already known to be a Complex
- * instance, via zend_read_property() (not complex_read_parts()'s real/imaginary) -- this goes
- * through the object's own read_property handler, so it triggers the lazy compute-and-cache logic
- * in complex_properties.c rather than recomputing hypot()/atan2() directly. Shared by ln()
- * (complex_transcendental.c) and roots()/sqrt() (complex_power.c).
+ * Reads the magnitude/phase properties off a zend_object already known to be a Complex instance,
+ * via zend_read_property() (not complex_read_parts()'s real/imaginary) -- these are eagerly
+ * populated at construction (complex_init()), so this just reads the stored values rather than
+ * recomputing hypot()/atan2() directly. Shared by ln() (complex_transcendental.c) and
+ * roots()/sqrt() (complex_power.c).
  */
 void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase)
 {
@@ -419,11 +431,12 @@ PHP_METHOD(OceanMoon_Math_Complex, fromString)
  * Shared by fromPolar() and internal callers (exp(), sqrt(), roots() in complex_power.c/
  * complex_transcendental.c) that construct a Complex from polar coordinates (magnitude, phase in
  * radians). The phase is wrapped into (-pi, pi] via math_floats_wrap(), mirroring the PHP
- * package's Floats::wrap($phase) call. Also pre-populates the magnitude/phase computed properties
- * with the exact input values (rather than leaving them to be lazily recomputed from real/
- * imaginary via hypot()/atan2()), matching the package's `$z->magnitude = $mag; $z->phase =
- * $phase;` -- avoids any round-trip floating-point difference between the input and what
- * recomputing from cos($phase)/sin($phase) would give back.
+ * package's Floats::wrap($phase) call. complex_create() (via complex_init()) already populates
+ * magnitude/phase from real/imaginary via hypot()/atan2(); this then overwrites both with the
+ * exact input values -- a deliberate extension-only precision improvement over the PHP package
+ * (which just recomputes from cos($phase)/sin($phase) like any other constructor call), avoiding
+ * any round-trip floating-point difference between the polar input and what recomputing from
+ * cos($phase)/sin($phase) would give back.
  */
 zend_result complex_from_polar(zval *return_value, double mag, double phase)
 {
@@ -509,8 +522,10 @@ zend_result complex_rinit(int module_number)
 	zend_constant c;
 
 	object_init_ex(&c.value, complex_ce_Complex);
-	zend_update_property_double(complex_ce_Complex, Z_OBJ(c.value), ZEND_STRL("real"), 0.0);
-	zend_update_property_double(complex_ce_Complex, Z_OBJ(c.value), ZEND_STRL("imaginary"), 1.0);
+	if (complex_init(Z_OBJ(c.value), 0.0, 1.0) == FAILURE) {
+		zval_ptr_dtor(&c.value);
+		return FAILURE;
+	}
 
 	c.name = zend_string_init("OceanMoon\\Math\\M_I", sizeof("OceanMoon\\Math\\M_I") - 1, 0);
 	c.filename = NULL;

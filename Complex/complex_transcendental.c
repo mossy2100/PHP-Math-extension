@@ -82,9 +82,8 @@ void complex_calc_exp(double real, double imag, double *out_real, double *out_im
  *
  * Matches the PHP package's Complex::ln(): the natural logarithm. Uses the same shortcuts for
  * well-known values, falling back to ln(z) = ln|z| + i*arg(z) for the general case -- reading the
- * magnitude/phase computed properties off obj (rather than recomputing hypot()/atan2() directly)
- * so the result matches the PHP package's `$mag = $this->magnitude; $phase = $this->phase;`
- * exactly, including the lazy caching.
+ * magnitude/phase properties off obj (rather than recomputing hypot()/atan2() directly) so the
+ * result matches the PHP package's `log($this->magnitude)`/`$this->phase` exactly.
  *
  * Returns FAILURE (with ArithmeticException already thrown) if obj represents zero.
  */
@@ -171,8 +170,8 @@ PHP_METHOD(OceanMoon_Math_Complex, ln)
  * Matches the PHP package's Complex::log(): the logarithm with an arbitrary base, via the
  * change-of-base formula log_b(z) = ln(z) / ln(b). Unlike add()/sub()/mul()/div()/pow(), $base
  * needs to exist as a genuine Complex object (not just a (real, imaginary) pair) when it reaches
- * the general-solution branch, since complex_calc_ln() reads/caches the magnitude/phase computed
- * properties off a real object -- matching the PHP source, where a float $base is promoted via
+ * the general-solution branch, since complex_calc_ln() reads the magnitude/phase properties off a
+ * real object -- matching the PHP source, where a float $base is promoted via
  * `new self($base)` before `$base->ln()` is ever called. A promoted float therefore gets a
  * throwaway Complex allocated here, destroyed before returning.
  */

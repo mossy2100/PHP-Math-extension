@@ -27,9 +27,9 @@ This package provides native C implementations of the `Complex`, `Rational`, `Ve
 - **Drop-in replacement** - each class uses the exact same fully-qualified name as its userland counterpart, so loading
   this extension transparently replaces it; no code changes required, and nothing breaks if the extension isn't loaded.
 - **Native performance** - `Complex`, `Rational`, `Vector`, and `Matrix` arithmetic implemented directly in C.
-- **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable), and `~` (conjugate) for `Complex`; `Rational`
-  additionally gets the full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). Plain PHP classes can't
-  do this on their own - it's only possible at the C level, via the `do_operation`/`compare` object handlers.
+- **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable), and `~` (conjugate) for `Complex`; `Complex`
+  and `Rational` also get the full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). Plain PHP classes
+  can't do this on their own - it's only possible at the C level, via the `do_operation`/`compare` object handlers.
 - **Behavioral parity** - a PHPUnit conformance suite runs the userland package's own tests against this extension's
   native classes, so the two stay identical in behavior, not just API shape.
 
@@ -69,7 +69,8 @@ extension adds: operator overloading.
 
 ### [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)
 
-Adds `+`, `-`, `*`, `/`, `**`, and `~` (conjugate). See [Complex operators](docs/Complex.md).
+Adds `+`, `-`, `*`, `/`, `**`, `~` (conjugate), and the full set of comparison operators (`==`, `!=`, `<`, `<=`, `>`,
+`>=`, `<=>`, ordered lexicographically by real then imaginary part). See [Complex operators](docs/Complex.md).
 
 ### [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md)
 
@@ -85,6 +86,66 @@ Adds `+`, `-`, `*`, `/`. See [Vector operators](docs/Vector.md).
 Adds `+`, `-`, `*`, `/`, `**`. See [Matrix operators](docs/Matrix.md).
 
 ---
+
+## Comparison Operators
+
+There are two groups of comparison operators in PHP:
+
+1. **Loose**: `<=>`, `==`, `!=`, `<`, `<=`, `>`, `>=`. Flexible about type.
+2. **Strict**: `===`, `!==`. Include type in the comparison, and for objects mean reference identity rather than
+   value equality.
+
+### Loose comparison operators
+
+A PHP extension can't override a subset of the loose group independently: a single `compare` object handler backs
+`<=>`, and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result - there's no way to implement
+some of the six and fall back to PHP's default for the rest.
+
+`Complex` and `Rational` each provide one; `Vector` and `Matrix` don't, since there's no natural way to order a whole
+element list against another the way there is for a 2-element `(real, imaginary)` tuple or a single rational value.
+
+- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect - see
+  [Rational operators](docs/Rational.md#comparison-operators).
+- `Complex`'s ordering is plain lexicographic (real part first, then imaginary) - useful for sorting and
+  deduplication, but not mathematically meaningful, since there's no total order compatible with complex arithmetic.
+  It's exactly what PHP's own default object comparison already gives two `Complex` instances for free (`$real` is
+  declared before `$imaginary`); the operators only add accepting an `int`/`float` operand on either side. See
+  [Complex operators](docs/Complex.md#comparison-operators) for the details.
+
+Both accept an `int`/`float` operand on either side, promoted the same way their `equal()` method promotes one, and
+throw for a `NAN` operand (no meaningful comparison result) - see each class's own docs for specifics.
+
+### Strict comparison operators
+
+`===` and `!==` can't be overridden by a PHP extension, so they behave as normal. For objects, they always mean
+reference identity: two distinct `Complex`/`Rational`/`Vector`/`Matrix` instances representing the same value are
+never `===`, even when they are `==` (for the two classes that support `==`) or `equal()`:
+
+```php
+$z1 = new Complex(3, 4);
+$z2 = new Complex(3, 4);
+
+$z1 == $z2;   // true  (same value)
+$z1 === $z2;  // false (different instances)
+```
+
+### Equality methods
+
+`Vector` and `Matrix` have no comparison operators at all, so `equal()`/`approxEqual()` are the only way to test value
+equality for them. `Complex` and `Rational` support both `==`/`equal()`; some coding standards (PHPStan strict rules,
+Slevomat, and others) discourage `==`/`!=` in favour of explicit method calls, so `equal()`/`approxEqual()` remain
+available on those two as well. All four are documented in the Math package documentation, which applies equally to
+the extension.
+
+See:
+
+- [`Complex::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal)
+- [`Complex::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#approxequal)
+- [`Rational::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#equal)
+- [`Rational::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#approxequal)
+- [`Vector::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#equal)
+- [`Matrix::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#equal)
+
 
 ## Operator Precedence
 
@@ -111,8 +172,8 @@ The table below shows just the rules relevant to this extension, tightest-bindin
 | 2           | `-` `+` `~` (unary prefix) | Right         | `-` `+` All four; `~` is `Complex`-only | `-$z ** 2` is `-($z ** 2)`, not `(-$z) ** 2` - PHP's well-known `**` special case, not specific to this extension.    |
 | 3           | `*` `/`                    | Left          | All four                                |                                                                                                                       |
 | 4           | `-` `+` (binary)           | Left          | All four                                |                                                                                                                       |
-| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Rational` only                         | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                  |
-| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Rational` only                         | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here. |
+| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Complex`, `Rational`                   | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                  |
+| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Complex`, `Rational`                   | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here. |
 
 The most tricky thing to remember is that the exponentiation operator `**` has the highest precedence of all, which
 means, for example, `-$z1 ** 2` is evaluated as `-($z1 ** 2)` rather than `(-$z1) ** 2`. That precedence can be

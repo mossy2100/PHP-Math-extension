@@ -23,6 +23,7 @@ zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value);
 zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval *return_value);
 zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *return_value);
+zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *return_value);
 zend_result matrix_calc_inv(zend_object *self, zval *return_value);
 zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_value);
 

@@ -11,12 +11,12 @@
  * $data is a genuine PHP array property (list<float>), matching the pure-PHP class exactly --
  * letting the Zend engine's own array/zval machinery handle allocation and refcounting, rather
  * than a custom object struct. Every read/write of an element goes through vector_read_element()/
- * vector_write_element() below, which is the one place bounds-checking, finite-value validation,
- * and the $magnitude cache invalidation (on write) all live.
+ * vector_write_element() below, which is the one place bounds-checking and finite-value validation
+ * live.
  *
  * vector_minit() is called from the module's real PHP_MINIT_FUNCTION in ../math.c. Conversion
  * methods (toArray/__toString/toRowMatrix/toColumnMatrix) live in vector_conversion.c; the
- * computed $magnitude property lives in vector_properties.c; inspection/modification/comparison/
+ * magnitude() method lives in vector_linear_algebra.c; inspection/modification/comparison/
  * arithmetic/linear-algebra/aggregation/ArrayAccess methods live in their own vector_*.c files,
  * matching Vector.php's own region split.
  */
@@ -128,11 +128,10 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
 /* {{{ vector_write_element
  *
  * Bounds-checked, finite-value-checked write of $data[$index] off a zend_object already known to
- * be a Vector instance, invalidating the cached $magnitude afterward (matching the PHP package's
- * set(): `$this->data[$index] = $value; $this->magnitude = null;`). Used by set()/offsetSet() and,
- * for the same correctness-by-construction reason as vector_read_element(), by every other method
- * that builds a new Vector result element-by-element -- this is also where a non-finite result
- * (e.g. a scalar multiplication overflowing to INF) gets caught.
+ * be a Vector instance. Used by set()/offsetSet() and, for the same correctness-by-construction
+ * reason as vector_read_element(), by every other method that builds a new Vector result
+ * element-by-element -- this is also where a non-finite result (e.g. a scalar multiplication
+ * overflowing to INF) gets caught.
  *
  * Returns FAILURE (with an exception already thrown) for an out-of-range index or a non-finite
  * value.
@@ -165,8 +164,6 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 	zval new_value;
 	ZVAL_DOUBLE(&new_value, value);
 	zend_hash_index_update(Z_ARRVAL_P(data), (zend_ulong) index, &new_value);
-
-	zend_update_property_null(vector_ce_Vector, obj, "magnitude", sizeof("magnitude") - 1);
 
 	return SUCCESS;
 }

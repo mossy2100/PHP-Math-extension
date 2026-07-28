@@ -459,6 +459,49 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
 }
 /* }}} */
 
+/* {{{ matrix_calc_scalar_div
+ *
+ * The computational core of the `/` operator's `float / Matrix` form (matrix_operators.c) --
+ * Matrix has no named method for this direction, only the operator (`Matrix / float` is div(),
+ * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
+ * $matrix->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().
+ */
+zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+
+	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < row_count; i++) {
+		for (zend_long j = 0; j < column_count; j++) {
+			double value;
+			matrix_read_element(self, i, j, &value);
+			if (value == 0.0) {
+				zend_string *msg = strpprintf(
+					0, "Cannot divide by zero at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ".", i, j
+				);
+				zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
+				zend_string_release(msg);
+				zval_ptr_dtor(return_value);
+				ZVAL_UNDEF(return_value);
+				return FAILURE;
+			}
+			if (matrix_write_element(result, i, j, scalar / value) == FAILURE) {
+				zval_ptr_dtor(return_value);
+				ZVAL_UNDEF(return_value);
+				return FAILURE;
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::div(float $scalar): Matrix
  *
  * Matches the PHP package's Matrix::div().

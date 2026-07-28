@@ -44,14 +44,15 @@ Each interface has two methods:
 - `specifyType(...): Type` - given the same inputs (once `isOperatorSupported()` has already said yes), return the
   PHPStan `Type` the expression evaluates to.
 
-This repo already has a complete, working set of these - one binary + one unary extension per class (plus a separate
-comparison extension for `Rational`, since its comparison operators are backed by a distinct `compare` object handler,
-not `do_operation`):
+This repo already has a complete, working set of these - one binary + one unary extension per class, plus a separate
+comparison extension for `Complex` and `Rational` (the two classes with comparison operators), since those are backed
+by a distinct `compare` object handler, not `do_operation`:
 
 | File                                              | Backs                                   |
 | ------------------------------------------------- | --------------------------------------- |
 | `phpstan/ComplexBinaryOperatorExtension.php`      | `+`, `-`, `*`, `/`, `**`                |
 | `phpstan/ComplexUnaryOperatorExtension.php`       | unary `+`, `-`, `~`                     |
+| `phpstan/ComplexComparisonOperatorExtension.php`  | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
 | `phpstan/RationalBinaryOperatorExtension.php`     | `+`, `-`, `*`, `/`, `**`                |
 | `phpstan/RationalUnaryOperatorExtension.php`      | unary `+`, `-`                          |
 | `phpstan/RationalComparisonOperatorExtension.php` | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
@@ -127,7 +128,7 @@ services:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
 ```
 
-See `phpstan.neon` in this repo for the complete, currently-working set of nine registrations (one per row in the table
+See `phpstan.neon` in this repo for the complete, currently-working set of ten registrations (one per row in the table
 above).
 
 ### The classes also have to be visible to PHPStan as class types at all

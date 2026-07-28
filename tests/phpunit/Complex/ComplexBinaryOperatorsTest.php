@@ -287,14 +287,14 @@ class ComplexBinaryOperatorsTest extends TestCase
      */
     public function testPowComplexToComplex(): void
     {
-        $z = new Complex(3, 4);
-        $exponent = new Complex(2, 0);
-        $result = $z ** $exponent;
+        $z1 = new Complex(3, 4);
+        $z2 = new Complex(2, 0);
+        $result = $z1 ** $z2;
 
         $this->assertEqualsWithDelta(-7.0, $result->real, EPSILON);
         $this->assertEqualsWithDelta(24.0, $result->imaginary, EPSILON);
-        $this->assertEqualsWithDelta($z->pow($exponent)->real, $result->real, EPSILON);
-        $this->assertEqualsWithDelta($z->pow($exponent)->imaginary, $result->imaginary, EPSILON);
+        $this->assertEqualsWithDelta($z1->pow($z2)->real, $result->real, EPSILON);
+        $this->assertEqualsWithDelta($z1->pow($z2)->imaginary, $result->imaginary, EPSILON);
     }
 
     /**
@@ -329,12 +329,12 @@ class ComplexBinaryOperatorsTest extends TestCase
      */
     public function testPowDoesNotMutate(): void
     {
-        $z = new Complex(3, 4);
+        $z1 = new Complex(3, 4);
 
-        $z2 = $z ** 2;
+        $z2 = $z1 ** 2;
 
-        $this->assertSame(3.0, $z->real);
-        $this->assertSame(4.0, $z->imaginary);
+        $this->assertSame(3.0, $z1->real);
+        $this->assertSame(4.0, $z1->imaginary);
     }
 
     #endregion

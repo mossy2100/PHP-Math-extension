@@ -21,19 +21,28 @@ zend_long vector_read_size(zend_object *obj);
 zend_result vector_read_element(zend_object *obj, zend_long index, double *out_value);
 zend_result vector_write_element(zend_object *obj, zend_long index, double value);
 
-/* Installs the magnitude computed-property object handler. Defined in vector_properties.c;
- * called from vector_minit() (vector.c). */
+/* Installs the custom object handlers (do_operation, create_object, read_property) shared by
+ * every Vector instance. Defined in vector_properties.c; called from vector_minit() (vector.c). */
 zend_result vector_properties_minit(void);
+
+/* Computes the magnitude (Euclidean norm) of a Vector: sqrt(sum of squares). Defined in
+ * vector_linear_algebra.c; backs the `magnitude` computed property (vector_properties.c), and is
+ * also called directly (bypassing property read dispatch) by normalized()
+ * (vector_linear_algebra.c) and normalize() (vector_modification.c). */
+double vector_compute_magnitude(zend_object *obj);
 
 /* The computational cores of add()/sub()/mul()/div(), defined in vector_arithmetic.c. Shared with
  * the operator overloads (vector_operators.c) so operator and method results/exceptions are
  * guaranteed identical; vector_calc_div() is also shared with normalized()/normalize()
- * (vector_linear_algebra.c/vector_modification.c). */
+ * (vector_linear_algebra.c/vector_modification.c). vector_calc_scalar_div() backs only the `/`
+ * operator's `float / Vector` form -- there's no equivalent named method, since Vector::div() only
+ * ever divides the Vector by a scalar, never the reverse. */
 zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value);
 zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value);
+zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value);
 
 /* Builds a 1xN / Nx1 Matrix from this Vector's elements, defined in vector_conversion.c. Shared
  * between toRowMatrix()/toColumnMatrix() themselves and mul()'s Matrix branch (vector_arithmetic.c)

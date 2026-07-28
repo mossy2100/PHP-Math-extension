@@ -1,86 +1,77 @@
 /*
  * vector_properties.c
  *
- * The `magnitude` computed property on OceanMoon\Math\Vector. Mirrors the PHP package's
- * "Computed properties" region: declared nullable, defaults to null, and is lazily computed and
- * cached in place the first time it's read, invalidated back to null by vector_write_element()
- * (vector.c) on every write -- matching the package's property-hook-based caching, implemented
- * here via a custom `read_property` object handler since internal (C-registered) classes don't
- * support property hooks. Directly mirrors Complex/complex_properties.c's magnitude/phase
- * pattern (including its opcode-level inline-property-cache workaround, explained below).
+ * The `magnitude` computed property on OceanMoon\Math\Vector: computed fresh from the current
+ * elements on every read, never cached -- mirrors the PHP package's property-hook-based
+ * $magnitude (a `get`-only hook with no backing storage), implemented here via a custom
+ * `read_property` object handler since internal (C-registered) classes don't support property
+ * hooks. Unlike Complex's magnitude/phase (stored, eagerly computed once at construction, since
+ * Complex is immutable), Vector is mutable, so caching would need every mutating method (set(),
+ * and anything built on it) to remember to invalidate it -- simpler to just never cache.
  *
- * Also owns installing the custom object handlers table (read_property) on Vector's class entry.
+ * Also installs the custom object handlers (do_operation, create_object) shared by every Vector
+ * instance.
  */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
-#include <math.h>
-#include <string.h>
-
 #include "php.h"
 #include "vector_internal.h"
 #include "vector_arginfo.h"
 
-/* {{{ vector_compute_magnitude
- *
- * Matches the PHP package's magnitude hook: sqrt(sum of squares).
- */
-static double vector_compute_magnitude(zend_object *obj)
-{
-	zend_long size = vector_read_size(obj);
-	double sum = 0.0;
-
-	for (zend_long i = 0; i < size; i++) {
-		double element;
-		/* Bounds are trivially satisfied (0..size-1), so this never fails. */
-		vector_read_element(obj, i, &element);
-		sum += element * element;
-	}
-
-	return sqrt(sum);
-}
-/* }}} */
-
 /* {{{ vector_read_property
  *
- * Custom `read_property` handler: for "magnitude", computes and caches the value (via
- * zend_update_property_double(), so subsequent reads see it already populated) the first time
- * it's read as null, then falls through to zend_std_read_property() either way. Calls
- * zend_std_read_property() directly (not through the object's own handlers) to peek at the
- * current stored value -- going through the handler vtable here would recurse into this same
- * function.
+ * Custom `read_property` handler: for "magnitude", computes the value fresh from the vector's
+ * current elements and returns it directly via `rv`, without touching the (unused) backing
+ * property slot. Falls through to zend_std_read_property() for every other property.
  *
- * Deliberately passes NULL for cache_slot on every zend_std_read_property() call in this
- * function, including the final one -- never the real cache_slot the opcode handed us. The
- * opcode that fetches an object property (e.g. ZEND_FETCH_OBJ_R) uses *cache_slot to remember
- * "this class's property X is at offset N" across repeated executions of the *same* bytecode
- * location (e.g. a loop body). If that cache gets populated here, the engine's fast path can, on
- * the next iteration, read the raw property slot directly -- bypassing this handler (and so our
- * lazy compute-and-cache logic) entirely -- and return the still-uncomputed null. Forcing NULL
- * here means every access genuinely goes through this function, at a small, deliberate cost to
- * the opcode-level fast path for magnitude/data/size alike.
+ * Deliberately passes NULL for cache_slot on the fallthrough call rather than forwarding the
+ * opcode's real cache_slot. The opcode that fetches an object property (e.g. ZEND_FETCH_OBJ_R)
+ * uses *cache_slot to remember "this class's property X is at offset N" across repeated
+ * executions of the same bytecode location (e.g. a loop body); if populated, the engine's fast
+ * path could read the raw property slot directly on a later iteration, bypassing this handler
+ * entirely and returning the (permanently unset) backing value instead of a fresh computation --
+ * see Complex/complex_properties.c's git history for the same bug, hit and fixed there first.
  */
 static zval *vector_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	if (zend_string_equals_literal(member, "magnitude")) {
-		zval peek_rv;
-		zval *current = zend_std_read_property(object, member, BP_VAR_R, NULL, &peek_rv);
-
-		if (Z_TYPE_P(current) == IS_NULL) {
-			double computed = vector_compute_magnitude(object);
-			zend_update_property_double(vector_ce_Vector, object, ZSTR_VAL(member), ZSTR_LEN(member), computed);
-		}
+		ZVAL_DOUBLE(rv, vector_compute_magnitude(object));
+		return rv;
 	}
 
 	return zend_std_read_property(object, member, type, NULL, rv);
 }
 /* }}} */
 
+/* {{{ vector_write_property
+ *
+ * Custom `write_property` handler: rejects writes to "magnitude" with the same "Property
+ * OceanMoon\Math\Vector::$magnitude is read-only" Error the PHP package's `get`-only property
+ * hook produces natively -- without this override, the backing slot declared for `magnitude`
+ * (needed so the property exists at all for reflection/property_exists()) would silently accept
+ * writes that read_property() above then ignores on every subsequent read, a silent no-op instead
+ * of the loud failure the package gives. Falls through to zend_std_write_property() for every
+ * other property.
+ */
+static zval *vector_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot)
+{
+	if (zend_string_equals_literal(member, "magnitude")) {
+		zend_throw_error(NULL, "Property %s::$magnitude is read-only", ZSTR_VAL(object->ce->name));
+		return value;
+	}
+
+	return zend_std_write_property(object, member, value, cache_slot);
+}
+/* }}} */
+
 /* The custom object handlers for Vector, installed by vector_create_object(). A copy of the
- * standard handlers with `read_property` overridden so magnitude can be lazily computed and
- * cached in place, matching the PHP package's property-hook behavior. */
+ * standard handlers with `do_operation`, `read_property`, and `write_property` overridden -- the
+ * first for operator support, the other two so `magnitude` behaves like the package's read-only
+ * property hook: computed fresh on every read, and rejecting writes, instead of silently
+ * accepting them into an ignored backing slot. */
 static zend_object_handlers vector_object_handlers;
 
 /* {{{ vector_create_object
@@ -105,8 +96,9 @@ static zend_object *vector_create_object(zend_class_entry *ce)
 zend_result vector_properties_minit(void)
 {
 	memcpy(&vector_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	vector_object_handlers.read_property = vector_read_property;
 	vector_object_handlers.do_operation = vector_do_operation;
+	vector_object_handlers.read_property = vector_read_property;
+	vector_object_handlers.write_property = vector_write_property;
 	vector_ce_Vector->create_object = vector_create_object;
 
 	return SUCCESS;

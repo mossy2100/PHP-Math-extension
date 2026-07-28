@@ -77,6 +77,8 @@ final class Matrix implements \Stringable, \Countable, \ArrayAccess
 
     public function sqr(): Matrix {}
 
+    public function mulVector(Vector $vector): Vector {}
+
     public function t(): Matrix {}
 
     public function det(): float {}

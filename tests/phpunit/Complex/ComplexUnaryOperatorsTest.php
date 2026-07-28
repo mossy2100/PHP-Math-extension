@@ -23,22 +23,22 @@ class ComplexUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $z = new Complex(3, 4);
-        $copy = +$z;
+        $z1 = new Complex(3, 4);
+        $z2 = +$z1;
 
-        $this->assertSame(3.0, $copy->real);
-        $this->assertSame(4.0, $copy->imaginary);
+        $this->assertSame(3.0, $z2->real);
+        $this->assertSame(4.0, $z2->imaginary);
     }
 
     /**
-     * Test that unary + returns a new instance, not $z itself (immutability).
+     * Test that unary + returns a new instance, not $z1 itself (immutability).
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $z = new Complex(3, 4);
-        $copy = +$z;
+        $z1 = new Complex(3, 4);
+        $z2 = +$z1;
 
-        $this->assertNotSame($z, $copy);
+        $this->assertNotSame($z1, $z2);
     }
 
     /**
@@ -77,12 +77,12 @@ class ComplexUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinusDoesNotMutate(): void
     {
-        $z = new Complex(3, 4);
+        $z1 = new Complex(3, 4);
 
-        $z2 = -$z;
+        $z2 = -$z1;
 
-        $this->assertSame(3.0, $z->real);
-        $this->assertSame(4.0, $z->imaginary);
+        $this->assertSame(3.0, $z1->real);
+        $this->assertSame(4.0, $z1->imaginary);
     }
 
     /**
@@ -130,12 +130,12 @@ class ComplexUnaryOperatorsTest extends TestCase
      */
     public function testConjugateDoesNotMutate(): void
     {
-        $z = new Complex(3, 4);
+        $z1 = new Complex(3, 4);
 
-        $z2 = ~$z;
+        $z2 = ~$z1;
 
-        $this->assertSame(3.0, $z->real);
-        $this->assertSame(4.0, $z->imaginary);
+        $this->assertSame(3.0, $z1->real);
+        $this->assertSame(4.0, $z1->imaginary);
     }
 
     /**

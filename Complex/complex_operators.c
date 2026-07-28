@@ -62,7 +62,7 @@ static zend_result complex_operand_to_parts(zval *zv, double *out_real, double *
  * Backs the ZEND_POW case of complex_do_operation(): resolves the exponent (op2) into a (real,
  * imaginary) pair, then the base (op1) into a genuine zend_object* -- promoting it to a temporary
  * Complex first if it isn't already one -- since complex_calc_pow() (complex_power.c) needs a real
- * object for its general-case ln() call to read/cache the magnitude/phase computed properties.
+ * object for its general-case ln() call to read the magnitude/phase properties.
  * Mirrors how complex_transcendental.c's log() promotes a scalar $base for the same reason.
  */
 static zend_result complex_operator_pow(zval *result, zval *op1, zval *op2)

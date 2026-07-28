@@ -23,8 +23,14 @@ zend_result complex_from_polar(zval *return_value, double mag, double phase);
 void complex_read_parts(zend_object *obj, double *out_real, double *out_imag);
 void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase);
 
-/* Installs the magnitude/phase computed-property object handlers. Defined in
- * complex_properties.c; called from complex_minit() (complex.c). */
+/* Compute the magnitude/phase for a given real/imaginary pair, matching the PHP package's
+ * constructor logic exactly. Defined in complex_properties.c; called from complex_init()
+ * (complex.c) to populate $magnitude/$phase eagerly at construction time. */
+double complex_compute_magnitude(double real, double imag);
+double complex_compute_phase(double real, double imag);
+
+/* Installs the custom object handlers (do_operation, compare, create_object) shared by every
+ * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */
 zend_result complex_properties_minit(void);
 
 /* Shared by add()/sub()/mul()/div() (complex_arithmetic.c) and pow() (complex_power.c). See its
@@ -45,6 +51,12 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
  * complex_object_handlers in complex_properties_minit() (complex_properties.c). See its doc
  * comment in complex_operators.c. */
 zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
+/* The computational core of the <, <=, >, >=, <=> comparison operators, and the `compare` object
+ * handler backing them (installed on complex_object_handlers in complex_properties_minit()).
+ * Defined in complex_comparison.c; see their doc comments there. */
+zend_result complex_calc_compare(zend_object *self_obj, zval *other, int *out);
+int complex_do_compare(zval *op1, zval *op2);
 
 /* Module lifecycle hooks, called from ../math.c. See their doc comments in complex.c. */
 zend_result complex_minit(void);

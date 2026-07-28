@@ -441,12 +441,12 @@ class RationalBinaryOperatorsTest extends TestCase
      */
     public function testPowDoesNotMutate(): void
     {
-        $r = new Rational(2, 3);
+        $r1 = new Rational(2, 3);
 
-        $r2 = $r ** 2;
+        $r2 = $r1 ** 2;
 
-        $this->assertSame(2, $r->numerator);
-        $this->assertSame(3, $r->denominator);
+        $this->assertSame(2, $r1->numerator);
+        $this->assertSame(3, $r1->denominator);
     }
 
     #endregion

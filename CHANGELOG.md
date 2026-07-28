@@ -24,6 +24,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     immutable).
 - **Operator overloading for `Complex`** (not possible in the userland package): `+`, `-`, `*`, `/`, `**` each accept a
   `Complex` or `int|float` operand on either side, and `~` for the complex conjugate. See `docs/Complex.md`.
+- **Comparison operators for `Complex`** (`<`, `<=`, `>`, `>=`, `<=>`, and, as an unavoidable side effect of PHP wiring
+  all six to the same `compare` handler, `==`/`!=`) -- not backed by any named method in the userland package, since
+  comparing complex numbers isn't mathematically meaningful (no total order is compatible with the field operations).
+  The ordering is plain lexicographic (real part first, then imaginary), matching what PHP's own default object
+  comparison already gives two `Complex` instances for free (`$real` is declared before `$imaginary`); the operators
+  add accepting an `int|float` operand on either side, promoted the same way `equal()` promotes one, and throwing
+  `DomainException` for a `NAN` operand. `Complex` is now the second of the four classes (after `Rational`) with
+  comparison operators; `Vector`/`Matrix` still have none. See `docs/Complex.md`.
 - **`OceanMoon\Math\Rational` is now fully implemented natively**, matching the userland package method-for-method:
   - Construction, factory methods (`fromFloat()`, `fromString()`), conversion (`toFloat()`, `toMixedNumber()`,
     `__toString()`), and comparison (`compare()`, `equal()`, `approxEqual()`, `lessThan()`, etc.).
@@ -39,7 +47,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   they're mutually dependent in the userland package, matching it method-for-method:
   - `Vector`: construction, `fromArray()`, conversion (`toArray()`, `toRowMatrix()`, `toColumnMatrix()`,
     `__toString()`), inspection (`get()`), modification (`set()`, `normalize()`), and comparison (`equal()`,
-    `approxEqual()`).
+    `approxEqual()`). `$magnitude` is a computed property, implemented via custom `read_property`/`write_property`
+    object handlers (internal classes can't use PHP 8.4 property hooks directly) -- like the userland package's own
+    `get`-only property hook, it recomputes fresh from the current elements on every read rather than caching (since
+    `Vector` is mutable and a cache would need every mutating method to remember to invalidate it), and rejects
+    writes with the identical "Property OceanMoon\Math\Vector::$magnitude is read-only" `Error` PHP's own hook
+    machinery produces for the package's version.
   - `Vector` unary and binary arithmetic (`neg()`, `reciprocal()`, `add()`, `sub()`, `mul()`, `div()`, `hadamardMul()`,
     `hadamardDiv()`), linear algebra (`dot()`, `cross()`, `outer()`, `normalized()`), and aggregation (`sum()`,
     `prod()`, `count()`).
@@ -47,26 +60,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     inspection (`isSquare()`, `get()`, `getRow()`, `getColumn()`, `copy()`), modification (`set()`, `setRow()`,
     `setColumn()`, `paste()`), comparison (`equal()`, `approxEqual()`), and transformation (`resize()`).
   - `Matrix` unary and binary arithmetic (`neg()`, `reciprocal()`, `inv()`, `add()`, `sub()`, `mul()`, `div()`,
-    `hadamardMul()`, `hadamardDiv()`), power methods (`pow()`, `sqr()`), linear algebra (`t()`, `det()`, `trace()`), and
-    norm methods (`norm()`, `p1Norm()`, `pInfNorm()`).
+    `hadamardMul()`, `hadamardDiv()`), power methods (`pow()`, `sqr()`), linear algebra (`mulVector()`, `t()`, `det()`,
+    `trace()`), and norm methods (`norm()`, `p1Norm()`, `pInfNorm()`).
   - Both implement `Countable`/`ArrayAccess` (mutable, unlike `Complex`); `Matrix::offsetGet()` returns a live row
     `Vector` reference, matching the userland package's semantics for `$m[$row][$col] = $x`.
   - Cloning a `Matrix` deep-clones its row `Vector`s via a custom `clone_obj` object handler -- the one genuinely new C
     pattern this port required -- matching `Matrix::__clone()`'s fix for the same shared-row-identity bug.
 - **Operator overloading for `Vector` and `Matrix`** (not possible in the userland package): `Vector` gets `+`/`-`
-  (`Vector` operand only), `*` (`int|float` on either side, or `Vector * Matrix`), and `/` (`int|float` divisor only).
-  `Matrix` gets `+`/`-` (`Matrix` operand only), `*` (`int|float` on either side, `Matrix * Matrix`, or
-  `Matrix * Vector` -- resulting in a `Vector` rather than a `Matrix`, with no equivalent named method; see
-  `Vector::mul()`/`Matrix::mul()`), `/` (`int|float` divisor only), and `**` (`int` exponent only, via `pow()`). Every
-  deliberately-unsupported form documented in `docs/Vector.md`/`docs/Matrix.md` (e.g. `Vector * Vector`, `int / Vector`,
+  (`Vector` operand only), `*` (`int|float` on either side, or `Vector * Matrix`), and `/` (`int|float` divisor, or
+  `int|float` dividend -- see below). `Matrix` gets `+`/`-` (`Matrix` operand only), `*` (`int|float` on either side,
+  `Matrix * Matrix`, or `Matrix * Vector` -- equivalent to `mulVector()`, resulting in a `Vector` rather than a
+  `Matrix`), `/` (`int|float` divisor, or `int|float` dividend), and `**` (`int` exponent only, via `pow()`). Every
+  deliberately-unsupported form documented in `docs/Vector.md`/`docs/Matrix.md` (e.g. `Vector * Vector`,
   `Matrix / Matrix`, `int ** Matrix`) throws `TypeError`, matching PHP's own "unsupported operand types" error for
   ordinary types.
-- **`Matrix::mulVector()`** — added earlier in this Unreleased cycle, removed again for the same reason `Vector::mul()`
-  dropped its `Matrix` operand (see the PHP package's CHANGELOG): a dedicated method for "matrix times vector" (_Ax_)
-  forces an unsatisfying choice between a `self|Vector` union return type (which PHPStan can't narrow without
-  `assert()`, and which breaks the fluent API) or a single-column `Matrix` (not what callers actually want from _Ax_).
-  Use the `*` operator instead (`$A * $v`), which isn't constrained by a declared return type; see `docs/Matrix.md` and
-  the PHP package's `Matrix::mul()` docblock for the named-method alternative.
+- **`int|float / Vector` and `int|float / Matrix`** -- element-wise: divides the scalar by each element in turn,
+  equivalent to `$x * $vector->reciprocal()`/`$x * $matrix->reciprocal()`, and throwing `ArithmeticException` for a
+  zero element, matching `reciprocal()`. Not commutative with `Vector / int|float`/`Matrix / int|float` (`div()`),
+  and has no equivalent named method in either direction -- `div()` only ever divides the `Vector`/`Matrix` by a
+  scalar, never the reverse. On `Matrix`, this is distinct from `$x * $matA->inv()` (inverse scaling); the ambiguity
+  between the two readings of `x / A` that made this form unsupported until now is resolved in favor of the
+  element-wise reading, matching `reciprocal()`'s existing meaning.
 - **`docs/Static Analysis.md`**, explaining how PHPStan is taught to understand this extension's operator overloads
   (PHPStan's `OperatorTypeSpecifyingExtension`/`UnaryOperatorTypeSpecifyingExtension` mechanism — the same one used for
   GMP/BCMath), using the existing `phpstan/*OperatorExtension.php` classes and `phpstan.neon` registrations as the
@@ -77,6 +91,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   (VPS/cloud) pages, replacing a single flat section. The Windows page in particular is now explicit that no prebuilt
   binary exists yet and why PIE can't build one for you there (it only builds from source on non-Windows platforms —
   extension maintainers must supply prebuilt Windows binaries).
+- **PHPCS set up for `tests/`**, matching the setup already used by `Math` and the other packages: `phpcs.xml` using
+  the `oceanmoon/coding-standard` `OceanMoon` ruleset, plus `composer fix`/`composer check` scripts. Fixing the
+  resulting violations (mostly array-literal formatting) also turned up two real issues: `MatrixBinaryOperatorsTest.php`
+  and `VectorBinaryOperatorsTest.php` used `$A`/`$B` for matrix variables, inconsistent with the project's lowerCamelCase
+  convention and with `packages/Math`'s own tests (which use `$a`/`$b`); and `RationalComparisonOperatorsTest.php`'s
+  `==`/`!=` operator tests were auto-"fixed" by `phpcbf` to `===`/`!==`, which silently broke them, since the whole
+  point of those tests is exercising `Rational`'s custom loose-equality operator overload — reverted. (The underlying
+  `SlevomatCodingStandard.Operators.DisallowEqualOperators` sniff was subsequently removed from `oceanmoon/coding-standard`
+  itself, so no per-line suppression was needed.)
+- **New "Comparison Operators" section in `README.md`**, covering both loose (`<=>`-backed) and strict (`===`/`!==`)
+  comparison across all four classes: which classes get loose operators and why (`Complex`/`Rational` do, `Vector`/
+  `Matrix` don't, since neither has a natural total order over a whole element list), and that strict comparison
+  needs no extension support at all -- PHP's own `===` already does the right thing for value types with only
+  scalar/typed properties.
 
 ### Changed
 

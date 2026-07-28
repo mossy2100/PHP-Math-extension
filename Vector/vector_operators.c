@@ -57,10 +57,10 @@ static zend_result vector_operand_scalar(zval *zv, double *out)
  *
  * Called by the engine whenever at least one operand of one of the above opcodes is an object with
  * a do_operation handler (op1 checked first, then op2). Returning FAILURE (without throwing) for
- * any unsupported operand combination -- including Vector + int, Vector * Vector, int / Vector,
- * Vector / Vector, and Vector / Matrix, all deliberately unsupported per docs/Vector.md -- lets the
- * engine fall through to its own standard "Unsupported operand types" TypeError, or try the other
- * operand's handler if it has one (e.g. `Matrix * Vector`, handled by matrix_do_operation instead).
+ * any unsupported operand combination -- including Vector + int, Vector * Vector, Vector / Vector,
+ * and Vector / Matrix, all deliberately unsupported per docs/Vector.md -- lets the engine fall
+ * through to its own standard "Unsupported operand types" TypeError, or try the other operand's
+ * handler if it has one (e.g. `Matrix * Vector`, handled by matrix_do_operation instead).
  */
 zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
@@ -98,6 +98,9 @@ zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *o
 			double scalar;
 			if (op1_is_vector && vector_operand_scalar(op2, &scalar) == SUCCESS) {
 				return vector_calc_div(Z_OBJ_P(op1), scalar, result);
+			}
+			if (op2_is_vector && vector_operand_scalar(op1, &scalar) == SUCCESS) {
+				return vector_calc_scalar_div(scalar, Z_OBJ_P(op2), result);
 			}
 			return FAILURE;
 		}
