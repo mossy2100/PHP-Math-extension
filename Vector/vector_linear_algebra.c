@@ -26,12 +26,12 @@
  */
 double vector_compute_magnitude(zend_object *obj)
 {
-	zend_long size = vector_read_size(obj);
+	zend_long count = vector_read_count(obj);
 	double sum = 0.0;
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
-		/* Bounds are trivially satisfied (0..size-1), so this never fails. */
+		/* Bounds are trivially satisfied (0..count-1), so this never fails. */
 		vector_read_element(obj, i, &element);
 		sum += element * element;
 	}
@@ -55,12 +55,12 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	zend_long size = vector_read_size(self);
-	zend_long other_size = vector_read_size(other_obj);
-	if (size != other_size) {
+	zend_long count = vector_read_count(self);
+	zend_long other_count = vector_read_count(other_obj);
+	if (count != other_count) {
 		zend_string *msg = strpprintf(
-			0, "Cannot compute dot product with Vector of incorrect size: " ZEND_LONG_FMT ". Expected "
-			ZEND_LONG_FMT ".", other_size, size
+			0, "Cannot compute dot product with Vector of incorrect count: " ZEND_LONG_FMT ". Expected "
+			ZEND_LONG_FMT ".", other_count, count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
@@ -68,7 +68,7 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 	}
 
 	double sum = 0.0;
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other_obj, i, &b);
@@ -81,7 +81,7 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 
 /* {{{ OceanMoon\Math\Vector::cross(Vector $other): Vector
  *
- * Matches the PHP package's Vector::cross(): both vectors must be size 3.
+ * Matches the PHP package's Vector::cross(): both vectors must be count 3.
  */
 PHP_METHOD(OceanMoon_Math_Vector, cross)
 {
@@ -94,20 +94,20 @@ PHP_METHOD(OceanMoon_Math_Vector, cross)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	zend_long self_size = vector_read_size(self);
-	if (self_size != 3) {
+	zend_long self_count = vector_read_count(self);
+	if (self_count != 3) {
 		zend_string *msg = strpprintf(
-			0, "Cannot compute cross product with first Vector size: " ZEND_LONG_FMT ". Must be 3.", self_size
+			0, "Cannot compute cross product with first Vector count: " ZEND_LONG_FMT ". Must be 3.", self_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
 		RETURN_THROWS();
 	}
 
-	zend_long other_size = vector_read_size(other_obj);
-	if (other_size != 3) {
+	zend_long other_count = vector_read_count(other_obj);
+	if (other_count != 3) {
 		zend_string *msg = strpprintf(
-			0, "Cannot compute cross product with second Vector size: " ZEND_LONG_FMT ". Must be 3.", other_size
+			0, "Cannot compute cross product with second Vector count: " ZEND_LONG_FMT ". Must be 3.", other_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);

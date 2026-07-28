@@ -22,10 +22,10 @@ PHP_METHOD(OceanMoon_Math_Vector, sum)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 
 	double sum = 0.0;
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 		sum += element;
@@ -44,10 +44,10 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 
 	double prod = 1.0;
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 		prod *= element;
@@ -59,12 +59,12 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 
 /* {{{ OceanMoon\Math\Vector::count(): int
  *
- * Matches the PHP package's Vector::count() (Countable): returns $size.
+ * Matches the PHP package's Vector::count() (Countable): returns $count.
  */
 PHP_METHOD(OceanMoon_Math_Vector, count)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG(vector_read_size(Z_OBJ_P(ZEND_THIS)));
+	RETURN_LONG(vector_read_count(Z_OBJ_P(ZEND_THIS)));
 }
 /* }}} */

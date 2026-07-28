@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce14550e38097d3a359080fd5dee6361521bd543 */
+ * Stub hash: ed4674d332d4f1bd052300870ff48c310e6dad8e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Vector___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_fromArray, 0, 1, OceanMoon\\Math\\Vector, 0)
@@ -175,22 +175,20 @@ static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess);
 
+	zval property_count_default_value;
+	ZVAL_LONG(&property_count_default_value, 0);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_COUNT), &property_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+
 	zval property_data_default_value;
 	ZVAL_EMPTY_ARRAY(&property_data_default_value);
 	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
 	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property_data_name);
 
-	zval property_size_default_value;
-	ZVAL_LONG(&property_size_default_value, 0);
-	zend_string *property_size_name = zend_string_init("size", sizeof("size") - 1, 1);
-	zend_declare_typed_property(class_entry, property_size_name, &property_size_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_size_name);
-
 	zval property_magnitude_default_value;
-	ZVAL_DOUBLE(&property_magnitude_default_value, 0.0);
+	ZVAL_UNDEF(&property_magnitude_default_value);
 	zend_string *property_magnitude_name = zend_string_init("magnitude", sizeof("magnitude") - 1, 1);
-	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
+	zend_declare_typed_property(class_entry, property_magnitude_name, &property_magnitude_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
 	zend_string_release(property_magnitude_name);
 
 	return class_entry;

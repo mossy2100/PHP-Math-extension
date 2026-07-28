@@ -15,13 +15,13 @@ namespace OceanMoon\Math;
 
 final class Vector implements \Stringable, \Countable, \ArrayAccess
 {
+    public int $count = 0;
+
     private array $data = [];
 
-    public int $size = 0;
+    public readonly float $magnitude;
 
-    public float $magnitude = 0.0;
-
-    public function __construct(int $size) {}
+    public function __construct(int $count) {}
 
     public static function fromArray(array $arr): Vector {}
 

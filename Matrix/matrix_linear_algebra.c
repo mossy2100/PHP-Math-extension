@@ -27,12 +27,12 @@ zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval 
 {
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
-	zend_long vector_size = vector_read_size(vector);
+	zend_long vector_count = vector_read_count(vector);
 
-	if (column_count != vector_size) {
+	if (column_count != vector_count) {
 		zend_string *msg = strpprintf(
 			0, "Invalid Matrix row count: " ZEND_LONG_FMT ". Must equal this Matrix's column count: "
-			ZEND_LONG_FMT ".", vector_size, column_count
+			ZEND_LONG_FMT ".", vector_count, column_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
@@ -129,13 +129,13 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 		RETURN_THROWS();
 	}
 
-	zend_long size = row_count;
+	zend_long count = row_count;
 	zval data_array;
-	array_init_size(&data_array, (uint32_t) size);
-	for (zend_long i = 0; i < size; i++) {
+	array_init_size(&data_array, (uint32_t) count);
+	for (zend_long i = 0; i < count; i++) {
 		zval row;
-		array_init_size(&row, (uint32_t) size);
-		for (zend_long j = 0; j < size; j++) {
+		array_init_size(&row, (uint32_t) count);
+		for (zend_long j = 0; j < count; j++) {
 			double value;
 			matrix_read_element(self, i, j, &value);
 			zval v;

@@ -15,9 +15,9 @@
 extern zend_class_entry *vector_ce_Vector;
 
 /* Shared helpers, defined in vector.c. See their doc comments there. */
-zend_result vector_init(zend_object *obj, zend_long size);
-zend_result vector_create(zval *return_value, zend_long size);
-zend_long vector_read_size(zend_object *obj);
+zend_result vector_init(zend_object *obj, zend_long count);
+zend_result vector_create(zval *return_value, zend_long count);
+zend_long vector_read_count(zend_object *obj);
 zend_result vector_read_element(zend_object *obj, zend_long index, double *out_value);
 zend_result vector_write_element(zend_object *obj, zend_long index, double value);
 

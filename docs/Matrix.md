@@ -13,17 +13,15 @@ operators are provided, since matrices have no natural sort order.
 
 ## Unary Arithmetic Operators
 
-### + (identity)
+### + (clone)
 
 ```php
-$matB = +$matA;
+$copy = +$matA;
 ```
 
-Returns a new `Matrix` with the same elements. There's no package method this maps to; value identity needs no explicit
-method call in ordinary PHP code. PHP has no dedicated opcode for unary `+`/`-`; the compiler lowers `+$matA` to
-`$matA * 1`, which the extension handles via the scalar form of `*` (see below). Since `Matrix` is mutable, this returns
-a distinct copy rather than `$this`, so mutating the result never affects the original - the same rule the package's own
-arithmetic methods follow (see the note on `pow(1)` in the package's `Matrix` docs).
+Equivalent to `clone $matA`. Returns a new `Matrix` with the same elements. Since `Matrix` is mutable, this matters:
+mutating the copy never affects the original, and vice versa - including at the row level, since cloning a `Matrix`
+deep-clones its row `Vector`s too (matching the package's own `Matrix::__clone()`).
 
 **Example:**
 
@@ -31,6 +29,12 @@ arithmetic methods follow (see the note on `pow(1)` in the package's `Matrix` do
 $matA = Matrix::fromArray([[1, 2], [3, 4]]);
 $matB = +$matA;  // [[1, 2], [3, 4]]
 ```
+
+Equivalence table for the unary `+` operator, where `$matA` is a `Matrix`.
+
+| Operation | Equivalent to  |
+| --------- | -------------- |
+| `+$matA`  | `clone $matA`  |
 
 ---
 

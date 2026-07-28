@@ -9,7 +9,6 @@ parameters:
         - Matrix/matrix.stub.php
     bootstrapFiles:
         - tests/bootstrap.php
-    treatPhpDocTypesAsCertain: false
 
 services:
     -

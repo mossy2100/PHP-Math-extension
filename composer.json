@@ -44,10 +44,16 @@
     "scripts": {
         "fix": "vendor/bin/phpcbf -vp",
         "check": "vendor/bin/phpcs -s",
-        "test": "scripts/test-phpunit",
         "analyze": "scripts/analyze",
-        "make": "scripts/build",
+        "test": "scripts/test-phpunit",
+        "build": "scripts/build",
         "enable": "scripts/global-install on",
-        "disable": "scripts/global-install off"
+        "disable": "scripts/global-install off",
+        "quality": [
+            "@fix",
+            "@check",
+            "@analyze",
+            "@test"
+        ]
     }
 }

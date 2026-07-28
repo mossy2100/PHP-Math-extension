@@ -15,11 +15,11 @@ namespace OceanMoon\Math;
 
 final class Matrix implements \Stringable, \Countable, \ArrayAccess
 {
-    private array $data = [];
-
     public int $rowCount = 0;
 
     public int $columnCount = 0;
+
+    private array $data = [];
 
     public function __construct(int $rowCount, int $columnCount) {}
 

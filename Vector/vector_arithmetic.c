@@ -23,20 +23,20 @@
 #include "../Matrix/matrix_internal.h"
 #include "exceptions.h"
 
-/* {{{ vector_check_same_size
+/* {{{ vector_check_same_count
  *
- * Shared by add()/sub()/hadamardMul()/hadamardDiv(): checks $other has the same size as self,
+ * Shared by add()/sub()/hadamardMul()/hadamardDiv(): checks $other has the same count as self,
  * throwing LengthException with the given operation-specific message otherwise.
  */
-static zend_result vector_check_same_size(zend_object *self, zend_object *other, const char *verb)
+static zend_result vector_check_same_count(zend_object *self, zend_object *other, const char *verb)
 {
-	zend_long self_size = vector_read_size(self);
-	zend_long other_size = vector_read_size(other);
+	zend_long self_count = vector_read_count(self);
+	zend_long other_count = vector_read_count(other);
 
-	if (self_size != other_size) {
+	if (self_count != other_count) {
 		zend_string *msg = strpprintf(
-			0, "Cannot %s Vector of incorrect size: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
-			verb, other_size, self_size
+			0, "Cannot %s Vector of incorrect count: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
+			verb, other_count, self_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
@@ -56,14 +56,14 @@ PHP_METHOD(OceanMoon_Math_Vector, neg)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 
-	if (vector_create(return_value, size) == FAILURE) {
+	if (vector_create(return_value, count) == FAILURE) {
 		RETURN_THROWS();
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 		if (vector_write_element(result, i, -element) == FAILURE) {
@@ -84,14 +84,14 @@ PHP_METHOD(OceanMoon_Math_Vector, reciprocal)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 
-	if (vector_create(return_value, size) == FAILURE) {
+	if (vector_create(return_value, count) == FAILURE) {
 		RETURN_THROWS();
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 
@@ -120,17 +120,17 @@ PHP_METHOD(OceanMoon_Math_Vector, reciprocal)
  */
 zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_value)
 {
-	if (vector_check_same_size(self, other, "add") == FAILURE) {
+	if (vector_check_same_count(self, other, "add") == FAILURE) {
 		return FAILURE;
 	}
 
-	zend_long size = vector_read_size(self);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
@@ -170,17 +170,17 @@ PHP_METHOD(OceanMoon_Math_Vector, add)
  */
 zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_value)
 {
-	if (vector_check_same_size(self, other, "subtract") == FAILURE) {
+	if (vector_check_same_count(self, other, "subtract") == FAILURE) {
 		return FAILURE;
 	}
 
-	zend_long size = vector_read_size(self);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
@@ -220,13 +220,13 @@ PHP_METHOD(OceanMoon_Math_Vector, sub)
  */
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
 {
-	zend_long size = vector_read_size(self);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 		if (vector_write_element(result, i, element * scalar) == FAILURE) {
@@ -316,13 +316,13 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 		return FAILURE;
 	}
 
-	zend_long size = vector_read_size(obj);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(obj);
+	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(obj, i, &element);
 		if (vector_write_element(result, i, element / scalar) == FAILURE) {
@@ -345,13 +345,13 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
  */
 zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value)
 {
-	zend_long size = vector_read_size(obj);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(obj);
+	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(obj, i, &element);
 
@@ -405,17 +405,17 @@ PHP_METHOD(OceanMoon_Math_Vector, hadamardMul)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	if (vector_check_same_size(self, other_obj, "compute Hadamard product with") == FAILURE) {
+	if (vector_check_same_count(self, other_obj, "compute Hadamard product with") == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zend_long size = vector_read_size(self);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
 		RETURN_THROWS();
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other_obj, i, &b);
@@ -443,17 +443,17 @@ PHP_METHOD(OceanMoon_Math_Vector, hadamardDiv)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	if (vector_check_same_size(self, other_obj, "compute Hadamard quotient with") == FAILURE) {
+	if (vector_check_same_count(self, other_obj, "compute Hadamard quotient with") == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zend_long size = vector_read_size(self);
-	if (vector_create(return_value, size) == FAILURE) {
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
 		RETURN_THROWS();
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other_obj, i, &b);

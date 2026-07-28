@@ -40,24 +40,24 @@ zend_class_entry *vector_ce_Vector;
 
 /* {{{ vector_init
  *
- * Validate size and set up an already-allocated Vector object's $data (a zero-filled packed
- * array of $size doubles) and $size properties. Shared by __construct and vector_create() (used
+ * Validate count and set up an already-allocated Vector object's $data (a zero-filled packed
+ * array of $count doubles) and $count properties. Shared by __construct and vector_create() (used
  * by fromArray() and every arithmetic/linear-algebra method that builds a new Vector result).
  *
- * Returns FAILURE (with an exception already thrown) if size is negative.
+ * Returns FAILURE (with an exception already thrown) if count is negative.
  */
-zend_result vector_init(zend_object *obj, zend_long size)
+zend_result vector_init(zend_object *obj, zend_long count)
 {
-	if (size < 0) {
-		zend_string *msg = strpprintf(0, "Cannot create Vector with negative size: " ZEND_LONG_FMT ".", size);
+	if (count < 0) {
+		zend_string *msg = strpprintf(0, "Cannot create Vector with negative count: " ZEND_LONG_FMT ".", count);
 		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
 		return FAILURE;
 	}
 
 	zval data;
-	array_init_size(&data, (uint32_t) size);
-	for (zend_long i = 0; i < size; i++) {
+	array_init_size(&data, (uint32_t) count);
+	for (zend_long i = 0; i < count; i++) {
 		zval zero;
 		ZVAL_DOUBLE(&zero, 0.0);
 		zend_hash_next_index_insert(Z_ARRVAL(data), &zero);
@@ -66,7 +66,7 @@ zend_result vector_init(zend_object *obj, zend_long size)
 	zend_update_property(vector_ce_Vector, obj, "data", sizeof("data") - 1, &data);
 	zval_ptr_dtor(&data);
 
-	zend_update_property_long(vector_ce_Vector, obj, "size", sizeof("size") - 1, size);
+	zend_update_property_long(vector_ce_Vector, obj, "count", sizeof("count") - 1, count);
 
 	return SUCCESS;
 }
@@ -76,22 +76,22 @@ zend_result vector_init(zend_object *obj, zend_long size)
  *
  * Allocate a new Vector object into return_value and initialize it via vector_init().
  */
-zend_result vector_create(zval *return_value, zend_long size)
+zend_result vector_create(zval *return_value, zend_long count)
 {
 	object_init_ex(return_value, vector_ce_Vector);
-	return vector_init(Z_OBJ_P(return_value), size);
+	return vector_init(Z_OBJ_P(return_value), count);
 }
 /* }}} */
 
-/* {{{ vector_read_size
+/* {{{ vector_read_count
  *
- * Reads the $size property off a zend_object already known to be a Vector instance.
+ * Reads the $count property off a zend_object already known to be a Vector instance.
  */
-zend_long vector_read_size(zend_object *obj)
+zend_long vector_read_count(zend_object *obj)
 {
 	zval rv;
-	zval *size = zend_read_property(vector_ce_Vector, obj, "size", sizeof("size") - 1, 1, &rv);
-	return zval_get_long(size);
+	zval *count = zend_read_property(vector_ce_Vector, obj, "count", sizeof("count") - 1, 1, &rv);
+	return zval_get_long(count);
 }
 /* }}} */
 
@@ -105,11 +105,11 @@ zend_long vector_read_size(zend_object *obj)
  */
 zend_result vector_read_element(zend_object *obj, zend_long index, double *out_value)
 {
-	zend_long size = vector_read_size(obj);
+	zend_long count = vector_read_count(obj);
 
-	if (index < 0 || index >= size) {
+	if (index < 0 || index >= count) {
 		zend_string *msg = strpprintf(
-			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, size - 1
+			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, count - 1
 		);
 		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
@@ -138,11 +138,11 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
  */
 zend_result vector_write_element(zend_object *obj, zend_long index, double value)
 {
-	zend_long size = vector_read_size(obj);
+	zend_long count = vector_read_count(obj);
 
-	if (index < 0 || index >= size) {
+	if (index < 0 || index >= count) {
 		zend_string *msg = strpprintf(
-			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, size - 1
+			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, count - 1
 		);
 		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);
@@ -169,16 +169,16 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::__construct(int $size) */
+/* {{{ OceanMoon\Math\Vector::__construct(int $count) */
 PHP_METHOD(OceanMoon_Math_Vector, __construct)
 {
-	zend_long size;
+	zend_long count;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(size)
+		Z_PARAM_LONG(count)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (vector_init(Z_OBJ_P(ZEND_THIS), size) == FAILURE) {
+	if (vector_init(Z_OBJ_P(ZEND_THIS), count) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

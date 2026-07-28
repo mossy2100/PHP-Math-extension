@@ -30,17 +30,13 @@ These are all prefix operators, and work the same way as for `int`/`float`.
 
 ---
 
-### + (identity)
+### + (clone)
 
 ```php
-$r2 = +$r1;
+$copy = +$r;
 ```
 
-Returns an equal `Rational` with the same numerator and denominator.
-
-There's no package method this maps to; value identity needs no explicit method call in ordinary PHP code. PHP has no
-dedicated opcode for unary `+`/`-`; the compiler lowers `+$r1` to `$r1 * 1`, which the extension handles via a
-`Rational * int` operation, as documented below.
+Equivalent to `clone $r`. Returns an equal `Rational` with the same numerator and denominator.
 
 **Example:**
 
@@ -48,6 +44,12 @@ dedicated opcode for unary `+`/`-`; the compiler lowers `+$r1` to `$r1 * 1`, whi
 $r1 = new Rational(2, 3);
 $r2 = +$r1;  // 2/3
 ```
+
+Equivalence table for the unary `+` operator, where `$r` is a `Rational`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `+$r`     | `clone $r`    |
 
 ---
 

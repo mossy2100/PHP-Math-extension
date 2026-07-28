@@ -52,7 +52,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     `get`-only property hook, it recomputes fresh from the current elements on every read rather than caching (since
     `Vector` is mutable and a cache would need every mutating method to remember to invalidate it), and rejects
     writes with the identical "Property OceanMoon\Math\Vector::$magnitude is read-only" `Error` PHP's own hook
-    machinery produces for the package's version.
+    machinery produces for the package's version. `vector.stub.php` also declares the property `readonly` (rather
+    than mirroring the package's `get`-only property hook syntax, which `gen_stub.php` can't parse) so
+    `ReflectionProperty::isReadOnly()` and PHPStan both see it as read-only too, not just the runtime
+    `write_property` handler.
   - `Vector` unary and binary arithmetic (`neg()`, `reciprocal()`, `add()`, `sub()`, `mul()`, `div()`, `hadamardMul()`,
     `hadamardDiv()`), linear algebra (`dot()`, `cross()`, `outer()`, `normalized()`), and aggregation (`sum()`,
     `prod()`, `count()`).
@@ -100,6 +103,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   point of those tests is exercising `Rational`'s custom loose-equality operator overload — reverted. (The underlying
   `SlevomatCodingStandard.Operators.DisallowEqualOperators` sniff was subsequently removed from `oceanmoon/coding-standard`
   itself, so no per-line suppression was needed.)
+- **`composer quality`**, matching the composite script other `oceanmoon/*` packages already have: runs `fix`, `check`,
+  `analyze`, and `test` in sequence. The `make` script was also renamed to `build`, matching `scripts/build`'s actual
+  filename (it never matched the script name before).
 - **New "Comparison Operators" section in `README.md`**, covering both loose (`<=>`-backed) and strict (`===`/`!==`)
   comparison across all four classes: which classes get loose operators and why (`Complex`/`Rational` do, `Vector`/
   `Matrix` don't, since neither has a natural total order over a whole element list), and that strict comparison
@@ -108,6 +114,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- **`Vector::$size` renamed to `$count`**, matching the userland package's own rename (same motivation: consistency
+  with `Matrix`'s `rowCount`/`columnCount`, and less risk of confusion with `$magnitude`). Purely a rename with no
+  behavior change; the property is still a plain stored value (not a computed one like `$magnitude`), so no
+  `read_property` handler changes were needed here -- just the property name itself, the constructor parameter, and
+  every internal reference (`vector_read_size()` → `vector_read_count()`, and equivalent renames throughout
+  `Vector`'s and `Matrix`'s C source). Update `$v->size` to `$v->count`.
 - **The planned `Vector`/`Matrix` operator surface (`docs/Vector.md`, `docs/Matrix.md`) drops two forms** ahead of
   implementation, mirroring the userland `Math` package's own `Matrix::div()` narrowing this release:
   - `Vector * Vector` isn't mapped to an operator - with `dot()`, `cross()`, `hadamardMul()`, and now `outer()` all
@@ -155,3 +167,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   filename, but nothing in the normal `composer enable` workflow (`scripts/global-install`) ever reads that copy:
   `enable` points PHP directly at this repo's own build via a full path, so the file `deploy` produced was dead weight,
   not a safety mechanism for keeping a stable global build isolated from local rebuilds.
+
+### Documentation
+
+- **The unary `+` sections in `docs/Complex.md`/`docs/Rational.md`/`docs/Vector.md`/`docs/Matrix.md` now document it as
+  `clone $x`** rather than describing the underlying mechanism (no dedicated opcode, lowers to `$x * 1`, etc.) — the
+  `clone` framing is both simpler and, for `Vector`/`Matrix`, directly verifiable: confirmed at runtime that `+$x` and
+  `clone $x` produce value-equal, instance-distinct results, and for `Matrix` specifically, that both independently
+  deep-clone row `Vector`s (via the custom `clone_obj` handler), so mutating a row of either copy never affects the
+  original or the other copy.

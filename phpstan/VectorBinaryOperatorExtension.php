@@ -50,10 +50,10 @@ final class VectorBinaryOperatorExtension implements OperatorTypeSpecifyingExten
             return $leftIsVector && $rightIsVector;
         }
 
-        // The `/` operator only accepts Vector / int|float.
-        // Vector / Vector and int|float / Vector forms are unsupported.
+        // The `/` operator only accepts Vector / int|float or int|float / Vector.
+        // The Vector / Vector form is not yet supported.
         if ($operatorSigil === '/') {
-            return $leftIsVector && $this->isScalar($rightSide);
+            return $leftIsVector && $this->isScalar($rightSide) || $this->isScalar($leftSide) && $rightIsVector;
         }
 
         // The `*` accepts:

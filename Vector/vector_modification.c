@@ -50,7 +50,7 @@ PHP_METHOD(OceanMoon_Math_Vector, normalize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 	double magnitude = vector_compute_magnitude(self);
 
 	zval unit;
@@ -59,7 +59,7 @@ PHP_METHOD(OceanMoon_Math_Vector, normalize)
 	}
 	zend_object *unit_obj = Z_OBJ_P(&unit);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(unit_obj, i, &element);
 		if (vector_write_element(self, i, element) == FAILURE) {

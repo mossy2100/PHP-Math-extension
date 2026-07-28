@@ -22,14 +22,14 @@
  */
 zend_result vector_to_row_matrix(zend_object *obj, zval *return_value)
 {
-	zend_long size = vector_read_size(obj);
+	zend_long count = vector_read_count(obj);
 
-	if (matrix_create(return_value, 1, size) == FAILURE) {
+	if (matrix_create(return_value, 1, count) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double value;
 		vector_read_element(obj, i, &value);
 		if (matrix_write_element(result, 0, i, value) == FAILURE) {
@@ -51,14 +51,14 @@ zend_result vector_to_row_matrix(zend_object *obj, zval *return_value)
  */
 zend_result vector_to_column_matrix(zend_object *obj, zval *return_value)
 {
-	zend_long size = vector_read_size(obj);
+	zend_long count = vector_read_count(obj);
 
-	if (matrix_create(return_value, size, 1) == FAILURE) {
+	if (matrix_create(return_value, count, 1) == FAILURE) {
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double value;
 		vector_read_element(obj, i, &value);
 		if (matrix_write_element(result, i, 0, value) == FAILURE) {
@@ -126,12 +126,12 @@ PHP_METHOD(OceanMoon_Math_Vector, __toString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long size = vector_read_size(self);
+	zend_long count = vector_read_count(self);
 
 	smart_str buf = {0};
 	smart_str_appendl(&buf, "\xE2\x9F\xA8", 3); /* U+27E8 MATHEMATICAL LEFT ANGLE BRACKET */
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
 

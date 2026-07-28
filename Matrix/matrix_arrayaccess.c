@@ -122,12 +122,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetSet)
 	}
 
 	zend_object *vec_obj = Z_OBJ_P(value);
-	zend_long vector_size = vector_read_size(vec_obj);
+	zend_long vector_count = vector_read_count(vec_obj);
 	zend_long column_count = matrix_read_column_count(self);
-	if (vector_size != column_count) {
+	if (vector_count != column_count) {
 		zend_string *msg = strpprintf(
-			0, "Cannot set row due to incorrect Vector size: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
-			vector_size, column_count
+			0, "Cannot set row due to incorrect Vector count: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
+			vector_count, column_count
 		);
 		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
 		zend_string_release(msg);

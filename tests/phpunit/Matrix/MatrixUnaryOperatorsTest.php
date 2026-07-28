@@ -52,6 +52,25 @@ class MatrixUnaryOperatorsTest extends TestCase
         $this->assertSame(1.0, $matA->get(0, 0));
     }
 
+    /**
+     * Test that unary + deep-clones the row Vectors too, not just the Matrix object -- mutating a
+     * row of the clone via ArrayAccess (e.g. $matB[0][1] = ...) must not affect $matA's row, which
+     * would happen if the clone's $data array held the same row Vector instances as the original.
+     */
+    public function testUnaryPlusClonesRows(): void
+    {
+        $matA = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $matB = +$matA;
+
+        $this->assertNotSame($matA[0], $matB[0]);
+
+        $matB[0][1] = -1;
+        $this->assertSame(2.0, $matA->get(0, 1));
+    }
+
     #endregion
 
     #region Operator - (negate) tests.

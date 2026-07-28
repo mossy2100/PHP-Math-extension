@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6d6f3cdad00d835ccc3bdc207c24f6b196ee0042 */
+ * Stub hash: dd49b54db43355d66fd128d9e4204833047fb648 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Matrix___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, rowCount, IS_LONG, 0)
@@ -242,12 +242,6 @@ static zend_class_entry *register_class_OceanMoon_Math_Matrix(zend_class_entry *
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess);
 
-	zval property_data_default_value;
-	ZVAL_EMPTY_ARRAY(&property_data_default_value);
-	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
-	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_data_name);
-
 	zval property_rowCount_default_value;
 	ZVAL_LONG(&property_rowCount_default_value, 0);
 	zend_string *property_rowCount_name = zend_string_init("rowCount", sizeof("rowCount") - 1, 1);
@@ -259,6 +253,12 @@ static zend_class_entry *register_class_OceanMoon_Math_Matrix(zend_class_entry *
 	zend_string *property_columnCount_name = zend_string_init("columnCount", sizeof("columnCount") - 1, 1);
 	zend_declare_typed_property(class_entry, property_columnCount_name, &property_columnCount_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_columnCount_name);
+
+	zval property_data_default_value;
+	ZVAL_EMPTY_ARRAY(&property_data_default_value);
+	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
+	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_data_name);
 
 	return class_entry;
 }

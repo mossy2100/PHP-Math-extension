@@ -23,8 +23,8 @@
 /* {{{ vector_check_same_size_operand
  *
  * Shared by equal() and approxEqual(): checks $other is a Vector, throwing InvalidArgumentException
- * otherwise. Matches the PHP package's own type check; the size comparison (returning false, not
- * throwing, for a size mismatch) is handled separately by each caller.
+ * otherwise. Matches the PHP package's own type check; the count comparison (returning false, not
+ * throwing, for a count mismatch) is handled separately by each caller.
  */
 static zend_result vector_check_operand(zval *other)
 {
@@ -43,7 +43,7 @@ static zend_result vector_check_operand(zval *other)
 
 /* {{{ OceanMoon\Math\Vector::equal(mixed $other): bool
  *
- * Matches the PHP package's Vector::equal(): same size and every element exactly equal.
+ * Matches the PHP package's Vector::equal(): same count and every element exactly equal.
  */
 PHP_METHOD(OceanMoon_Math_Vector, equal)
 {
@@ -60,12 +60,12 @@ PHP_METHOD(OceanMoon_Math_Vector, equal)
 	zend_object *self_obj = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	zend_long size = vector_read_size(self_obj);
-	if (size != vector_read_size(other_obj)) {
+	zend_long count = vector_read_count(self_obj);
+	if (count != vector_read_count(other_obj)) {
 		RETURN_FALSE;
 	}
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self_obj, i, &a);
 		vector_read_element(other_obj, i, &b);
@@ -80,7 +80,7 @@ PHP_METHOD(OceanMoon_Math_Vector, equal)
 
 /* {{{ OceanMoon\Math\Vector::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
  *
- * Matches the PHP package's Vector::approxEqual(): same size and every element approximately
+ * Matches the PHP package's Vector::approxEqual(): same count and every element approximately
  * equal, via math_floats_approx_equal().
  */
 PHP_METHOD(OceanMoon_Math_Vector, approxEqual)
@@ -103,12 +103,12 @@ PHP_METHOD(OceanMoon_Math_Vector, approxEqual)
 	zend_object *self_obj = Z_OBJ_P(ZEND_THIS);
 	zend_object *other_obj = Z_OBJ_P(other);
 
-	zend_long size = vector_read_size(self_obj);
-	if (size != vector_read_size(other_obj)) {
+	zend_long count = vector_read_count(self_obj);
+	if (count != vector_read_count(other_obj)) {
 		RETURN_FALSE;
 	}
 
-	for (zend_long i = 0; i < size; i++) {
+	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self_obj, i, &a);
 		vector_read_element(other_obj, i, &b);

@@ -3,8 +3,7 @@
 Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded - plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Vector` (properties,
 factory methods, conversion, comparison, dot/cross product, `ArrayAccess`, etc.), see the package's own
-[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md) - this page covers only the
-operators the extension adds on top of it.
+[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md) - this page covers only the operators the extension adds on top of it.
 
 `Vector` gets the four basic arithmetic operators: `+`, `-`, `*`, and `/`. It does not get (nor require) `**` as raising
 a vector to a power is not a valid mathematical operation. No comparison operators are provided either, since vectors do
@@ -14,17 +13,14 @@ not have a natural sort order.
 
 ## Unary Arithmetic Operators
 
-### + (identity)
+### + (clone)
 
 ```php
-$v2 = +$v1;
+$copy = +$v;
 ```
 
-Returns a new `Vector` with the same elements. There's no package method this maps to; value identity needs no explicit
-method call in ordinary PHP code. PHP has no dedicated opcode for unary `+`/`-`; the compiler lowers `+$v1` to `$v1 * 1`,
-which the extension handles via the scalar form of `*` (see below). Since `Vector` is mutable, this returns a distinct
-copy rather than `$this`, so mutating the result never affects the original - the same rule the package's own arithmetic
-methods follow.
+Equivalent to `clone $v`. Returns a new `Vector` with the same elements. Since `Vector` is mutable, this matters:
+mutating the copy never affects the original, and vice versa.
 
 **Example:**
 
@@ -32,6 +28,12 @@ methods follow.
 $v1 = Vector::fromArray([1, 2, 3]);
 $v2 = +$v1;  // [1, 2, 3]
 ```
+
+Equivalence table for the unary `+` operator, where `$v` is a `Vector`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `+$v`     | `clone $v`    |
 
 ---
 
@@ -73,7 +75,7 @@ $sum = $v1 + $v2;
 ```
 
 Equivalent to [`$v1->add($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#add). Element-wise; both
-vectors must be the same size.
+vectors must be the same count.
 
 Forms:
 
@@ -102,7 +104,7 @@ $diff = $v1 - $v2;
 ```
 
 Equivalent to [`$v1->sub($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#sub). Element-wise; both
-vectors must be the same size.
+vectors must be the same count.
 
 Forms:
 
@@ -136,9 +138,10 @@ Forms:
    [`$v1->mul($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul).
 2. `int|float * Vector`. Multiplication of vector by a scalar is commutative, so this gives the same result as #1.
 3. `Vector * Matrix`. This `Vector` is treated as a 1×n row matrix, multiplied by a `Matrix` using standard matrix
-   multiplication. The number of rows in the `Matrix` must equal the `Vector` size. This operation is equivalent to
-   [`$v1->mul($matA)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul). Not commutative - the
-   `Matrix * Vector` operation is a distinct calculation, documented in [Matrix Operators](Matrix.md#-multiply).
+   multiplication. The number of rows in the `Matrix` must equal the `Vector`'s count. This operation is equivalent to
+   [`$v1->mul($matA)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul).
+
+The `Matrix * Vector` operation is documented in [Matrix Operators](Matrix.md#-multiply).
 
 Unsupported form:
 
@@ -163,14 +166,13 @@ $v2 = Vector::fromArray([1, 2]);
 $v2 * $matA;  // [1, 2]  (Vector * Matrix - $v2 treated as a 1x2 row matrix)
 ```
 
-Equivalence table for the `*` operator, where `$v1` is a `Vector`, `$x` is an `int` or `float`, and `$matA` is a
-`Matrix`.
+Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and `$matA` is a `Matrix`.
 
-| Operation    | Equivalent to     |
-| ------------ | ----------------- |
-| `$v1 * $x`    | `$v1->mul($x)`     |
-| `$x * $v1`    | `$v1->mul($x)`     |
-| `$v1 * $matA` | `$v1->mul($matA)`  |
+| Operation    | Equivalent to    |
+| ------------ | ---------------- |
+| `$v * $x`    | `$v->mul($x)`    |
+| `$x * $v`    | `$v->mul($x)`    |
+| `$v * $matA` | `$v->mul($matA)` |
 
 ---
 
@@ -180,28 +182,19 @@ Equivalence table for the `*` operator, where `$v1` is a `Vector`, `$x` is an `i
 $result = $v1 / $x;
 ```
 
-Equivalent to [`$v1->div($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#div). Performs
-element-wise scalar division.
+Performs element-wise scalar division.
 
 Forms:
 
-1. `Vector / int|float`.
-2. `int|float / Vector`. Not commutative with `Vector / int|float` - element-wise, divides the scalar by each
-   element of the `Vector` in turn, equivalent to
-   [`$x * $v1->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal). There's no
-   equivalent named method for this direction - `Vector::div()` only ever divides the `Vector` by a scalar, never the
-   reverse. Throws `ArithmeticException` for a zero element, matching `reciprocal()`.
+1. `Vector / int|float`. Equivalent to [`$v1->div($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#div).
+2. `int|float / Vector`. Not commutative with `Vector / int|float`. Element-wise, divides the scalar by each
+   element of the `Vector` in turn. There's no equivalent method, but the same result can be achieved by [`$x * $v->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal), or, equivalently, `$v->reciprocal()->mul($x)`. Throws `ArithmeticException` if any of the vector's elements equal zero, matching `reciprocal()`.
 
 Unsupported forms:
 
 1. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by. If you want element-wise
-   (Hadamard) division, use
-   [`$v1->hadamardDiv($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
-2. `Vector / Matrix`. Division by a `Matrix` isn't a typical operation, and using a division operator for this purpose
-   is technically ambiguous, since v/M could mean M⁻¹\*v or v\*M⁻¹, and these are not necessarily equal because matrix
-   multiplication is not commutative. You can multiply a vector by a matrix's inverse (i.e. compute v\*M⁻¹) using
-   methods, e.g. `$v1 * $matA->inv()`. This requires the matrix to be square, in addition to having the same number of
-   columns as the vector has elements.
+   (Hadamard) division, call [`$v1->hadamardDiv($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
+2. `Vector / Matrix`. Division of a vector by a matrix isn't a typical operation. If the intent is to multiply a vector by a matrix's inverse (i.e. compute v ⨉ M⁻¹) it can be achieved with `$vec * $mat ** -1` or, equivalently, `$vec * $mat->inv()`. This requires the matrix to be square, in addition to having the same number of  columns as the vector has elements.
 
 **Example:**
 
@@ -214,12 +207,12 @@ $v2 = Vector::fromArray([1, 2, 4]);
 8 / $v2;    // [8, 4, 2]        (int / Vector - element-wise)
 ```
 
-Equivalence table for the `/` operator, where `$v1` is a `Vector`, and `$x` is an `int` or `float`.
+Equivalence table for the `/` operator, where `$v` is a `Vector`, and `$x` is an `int` or `float`.
 
-| Operation  | Equivalent to             |
-| ---------- | ------------------------- |
-| `$v1 / $x` | `$v1->div($x)`            |
-| `$x / $v1` | `$x * $v1->reciprocal()`  |
+| Operation | Equivalent to           |
+| --------- | ----------------------- |
+| `$v / $x` | `$v->div($x)`           |
+| `$x / $v` | `$x * $v->reciprocal()` |
 
 ---
 

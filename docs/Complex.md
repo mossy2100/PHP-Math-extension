@@ -8,15 +8,13 @@ covers only the operators the extension adds on top of it.
 
 ## Unary Arithmetic Operators
 
-### + (identity)
+### + (clone)
 
 ```php
-$z2 = +$z1;
+$copy = +$z;
 ```
 
-Returns an equal `Complex` with the same real and imaginary parts. There's no package method this maps to - value
-identity needs no explicit method call in ordinary PHP code. PHP has no dedicated opcode for unary `+`/`-`; the compiler
-lowers `+$z1` to `$z1 * 1`, which the extension handles via a `Complex * int` operation, as documented below.
+Equivalent to `clone $z`. Returns an equal `Complex` with the same real and imaginary parts.
 
 **Example:**
 
@@ -24,6 +22,12 @@ lowers `+$z1` to `$z1 * 1`, which the extension handles via a `Complex * int` op
 $z1 = new Complex(3, 4);
 $z2 = +$z1;  // 3 + 4i
 ```
+
+Equivalence table for the unary `+` operator, where `$z` is a `Complex`.
+
+| Operation | Equivalent to |
+| --------- | ------------- |
+| `+$z`     | `clone $z`    |
 
 ---
 

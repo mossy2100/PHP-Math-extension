@@ -50,10 +50,10 @@ final class MatrixBinaryOperatorExtension implements OperatorTypeSpecifyingExten
             return $leftIsMatrix && $rightIsMatrix;
         }
 
-        // The `/` operator only accepts Matrix / int|float.
-        // Matrix / Matrix and int|float / Matrix forms are unsupported.
+        // The `/` operator only accepts Matrix / int|float or int|float / Matrix.
+        // The Matrix / Matrix form is not yet supported.
         if ($operatorSigil === '/') {
-            return $leftIsMatrix && $this->isScalar($rightSide);
+            return $leftIsMatrix && $this->isScalar($rightSide) || $this->isScalar($leftSide) && $rightIsMatrix;
         }
 
         // The `**` operator only accepts Matrix ** int.

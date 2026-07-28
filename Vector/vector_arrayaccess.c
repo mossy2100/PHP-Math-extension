@@ -4,7 +4,7 @@
  * ArrayAccess methods for OceanMoon\Math\Vector: offsetExists(), offsetGet(), offsetSet(),
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Vector class --
  * unlike Complex (immutable), Vector is mutable, so offsetSet() actually writes; only
- * offsetUnset() always throws, since Vector has a fixed size.
+ * offsetUnset() always throws, since Vector has a fixed count.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,8 +35,8 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetExists)
 	}
 
 	zend_long index = Z_LVAL_P(offset);
-	zend_long size = vector_read_size(Z_OBJ_P(ZEND_THIS));
-	RETURN_BOOL(index >= 0 && index < size);
+	zend_long count = vector_read_count(Z_OBJ_P(ZEND_THIS));
+	RETURN_BOOL(index >= 0 && index < count);
 }
 /* }}} */
 
@@ -107,7 +107,7 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetSet)
 
 /* {{{ OceanMoon\Math\Vector::offsetUnset(mixed $offset): void
  *
- * Matches the PHP package's Vector::offsetUnset(): always throws, since Vector has a fixed size.
+ * Matches the PHP package's Vector::offsetUnset(): always throws, since Vector has a fixed count.
  */
 PHP_METHOD(OceanMoon_Math_Vector, offsetUnset)
 {
