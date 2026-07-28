@@ -2,11 +2,8 @@ parameters:
     paths:
         - tests/phpunit
     scanFiles:
-        - Complex/complex.stub.php
+        - oceanmoon_math.stub.php
         - phpstan/constants.php
-        - Rational/rational.stub.php
-        - Vector/vector.stub.php
-        - Matrix/matrix.stub.php
     bootstrapFiles:
         - tests/bootstrap.php
 

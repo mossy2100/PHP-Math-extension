@@ -216,10 +216,14 @@ scripts/test-phpunit    # PHPUnit conformance tests against the Math package's o
 
 ## Project Structure
 
-- Top level: module-wide files only (`math.c` - MINIT/RINIT/MINFO/module entry; `floats.c`/`floats.h` - shared helpers
-  with no class affinity).
-- One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class - its `.c`
-  implementation files, its `_internal.h`, its stub, and its generated arginfo header.
+- Top level: `oceanmoon_math.c` (MINIT/RINIT/MINFO/module entry), `php_oceanmoon_math.h`, and `oceanmoon_math.stub.php`
+  (plus its generated `oceanmoon_math_arginfo.h`) - one monolithic stub for the whole extension, following the
+  convention used by most PHP core extensions (`php_dom.stub.php`, `php_reflection.stub.php`, `random.stub.php`, etc.)
+  rather than one stub per class.
+- `src/`: everything else.
+  - `floats.c`/`.h`, `integers.c`/`.h`, `types.c`/`.h`, `exceptions.c`/`.h` - shared helpers with no class affinity.
+  - One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class - its
+    `.c` implementation files and its `_internal.h`.
 
 ---
 

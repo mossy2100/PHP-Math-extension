@@ -144,9 +144,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **README.md restructured** to match the sibling packages' layout: `Description` and
   `Development and Quality Assurance` sections added, `Requirements` moved up to directly follow them, and
   `Installation` (now linking out to `docs/Installation/`) inserted after that.
+- **C source tree reorganized under `src/`**, with only `oceanmoon_math.c` and `php_oceanmoon_math.h` kept at the
+  project root (the primary `<ext>.c`/`php_<ext>.h` pair, per common PHP extension convention). Shared helpers
+  (`floats`, `integers`, `types`, `exceptions`) and the per-class subdirectories (`Complex/`, `Rational/`, `Vector/`,
+  `Matrix/`) all moved under `src/`.
+- **The four per-class stub files consolidated into one `oceanmoon_math.stub.php`** at the project root, generating a
+  single `oceanmoon_math_arginfo.h`, matching the pattern most PHP core extensions with multiple classes use
+  (`php_dom.stub.php`, `php_reflection.stub.php`, `random.stub.php`, etc.) rather than one stub per class.
+- **`math.c`/`php_math.h` renamed to `oceanmoon_math.c`/`php_oceanmoon_math.h`**, matching the extension's actual
+  registered name (`oceanmoon_math`) — leftover from before the module was renamed and never caught at the time.
 
 ### Fixed
 
+- **`config.m4`'s `PHP_ADD_INCLUDE([$ext_srcdir/src])` was called before `PHP_NEW_EXTENSION`**, at which point
+  `$ext_srcdir` isn't set yet (it's assigned as part of `PHP_NEW_EXTENSION`'s own generated shell code) - this
+  silently produced a bogus `-I/src` in the build's include flags instead of the extension's actual `src/` directory,
+  breaking every bare `#include "exceptions.h"`-style include once the source tree moved under `src/`. Fixed by
+  calling `PHP_ADD_INCLUDE` after `PHP_NEW_EXTENSION`.
 - A `read_property` object-handler bug where the engine's opcode-level inline property cache could bypass the lazy
   compute-and-cache logic for the `magnitude`/`phase` computed properties on the second and subsequent reads at the same
   bytecode location (e.g. inside a loop), returning a stale `null` instead of the computed value.

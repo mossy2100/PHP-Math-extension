@@ -64,7 +64,7 @@ by a distinct `compare` object handler, not `do_operation`:
 ### Anatomy of one extension
 
 `VectorBinaryOperatorExtension` is a good one to read first - it's short, and it shows the pattern of narrowing
-`isOperatorSupported()` per-operator to match exactly what `vector_do_operation()` (`Vector/vector_operators.c`)
+`isOperatorSupported()` per-operator to match exactly what `vector_do_operation()` (`src/Vector/vector_operators.c`)
 actually accepts at runtime (no more, no less):
 
 ```php
@@ -134,28 +134,25 @@ above).
 ### The classes also have to be visible to PHPStan as class types at all
 
 Registering the operator extensions solves "does PHPStan understand what `*` means", but PHPStan separately needs to
-know `Complex`/`Rational`/`Vector`/`Matrix` _exist_ as classes with the methods/properties their `.stub.php` files
-declare - the compiled `.so` obviously isn't something PHPStan can read. That's what `scanFiles` in `phpstan.neon` is
+know `Complex`/`Rational`/`Vector`/`Matrix` _exist_ as classes with the methods/properties `oceanmoon_math.stub.php`
+declares - the compiled `.so` obviously isn't something PHPStan can read. That's what `scanFiles` in `phpstan.neon` is
 for:
 
 ```neon
 parameters:
     scanFiles:
-        - Complex/complex.stub.php
-        - Rational/rational.stub.php
-        - Vector/vector.stub.php
-        - Matrix/matrix.stub.php
+        - oceanmoon_math.stub.php
 ```
 
-Each `.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php` - see the
-`Building` section of the main `README.md`), so this is the same signatures PHP itself uses at runtime, not a separate
-hand-maintained copy that could drift.
+`oceanmoon_math.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php` - see
+the `Building` section of the main `README.md`), so this is the same signatures PHP itself uses at runtime, not a
+separate hand-maintained copy that could drift.
 
 ### Constants registered at runtime
 
 `OceanMoon\Math\M_I` (the `Complex(0, 1)` constant) has the same fundamental problem as the operators, for a different
 reason: it's registered purely at request start via `zend_register_constant()` in `complex_rinit()`
-(`Complex/complex.c`), fresh on every request, so there's no PHP source text anywhere for PHPStan to discover it in.
+(`src/Complex/complex.c`), fresh on every request, so there's no PHP source text anywhere for PHPStan to discover it in.
 `gen_stub.php` can't generate a declaration for it either (constant expressions have to be a "global, non-magic
 constant" - object instantiation isn't allowed). The fix is the same shape as the class-visibility one above: a
 PHPStan-only file (`phpstan/constants.php`) that declares `const M_I = new Complex(0, 1);` purely for PHPStan to see,

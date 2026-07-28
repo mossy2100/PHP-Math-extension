@@ -1,0 +1,65 @@
+/*
+ * complex_internal.h
+ *
+ * Cross-file declarations shared between complex.c and the other complex_*.c
+ * implementation files in this directory. Also exposes complex_minit()/
+ * complex_rinit() to ../oceanmoon_math.c, which calls them from the module's real
+ * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION. Not a public API -- nothing here is
+ * exposed to other extensions.
+ */
+
+#ifndef PHP_COMPLEX_INTERNAL_H
+#define PHP_COMPLEX_INTERNAL_H
+
+#include "php.h"
+
+/* The registered class entry for OceanMoon\Math\Complex. Defined in complex.c. */
+extern zend_class_entry *complex_ce_Complex;
+
+/* Shared helpers, defined in complex.c. See their doc comments there. */
+zend_result complex_init(zend_object *obj, double real, double imag);
+zend_result complex_create(zval *return_value, double real, double imag);
+zend_result complex_from_polar(zval *return_value, double mag, double phase);
+void complex_read_parts(zend_object *obj, double *out_real, double *out_imag);
+void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase);
+
+/* Compute the magnitude/phase for a given real/imaginary pair, matching the PHP package's
+ * constructor logic exactly. Defined in complex_properties.c; called from complex_init()
+ * (complex.c) to populate $magnitude/$phase eagerly at construction time. */
+double complex_compute_magnitude(double real, double imag);
+double complex_compute_phase(double real, double imag);
+
+/* Installs the custom object handlers (do_operation, compare, create_object) shared by every
+ * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */
+zend_result complex_properties_minit(void);
+
+/* Shared by add()/sub()/mul()/div() (complex_arithmetic.c) and pow() (complex_power.c). See its
+ * doc comment in complex_arithmetic.c. */
+zend_result complex_read_other(zval *other, double *out_real, double *out_imag);
+
+/* The computational core of exp()/ln() (complex_power.c's pow() calls these directly, without
+ * going through the PHP methods, to reuse their shortcuts). See their doc comments in
+ * complex_transcendental.c. */
+void complex_calc_exp(double real, double imag, double *out_real, double *out_imag);
+zend_result complex_calc_ln(zend_object *obj, double *out_real, double *out_imag);
+
+/* The computational core of pow(), shared with complex_do_operation()'s `**` handling
+ * (complex_operators.c). See its doc comment in complex_power.c. */
+zend_result complex_calc_pow(zend_object *base_obj, double other_real, double other_imag, double *out_real, double *out_imag);
+
+/* The `do_operation` object handler backing Complex's operator overloads. Installed on
+ * complex_object_handlers in complex_properties_minit() (complex_properties.c). See its doc
+ * comment in complex_operators.c. */
+zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
+/* The computational core of the <, <=, >, >=, <=> comparison operators, and the `compare` object
+ * handler backing them (installed on complex_object_handlers in complex_properties_minit()).
+ * Defined in complex_comparison.c; see their doc comments there. */
+zend_result complex_calc_compare(zend_object *self_obj, zval *other, int *out);
+int complex_do_compare(zval *op1, zval *op2);
+
+/* Module lifecycle hooks, called from ../oceanmoon_math.c. See their doc comments in complex.c. */
+zend_result complex_minit(void);
+zend_result complex_rinit(int module_number);
+
+#endif /* PHP_COMPLEX_INTERNAL_H */
