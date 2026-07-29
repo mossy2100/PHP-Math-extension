@@ -528,8 +528,11 @@ zend_result complex_rinit(int module_number)
 	}
 
 	c.name = zend_string_init("OceanMoon\\Math\\M_I", sizeof("OceanMoon\\Math\\M_I") - 1, 0);
+#if PHP_VERSION_ID >= 80500
+	/* zend_constant gained these fields in PHP 8.5; absent on 8.4 and earlier. */
 	c.filename = NULL;
 	c.attributes = NULL;
+#endif
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, module_number);
 
 	zend_register_constant(&c);

@@ -28,7 +28,7 @@ prebuilt binary.
 
 ### Build from source
 
-See the main `README.md`'s Building section for the full `phpize`/`configure`/`make` workflow. Once built,
+See [Development](../Development.md#building) for the full `phpize`/`configure`/`make` workflow. Once built,
 `modules/oceanmoon_math.so` is a standard PHP extension module.
 
 ### Enable the extension

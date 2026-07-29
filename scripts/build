@@ -5,10 +5,21 @@
 # .c file) require phpize/configure to be re-run to pick them up -- `make` alone would silently
 # keep building the old file list.
 #
+# Builds against whichever PHP is on PATH (currently supports 8.4 and 8.5 -- see README "Why PHP
+# 8.4?"). A compiled extension is ABI-locked to the exact PHP minor version it was built against
+# (Zend Extension API number), so the resulting .so only loads under that same version.
+#
 # Usage:
-#   scripts/build   # composer make
+#   scripts/build   # composer build
 #
 set -euo pipefail
+
+# Check for a valid version.
+php_version="$(php -r 'echo PHP_VERSION;')"
+if [[ "$php_version" != 8.4.* && "$php_version" != 8.5.* ]]; then
+    echo "This extension currently only supports PHP 8.4.x and 8.5.x (found $php_version on PATH)." >&2
+    exit 1
+fi
 
 cd "$(dirname "$0")/.."
 

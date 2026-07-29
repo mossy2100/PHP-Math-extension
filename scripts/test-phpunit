@@ -11,6 +11,13 @@
 
 set -euo pipefail
 
+# Check for a valid version.
+php_version="$(php -r 'echo PHP_VERSION;')"
+if [[ "$php_version" != 8.4.* && "$php_version" != 8.5.* ]]; then
+    echo "This extension currently only supports PHP 8.4.x and 8.5.x (found $php_version on PATH)." >&2
+    exit 1
+fi
+
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODULE="$EXT_DIR/modules/oceanmoon_math.so"
 

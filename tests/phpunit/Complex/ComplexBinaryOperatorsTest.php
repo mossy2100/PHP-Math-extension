@@ -29,6 +29,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     {
         $z1 = new Complex(3, 4);
         $z2 = new Complex(1, 2);
+        /** @disregard P1006 */
         $result = $z1 + $z2;
 
         $this->assertSame(4.0, $result->real);

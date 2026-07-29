@@ -84,7 +84,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   scalar, never the reverse. On `Matrix`, this is distinct from `$x * $matA->inv()` (inverse scaling); the ambiguity
   between the two readings of `x / A` that made this form unsupported until now is resolved in favor of the
   element-wise reading, matching `reciprocal()`'s existing meaning.
-- **`docs/Static Analysis.md`**, explaining how PHPStan is taught to understand this extension's operator overloads
+- **`docs/Static_Analysis.md`**, explaining how PHPStan is taught to understand this extension's operator overloads
   (PHPStan's `OperatorTypeSpecifyingExtension`/`UnaryOperatorTypeSpecifyingExtension` mechanism — the same one used for
   GMP/BCMath), using the existing `phpstan/*OperatorExtension.php` classes and `phpstan.neon` registrations as the
   worked example. Also documents a real gap found while writing it: those classes currently live under `autoload-dev`,
@@ -107,10 +107,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   `analyze`, and `test` in sequence. The `make` script was also renamed to `build`, matching `scripts/build`'s actual
   filename (it never matched the script name before).
 - **New "Comparison Operators" section in `README.md`**, covering both loose (`<=>`-backed) and strict (`===`/`!==`)
-  comparison across all four classes: which classes get loose operators and why (`Complex`/`Rational` do, `Vector`/
-  `Matrix` don't, since neither has a natural total order over a whole element list), and that strict comparison
-  needs no extension support at all -- PHP's own `===` already does the right thing for value types with only
-  scalar/typed properties.
+  comparison across all four classes: which classes get an extension-provided loose-comparison handler and why
+  (`Complex`/`Rational` do; `Vector`/`Matrix` don't, since neither has a natural total order over a whole element
+  list, but still fall back to PHP's own default per-property object comparison, same as any plain PHP object -- not
+  "no comparison operators at all"), and that strict comparison needs no extension support at all -- PHP's own `===`
+  already does the right thing for value types with only scalar/typed properties.
 
 ### Changed
 
@@ -142,8 +143,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **`docs/Rational.md`'s `!=` equivalence table expanded** from combined `$x` (`int|float`) rows to separate `$i`/`$f`
   rows, matching `==`'s structure, gaining its own "Also equivalent" column in the process.
 - **README.md restructured** to match the sibling packages' layout: `Description` and
-  `Development and Quality Assurance` sections added, `Requirements` moved up to directly follow them, and
-  `Installation` (now linking out to `docs/Installation/`) inserted after that.
+  `Development and Quality Assurance` sections added, `Requirements` moved up to directly follow them, a
+  `[License](LICENSE)` badge link added (the missing `LICENSE` file itself was also added), and `Installation`
+  (now linking out to `docs/Installation/`) inserted after that.
+- **`docs/Development.md`**, consolidating the `Building`, `Testing`, and `Project Structure` sections previously in
+  `README.md` into one place for anyone working on the C source, fixing a circular reference where
+  `docs/Installation/Mac, Linux.md`'s manual-build step pointed back at README's Building section. Installation docs
+  now point into `docs/Development.md#building` instead.
 - **C source tree reorganized under `src/`**, with only `oceanmoon_math.c` and `php_oceanmoon_math.h` kept at the
   project root (the primary `<ext>.c`/`php_<ext>.h` pair, per common PHP extension convention). Shared helpers
   (`floats`, `integers`, `types`, `exceptions`) and the per-class subdirectories (`Complex/`, `Rational/`, `Vector/`,
@@ -153,9 +159,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   (`php_dom.stub.php`, `php_reflection.stub.php`, `random.stub.php`, etc.) rather than one stub per class.
 - **`math.c`/`php_math.h` renamed to `oceanmoon_math.c`/`php_oceanmoon_math.h`**, matching the extension's actual
   registered name (`oceanmoon_math`) — leftover from before the module was renamed and never caught at the time.
+- **Supported PHP versions: 8.4.x and 8.5.x**, with the published, prebuilt module compiled against 8.4 to match the
+  minimum PHP version required by `oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. A
+  compiled extension is ABI-locked to the exact PHP minor version it's built against, so anyone on 8.5 (or wanting a
+  build for some other reason) needs to build it themselves against their own PHP — see README "Why PHP 8.4?" and
+  `docs/Development.md`. `scripts/build`, `scripts/test-phpunit`, and `scripts/global-install` all check the active
+  `php` version and refuse to run against anything but 8.4.x/8.5.x, rather than risk silently producing (or loading)
+  an ABI-mismatched build.
 
 ### Fixed
 
+- **`complex_rinit()` unconditionally set `c.filename`/`c.attributes` on a `zend_constant`** when registering the
+  `M_I` constant — those fields only exist in PHP 8.5's `zend_constant` struct, not 8.4's (found while briefly
+  test-building against 8.4: compiled "successfully" against 8.4's headers due to a stale build, then failed loudly
+  once rebuilt from clean, rather than silently corrupting memory). Guarded behind `#if PHP_VERSION_ID >= 80500`,
+  which is exactly what makes building for both 8.4 and 8.5 possible.
 - **`config.m4`'s `PHP_ADD_INCLUDE([$ext_srcdir/src])` was called before `PHP_NEW_EXTENSION`**, at which point
   `$ext_srcdir` isn't set yet (it's assigned as part of `PHP_NEW_EXTENSION`'s own generated shell code) - this
   silently produced a bogus `-I/src` in the build's include flags instead of the extension's actual `src/` directory,

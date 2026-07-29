@@ -1,13 +1,13 @@
 # Static Analysis
 
-Operator overloading (`+`, `-`, `*`, `/`, `**`, `~`, and, for `Rational`, the comparison operators) only exists at the C
-level, via the `do_operation`/`compare` object handlers - there's no PHP source text anywhere that declares "`Vector`
-supports `*`". Static analysis tools work from PHP source (plus, for classes like these, the `.stub.php` files that
+Operator overloading only exists at the C level, via the `do_operation`/`compare` object handlers - there's no PHP source text anywhere that declares "`Vector` supports `*`".
+
+Static analysis tools work from PHP source (plus, for classes like these, the `.stub.php` files that
 document their method signatures), so without help they have no way to know these operators exist. Left alone, a tool
 will treat `$v * 2` exactly like `$anyOtherObject * 2`: an error, because plain PHP objects don't support arithmetic
 operators at all.
 
-This page covers, tool by tool, how to teach a static analyser about the operators this extension adds. Each tool needs
+This page covers, tool by tool, how to teach a static analyser about the operators this extension adds, if possible. Each tool needs
 its own solution - there's no shared mechanism between them.
 
 ---
@@ -17,6 +17,8 @@ its own solution - there's no shared mechanism between them.
 ### The problem, concretely
 
 Without any help, PHPStan reports every operator use on `Complex`/`Rational`/`Vector`/`Matrix` as an error:
+
+(There is no error using comparison operators and objects of the same type. Just when comparing objects with scalars, or arithmetic using objects.)
 
 ```
 Binary operation "*" between OceanMoon\Math\Vector and int results in an error.
@@ -211,7 +213,41 @@ equivalent "write an extension class" fix available.
   is run as an external tool/integration and its output shown as annotations over the code. So PhpStorm isn't actually
   better off than VS Code for the live-editing experience; it just has a smoother path to _also_ run the real PHPStan
   pass and see its results inline.
-- **VS Code / Intelephense**: no extension mechanism found for this so far. The only workaround identified is excluding
-  the file entirely from Intelephense's diagnostics, which is a blunt instrument (loses all diagnostics for that file,
-  not just the false operator-invalid ones).
 - Anything else worth trying here is still open.
+
+---
+## Intelephense (VS Code)
+
+Intelephense is a PHP language server and popular extension used with Visual Studio Code, which provides code completion and diagnostics including type checking.
+
+It doesn't complain about comparison operators used with these types, but it does complain about arithmetic operators, issuing P1006  errors, which have the form "Expected type X. Found Y."
+
+The errors can be silenced with a `@disregard` directive on the previous line, as follows:
+
+```php
+$z = new Complex(5, 7);
+/** @disregard P1006 */
+$result = 2 - $z;
+```
+
+If you have a several expressions that need this directive applied, you can create a block, as follows:
+
+```php
+/** @disregard P1006 */
+{
+    $total = $z1 + $z2;
+    $scaled = $total * 2.5;
+    $isGreater = $scaled > $z3;
+}
+```
+
+Another option is to exclude entire files or folders from Intelephense Diagnostics via the `settings.json` file:
+
+```json
+"intelephense.diagnostics.exclude": [
+    "**/Math/Packages/**",
+    "**/ValueObjects/*Math.php"
+]
+```
+
+Generally, stubs can be provided for custom types to suppress Intelephense issues. However, these stubs can only specify functions, classes, properties, and methods — i.e. anything that can be expressed in PHP — and doesn't enable specifications for overloaded operators. Rules for operator types are hard-coded in proprietary Intelephense code.

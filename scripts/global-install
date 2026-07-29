@@ -29,6 +29,14 @@ SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
 INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
 
 if [[ "$1" == "on" ]]; then
+
+    # Check for a valid version.
+    php_version="$(php -r 'echo PHP_VERSION;')"
+    if [[ "$php_version" != 8.4.* && "$php_version" != 8.5.* ]]; then
+        echo "This extension currently only supports PHP 8.4.x and 8.5.x (found $php_version on PATH)." >&2
+        exit 1
+    fi
+
     if [[ ! -f "$MODULE" ]]; then
         echo "oceanmoon_math.so not found at $MODULE -- run 'make' first." >&2
         exit 1
