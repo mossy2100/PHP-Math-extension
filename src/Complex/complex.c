@@ -143,7 +143,7 @@ PHP_METHOD(OceanMoon_Math_Complex, __construct)
 /* {{{ complex_is_imaginary_unit */
 static bool complex_is_imaginary_unit(char c)
 {
-	return c == 'i' || c == 'I';
+	return c == 'i';
 }
 /* }}} */
 
