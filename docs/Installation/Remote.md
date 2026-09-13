@@ -30,7 +30,7 @@ Move your built extension file into the exact folder discovered in Step 1.
 
 - **From your local machine** (using `scp`):
   ```bash
-  scp modules/oceanmoon_math.so root@your_server_ip:/usr/lib/php/20230831/
+  scp build/8.4/modules/oceanmoon_math.so root@your_server_ip:/usr/lib/php/20230831/
   ```
 - **If the file is already on the server** (e.g. you built it there):
   ```bash

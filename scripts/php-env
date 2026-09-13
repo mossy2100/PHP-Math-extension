@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#
+# Resolve which PHP the extension is built, tested and enabled against, and put that PHP's
+# toolchain first on PATH. Sourced by scripts/build, scripts/test-phpunit and
+# scripts/enable and scripts/disable -- never executed directly.
+#
+#   source "$EXT_DIR/scripts/php-env"
+#
+# Input (optional):
+#   PHP_VERSION  Target PHP minor version. Default 8.4. Recognised: 8.4, 8.5.
+#
+# Sets in the sourcing shell:
+#   PATH              Target bin dir prepended, so php, phpize and php-config all agree.
+#   PHP_BIN           Bin directory for the resolved version.
+#   PHP_CONFIG        Full path to the target php-config.
+#   PHP_VERSION       Resolved minor version (e.g. 8.4).
+#   PHP_VERSION_FULL  Resolved full version (e.g. 8.4.25), for status messages.
+#   PHP_BUILD_DIR     Build tree for this version (build/<version>).
+#   PHP_MODULE_DIR    Module output directory within that tree (build/<version>/modules).
+#   PHP_MODULE        Built module (build/<version>/modules/oceanmoon_math.so).
+#
+# Returns 1 with a diagnostic on stderr if the requested toolchain is missing or doesn't match.
+#
+# Why 8.4 is the default: a compiled extension is ABI-locked to the exact PHP minor version it was
+# built against, and the published module targets 8.4 (the minimum PHP for the OceanMoon packages
+# -- see README, "Why PHP 8.4?"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
+# inheriting PATH therefore silently builds for the wrong version.
+
+target_version="${PHP_VERSION:-8.4}"
+
+case "$target_version" in
+    8.4) PHP_BIN="/opt/homebrew/opt/php@8.4/bin" ;;
+    8.5) PHP_BIN="/opt/homebrew/opt/php/bin" ;;
+    *)
+        echo "Unsupported PHP version: $target_version. Supported: 8.4, 8.5." >&2
+        return 1
+        ;;
+esac
+
+for tool in php phpize php-config; do
+    if [[ ! -x "$PHP_BIN/$tool" ]]; then
+        echo "No $tool in $PHP_BIN. Is PHP $target_version installed?" >&2
+        return 1
+    fi
+done
+
+PHP_VERSION_FULL="$("$PHP_BIN/php" -r 'echo PHP_VERSION;')"
+if [[ "$PHP_VERSION_FULL" != "$target_version".* ]]; then
+    echo "PHP $target_version.x requested, but $PHP_BIN is PHP $PHP_VERSION_FULL." >&2
+    return 1
+fi
+
+PHP_VERSION="$target_version"
+PHP_CONFIG="$PHP_BIN/php-config"
+
+# Per-version out-of-tree build directory. scripts/build recreates this from scratch each time and
+# runs phpize/configure/make inside it, so each tree has its own generated Makefile and its own
+# modules/ -- which is what the build system's hard-coded `modules/` paths (the test, install and
+# clean targets) expect. Two trees can therefore coexist without colliding.
+ext_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PHP_BUILD_DIR="$ext_dir/build/$PHP_VERSION"
+PHP_MODULE_DIR="$PHP_BUILD_DIR/modules"
+PHP_MODULE="$PHP_MODULE_DIR/oceanmoon_math.so"
+
+# Prepend, but only if it isn't already there: sourcing this file twice in one shell (an
+# interactive session working through the by-hand build steps, say) would otherwise add the same
+# directory again every time. The scripts source it once per process, so they can't accumulate -
+# but the guard costs nothing and makes sourcing it idempotent.
+case ":$PATH:" in
+    *":$PHP_BIN:"*) ;;
+    *) PATH="$PHP_BIN:$PATH" ;;
+esac
+export PATH

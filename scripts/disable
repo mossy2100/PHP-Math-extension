@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# Disable oceanmoon_math globally on this machine, by removing the conf.d ini file that
+# scripts/enable writes. This doesn't touch the built .so itself -- it just stops PHP loading it.
+#
+# Usage:
+#   scripts/disable          # PHP 8.4 (composer disable)
+#   scripts/disable 8.5      # PHP 8.5
+#   PHP_VERSION=8.5 scripts/disable
+#
+# The ini is removed from the selected PHP version's scan directory only, so disabling for 8.4
+# leaves an 8.5 enable in place, and vice versa.
+#
+set -euo pipefail
+
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Optional positional override; PHP_VERSION is the mechanism shared with the other scripts.
+if [[ $# -ge 1 ]]; then
+    PHP_VERSION="$1"
+fi
+
+# Resolves the target PHP toolchain (default 8.4); SCAN_DIR below has to come from that same PHP.
+# shellcheck source=php-env
+source "$EXT_DIR/scripts/php-env"
+
+SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
+INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
+
+if [[ -f "$INI_FILE" ]]; then
+    rm "$INI_FILE"
+    echo "Disabled globally for PHP $PHP_VERSION_FULL: removed $INI_FILE"
+else
+    echo "Already disabled for PHP $PHP_VERSION_FULL ($INI_FILE doesn't exist)."
+fi

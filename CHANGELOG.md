@@ -163,9 +163,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   minimum PHP version required by `oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. A
   compiled extension is ABI-locked to the exact PHP minor version it's built against, so anyone on 8.5 (or wanting a
   build for some other reason) needs to build it themselves against their own PHP — see README "Why PHP 8.4?" and
-  `docs/Development.md`. `scripts/build`, `scripts/test-phpunit`, and `scripts/global-install` all check the active
-  `php` version and refuse to run against anything but 8.4.x/8.5.x, rather than risk silently producing (or loading)
-  an ABI-mismatched build.
+  `docs/Development.md`. `scripts/build`, `scripts/test-phpunit`, `scripts/enable` and `scripts/disable` all resolve
+  their target PHP through `scripts/php-env` (8.4 by default, overridable with `PHP_VERSION` or an argument) rather
+  than trusting whichever `php` is first on `PATH`, so an ABI-mismatched build can't be produced or loaded by accident.
+- **`scripts/global-install` split into `scripts/enable` and `scripts/disable`**, each taking an optional PHP version
+  argument (`scripts/enable 8.5`) like the other scripts. The single script previously took `on`/`off` and could only
+  ever act on whichever `php` was first on `PATH`.
 
 ### Fixed
 
@@ -196,7 +199,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Removed
 
 - **`composer deploy` (`scripts/deploy`)** — it copied the built module into PHP's real `extension_dir` under its bare
-  filename, but nothing in the normal `composer enable` workflow (`scripts/global-install`) ever reads that copy:
+  filename, but nothing in the normal `composer enable` workflow (`scripts/enable`) ever reads that copy:
   `enable` points PHP directly at this repo's own build via a full path, so the file `deploy` produced was dead weight,
   not a safety mechanism for keeping a stable global build isolated from local rebuilds.
 

@@ -11,18 +11,16 @@
 
 set -euo pipefail
 
-# Check for a valid version.
-php_version="$(php -r 'echo PHP_VERSION;')"
-if [[ "$php_version" != 8.4.* && "$php_version" != 8.5.* ]]; then
-    echo "This extension currently only supports PHP 8.4.x and 8.5.x (found $php_version on PATH)." >&2
-    exit 1
-fi
-
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MODULE="$EXT_DIR/modules/oceanmoon_math.so"
+
+# Resolve the target PHP toolchain (default 8.4; override with PHP_VERSION=8.5).
+# shellcheck source=php-env
+source "$EXT_DIR/scripts/php-env"
+
+MODULE="$PHP_MODULE"
 
 if [ ! -f "$MODULE" ]; then
-    echo "oceanmoon_math.so not found -- run 'make' in $EXT_DIR first." >&2
+    echo "oceanmoon_math.so not found -- run 'composer build' first." >&2
     exit 1
 fi
 

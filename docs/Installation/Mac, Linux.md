@@ -29,7 +29,7 @@ prebuilt binary.
 ### Build from source
 
 See [Development](../Development.md#building) for the full `phpize`/`configure`/`make` workflow. Once built,
-`modules/oceanmoon_math.so` is a standard PHP extension module.
+`build/<php-version>/modules/oceanmoon_math.so` is a standard PHP extension module.
 
 ### Enable the extension
 
@@ -40,7 +40,8 @@ Go to the local folder containing the git repository for the extension. Let's ca
 Run `composer enable`.
 
 This will set up a custom `oceanmoon_math.ini` file in the PHP scan directory (as described below), telling PHP to load
-the compiled `oceanmoon_math.so` extension directly from the `extension-dir/modules` subfolder.
+the compiled `oceanmoon_math.so` extension directly from the `extension-dir/build/<php-version>/modules` subfolder - the
+one matching the PHP version the module was built for (see `PHP_VERSION` in [Development](../Development.md#building)).
 
 The advantage of this approach is that PHP is linked to the repo's own build rather than a copied file, so every
 subsequent rebuild is picked up automatically without redeploying.
@@ -51,12 +52,13 @@ so the extension isn't loaded by PHP.
 #### Option 2 - Manual setup
 
 Decide whether you want to copy `oceanmoon_math.so` to PHP's extensions folder and load it from there, or just link
-directly to the build version (i.e. the one in `extension-dir/modules`).
+directly to the build version (i.e. the one in `extension-dir/build/<php-version>/modules`).
 
-To copy the extension to PHP's own extensions folder, first go to `extension-dir`. Then:
+To copy the extension to PHP's own extensions folder, first go to `extension-dir`. Then (substituting the version you
+built for):
 
 ```bash
-cp modules/oceanmoon_math.so "$(php -r 'echo ini_get("extension_dir");')/"
+cp build/8.4/modules/oceanmoon_math.so "$(php -r 'echo ini_get("extension_dir");')/"
 ```
 
 Tell PHP to load the extension (from wherever you decided) either by adding a small custom `.ini` file

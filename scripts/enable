@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Enable oceanmoon_math globally on this machine, by writing a conf.d ini file that points directly
+# at this repo's own built module (build/<php-version>/modules/oceanmoon_math.so) -- so enabling
+# always picks up the latest local build, with no separate "copy the .so somewhere" step needed.
+# Useful for ad-hoc scripts/demos that expect the extension to "just be there" without an explicit
+# -d extension=... flag on every invocation.
+#
+# Usage:
+#   scripts/enable          # PHP 8.4 (composer enable)
+#   scripts/enable 8.5      # PHP 8.5
+#   PHP_VERSION=8.5 scripts/enable
+#
+# The ini is written to the selected PHP version's scan directory, and points at that version's
+# module, so enabling for 8.4 and 8.5 are independent.
+#
+# Disabled is the right default for day-to-day development: enabling this globally will silently
+# shadow oceanmoon/math's own userland Complex/Rational/Vector/Matrix classes in EVERY OTHER PHP
+# project on this machine too (not just this one), since PHP registers internal (C extension)
+# classes before autoloading ever runs. See packages/Math's tests/bootstrap.php for the guard
+# rail that necessitated on the package side.
+#
+set -euo pipefail
+
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Optional positional override; PHP_VERSION is the mechanism shared with the other scripts.
+if [[ $# -ge 1 ]]; then
+    PHP_VERSION="$1"
+fi
+
+# Resolves the target PHP toolchain (default 8.4). Has to run before SCAN_DIR below, which must
+# come from the PHP that will actually load the module.
+# shellcheck source=php-env
+source "$EXT_DIR/scripts/php-env"
+
+MODULE="$PHP_MODULE"
+SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
+INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
+
+if [[ ! -f "$MODULE" ]]; then
+    echo "oceanmoon_math.so not found at $MODULE -- run 'composer build' first." >&2
+    exit 1
+fi
+
+if [[ -z "$SCAN_DIR" ]]; then
+    echo "No php.ini scan directory configured for PHP $PHP_VERSION_FULL -- can't enable globally." >&2
+    exit 1
+fi
+
+mkdir -p "$SCAN_DIR"
+echo "extension=$MODULE" > "$INI_FILE"
+echo "Enabled globally for PHP $PHP_VERSION_FULL: $INI_FILE -> $MODULE"

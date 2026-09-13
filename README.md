@@ -4,7 +4,7 @@ Provides classes for Complex numbers, Rational numbers, Vectors, and Matrices.
 
 **[License](LICENSE)** | **[Changelog](CHANGELOG.md)** | **[Documentation](docs/)**
 
-![PHP 8.4](docs/logo_php8_4.png)
+![PHP 8.4](docs/logo_php8_4-125w.png) ![PHP 8.5](docs/logo_php8_5-125w.png)
 
 **Work in progress.** A native PHP extension that replicates the
 [OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) - the `Complex`, `Rational`, `Vector`, and `Matrix`
@@ -69,8 +69,10 @@ The published, prebuilt module is compiled against PHP 8.4, to match the minimum
 `oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. It's still ABI-locked to 8.4 specifically,
 though - it won't load under 8.5 or any other version.
 
-**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Development.md#building), it's simple enough. The C source
-supports both 8.4 and 8.5 already, so this is just a case of building against the PHP version you have installed.
+**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Development.md#building), it's simple enough - `composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4. The C source
+supports both 8.4 and 8.5 already, so this is just a case of building against the PHP version you have installed. Each
+version builds into its own tree (`build/8.4/`, `build/8.5/`, each with its module in `modules/` inside it), so you can
+keep both side by side.
 
 **If you're on another version of PHP,** in all likelihood the extension won't build due to changes in the internal Zend engine APIs and structures that PHP's C extension interface depends on. These aren't part of PHP's stable, backward-compatible userland API, and can change from one minor version to the next without notice. You can use `#if PHP_VERSION_ID...` macros to make version-specific changes (see `complex.c` for an example), or perhaps get an AI to help you, or just message me and I'll see what I can do.
 

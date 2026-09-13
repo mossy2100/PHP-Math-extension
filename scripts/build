@@ -1,28 +1,64 @@
 #!/usr/bin/env bash
 #
-# Compile the extension into modules/oceanmoon_math.so. Runs the full phpize/configure/make
+# Compile the extension into build/<php-version>/modules/oceanmoon_math.so. Runs the full phpize/configure/make
 # pipeline every time (not just `make`), since config.m4/config.w32 changes (e.g. adding a new
 # .c file) require phpize/configure to be re-run to pick them up -- `make` alone would silently
 # keep building the old file list.
 #
-# Builds against whichever PHP is on PATH (currently supports 8.4 and 8.5 -- see README "Why PHP
-# 8.4?"). A compiled extension is ABI-locked to the exact PHP minor version it was built against
-# (Zend Extension API number), so the resulting .so only loads under that same version.
+# Builds against PHP 8.4 by default (currently supports 8.4 and 8.5 -- see README "Why PHP 8.4?"),
+# resolved by scripts/php-env rather than inherited from PATH, because the 8.4 formula is keg-only
+# and /opt/homebrew/bin/php is 8.5. A compiled extension is ABI-locked to the exact PHP minor
+# version it was built against (Zend Extension API number), so the resulting .so only loads under
+# that same version.
 #
 # Usage:
-#   scripts/build   # composer build
+#   scripts/build           # composer build -- PHP 8.4
+#   scripts/build 8.5       # PHP 8.5
+#   PHP_VERSION=8.5 scripts/build
 #
 set -euo pipefail
 
-# Check for a valid version.
-php_version="$(php -r 'echo PHP_VERSION;')"
-if [[ "$php_version" != 8.4.* && "$php_version" != 8.5.* ]]; then
-    echo "This extension currently only supports PHP 8.4.x and 8.5.x (found $php_version on PATH)." >&2
-    exit 1
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Optional positional override; PHP_VERSION is the mechanism shared with the other scripts.
+if [[ $# -ge 1 ]]; then
+    PHP_VERSION="$1"
 fi
 
-cd "$(dirname "$0")/.."
+# Resolves the target PHP toolchain (default 8.4) and puts it first on PATH.
+# shellcheck source=php-env
+source "$EXT_DIR/scripts/php-env"
+
+cd "$EXT_DIR"
+
+echo "Building oceanmoon_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_MODULE"
+
+# Recreate this version's build tree from scratch. Building out of tree is what lets the build
+# system's fixed paths work: the generated Makefile -- and build/Makefile.global, which phpize
+# copies verbatim from whichever PHP it was run against -- hard-code `modules/` for the test,
+# install and clean targets, so the module has to land in a directory literally called modules/.
+# Giving each PHP version its own tree lets both do that without colliding.
+#
+# Starting from a fresh copy of the compile inputs each time also rules out the stale-artifact
+# problems by construction: phpize's build-aux copies have no pre-existing read-only files to
+# overwrite, and the Makefile's `-include *.dep` dependency files (which record the absolute PHP
+# include paths of whichever PHP generated them) are generated anew rather than inherited from
+# another version's build. Copying an explicit list of inputs additionally means generated files
+# (configure, Makefile, .libs/, run-tests.php, ...) can never be copied in, so an earlier in-tree
+# phpize run can't contaminate the tree.
+rm -rf "$PHP_BUILD_DIR"
+mkdir -p "$PHP_BUILD_DIR"
+cp -R \
+    config.m4 config.w32 \
+    oceanmoon_math.c php_oceanmoon_math.h oceanmoon_math_arginfo.h oceanmoon_math.stub.php \
+    src \
+    "$PHP_BUILD_DIR"/
+# The .phpt tests go in at their usual path, so `make test TESTS=tests/phpt/` works in the tree.
+mkdir -p "$PHP_BUILD_DIR/tests"
+cp -R tests/phpt "$PHP_BUILD_DIR/tests/"
+
+cd "$PHP_BUILD_DIR"
 
 phpize
-./configure --enable-oceanmoon_math
+./configure --enable-oceanmoon_math --with-php-config="$PHP_CONFIG"
 make

@@ -4,7 +4,7 @@
     "type": "php-ext",
     "license": "MIT",
     "require": {
-        "php": "^8.4"
+        "php": ">=8.4 <8.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
@@ -50,8 +50,8 @@
         "analyze": "scripts/analyze",
         "test": "scripts/test-phpunit",
         "build": "scripts/build",
-        "enable": "scripts/global-install on",
-        "disable": "scripts/global-install off",
+        "enable": "scripts/enable",
+        "disable": "scripts/disable",
         "quality": [
             "@fix",
             "@check",
