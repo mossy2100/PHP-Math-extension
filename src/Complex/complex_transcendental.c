@@ -256,8 +256,8 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 	} else if (real == M_E && imag == 0.0 && base_real == 10.0 && base_imag == 0.0) {
 		/* Built-in constant for log_10(e). */
 		result = complex_create(return_value, M_LOG10E, 0.0);
-	} else if (imag == 0.0 && base_imag == 0.0) {
-		/* Both arguments real: use the built-in two-argument log(). */
+	} else if (imag == 0.0 && base_imag == 0.0 && real > 0.0 && base_real > 0.0) {
+		/* Positive reals only: log() returns the principal value only there, so a negative real $this or $base takes the general branch below. */
 		result = complex_create(return_value, log(real) / log(base_real), 0.0);
 	} else {
 		/* General solution: log_b(z) = ln(z) / ln(b). */
@@ -267,7 +267,7 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 			result = complex_calc_ln(base_obj, &lnb_real, &lnb_imag);
 		}
 		if (result == SUCCESS) {
-			/* ln(z) is never zero here -- $this == 1 would have taken the "both real" branch above. */
+			/* |ln(b)|^2 is non-zero (base == 1 was rejected above); ln(z) == 0 is fine, giving 0/x = 0. */
 			double f = (lnb_real * lnb_real) + (lnb_imag * lnb_imag);
 			result = complex_create(
 				return_value,
