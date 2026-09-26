@@ -31,6 +31,34 @@ source "$EXT_DIR/scripts/php-env"
 
 cd "$EXT_DIR"
 
+# Object files, PIC-object directories and dependency scratch that an in-tree phpize/configure/make run
+# leaves behind, as `find` predicates. Shared by the guard below and the purge after the copy, so the two
+# can't drift apart.
+stale_artifacts=( \( -name '*.lo' -o -name '*.o' -o -name '.libs' -o -name '.deps' -o -name '*.dep' \) )
+
+# Refuse to build from a polluted source tree. src/ is copied as a directory (see below), and `make`
+# treats a copied object file as up to date, so a tree in this state builds a module that doesn't match
+# the sources -- silently. That is how the 8.4 build came to register Vector::$count as `get`; see 1.1 in
+# _dev/Math Extension - Claude Review 2026-09-26.md.
+pollution=$(find src "${stale_artifacts[@]}" -print)
+if [[ -n "$pollution" ]]; then
+    count=$(printf '%s\n' "$pollution" | wc -l | tr -d ' ')
+    {
+        echo "src/ contains stale build output left by an in-tree phpize/configure/make run ($count items):"
+        printf '%s\n' "$pollution" | head -3 | sed 's/^/  /'
+        if (( count > 3 )); then
+            echo "  ... and $((count - 3)) more"
+        fi
+        echo
+        echo "A build tree is a copy of src/, and make treats copied objects as up to date, so building from"
+        echo "this state would link code that no longer matches the sources. Remove them and re-run -- they"
+        echo "are untracked build output, so this is safe:"
+        echo
+        echo "  git clean -Xfd src/"
+    } >&2
+    exit 1
+fi
+
 echo "Building oceanmoon_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_MODULE"
 
 # Recreate this version's build tree from scratch. Building out of tree is what lets the build
@@ -39,13 +67,15 @@ echo "Building oceanmoon_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_M
 # install and clean targets, so the module has to land in a directory literally called modules/.
 # Giving each PHP version its own tree lets both do that without colliding.
 #
-# Starting from a fresh copy of the compile inputs each time also rules out the stale-artifact
-# problems by construction: phpize's build-aux copies have no pre-existing read-only files to
-# overwrite, and the Makefile's `-include *.dep` dependency files (which record the absolute PHP
-# include paths of whichever PHP generated them) are generated anew rather than inherited from
-# another version's build. Copying an explicit list of inputs additionally means generated files
-# (configure, Makefile, .libs/, run-tests.php, ...) can never be copied in, so an earlier in-tree
-# phpize run can't contaminate the tree.
+# Starting from a fresh copy of the compile inputs each time also rules out most stale-artifact problems
+# by construction: phpize's build-aux copies have no pre-existing read-only files to overwrite, and the
+# Makefile's `-include *.dep` dependency files (which record the absolute PHP include paths of whichever
+# PHP generated them) are generated anew rather than inherited from another version's build. Naming the
+# top-level inputs explicitly means generated files (configure, Makefile, run-tests.php, ...) can never
+# be copied in.
+#
+# src/ is the exception, because it is copied as a directory: anything an earlier in-tree build left
+# inside it comes too. That is what the guard above and the purge below are for.
 rm -rf "$PHP_BUILD_DIR"
 mkdir -p "$PHP_BUILD_DIR"
 cp -R \
@@ -53,6 +83,10 @@ cp -R \
     oceanmoon_math.c php_oceanmoon_math.h oceanmoon_math_arginfo.h oceanmoon_math.stub.php \
     src \
     "$PHP_BUILD_DIR"/
+# Belt and braces after the directory copy. The guard above should have refused a polluted src/, so this
+# normally finds nothing; it stays because the failure it prevents is silent -- a copied object file makes
+# `make` skip that translation unit, and the module then no longer matches the sources.
+find "$PHP_BUILD_DIR" "${stale_artifacts[@]}" -exec rm -rf {} +
 # The .phpt tests go in at their usual path, so `make test TESTS=tests/phpt/` works in the tree.
 mkdir -p "$PHP_BUILD_DIR/tests"
 cp -R tests/phpt "$PHP_BUILD_DIR/tests/"

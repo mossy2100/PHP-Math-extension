@@ -4,23 +4,49 @@
 # These are copies of packages/Math's own PHPUnit tests, trimmed to only what the extension
 # implements, used to drive development: run them, see what fails, implement the next method.
 #
+# The run is hermetic: PHP_INI_SCAN_DIR is cleared so this machine's conf.d directory is not scanned.
+# scripts/enable writes an oceanmoon_math.ini there pointing at this same module, and loading it twice
+# makes PHP warn ("Module "oceanmoon_math" is already loaded") at startup. Clearing the scan directory
+# also means the suite always tests the module built here, whatever is enabled globally -- the mirror
+# image of packages/Math's own test script, which clears the same variable to keep this extension out
+# of the package's pure-PHP run.
+#
 # Usage:
-#   scripts/test-phpunit                                       # run everything under tests/phpunit
-#   scripts/test-phpunit tests/phpunit/Complex/ComplexFactoryTest.php
+#   scripts/test-phpunit                                       # whole suite, PHP 8.4
+#   scripts/test-phpunit 8.5                                   # whole suite, PHP 8.5
 #   scripts/test-phpunit --filter testConstructor
+#   scripts/test-phpunit tests/phpunit/Complex/ComplexFactoryTest.php
+#
+# Everything after the optional version argument goes straight to PHPUnit, and phpunit.xml supplies
+# the default suite (tests/phpunit), so no path argument is needed. Going through composer is the one
+# wrinkle: composer parses anything starting with `-` itself and silently drops options it doesn't
+# recognise, so PHPUnit's own options need `--` to get past it -- `composer test 8.5 -- --filter
+# testConstructor`. Positional arguments (the version, a path) are forwarded as-is, which is why
+# `composer test 8.5` needs no `--`.
 
 set -euo pipefail
 
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Resolve the target PHP toolchain (default 8.4; override with PHP_VERSION=8.5).
+# Optional leading version argument, matching scripts/build and scripts/enable (`composer test 8.5`).
+# PHP_VERSION is the mechanism shared with the other scripts. Consume the argument only when it looks
+# like a version, so the PHPUnit arguments this script also accepts (a test path, --filter) pass
+# through untouched -- and so anything else numeric reaches php-env, which rejects unsupported versions
+# with a diagnostic naming the supported ones.
+if [[ $# -ge 1 && "$1" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    PHP_VERSION="$1"
+    shift
+fi
+
+# Resolve the target PHP toolchain and the module built for it (default 8.4; see the version argument
+# above, or PHP_VERSION=8.5).
 # shellcheck source=php-env
 source "$EXT_DIR/scripts/php-env"
 
 MODULE="$PHP_MODULE"
 
 if [ ! -f "$MODULE" ]; then
-    echo "oceanmoon_math.so not found -- run 'composer build' first." >&2
+    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL -- run 'composer build $PHP_VERSION' first." >&2
     exit 1
 fi
 
@@ -29,9 +55,18 @@ if [ ! -f "$EXT_DIR/vendor/bin/phpunit" ]; then
     exit 1
 fi
 
-exec php \
+# Say which build is under test: with a module per PHP version, PHPUnit's own banner (which reports
+# only the PHP version) doesn't identify the .so being loaded.
+echo "Testing $MODULE against PHP $PHP_VERSION_FULL"
+
+# Run from the repo root: PHPUnit looks for phpunit.xml in the working directory, and resolves the
+# paths inside it -- and any path argument -- relative to there.
+cd "$EXT_DIR"
+
+# Clear the ini scan directory for this process, so conf.d/oceanmoon_math.ini (written by
+# scripts/enable) can't load the module a second time -- the -d extension= below is the only load.
+PHP_INI_SCAN_DIR= exec php \
     -d extension="$MODULE" \
     "$EXT_DIR/vendor/bin/phpunit" \
-    --bootstrap "$EXT_DIR/tests/bootstrap.php" \
     --colors=always \
-    "${@:-$EXT_DIR/tests/phpunit}"
+    "$@"
