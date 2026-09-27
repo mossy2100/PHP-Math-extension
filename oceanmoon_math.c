@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "php_oceanmoon_math.h"
 #include "exceptions.h"
+#include "types.h"
 #include "Complex/complex_internal.h"
 #include "Rational/rational_internal.h"
 #include "Vector/vector_internal.h"
@@ -51,6 +52,19 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 	if (matrix_minit() == FAILURE) {
 		return FAILURE;
 	}
+
+	/* Mark the read-only properties of every class: the PHP package declares them private(set), and
+	 * gen_stub cannot express asymmetric visibility (it emits ZEND_ACC_PUBLIC for `private(set)` without
+	 * a word), so the flags are applied here, after registration. The engine then rejects userland
+	 * writes while the extension's own writes, via zend_update_property(ce, ...), keep working. */
+	static const char *const complex_read_only[] = { "real", "imaginary", "magnitude", "phase" };
+	math_types_mark_read_only(complex_ce_Complex, complex_read_only, sizeof(complex_read_only) / sizeof(complex_read_only[0]));
+	static const char *const rational_read_only[] = { "numerator", "denominator" };
+	math_types_mark_read_only(rational_ce_Rational, rational_read_only, sizeof(rational_read_only) / sizeof(rational_read_only[0]));
+	static const char *const vector_read_only[] = { "count" };
+	math_types_mark_read_only(vector_ce_Vector, vector_read_only, sizeof(vector_read_only) / sizeof(vector_read_only[0]));
+	static const char *const matrix_read_only[] = { "rowCount", "columnCount" };
+	math_types_mark_read_only(matrix_ce_Matrix, matrix_read_only, sizeof(matrix_read_only) / sizeof(matrix_read_only[0]));
 
 	return SUCCESS;
 }

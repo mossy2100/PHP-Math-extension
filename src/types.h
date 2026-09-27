@@ -20,4 +20,17 @@
 const char *math_types_debug_type_name(zval *value);
 /* }}} */
 
+/* {{{ math_types_mark_read_only
+ *
+ * Marks the named public properties of ce as `private(set)`: readable from userland, but a write from
+ * outside the class raises, matching how the PHP package declares them. gen_stub cannot express
+ * asymmetric visibility -- given `private(set)` in the stub it emits ZEND_ACC_PUBLIC without a word --
+ * so the flag is applied after register_class_*() instead, and the engine then handles both directions
+ * correctly: a userland write raises, while the extension's own writes via zend_update_property(ce, ...)
+ * keep working. That is the same mechanism that already lets the extension write the private `data`
+ * slots on Vector and Matrix from C.
+ */
+void math_types_mark_read_only(zend_class_entry *ce, const char *const *names, size_t count);
+/* }}} */
+
 #endif /* PHP_MATH_TYPES_H */

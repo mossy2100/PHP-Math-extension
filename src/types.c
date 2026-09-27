@@ -24,3 +24,14 @@ const char *math_types_debug_type_name(zval *value)
 		default: return "unknown type";
 	}
 }
+
+void math_types_mark_read_only(zend_class_entry *ce, const char *const *names, size_t count)
+{
+	for (size_t i = 0; i < count; i++) {
+		zend_property_info *info = zend_hash_str_find_ptr(&ce->properties_info, names[i], strlen(names[i]));
+
+		if (info != NULL) {
+			info->flags |= ZEND_ACC_PRIVATE_SET;
+		}
+	}
+}
