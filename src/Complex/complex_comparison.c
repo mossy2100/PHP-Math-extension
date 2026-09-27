@@ -35,7 +35,7 @@
  * imaginary) pair, matching the PHP package's shared type-check logic. $other must be a Complex
  * instance or a number (int/float); anything else throws InvalidArgumentException. A NAN float
  * throws DomainException (no meaningful comparison result); a non-finite float (+-INF) still
- * populates *out_real/*out_imag (with the signed infinity itself, imaginary 0) but also reports
+ * populates *out_real, *out_imag (with the signed infinity itself, imaginary 0) but also reports
  * *out_finite = false, since a Complex is always finite and so never equal to it -- equal()/
  * approxEqual() use that to return false outright, while complex_calc_compare() uses the sign of
  * *out_real to order against it instead.
