@@ -43,9 +43,7 @@ fi
 # shellcheck source=php-env
 source "$EXT_DIR/scripts/php-env"
 
-MODULE="$PHP_MODULE"
-
-if [ ! -f "$MODULE" ]; then
+if [ ! -f "$PHP_MODULE" ]; then
     echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL -- run 'composer build $PHP_VERSION' first." >&2
     exit 1
 fi
@@ -55,9 +53,42 @@ if [ ! -f "$EXT_DIR/vendor/bin/phpunit" ]; then
     exit 1
 fi
 
+# The conformance suite is the package's own tests, symlinked in one directory per class
+# (tests/phpunit/<Class>/shared -> packages/Math/tests/<Class>/shared). Those links are the whole feature-
+# parity check, and PHPUnit skips a symlink it can't resolve without saying a word -- so with a missing
+# sibling checkout this script would report a green run of the extension's own operator tests and check no
+# parity at all. Refuse to run the default suite in that state. A caller who names targets of their own is
+# taken at their word, since a subset run doesn't claim to check parity.
+if [[ $# -eq 0 ]]; then
+    unresolved=()
+    for class_dir in "$EXT_DIR"/tests/phpunit/*/; do
+        shared="${class_dir}shared"
+        if [ ! -d "$shared" ] || ! find -L "$shared" -name '*Test.php' -print -quit | grep -q .; then
+            unresolved+=( "$(basename "$class_dir") -> $(readlink "$shared" 2> /dev/null || echo 'unresolved')" )
+        fi
+    done
+
+    if (( ${#unresolved[@]} > 0 )); then
+        {
+            echo "Cannot run the conformance suite -- these shared test directories are missing or empty:"
+            for entry in "${unresolved[@]}"; do
+                echo "  $entry"
+            done
+            echo
+            echo "They point at the Math package's own tests, which is what makes this suite check feature"
+            echo "parity; PHPUnit skips an unresolvable symlink silently, so a run without them would pass"
+            echo "while checking nothing. Put the sibling checkout back (expected beneath"
+            echo "$(cd "$EXT_DIR/../.." && pwd)/packages), or name your targets explicitly:"
+            echo
+            echo "  composer test $PHP_VERSION -- tests/phpunit/Vector/VectorBinaryOperatorsTest.php"
+        } >&2
+        exit 1
+    fi
+fi
+
 # Say which build is under test: with a module per PHP version, PHPUnit's own banner (which reports
 # only the PHP version) doesn't identify the .so being loaded.
-echo "Testing $MODULE against PHP $PHP_VERSION_FULL"
+echo "Testing $PHP_MODULE against PHP $PHP_VERSION_FULL"
 
 # Run from the repo root: PHPUnit looks for phpunit.xml in the working directory, and resolves the
 # paths inside it -- and any path argument -- relative to there.
@@ -66,7 +97,7 @@ cd "$EXT_DIR"
 # Clear the ini scan directory for this process, so conf.d/oceanmoon_math.ini (written by
 # scripts/enable) can't load the module a second time -- the -d extension= below is the only load.
 PHP_INI_SCAN_DIR= exec php \
-    -d extension="$MODULE" \
+    -d extension="$PHP_MODULE" \
     "$EXT_DIR/vendor/bin/phpunit" \
     --colors=always \
     "$@"

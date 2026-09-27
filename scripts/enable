@@ -34,12 +34,11 @@ fi
 # shellcheck source=php-env
 source "$EXT_DIR/scripts/php-env"
 
-MODULE="$PHP_MODULE"
 SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
 INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
 
-if [[ ! -f "$MODULE" ]]; then
-    echo "oceanmoon_math.so not found at $MODULE -- run 'composer build' first." >&2
+if [[ ! -f "$PHP_MODULE" ]]; then
+    echo "oceanmoon_math.so not found at $PHP_MODULE -- run 'composer build' first." >&2
     exit 1
 fi
 
@@ -49,5 +48,5 @@ if [[ -z "$SCAN_DIR" ]]; then
 fi
 
 mkdir -p "$SCAN_DIR"
-echo "extension=$MODULE" > "$INI_FILE"
-echo "Enabled globally for PHP $PHP_VERSION_FULL: $INI_FILE -> $MODULE"
+echo "extension=$PHP_MODULE" > "$INI_FILE"
+echo "Enabled globally for PHP $PHP_VERSION_FULL: $INI_FILE -> $PHP_MODULE"
