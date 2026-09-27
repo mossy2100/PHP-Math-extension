@@ -124,6 +124,10 @@ final class Rational implements \Stringable
 
     public function __toString(): string {}
 
+    public function isInt(): bool {}
+
+    public function sign(bool $zeroForZero = true): int {}
+
     public function compare(mixed $other): int {}
 
     public function equal(mixed $other): bool {}

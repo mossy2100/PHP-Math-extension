@@ -24,6 +24,12 @@ double matrix_calc_det(zval *data_array)
 	HashTable *ht = Z_ARRVAL_P(data_array);
 	zend_long n = (zend_long) zend_hash_num_elements(ht);
 
+	if (n == 0) {
+		/* The 0x0 determinant is the empty product, 1, so the identity and multiplicativity
+		 * properties hold for empty matrices. */
+		return 1.0;
+	}
+
 	if (n == 1) {
 		zval *row0 = zend_hash_index_find(ht, 0);
 		return Z_DVAL_P(zend_hash_index_find(Z_ARRVAL_P(row0), 0));

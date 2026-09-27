@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8fd78e57d4e24e1234313353ebc6003d2435f95b */
+ * Stub hash: e6b8a84144c07e6d54c31d4f7e165d9f64770d1b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -132,6 +132,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Rational_to
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Rational___toString arginfo_class_OceanMoon_Math_Complex___toString
+
+#define arginfo_class_OceanMoon_Math_Rational_isInt arginfo_class_OceanMoon_Math_Complex_isReal
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Rational_sign, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, zeroForZero, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Rational_compare, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, other, IS_MIXED, 0)
@@ -443,6 +449,8 @@ ZEND_METHOD(OceanMoon_Math_Rational, fromString);
 ZEND_METHOD(OceanMoon_Math_Rational, toFloat);
 ZEND_METHOD(OceanMoon_Math_Rational, toMixedNumber);
 ZEND_METHOD(OceanMoon_Math_Rational, __toString);
+ZEND_METHOD(OceanMoon_Math_Rational, isInt);
+ZEND_METHOD(OceanMoon_Math_Rational, sign);
 ZEND_METHOD(OceanMoon_Math_Rational, compare);
 ZEND_METHOD(OceanMoon_Math_Rational, equal);
 ZEND_METHOD(OceanMoon_Math_Rational, lessThan);
@@ -583,6 +591,8 @@ static const zend_function_entry class_OceanMoon_Math_Rational_methods[] = {
 	ZEND_ME(OceanMoon_Math_Rational, toFloat, arginfo_class_OceanMoon_Math_Rational_toFloat, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, toMixedNumber, arginfo_class_OceanMoon_Math_Rational_toMixedNumber, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, __toString, arginfo_class_OceanMoon_Math_Rational___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Rational, isInt, arginfo_class_OceanMoon_Math_Rational_isInt, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Rational, sign, arginfo_class_OceanMoon_Math_Rational_sign, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, compare, arginfo_class_OceanMoon_Math_Rational_compare, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, equal, arginfo_class_OceanMoon_Math_Rational_equal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, lessThan, arginfo_class_OceanMoon_Math_Rational_lessThan, ZEND_ACC_PUBLIC)
