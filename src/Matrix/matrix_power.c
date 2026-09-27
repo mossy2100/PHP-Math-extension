@@ -97,7 +97,7 @@ static zend_result matrix_pow_positive(zend_object *self, zend_long exponent, zv
  * The computational core of pow(), shared with the `**` operator (matrix_operators.c): identity
  * for 0, clone for 1, exponentiation by squaring for larger positive exponents, and
  * inv()->pow(-exponent) for negative ones (with a special case for PHP_INT_MIN, whose negation
- * overflows: pow(PHP_INT_MAX)->mul(this)->inv()).
+ * overflows: inv()->pow(PHP_INT_MAX)->mul(inv), matching the package order).
  */
 zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_value)
 {
@@ -121,22 +121,24 @@ zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_
 		return SUCCESS;
 	}
 
-	/* Handle exponent = PHP_INT_MIN: pow(PHP_INT_MAX)->mul(this)->inv(). */
+	/* Handle exponent = PHP_INT_MIN: inv()->pow(PHP_INT_MAX)->mul(inv). The inverse is taken first,
+	 * as in the package: squaring the base first would overflow a diagonal entry above 1 to INF, which
+	 * cannot be represented as a Matrix. */
 	if (exponent == ZEND_LONG_MIN) {
-		zval max_pow;
-		if (matrix_pow_positive(self, ZEND_LONG_MAX, &max_pow) == FAILURE) {
+		zval inv_result;
+		if (matrix_calc_inv(self, &inv_result) == FAILURE) {
 			return FAILURE;
 		}
 
-		zval mul_result;
-		if (matrix_calc_mul_matrix(Z_OBJ(max_pow), self, &mul_result) == FAILURE) {
-			zval_ptr_dtor(&max_pow);
+		zval pow_result;
+		if (matrix_pow_positive(Z_OBJ(inv_result), ZEND_LONG_MAX, &pow_result) == FAILURE) {
+			zval_ptr_dtor(&inv_result);
 			return FAILURE;
 		}
-		zval_ptr_dtor(&max_pow);
 
-		zend_result result = matrix_calc_inv(Z_OBJ(mul_result), return_value);
-		zval_ptr_dtor(&mul_result);
+		zend_result result = matrix_calc_mul_matrix(Z_OBJ(pow_result), Z_OBJ(inv_result), return_value);
+		zval_ptr_dtor(&pow_result);
+		zval_ptr_dtor(&inv_result);
 		return result;
 	}
 
