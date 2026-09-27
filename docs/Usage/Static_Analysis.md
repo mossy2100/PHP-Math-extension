@@ -1,4 +1,4 @@
-# Static Analysis
+# Static Analysis with PHPStan
 
 Operator overloading only exists at the C level, via the `do_operation`/`compare` object handlers - there's no PHP source text anywhere that declares "`Vector` supports `*`".
 
@@ -7,18 +7,15 @@ document their method signatures), so without help they have no way to know thes
 will treat `$v * 2` exactly like `$anyOtherObject * 2`: an error, because plain PHP objects don't support arithmetic
 operators at all.
 
-This page covers, tool by tool, how to teach a static analyser about the operators this extension adds, if possible. Each tool needs
-its own solution - there's no shared mechanism between them.
+This page explains how to teach PHPStan about the operators this extension adds. Other tools will need their own solution.
 
----
-
-## PHPStan
-
-### The problem, concretely
+## The problem, concretely
 
 Without any help, PHPStan reports every operator use on `Complex`/`Rational`/`Vector`/`Matrix` as an error:
 
-(There is no error using comparison operators and objects of the same type. Just when comparing objects with scalars, or arithmetic using objects.)
+There is no error using comparison operators and objects of the same type. Errors will only occur when comparing objects with scalars, or using arithmetic operators with objects.
+
+Example:
 
 ```
 Binary operation "*" between OceanMoon\Math\Vector and int results in an error.
@@ -28,7 +25,7 @@ The tempting-but-wrong fix is scattering `@phpstan-ignore binaryOp.invalid` over
 error without telling PHPStan what the _result type_ actually is, so `($v * 2)->get(0)` still doesn't type-check
 (PHPStan doesn't know `$v * 2` is a `Vector`, so it doesn't know `get()` exists on it).
 
-### The real fix: `OperatorTypeSpecifyingExtension`
+## The real fix: `OperatorTypeSpecifyingExtension`
 
 PHPStan has a first-class extension point for exactly this situation -
 [`OperatorTypeSpecifyingExtension`](https://phpstan.org/developing-extensions/operator-type-specifying-extension) (for
@@ -63,7 +60,7 @@ by a distinct `compare` object handler, not `do_operation`:
 | `phpstan/MatrixBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`, `**`                |
 | `phpstan/MatrixUnaryOperatorExtension.php`        | unary `+`, `-`                          |
 
-### Anatomy of one extension
+## Anatomy of one extension
 
 `VectorBinaryOperatorExtension` is a good one to read first - it's short, and it shows the pattern of narrowing
 `isOperatorSupported()` per-operator to match exactly what `vector_do_operation()` (`src/Vector/vector_operators.c`)
@@ -112,7 +109,7 @@ Two things worth noting from the fuller set of extensions:
   handler actually receives as `op1`. See the doc comments on `vector_do_operation()`/ `matrix_do_operation()` in the C
   source for why the engine dispatches that way.
 
-### Registering the extensions
+## Registering the extensions
 
 Once the class exists, it needs registering as a service in `phpstan.neon`, tagged with
 `phpstan.broker.operatorTypeSpecifyingExtension` (binary) or `phpstan.broker.unaryOperatorTypeSpecifyingExtension`
@@ -133,7 +130,7 @@ services:
 See `phpstan.neon` in this repo for the complete, currently-working set of ten registrations (one per row in the table
 above).
 
-### The classes also have to be visible to PHPStan as class types at all
+## The classes also have to be visible to PHPStan as class types at all
 
 Registering the operator extensions solves "does PHPStan understand what `*` means", but PHPStan separately needs to
 know `Complex`/`Rational`/`Vector`/`Matrix` _exist_ as classes with the methods/properties `oceanmoon_math.stub.php`
@@ -146,11 +143,11 @@ parameters:
         - oceanmoon_math.stub.php
 ```
 
-`oceanmoon_math.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php` - see
-the `Building` section of the main `README.md`), so this is the same signatures PHP itself uses at runtime, not a
-separate hand-maintained copy that could drift.
+`oceanmoon_math.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php` - see the
+`Building` section of [Development](Development.md#building)), so this is the same signatures PHP itself uses at
+runtime, not a separate hand-maintained copy that could drift.
 
-### Constants registered at runtime
+## Constants registered at runtime
 
 `OceanMoon\Math\M_I` (the `Complex(0, 1)` constant) has the same fundamental problem as the operators, for a different
 reason: it's registered purely at request start via `zend_register_constant()` in `complex_rinit()`
@@ -161,7 +158,7 @@ PHPStan-only file (`phpstan/constants.php`) that declares `const M_I = new Compl
 listed in `scanFiles` alongside the stubs. It's never processed by `gen_stub.php` and never executed at runtime - it
 exists solely for this purpose.
 
-### Known limitation: not yet usable from a consuming project
+## Known limitation: not yet usable from a consuming project
 
 Everything above documents how PHPStan is made to understand **this repo's own code** (`tests/phpunit/`, per
 `phpstan.neon`'s `paths:`). The `phpstan/` extension classes are currently registered under `autoload-dev` in
@@ -181,73 +178,3 @@ this extension has no way to `require` these extension classes into their own `p
 aren't shipped to them. Before this can be documented as "how to set PHPStan up in _your_ project using this extension",
 the extension classes need to move to a real (non-dev) autoload section, or be split into a separate, always-shipped
 location. **TODO**, tracked here rather than fixed yet.
-
----
-
-## Psalm
-
-**TODO.** Unlike PHPStan, Psalm has no dedicated plugin interface for customizing the inferred type of a binary operator
-expression - its documented
-[plugin provider interfaces](https://psalm.dev/docs/running_psalm/plugins/authoring_plugins/) cover functions, methods,
-and properties (`MethodReturnTypeProviderInterface` and friends), but nothing operator-specific. The closest available
-hook is the generic `AfterExpressionAnalysisInterface` event, which fires after Psalm analyses _any_ expression
-(including a `BinaryOp` node) and could in principle be used to override the inferred type - but that's a much blunter,
-more general-purpose hook than PHPStan's purpose-built one, and using it this way hasn't been investigated yet.
-
----
-
-## Other tools
-
-Not yet investigated. Candidates to look at later: [Mago](https://github.com/carthage-software/mago),
-[Phan](https://github.com/phan/phan), [SonarQube](https://www.sonarsource.com/products/sonarqube/).
-
----
-
-## IDEs
-
-IDE inline error-squiggling (as distinct from running a static analysis tool like PHPStan as a separate step) is a
-different problem again - most IDEs' live syntax/type checking isn't pluggable the way PHPStan is, so there's no
-equivalent "write an extension class" fix available.
-
-- **PhpStorm**: its live inspections (as-you-type) don't read `phpstan.neon` extensions - that only happens when PHPStan
-  is run as an external tool/integration and its output shown as annotations over the code. So PhpStorm isn't actually
-  better off than VS Code for the live-editing experience; it just has a smoother path to _also_ run the real PHPStan
-  pass and see its results inline.
-- Anything else worth trying here is still open.
-
----
-## Intelephense (VS Code)
-
-Intelephense is a PHP language server and popular extension used with Visual Studio Code, which provides code completion and diagnostics including type checking.
-
-It doesn't complain about comparison operators used with these types, but it does complain about arithmetic operators, issuing P1006  errors, which have the form "Expected type X. Found Y."
-
-The errors can be silenced with a `@disregard` directive on the previous line, as follows:
-
-```php
-$z = new Complex(5, 7);
-/** @disregard P1006 */
-$result = 2 - $z;
-```
-
-If you have a several expressions that need this directive applied, you can create a block, as follows:
-
-```php
-/** @disregard P1006 */
-{
-    $total = $z1 + $z2;
-    $scaled = $total * 2.5;
-    $isGreater = $scaled > $z3;
-}
-```
-
-Another option is to exclude entire files or folders from Intelephense Diagnostics via the `settings.json` file:
-
-```json
-"intelephense.diagnostics.exclude": [
-    "**/Math/Packages/**",
-    "**/ValueObjects/*Math.php"
-]
-```
-
-Generally, stubs can be provided for custom types to suppress Intelephense issues. However, these stubs can only specify functions, classes, properties, and methods — i.e. anything that can be expressed in PHP — and doesn't enable specifications for overloaded operators. Rules for operator types are hard-coded in proprietary Intelephense code.

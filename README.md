@@ -4,7 +4,7 @@ Provides classes for Complex numbers, Rational numbers, Vectors, and Matrices.
 
 **[License](LICENSE)** | **[Changelog](CHANGELOG.md)** | **[Documentation](docs/)**
 
-![PHP 8.4](docs/logo_php8_4-125w.png) ![PHP 8.5](docs/logo_php8_5-125w.png)
+![PHP 8.4](docs/images/logo_php8_4-125w.png) ![PHP 8.5](docs/images/logo_php8_5-125w.png)
 
 **Work in progress.** A native PHP extension that replicates the
 [OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) - the `Complex`, `Rational`, `Vector`, and `Matrix`
@@ -69,7 +69,7 @@ The published, prebuilt module is compiled against PHP 8.4, to match the minimum
 `oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. It's still ABI-locked to 8.4 specifically,
 though - it won't load under 8.5 or any other version.
 
-**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Development.md#building), it's simple enough - `composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4. The C source
+**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Usage/Development.md#building), it's simple enough - `composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4. The C source
 supports both 8.4 and 8.5 already, so this is just a case of building against the PHP version you have installed. Each
 version builds into its own tree (`build/8.4/`, `build/8.5/`, each with its module in `modules/` inside it), so you can
 keep both side by side.
@@ -78,11 +78,13 @@ keep both side by side.
 
 ---
 
-## Installation and Development
+## Usage
 
-See: [Installation](docs/Installation.md) for using the extension in your project.
+See: [Installation](docs/Usage/Installation.md) for using the extension in your project.
 
-See: [Development](docs/Development.md) for building, testing, and the project's C source layout.
+See: [Development](docs/Usage/Development.md) for building, testing, and the project's C source layout.
+
+See: [Static Analysis](docs/Usage/Static_Analysis.md) for how to extend PHPStan to support the operators provided by this extension.
 
 ---
 
@@ -94,91 +96,28 @@ extension adds: operator overloading.
 
 ### [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)
 
-Adds `+`, `-`, `*`, `/`, `**`, `~` (conjugate), and the full set of comparison operators (`==`, `!=`, `<`, `<=`, `>`,
-`>=`, `<=>`, ordered lexicographically by real then imaginary part). See [Complex operators](docs/Complex.md).
+Adds `+`, `-`, `*`, `/`, `**`, `~` (conjugate), and equality operators (`==`, `!=`). See [Complex operators](docs/Reference/Complex.md).
 
 ### [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md)
 
 Adds `+`, `-`, `*`, `/`, `**`, and the full set of comparison operators (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See
-[Rational operators](docs/Rational.md).
+[Rational operators](docs/Reference/Rational.md).
 
 ### [Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)
 
-Adds `+`, `-`, `*`, `/`. See [Vector operators](docs/Vector.md).
+Adds `+`, `-`, `*`, `/`. See [Vector operators](docs/Reference/Vector.md).
 
 ### [Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)
 
-Adds `+`, `-`, `*`, `/`, `**`. See [Matrix operators](docs/Matrix.md).
+Adds `+`, `-`, `*`, `/`, `**`. See [Matrix operators](docs/Reference/Matrix.md).
 
 ---
 
 ## Comparison Operators
 
-There are two groups of comparison operators in PHP:
-
-1. **Loose**: `<=>`, `==`, `!=`, `<`, `<=`, `>`, `>=`. Flexible about type.
-2. **Strict**: `===`, `!==`. Include type in the comparison, and for objects mean reference identity rather than value
-   equality.
-
-### Loose comparison operators
-
-A PHP extension can't override a subset of the loose group independently: a single `compare` object handler backs `<=>`,
-and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result - there's no way to implement some of
-the six and fall back to PHP's default for the rest.
-
-`Complex` and `Rational` each provide one; `Vector` and `Matrix` don't, since there's no natural way to order a whole
-element list against another the way there is for a 2-element `(real, imaginary)` tuple or a single rational value.
-Without an extension-provided handler, `Vector`/`Matrix` still get PHP's own default object `compare` handler (like
-any plain PHP object) - see the Math package's
-[Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md) doc.
-
-- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect - see
-  [Rational operators](docs/Rational.md#comparison-operators).
-- `Complex`'s ordering is plain lexicographic (real part first, then imaginary) - useful for sorting and deduplication,
-  but not mathematically meaningful, since there's no total order compatible with complex arithmetic. It's exactly what
-  PHP's own default object comparison already gives two `Complex` instances for free (`$real` is declared before
-  `$imaginary`); the operators only add accepting an `int`/`float` operand on either side. See
-  [Complex operators](docs/Complex.md#comparison-operators) for the details.
-
-Both accept an `int`/`float` operand on either side, promoted the same way their `equal()` method promotes one, and
-throw for a `NAN` operand (no meaningful comparison result) - see each class's own docs for specifics.
-
-### Strict comparison operators
-
-`===` and `!==` can't be overridden by a PHP extension, so they behave as normal. For objects, they always mean
-reference identity: two distinct `Complex`/`Rational`/`Vector`/`Matrix` instances representing the same value are never
-`===`, even when they are `==` or `equal()`:
-
-```php
-$z1 = new Complex(3, 4);
-$z2 = new Complex(3, 4);
-
-$z1 == $z2;   // true  (same value)
-$z1 === $z2;  // false (different instances)
-```
-
-### Equality methods
-
-`Vector` and `Matrix` do still have comparison operators - PHP's default per-property comparison, same as any plain
-PHP object, not an extension-provided handler (see [Loose comparison operators](#loose-comparison-operators) above).
-For `==`/`!=` this happens to give a reasonable element-wise equality result, but without `approxEqual()`'s
-floating-point tolerance; the ordering operators (`<`, `<=`, `>`, `>=`, `<=>`) aren't mathematically meaningful, for
-the same reason `Complex`'s aren't.
-
-Some coding standards (PHPStan strict rules, Slevomat, and others) discourage `==`/`!=` in favour of explicit method
-calls regardless, so `equal()`/`approxEqual()` remain the recommended way to test value equality across all four
-classes. All four are documented in the Math package documentation, which applies equally to the extension.
-
-See:
-
-- [`Complex::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal)
-- [`Complex::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#approxequal)
-- [`Rational::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#equal)
-- [`Rational::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#approxequal)
-- [`Vector::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#equal)
-- [`Vector::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#approxequal)
-- [`Matrix::equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#equal)
-- [`Matrix::approxEqual()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#approxequal)
+The extension can only affect PHP's loose comparison operators (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`), and only for
+the classes where an ordering is defined; the strict operators (`===`, `!==`) can't be overloaded at all. See
+[Comparison Operators](docs/Reference/Comparison_Operators.md) for the details.
 
 ---
 
@@ -226,15 +165,6 @@ $z1 + $z2 * $z3;   // $z2 * $z3 is evaluated first: $z1 + ($z2 * $z3)
 -$z1 ** 2;         // ** is evaluated first: -($z1 ** 2) = -2i
 (-$z1) ** 2;       // parentheses override precedence: 2i (differs from the line above)
 ```
-
----
-
-## Static Analysis
-
-The main downside to using the extension is poor support for custom operators in IDEs like PhpStorm, static
-analysis tools like PHPStan, and diagnostic tools like Intelephense.
-
-See [Static Analysis](docs/Static_Analysis.md) for possible solutions and workarounds (work in progress).
 
 ---
 

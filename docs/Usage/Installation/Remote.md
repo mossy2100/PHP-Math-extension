@@ -2,7 +2,7 @@
 
 A remote Linux server (a DigitalOcean Droplet, an EC2 instance, a plain VPS, etc.) is really just Linux - if the hosting
 provider gives you a shell with root/sudo access and lets you install PHP extensions at all (many managed/ shared hosts
-explicitly don't - see the main `README.md`'s Advantages/Disadvantages notes), you have two options:
+explicitly don't - see the main `README.md`'s Key Features and Static Analysis sections), you have two options:
 
 1. **[PIE](https://github.com/php/pie)**, exactly as described in the Mac/Linux installation doc, if the server has a C
    compiler and the PHP development headers installed (or you're willing to install them).

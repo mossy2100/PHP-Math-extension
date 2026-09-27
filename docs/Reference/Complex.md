@@ -103,7 +103,7 @@ calls has no notion of precedence at all - it only ever evaluates in the order y
 out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
 ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
 requires you to have already done that grouping in your head before writing a single method call. This applies equally
-to every class this extension adds operators to, so see [Operator Precedence](../README.md#operator-precedence) in the
+to every class this extension adds operators to, so see [Operator Precedence](../../README.md#operator-precedence) in the
 main README for the shared precedence table and PHP manual link.
 
 ---
