@@ -1,13 +1,14 @@
 # Vector Operators
 
-Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded - plain PHP classes can't
+Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded — plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Vector` (properties,
 factory methods, conversion, comparison, dot/cross product, `ArrayAccess`, etc.), see the package's own
-[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md) - this page covers only the operators the extension adds on top of it.
+[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md) — this page covers only the operators the extension adds on top of it.
 
 `Vector` gets the four basic arithmetic operators: `+`, `-`, `*`, and `/`. It does not get (nor require) `**` as raising
-a vector to a power is not a valid mathematical operation. No comparison operators are provided either, since vectors do
-not have a natural sort order.
+a vector to a power is not a valid mathematical operation. The extension adds no comparison operators either: there's no
+natural sort order for a vector, so no `compare` handler is installed — PHP's own default object comparison still
+applies, as it does to any plain PHP object (see [Comparison Operators](Comparison_Operators.md)).
 
 ---
 
@@ -37,7 +38,7 @@ Equivalence table for the unary `+` operator, where `$v` is a `Vector`.
 
 ---
 
-### - (negate)
+### — (negate)
 
 ```php
 $negated = -$v;
@@ -64,7 +65,7 @@ Equivalence table for the unary `-` operator, where `$v` is a `Vector`.
 ## Binary Arithmetic Operators
 
 Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
-conditions, as that method - see the linked method docs for specifics.
+conditions, as that method — see the linked method docs for specifics.
 
 ---
 
@@ -79,7 +80,7 @@ vectors must be the same count.
 
 Forms:
 
-1. `Vector + Vector`. No other form is supported - there's no scalar addition for `Vector`.
+1. `Vector + Vector`. No other form is supported — there's no scalar addition for `Vector`.
 
 **Example:**
 
@@ -91,13 +92,13 @@ $v1 + $v2;  // [5, 7, 9]  (Vector + Vector)
 
 Equivalence table for the `+` operator, where `$v1` and `$v2` are `Vector` values.
 
-| Operation | Equivalent to |
-| --------- | ------------- |
+| Operation   | Equivalent to   |
+| ----------- | --------------- |
 | `$v1 + $v2` | `$v1->add($v2)` |
 
 ---
 
-### - (subtract)
+### — (subtract)
 
 ```php
 $diff = $v1 - $v2;
@@ -120,8 +121,8 @@ $v1 - $v2;  // [3, 3, 3]  (Vector - Vector)
 
 Equivalence table for the `-` operator, where `$v1` and `$v2` are `Vector` values.
 
-| Operation | Equivalent to |
-| --------- | ------------- |
+| Operation   | Equivalent to   |
+| ----------- | --------------- |
 | `$v1 - $v2` | `$v1->sub($v2)` |
 
 ---
@@ -134,7 +135,7 @@ $result = $v1 * $other;
 
 Forms:
 
-1. `Vector * int|float`. Scalar multiplication, element-wise - equivalent to
+1. `Vector * int|float`. Scalar multiplication, element-wise — equivalent to
    [`$v1->mul($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul).
 2. `int|float * Vector`. Multiplication of vector by a scalar is commutative, so this gives the same result as #1.
 3. `Vector * Matrix`. This `Vector` is treated as a 1×n row matrix, multiplied by a `Matrix` using standard matrix
@@ -166,7 +167,8 @@ $v2 = Vector::fromArray([1, 2]);
 $v2 * $matA;  // [1, 2]  (Vector * Matrix - $v2 treated as a 1x2 row matrix)
 ```
 
-Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and `$matA` is a `Matrix`.
+Equivalence table for the `*` operator, where `$v` is a `Vector`, `$x` is an `int` or `float`, and
+`$matA` is a `Matrix`.
 
 | Operation    | Equivalent to    |
 | ------------ | ---------------- |
@@ -188,13 +190,19 @@ Forms:
 
 1. `Vector / int|float`. Equivalent to [`$v1->div($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#div).
 2. `int|float / Vector`. Not commutative with `Vector / int|float`. Element-wise, divides the scalar by each
-   element of the `Vector` in turn. There's no equivalent method, but the same result can be achieved by [`$x * $v->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal), or, equivalently, `$v->reciprocal()->mul($x)`. Throws `ArithmeticException` if any of the vector's elements equal zero, matching `reciprocal()`.
+   element of the `Vector` in turn. There's no equivalent method, but the same result can be achieved by
+   [`$x * $v->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#reciprocal), or, equivalently,
+   `$v->reciprocal()->mul($x)`. Throws `ArithmeticException` if any of the vector's elements equal zero,
+   matching `reciprocal()`.
 
 Unsupported forms:
 
 1. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by. If you want element-wise
    (Hadamard) division, call [`$v1->hadamardDiv($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
-2. `Vector / Matrix`. Division of a vector by a matrix isn't a typical operation. If the intent is to multiply a vector by a matrix's inverse (i.e. compute v ⨉ M⁻¹) it can be achieved with `$vec * $mat ** -1` or, equivalently, `$vec * $mat->inv()`. This requires the matrix to be square, in addition to having the same number of  columns as the vector has elements.
+2. `Vector / Matrix`. Division of a vector by a matrix isn't a typical operation. If the intent is to multiply a
+   vector by a matrix's inverse (i.e. compute v ⨉ M⁻¹) it can be achieved with `$vec * $mat ** -1` or, equivalently,
+   `$vec * $mat->inv()`. This requires the matrix to be square, in addition to having the same number of  columns as
+   the vector has elements.
 
 **Example:**
 
@@ -218,7 +226,9 @@ Equivalence table for the `/` operator, where `$v` is a `Vector`, and `$x` is an
 
 ## See Also
 
-- **[Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)** - the full class documentation in the
+- **[Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)** — the full class documentation in the
   Math package
-- **[Matrix Operators](Matrix.md)** - `Vector * Matrix` and `Matrix * Vector` both work; see there for the matrix side
+- **[Matrix Operators](Matrix.md)** — `Vector * Matrix` and `Matrix * Vector` both work; see there for the matrix side
   of the interaction
+- **[Comparison Operators](Comparison_Operators.md)** — how comparison works across all four classes; `Vector` gets no
+  extension-provided comparison handler, only PHP's own default object comparison

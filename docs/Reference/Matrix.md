@@ -1,13 +1,15 @@
 # Matrix Operators
 
-Operator overloading for `OceanMoon\Math\Matrix`, available only when this extension is loaded - plain PHP classes can't
+Operator overloading for `OceanMoon\Math\Matrix`, available only when this extension is loaded — plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Matrix` (properties,
 factory methods, conversion, comparison, transpose/determinant/inverse, `ArrayAccess`, etc.), see the package's own
-[Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md) - this page covers only the
+[Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md) — this page covers only the
 operators the extension adds on top of it.
 
-`Matrix` gets the four basic arithmetic operators (`+`, `-`, `*`, `/`) plus `**` for matrix powers. No comparison
-operators are provided, since matrices have no natural sort order.
+`Matrix` gets the four basic arithmetic operators (`+`, `-`, `*`, `/`) plus `**` for matrix powers. The extension adds
+no comparison operators either: there's no natural sort order for a matrix, so no `compare` handler is installed -
+PHP's own default object comparison still applies, as it does to any plain PHP object (see
+[Comparison Operators](Comparison_Operators.md)).
 
 ---
 
@@ -20,7 +22,7 @@ $copy = +$matA;
 ```
 
 Equivalent to `clone $matA`. Returns a new `Matrix` with the same elements. Since `Matrix` is mutable, this matters:
-mutating the copy never affects the original, and vice versa - including at the row level, since cloning a `Matrix`
+mutating the copy never affects the original, and vice versa — including at the row level, since cloning a `Matrix`
 deep-clones its row `Vector`s too (matching the package's own `Matrix::__clone()`).
 
 **Example:**
@@ -38,7 +40,7 @@ Equivalence table for the unary `+` operator, where `$matA` is a `Matrix`.
 
 ---
 
-### - (negate)
+### — (negate)
 
 ```php
 $negated = -$matA;
@@ -64,7 +66,7 @@ Equivalence table for the unary `-` operator, where `$matA` is a `Matrix`.
 ## Binary Arithmetic Operators
 
 Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
-conditions, as that method - see the linked method docs for specifics.
+conditions, as that method — see the linked method docs for specifics.
 
 ---
 
@@ -79,7 +81,7 @@ must have the same dimensions.
 
 Forms:
 
-1. `Matrix + Matrix`. No other form is supported - there's no scalar addition for `Matrix`.
+1. `Matrix + Matrix`. No other form is supported — there's no scalar addition for `Matrix`.
 
 **Example:**
 
@@ -97,7 +99,7 @@ Equivalence table for the `+` operator, where `$matA` and `$matB` are `Matrix` v
 
 ---
 
-### - (subtract)
+### — (subtract)
 
 ```php
 $diff = $matA - $matB;
@@ -134,13 +136,13 @@ $result = $matA * $other;
 
 Forms:
 
-1. `Matrix * int|float`. Element-wise multiplication of every element by a scalar - equivalent to
+1. `Matrix * int|float`. Element-wise multiplication of every element by a scalar — equivalent to
    [`$matA->mul($x)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul).
 2. `int|float * Matrix`. Scalar multiplication is commutative, so this gives the same result as #1.
-3. `Matrix * Matrix`. Standard matrix multiplication - the result is a `Matrix` - equivalent to
+3. `Matrix * Matrix`. Standard matrix multiplication — the result is a `Matrix` — equivalent to
    [`$matA->mul($matB)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mul). The number of columns in
    the first `Matrix` must equal the number of rows in the second `Matrix`.
-4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector` - equivalent to
+4. `Matrix * Vector`. The `Vector` is treated as a single-column `Matrix`, and the result is a `Vector` — equivalent to
    [`$matA->mulVector($v)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#mulvector). Not commutative
    - see #5.
 
@@ -183,17 +185,17 @@ Equivalent to [`$matA->div($x)`](https://github.com/mossy2100/PHP-Math/blob/main
 Forms:
 
 1. `Matrix / int|float`. Element-wise division of every element by a scalar.
-2. `int|float / Matrix`. Not commutative with `Matrix / int|float` - element-wise, divides the scalar by each element
+2. `int|float / Matrix`. Not commutative with `Matrix / int|float` — element-wise, divides the scalar by each element
    of the `Matrix` in turn, equivalent to
    [`$x * $matA->reciprocal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#reciprocal). There's no
-   equivalent named method for this direction - `Matrix::div()` only ever divides the `Matrix` by a scalar, never the
+   equivalent named method for this direction — `Matrix::div()` only ever divides the `Matrix` by a scalar, never the
    reverse. Throws `ArithmeticException` for a zero element, matching `reciprocal()`. This is distinct from `x * A⁻¹`
-   (inverse scaling) - use `$x * $matA ** -1` (or `$x * $matA->inv()`) for that instead.
+   (inverse scaling) — use `$x * $matA ** -1` (or `$x * $matA->inv()`) for that instead.
 
 Unsupported form:
 
 1. `Matrix / Matrix`. Ambiguous in two different ways: it could mean `A * B⁻¹` or `B⁻¹ * A` (these differ in general,
-   since matrix multiplication isn't commutative), or it could mean Hadamard division - element-wise division of two
+   since matrix multiplication isn't commutative), or it could mean Hadamard division — element-wise division of two
    same-shaped matrices. Rather than guess which one you mean, make it explicit: `$matA * $matB ** -1` (or
    [`$matA * $matB->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv)) for `A * B⁻¹`,
    `$matB ** -1 * $matA` for `B⁻¹ * A`, or
@@ -212,10 +214,10 @@ $matB = Matrix::fromArray([[1, 2], [4, 8]]);
 
 Equivalence table for the `/` operator, where `$matA` is a `Matrix`, and `$x` is an `int` or `float`.
 
-| Operation    | Equivalent to              |
+| Operation    | Equivalent to               |
 | ------------ | --------------------------- |
-| `$matA / $x` | `$matA->div($x)`           |
-| `$x / $matA` | `$x * $matA->reciprocal()` |
+| `$matA / $x` | `$matA->div($x)`            |
+| `$x / $matA` | `$x * $matA->reciprocal()`  |
 
 ---
 
@@ -270,7 +272,9 @@ $matA ** -1;   // [[-2, 1], [1.5, -0.5]], same result
 
 ## See Also
 
-- **[Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)** - the full class documentation in the
+- **[Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)** — the full class documentation in the
   Math package
-- **[Vector Operators](Vector.md)** - `Matrix * Vector` and `Vector * Matrix` both work; see there for the vector side
+- **[Vector Operators](Vector.md)** — `Matrix * Vector` and `Vector * Matrix` both work; see there for the vector side
   of the interaction
+- **[Comparison Operators](Comparison_Operators.md)** — how comparison works across all four classes; `Matrix` gets no
+  extension-provided comparison handler, only PHP's own default object comparison

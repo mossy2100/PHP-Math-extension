@@ -1,14 +1,15 @@
 # Rational Operators
 
-Operator overloading for `OceanMoon\Math\Rational`, available only when this extension is loaded - plain PHP classes
+Operator overloading for `OceanMoon\Math\Rational`, available only when this extension is loaded — plain PHP classes
 can't overload operators, so none of this exists in the userland package. For everything else about `Rational`
 (properties, factory methods, conversion, `compare()`/`approxCompare()`, rounding, etc.), see the package's own
-[Rational documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) - this page covers only the
+[Rational documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) — this page covers only the
 operators the extension adds on top of it.
 
 `Rational` is one of two of the four classes for which comparison operators are provided (the other is `Complex` -
 see [Complex Operators](Complex.md#comparison-operators)). Unlike `Complex`, `Rational` has a genuine natural
-ordering; `Vector` and `Matrix` get no comparison operators at all.
+ordering; `Vector` and `Matrix` get no extension-provided comparison operators, and PHP's default object comparison
+still applies to both (see [Comparison Operators](Comparison_Operators.md)).
 
 ---
 
@@ -53,7 +54,7 @@ Equivalence table for the unary `+` operator, where `$r` is a `Rational`.
 
 ---
 
-### - (negate)
+### — (negate)
 
 ```php
 $negated = -$r;
@@ -88,7 +89,7 @@ computes the same result you'd get by promoting `$x` to a `Rational` first, then
 `$x->sub($r)` would compute, if that was possible.
 
 A genuine `float` operand is different: since the methods don't accept `float` at all, that case doesn't reduce to a
-method call in any order - the operator instead widens per the rule above and returns a `float`.
+method call in any order — the operator instead widens per the rule above and returns a `float`.
 
 ---
 
@@ -121,17 +122,17 @@ $r1 + 1.23;   // 1.73  (Rational + float)
 Equivalence table for the `+` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | --------------- |
-| `$r1 + $r2` | `$r1->add($r2)`               |                 |
-| `$r1 + $i` | `$r1->add($i)`               |                 |
-| `$i + $r1` | `new Rational($i)->add($r1)` | `$r1->add($i)`   |
-| `$r1 + $f` | `$r1->toFloat() + $f`        |                 |
-| `$f + $r1` | `$f + $r1->toFloat()`        |                 |
+| Operation   | Equivalent to                | Also equivalent |
+| ----------- | ---------------------------- | --------------- |
+| `$r1 + $r2` | `$r1->add($r2)`              |                 |
+| `$r1 + $i`  | `$r1->add($i)`               |                 |
+| `$i + $r1`  | `new Rational($i)->add($r1)` | `$r1->add($i)`  |
+| `$r1 + $f`  | `$r1->toFloat() + $f`        |                 |
+| `$f + $r1`  | `$f + $r1->toFloat()`        |                 |
 
 ---
 
-### - (subtract)
+### — (subtract)
 
 ```php
 $diff = $r1 - $r2;
@@ -143,7 +144,7 @@ Forms:
 
 1. `Rational - Rational`.
 2. `Rational - int|float`.
-3. `int|float - Rational`. Subtraction isn't commutative, so this is a distinct case from #2 - the scalar is promoted to
+3. `int|float - Rational`. Subtraction isn't commutative, so this is a distinct case from #2 — the scalar is promoted to
    a `Rational` first, then subtracted normally.
 
 **Example:**
@@ -161,13 +162,13 @@ $r1 - 0.25;   // 0.5   (Rational - float)
 Equivalence table for the `-` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | --------------- |
-| `$r1 - $r2` | `$r1->sub($r2)`               |                 |
-| `$r1 - $i` | `$r1->sub($i)`               |                 |
-| `$i - $r1` | `new Rational($i)->sub($r1)` | `-$r1->sub($i)`  |
-| `$r1 - $f` | `$r1->toFloat() - $f`        |                 |
-| `$f - $r1` | `$f - $r1->toFloat()`        |                 |
+| Operation   | Equivalent to                | Also equivalent |
+| ----------- | ---------------------------- | --------------- |
+| `$r1 - $r2` | `$r1->sub($r2)`              |                 |
+| `$r1 - $i`  | `$r1->sub($i)`               |                 |
+| `$i - $r1`  | `new Rational($i)->sub($r1)` | `-$r1->sub($i)` |
+| `$r1 - $f`  | `$r1->toFloat() - $f`        |                 |
+| `$f - $r1`  | `$f - $r1->toFloat()`        |                 |
 
 ---
 
@@ -200,13 +201,13 @@ $r1 * 0.75;   // 0.5  (Rational * float)
 Equivalence table for the `*` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation | Equivalent to               | Also equivalent |
-| --------- | --------------------------- | --------------- |
-| `$r1 * $r2` | `$r1->mul($r2)`               |                 |
-| `$r1 * $i` | `$r1->mul($i)`               |                 |
-| `$i * $r1` | `new Rational($i)->mul($r1)` | `$r1->mul($i)`   |
-| `$r1 * $f` | `$r1->toFloat() * $f`        |                 |
-| `$f * $r1` | `$f * $r1->toFloat()`        |                 |
+| Operation   | Equivalent to                | Also equivalent |
+| ----------- | ---------------------------- | --------------- |
+| `$r1 * $r2` | `$r1->mul($r2)`              |                 |
+| `$r1 * $i`  | `$r1->mul($i)`               |                 |
+| `$i * $r1`  | `new Rational($i)->mul($r1)` | `$r1->mul($i)`  |
+| `$r1 * $f`  | `$r1->toFloat() * $f`        |                 |
+| `$f * $r1`  | `$f * $r1->toFloat()`        |                 |
 
 ---
 
@@ -222,8 +223,8 @@ Forms:
 
 1. `Rational / Rational`.
 2. `Rational / int|float`.
-3. `int|float / Rational`. Division isn't commutative, so this is a distinct case from #2 - the scalar is promoted to a
-   `Rational` first, then divided normally. This also gives a way to compute a multiplicative inverse - see "Inverting
+3. `int|float / Rational`. Division isn't commutative, so this is a distinct case from #2 — the scalar is promoted to a
+   `Rational` first, then divided normally. This also gives a way to compute a multiplicative inverse — see "Inverting
    with `1 / r` or `r ** -1`" below.
 
 **Example:**
@@ -238,20 +239,20 @@ $r1 / 0.75;   // 0.8888...  (Rational / float)
 0.75 / $r1;   // 1.125      (float / Rational)
 ```
 
-Dividing by zero always throws `ArithmeticException`, matching `div()` - including `$r1 / 0.0`. This is a deliberate
+Dividing by zero always throws `ArithmeticException`, matching `div()` — including `$r1 / 0.0`. This is a deliberate
 departure from ordinary `float` division, which returns `INF`/`-INF`/`NAN` rather than throwing; this can be a hidden
 source of bugs.
 
 Equivalence table for the `/` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation | Equivalent to               |
-| --------- | --------------------------- |
-| `$r1 / $r2` | `$r1->div($r2)`               |
-| `$r1 / $i` | `$r1->div($i)`               |
-| `$i / $r1` | `new Rational($i)->div($r1)` |
-| `$r1 / $f` | `$r1->toFloat() / $f`        |
-| `$f / $r1` | `$f / $r1->toFloat()`        |
+| Operation   | Equivalent to                |
+| ----------- | ---------------------------- |
+| `$r1 / $r2` | `$r1->div($r2)`              |
+| `$r1 / $i`  | `$r1->div($i)`               |
+| `$i / $r1`  | `new Rational($i)->div($r1)` |
+| `$r1 / $f`  | `$r1->toFloat() / $f`        |
+| `$f / $r1`  | `$f / $r1->toFloat()`        |
 
 ---
 
@@ -267,7 +268,7 @@ A number raised to a fractional power generally isn't itself rational (e.g. `2 *
 doesn't accept a `Rational` or `float` exponent, and neither `Rational ** Rational` nor `int ** Rational` is supported
 here either.
 
-By the widening rule above, `int` only ever widens to `Rational`, never directly to `float` - so an `int` base has no
+By the widening rule above, `int` only ever widens to `Rational`, never directly to `float` — so an `int` base has no
 path to a `float` result unless the _other_ operand is already a genuine `float`. `float ** Rational` and
 `Rational ** float` are both supported on that basis: the `Rational` is widened to a `float` first, then computed as a
 regular `float ** float`.
@@ -328,7 +329,7 @@ $r ** -1;   // 4/3, same result
 
 ## Comparison Operators
 
-- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together - PHP does not provide a
+- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together — PHP does not provide a
   mechanism to override these individually.
 - The handler is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare):
   it accepts `Rational`, `int`, or `float` operands and throws the same exceptions for anything else.
@@ -375,13 +376,13 @@ $r1 <=> 0.5;   // 0   (1/2 == 0.5 exactly; Rational <=> float)
 Equivalence table for the `<=>` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`.
 
-| Operation   | Equivalent to                   | Also equivalent    |
-| ----------- | ------------------------------- | ------------------ |
-| `$r1 <=> $r2` | `$r1->compare($r2)`               |                    |
-| `$r1 <=> $i` | `$r1->compare($i)`               |                    |
-| `$i <=> $r1` | `new Rational($i)->compare($r1)` | `-$r1->compare($i)` |
-| `$r1 <=> $f` | `$r1->compare($f)`               |                    |
-| `$f <=> $r1` | `$f <=> $r1->toFloat()`          | `-$r1->compare($f)` |
+| Operation     | Equivalent to                    | Also equivalent     |
+| ------------- | -------------------------------- | ------------------- |
+| `$r1 <=> $r2` | `$r1->compare($r2)`              |                     |
+| `$r1 <=> $i`  | `$r1->compare($i)`               |                     |
+| `$i <=> $r1`  | `new Rational($i)->compare($r1)` | `-$r1->compare($i)` |
+| `$r1 <=> $f`  | `$r1->compare($f)`               |                     |
+| `$f <=> $r1`  | `$f <=> $r1->toFloat()`          | `-$r1->compare($f)` |
 
 ---
 
@@ -409,15 +410,16 @@ $r1 < 0.5;  // true   (1/3 < 0.5; Rational < float)
 ```
 
 Equivalence table for the `<` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
-`float`. When the scalar is on the left, the method can be flipped to `greaterThan()`, since `$x < $r1` means `$r1 > $x`.
+`float`. When the scalar is on the left, the method can be flipped to `greaterThan()`,
+since `$x < $r1` means `$r1 > $x`.
 
-| Operation | Equivalent to                    | Also equivalent       |
-| --------- | -------------------------------- | --------------------- |
-| `$r1 < $r2` | `$r1->lessThan($r2)`               |                       |
-| `$r1 < $i` | `$r1->lessThan($i)`               |                       |
-| `$i < $r1` | `new Rational($i)->lessThan($r1)` | `$r1->greaterThan($i)` |
-| `$r1 < $f` | `$r1->lessThan($f)`               |                       |
-| `$f < $r1` | `$f < $r1->toFloat()`             | `$r1->greaterThan($f)` |
+| Operation   | Equivalent to                     | Also equivalent        |
+| ----------- | --------------------------------- | ---------------------- |
+| `$r1 < $r2` | `$r1->lessThan($r2)`              |                        |
+| `$r1 < $i`  | `$r1->lessThan($i)`               |                        |
+| `$i < $r1`  | `new Rational($i)->lessThan($r1)` | `$r1->greaterThan($i)` |
+| `$r1 < $f`  | `$r1->lessThan($f)`               |                        |
+| `$f < $r1`  | `$f < $r1->toFloat()`             | `$r1->greaterThan($f)` |
 
 ---
 
@@ -448,13 +450,13 @@ Equivalence table for the `<=` operator, where `$r1` and `$r2` are `Rational` va
 `float`. When the scalar is on the left, the method can be flipped to `greaterThanOrEqual()`, since `$x <= $r1` means
 `$r1 >= $x`.
 
-| Operation  | Equivalent to                           | Also equivalent              |
-| ---------- | --------------------------------------- | ---------------------------- |
-| `$r1 <= $r2` | `$r1->lessThanOrEqual($r2)`               |                              |
-| `$r1 <= $i` | `$r1->lessThanOrEqual($i)`               |                              |
-| `$i <= $r1` | `new Rational($i)->lessThanOrEqual($r1)` | `$r1->greaterThanOrEqual($i)` |
-| `$r1 <= $f` | `$r1->lessThanOrEqual($f)`               |                              |
-| `$f <= $r1` | `$f <= $r1->toFloat()`                   | `$r1->greaterThanOrEqual($f)` |
+| Operation    | Equivalent to                            | Also equivalent               |
+| ------------ | ---------------------------------------- | ----------------------------- |
+| `$r1 <= $r2` | `$r1->lessThanOrEqual($r2)`              |                               |
+| `$r1 <= $i`  | `$r1->lessThanOrEqual($i)`               |                               |
+| `$i <= $r1`  | `new Rational($i)->lessThanOrEqual($r1)` | `$r1->greaterThanOrEqual($i)` |
+| `$r1 <= $f`  | `$r1->lessThanOrEqual($f)`               |                               |
+| `$f <= $r1`  | `$f <= $r1->toFloat()`                   | `$r1->greaterThanOrEqual($f)` |
 
 ---
 
@@ -484,13 +486,13 @@ $r1 > 0.5;   // false  (Rational > float)
 Equivalence table for the `>` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`. When the scalar is on the left, the method can be flipped to `lessThan()`, since `$x > $r1` means `$r1 < $x`.
 
-| Operation | Equivalent to                       | Also equivalent    |
-| --------- | ----------------------------------- | ------------------ |
-| `$r1 > $r2` | `$r1->greaterThan($r2)`               |                    |
-| `$r1 > $i` | `$r1->greaterThan($i)`               |                    |
-| `$i > $r1` | `new Rational($i)->greaterThan($r1)` | `$r1->lessThan($i)` |
-| `$r1 > $f` | `$r1->greaterThan($f)`               |                    |
-| `$f > $r1` | `$f > $r1->toFloat()`                | `$r1->lessThan($f)` |
+| Operation   | Equivalent to                        | Also equivalent     |
+| ----------- | ------------------------------------ | ------------------- |
+| `$r1 > $r2` | `$r1->greaterThan($r2)`              |                     |
+| `$r1 > $i`  | `$r1->greaterThan($i)`               |                     |
+| `$i > $r1`  | `new Rational($i)->greaterThan($r1)` | `$r1->lessThan($i)` |
+| `$r1 > $f`  | `$r1->greaterThan($f)`               |                     |
+| `$f > $r1`  | `$f > $r1->toFloat()`                | `$r1->lessThan($f)` |
 
 ---
 
@@ -521,13 +523,13 @@ Equivalence table for the `>=` operator, where `$r1` and `$r2` are `Rational` va
 `float`. When the scalar is on the left, the method can be flipped to `lessThanOrEqual()`, since `$x >= $r1` means
 `$r1 <= $x`.
 
-| Operation  | Equivalent to                              | Also equivalent           |
-| ---------- | ------------------------------------------ | ------------------------- |
-| `$r1 >= $r2` | `$r1->greaterThanOrEqual($r2)`               |                           |
-| `$r1 >= $i` | `$r1->greaterThanOrEqual($i)`               |                           |
-| `$i >= $r1` | `new Rational($i)->greaterThanOrEqual($r1)` | `$r1->lessThanOrEqual($i)` |
-| `$r1 >= $f` | `$r1->greaterThanOrEqual($f)`               |                           |
-| `$f >= $r1` | `$f >= $r1->toFloat()`                      | `$r1->lessThanOrEqual($f)` |
+| Operation    | Equivalent to                               | Also equivalent            |
+| ------------ | ------------------------------------------- | -------------------------- |
+| `$r1 >= $r2` | `$r1->greaterThanOrEqual($r2)`              |                            |
+| `$r1 >= $i`  | `$r1->greaterThanOrEqual($i)`               |                            |
+| `$i >= $r1`  | `new Rational($i)->greaterThanOrEqual($r1)` | `$r1->lessThanOrEqual($i)` |
+| `$r1 >= $f`  | `$r1->greaterThanOrEqual($f)`               |                            |
+| `$f >= $r1`  | `$f >= $r1->toFloat()`                      | `$r1->lessThanOrEqual($f)` |
 
 ---
 
@@ -539,7 +541,7 @@ $result = $r1 == $r2;
 
 Equivalent to [`$r1->equal($r2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#equal).
 
-Numeric equality, derived from the `<=>` handler - see "A note on equality testing" above. Returns a `bool`.
+Numeric equality, derived from the `<=>` handler — see "A note on equality testing" above. Returns a `bool`.
 
 **Example:**
 
@@ -556,13 +558,13 @@ $r1 == 0.5;  // true   (1/2 == 0.5 exactly; Rational == float)
 Equivalence table for the `==` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`. Equality is symmetric, so the reversed-operand row is identical to its un-reversed counterpart.
 
-| Operation  | Equivalent to                 | Also equivalent |
-| ---------- | ----------------------------- | --------------- |
-| `$r1 == $r2` | `$r1->equal($r2)`               |                 |
-| `$r1 == $i` | `$r1->equal($i)`               |                 |
-| `$i == $r1` | `new Rational($i)->equal($r1)` | `$r1->equal($i)` |
-| `$r1 == $f` | `$r1->equal($f)`               |                 |
-| `$f == $r1` | `$f === $r1->toFloat()`        | `$r1->equal($f)` |
+| Operation    | Equivalent to                  | Also equivalent  |
+| ------------ | ------------------------------ | ---------------- |
+| `$r1 == $r2` | `$r1->equal($r2)`              |                  |
+| `$r1 == $i`  | `$r1->equal($i)`               |                  |
+| `$i == $r1`  | `new Rational($i)->equal($r1)` | `$r1->equal($i)` |
+| `$r1 == $f`  | `$r1->equal($f)`               |                  |
+| `$f == $r1`  | `$f === $r1->toFloat()`        | `$r1->equal($f)` |
 
 ---
 
@@ -574,7 +576,7 @@ $result = $r1 != $r2;
 
 There's no `notEqual()` method; the negation `!$r1->equal($r2)` is the equivalent.
 
-Numeric inequality, derived from the `<=>` handler - see "A note on equality testing" above. Returns a `bool`.
+Numeric inequality, derived from the `<=>` handler — see "A note on equality testing" above. Returns a `bool`.
 
 **Example:**
 
@@ -591,19 +593,21 @@ $r1 != 0.5;  // false  (1/2 == 0.5 exactly; Rational != float)
 Equivalence table for the `!=` operator, where `$r1` and `$r2` are `Rational` values, `$i` is an `int`, and `$f` is a
 `float`. As with `==`, equality is symmetric, so the reversed-operand row is identical to its un-reversed counterpart.
 
-| Operation  | Equivalent to                  | Also equivalent  |
-| ---------- | ------------------------------ | ---------------- |
-| `$r1 != $r2` | `!$r1->equal($r2)`               |                  |
-| `$r1 != $i` | `!$r1->equal($i)`               |                  |
-| `$i != $r1` | `!new Rational($i)->equal($r1)` | `!$r1->equal($i)` |
-| `$r1 != $f` | `!$r1->equal($f)`               |                  |
-| `$f != $r1` | `$f !== $r1->toFloat()`         | `!$r1->equal($f)` |
+| Operation    | Equivalent to                   | Also equivalent   |
+| ------------ | ------------------------------- | ----------------- |
+| `$r1 != $r2` | `!$r1->equal($r2)`              |                   |
+| `$r1 != $i`  | `!$r1->equal($i)`               |                   |
+| `$i != $r1`  | `!new Rational($i)->equal($r1)` | `!$r1->equal($i)` |
+| `$r1 != $f`  | `!$r1->equal($f)`               |                   |
+| `$f != $r1`  | `$f !== $r1->toFloat()`         | `!$r1->equal($f)` |
 
 ---
 
 ## See Also
 
-- **[Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md)** - the full class documentation in the
+- **[Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md)** — the full class documentation in the
   Math package
-- **[Complex Operators](Complex.md)** - the other class with comparison operators, though `Complex`'s ordering is
+- **[Complex Operators](Complex.md)** — the other class with comparison operators, though `Complex`'s ordering is
   plain lexicographic (real, then imaginary) rather than a genuine natural ordering like `Rational`'s
+- **[Comparison Operators](Comparison_Operators.md)** — how comparison works across all four classes, including the
+  `equal()`/`approxEqual()` methods recommended over the operators themselves
