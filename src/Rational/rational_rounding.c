@@ -1,8 +1,8 @@
 /*
  * rational_rounding.c
  *
- * Rounding methods for OceanMoon\Math\Rational: round(), floor(), ceil(). Mirrors the "Rounding
- * methods" region of the PHP package's Rational class.
+ * Rounding methods for OceanMoon\Math\Rational: round(), floor(), ceil(), trunc(). Mirrors the
+ * "Rounding methods" region of the PHP package's Rational class.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -153,5 +153,21 @@ PHP_METHOD(OceanMoon_Math_Rational, ceil)
 	 * fractions, truncation already gives the ceiling. */
 	zend_long q = num / den;
 	RETURN_LONG(num > 0 ? q + 1 : q);
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Rational::trunc(): int
+ *
+ * Matches the PHP package's Rational::trunc(): the integer part, truncating toward zero, as C's `/`
+ * does. The denominator is always positive, so the division can't overflow.
+ */
+PHP_METHOD(OceanMoon_Math_Rational, trunc)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_long num, den;
+	rational_read_parts(Z_OBJ_P(ZEND_THIS), &num, &den);
+
+	RETURN_LONG(num / den);
 }
 /* }}} */

@@ -26,6 +26,7 @@ extern uint32_t complex_offset_phase;
 
 /* Shared helpers, defined in complex.c. See their doc comments there. */
 zend_result complex_init(zend_object *obj, double real, double imag);
+void complex_throw_non_finite(double real, double imag);
 zend_result complex_create(zval *return_value, double real, double imag);
 zend_result complex_from_polar(zval *return_value, double mag, double phase);
 void complex_read_parts(zend_object *obj, double *out_real, double *out_imag);
@@ -56,7 +57,7 @@ zend_result complex_calc_div(double a, double b, double c, double d, double *out
 /* The computational core of exp()/ln() (complex_power.c's pow() calls these directly, without
  * going through the PHP methods, to reuse their shortcuts). See their doc comments in
  * complex_transcendental.c. */
-void complex_calc_exp(double real, double imag, double *out_real, double *out_imag);
+zend_result complex_calc_exp(double real, double imag, double *out_real, double *out_imag);
 zend_result complex_calc_ln(zend_object *obj, double *out_real, double *out_imag);
 
 /* The computational core of pow(), shared with complex_do_operation()'s `**` handling

@@ -77,7 +77,7 @@ static void complex_write_double(zend_object *obj, uint32_t offset, double value
 zend_result complex_init(zend_object *obj, double real, double imag)
 {
 	if (!zend_finite(real) || !zend_finite(imag)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create a complex number from non-finite values.", 0);
+		complex_throw_non_finite(real, imag);
 		return FAILURE;
 	}
 
@@ -87,6 +87,40 @@ zend_result complex_init(zend_object *obj, double real, double imag)
 	complex_write_double(obj, complex_offset_phase, complex_compute_phase(real, imag));
 
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ complex_throw_non_finite
+ *
+ * Throws the PHP package constructor's DomainException for a non-finite part, checking the real part
+ * first, e.g. "Cannot create Complex with non-finite real part: INF." Shared by complex_init() and
+ * the methods and operators that validate an int|float operand, as the package does via `new self()`.
+ */
+void complex_throw_non_finite(double real, double imag)
+{
+	bool real_bad = !zend_finite(real);
+	zend_string *value_str = math_floats_to_str(real_bad ? real : imag);
+	zend_string *msg = strpprintf(
+		0, "Cannot create Complex with non-finite %s part: %s.", real_bad ? "real" : "imaginary", ZSTR_VAL(value_str)
+	);
+	zend_string_release(value_str);
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+}
+/* }}} */
+
+/* {{{ complex_throw_polar_error
+ *
+ * Throws the PHP package's fromPolar() DomainException, e.g. "Cannot create Complex with non-finite
+ * magnitude: INF." The format has one %s, for the value.
+ */
+static void complex_throw_polar_error(const char *format, double value)
+{
+	zend_string *value_str = math_floats_to_str(value);
+	zend_string *msg = strpprintf(0, format, ZSTR_VAL(value_str));
+	zend_string_release(value_str);
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
 }
 /* }}} */
 
@@ -447,19 +481,15 @@ PHP_METHOD(OceanMoon_Math_Complex, fromString)
 zend_result complex_from_polar(zval *return_value, double mag, double phase)
 {
 	if (!zend_finite(mag)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Magnitude must be finite.", 0);
+		complex_throw_polar_error("Cannot create Complex with non-finite magnitude: %s.", mag);
 		return FAILURE;
 	}
 	if (!zend_finite(phase)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create Complex. Phase must be finite.", 0);
+		complex_throw_polar_error("Cannot create Complex with non-finite phase: %s.", phase);
 		return FAILURE;
 	}
 	if (mag < 0) {
-		char mag_buf[64];
-		snprintf(mag_buf, sizeof(mag_buf), "%g", mag);
-		zend_string *msg = strpprintf(0, "Invalid magnitude: %s. Cannot be negative.", mag_buf);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		complex_throw_polar_error("Cannot create Complex with negative magnitude: %s.", mag);
 		return FAILURE;
 	}
 

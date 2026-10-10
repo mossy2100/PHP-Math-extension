@@ -17,6 +17,7 @@
 #include "complex_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
+#include "floats.h"
 
 /* {{{ complex_calc_pow
  *
@@ -27,7 +28,8 @@
  *
  * Matches the PHP package's Complex::pow(): z^w. Only the principal value is returned for
  * multivalued cases. Uses the same shortcuts as the PHP source (0 exponent, 0 base, exponent 1/
- * 2/-1, base e), falling back to z^w = e^(w * ln(z)) for the general case - calling
+ * 2/-1, base e), then exponentiation by squaring for an integer exponent, falling back to
+ * z^w = e^(w * ln(z)) for the general case - calling
  * complex_calc_exp()/complex_calc_ln() directly rather than going through a full PHP method
  * dispatch.
  *
@@ -76,15 +78,50 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 
 	/* Exponent -1: delegate to inv(). Safe - base != 0 already established above. */
 	if (other_real == -1.0 && other_imag == 0.0) {
-		double f = (real * real) + (imag * imag);
-		*out_real = real / f;
-		*out_imag = -imag / f;
-		return SUCCESS;
+		return complex_calc_div(1.0, 0.0, real, imag, out_real, out_imag);
 	}
 
 	/* Base e: z^w = e^w, saving unnecessary ln()/mul() calls. */
 	if (real == M_E && imag == 0.0) {
-		complex_calc_exp(other_real, other_imag, out_real, out_imag);
+		return complex_calc_exp(other_real, other_imag, out_real, out_imag);
+	}
+
+	/* Integer exponent: exponentiation by squaring, which is exact where the products are. Each product is
+	 * checked, as the package's mul() calls are, so an overflow fails at the same step with the same message. */
+	if (other_imag == 0.0 && math_floats_is_int(other_real)) {
+		double x_real = real, x_imag = imag;
+		if (other_real < 0 && complex_calc_div(1.0, 0.0, real, imag, &x_real, &x_imag) == FAILURE) {
+			return FAILURE;
+		}
+
+		double result_real = 1.0, result_imag = 0.0;
+		double y = fabs(other_real);
+		while (y > 0) {
+			if (fmod(y, 2) == 1.0) {
+				double r = result_real * x_real - result_imag * x_imag;
+				double i = result_real * x_imag + result_imag * x_real;
+				if (!zend_finite(r) || !zend_finite(i)) {
+					complex_throw_non_finite(r, i);
+					return FAILURE;
+				}
+				result_real = r;
+				result_imag = i;
+			}
+			y = floor(y / 2);
+			if (y > 0) {
+				double r = x_real * x_real - x_imag * x_imag;
+				double i = x_real * x_imag + x_imag * x_real;
+				if (!zend_finite(r) || !zend_finite(i)) {
+					complex_throw_non_finite(r, i);
+					return FAILURE;
+				}
+				x_real = r;
+				x_imag = i;
+			}
+		}
+
+		*out_real = result_real;
+		*out_imag = result_imag;
 		return SUCCESS;
 	}
 
@@ -96,9 +133,12 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 
 	double mul_real = other_real * ln_real - other_imag * ln_imag;
 	double mul_imag = other_real * ln_imag + other_imag * ln_real;
+	if (!zend_finite(mul_real) || !zend_finite(mul_imag)) {
+		complex_throw_non_finite(mul_real, mul_imag);
+		return FAILURE;
+	}
 
-	complex_calc_exp(mul_real, mul_imag, out_real, out_imag);
-	return SUCCESS;
+	return complex_calc_exp(mul_real, mul_imag, out_real, out_imag);
 }
 /* }}} */
 

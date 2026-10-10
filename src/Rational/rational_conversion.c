@@ -2,7 +2,8 @@
  * rational_conversion.c
  *
  * Conversion methods for OceanMoon\Math\Rational: toFloat(), toMixedNumber(), __toString().
- * Mirrors the "Conversion methods" region of the PHP package's Rational class.
+ * Mirrors the "Conversion methods" region of the PHP package's Rational class. Also the `cast_object`
+ * handler behind `(float) $r` and `(int) $r`, which only exist in the extension.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,6 +27,30 @@ PHP_METHOD(OceanMoon_Math_Rational, toFloat)
 	rational_read_parts(Z_OBJ_P(ZEND_THIS), &num, &den);
 
 	RETURN_DOUBLE((double) num / (double) den);
+}
+/* }}} */
+
+/* {{{ rational_cast_object
+ *
+ * The `cast_object` object handler, so `(float) $r` gives the same value as toFloat(), and `(int) $r`
+ * the same as trunc(), as `(int)` truncates a float. floatval(), intval() and settype() use the same
+ * cast. Every other cast goes to the standard handler: `(string)` calls __toString(), and `(bool)` is
+ * true, as for any object.
+ */
+zend_result rational_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_DOUBLE || type == IS_LONG) {
+		zend_long num, den;
+		rational_read_parts(obj, &num, &den);
+		if (type == IS_DOUBLE) {
+			ZVAL_DOUBLE(result, (double) num / (double) den);
+		} else {
+			ZVAL_LONG(result, num / den);
+		}
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
 }
 /* }}} */
 

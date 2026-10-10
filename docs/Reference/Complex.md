@@ -113,6 +113,11 @@ $sum = $x + $z;    // int|float + Complex → Complex
 
 Addition is commutative, so reversing the operands gives the same result.
 
+**Throws:**
+
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -145,6 +150,11 @@ $diff = $x - $z;    // int|float - Complex → Complex
 
 Subtraction isn't commutative, so `int|float - Complex` is a distinct case from `Complex - int|float`.
 
+**Throws:**
+
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -176,6 +186,11 @@ $product = $x * $z;    // int|float * Complex → Complex
 ```
 
 Multiplication is commutative, so reversing the operands gives the same result.
+
+**Throws:**
+
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**
 
@@ -210,6 +225,13 @@ $quotient = $x / $z;    // int|float / Complex → Complex
 Division isn't commutative, so `int|float / Complex` is a distinct case from `Complex / int|float`. It also gives a way
 to compute a multiplicative inverse - see "Inverting with `1 / z` or `z ** -1`" below.
 
+**Throws:**
+
+- `ArithmeticException` if dividing by zero.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result is too large to represent.
+- `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -241,6 +263,12 @@ $result = $x ** $z;    // int|float ** Complex → Complex
 ```
 
 Exponentiation isn't commutative, so `int|float ** Complex` is a distinct case from `Complex ** int|float`.
+
+**Throws:**
+
+- `ArithmeticException` if raising zero to a negative or non-real power.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**
 
@@ -303,6 +331,9 @@ A `NAN` operand throws `DomainException`, matching `equal()` - there's no meanin
 `INF` and `-INF` are supported despite being outside `Complex`'s always-finite range: a `Complex` is always less than
 `INF` and greater than `-INF`.
 
+PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`. So
+`$z == null` is `false` and `$z == true` is `true`, rather than throwing.
+
 See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes.
 
 ---
@@ -317,6 +348,11 @@ $result = $x <=> $z;    // int|float <=> Complex → int
 
 Returns `-1` for "less than", `0` for "equal", and `1` for "greater than": real parts are compared first, and imaginary
 parts only if the real parts are equal.
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -346,6 +382,11 @@ $result = $z < $x;    // Complex < int|float → bool
 $result = $x < $z;    // int|float < Complex → bool
 ```
 
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
+
 **Examples:**
 
 ```php
@@ -365,6 +406,11 @@ $result = $z1 <= $z2;  // Complex <= Complex → bool
 $result = $z <= $x;    // Complex <= int|float → bool
 $result = $x <= $z;    // int|float <= Complex → bool
 ```
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -386,6 +432,11 @@ $result = $z > $x;    // Complex > int|float → bool
 $result = $x > $z;    // int|float > Complex → bool
 ```
 
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
+
 **Examples:**
 
 ```php
@@ -404,6 +455,11 @@ $result = $z1 >= $z2;  // Complex >= Complex → bool
 $result = $z >= $x;    // Complex >= int|float → bool
 $result = $x >= $z;    // int|float >= Complex → bool
 ```
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -426,6 +482,11 @@ $result = $x == $z;    // int|float == Complex → bool
 ```
 
 Two distinct instances representing the same value are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) - this is value equality, not identity.
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -455,6 +516,11 @@ $result = $x != $z;    // int|float != Complex → bool
 ```
 
 The negation of `==`.
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 

@@ -49,6 +49,8 @@ zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value);
 zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value);
+zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval *return_value);
+zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval *return_value);
 
 /* Builds a 1xN / Nx1 Matrix from this Vector's elements, defined in vector_conversion.c. Shared
  * between toRowMatrix()/toColumnMatrix() themselves and mul()'s Matrix branch (vector_arithmetic.c)

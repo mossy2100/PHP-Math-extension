@@ -61,6 +61,10 @@ zend_result rational_do_operation(uint8_t opcode, zval *result, zval *op1, zval 
 int rational_do_compare(zval *op1, zval *op2);
 zend_result rational_operators_minit(void);
 
+/* The `cast_object` object handler behind `(float) $r` and `(int) $r`. Defined in rational_conversion.c, and
+ * installed by rational_operators_minit(). */
+zend_result rational_cast_object(zend_object *obj, zval *result, int type);
+
 /* Module lifecycle hook, called from ../oceanmoon_math.c. See its doc comment in rational.c. */
 zend_result rational_minit(void);
 

@@ -59,25 +59,6 @@ static zend_result c_ln(double re, double im, double *out_re, double *out_im)
 }
 /* }}} */
 
-/* {{{ c_div
- *
- * Complex division of two plain (real, imaginary) pairs. Returns FAILURE (with ArithmeticException
- * already thrown) for division by zero, matching OceanMoon_Math_Complex::div().
- */
-static zend_result c_div(double a_re, double a_im, double b_re, double b_im, double *out_re, double *out_im)
-{
-	if (b_re == 0.0 && b_im == 0.0) {
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-		return FAILURE;
-	}
-
-	double f = (b_re * b_re) + (b_im * b_im);
-	*out_re = (a_re * b_re + a_im * b_im) / f;
-	*out_im = (a_im * b_re - a_re * b_im) / f;
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ OceanMoon\Math\Complex::sinh(): Complex
  *
  * Matches the PHP package's Complex::sinh(): sinh(z) = sinh(x)cos(y) + i·cosh(x)sin(y), z = x + iy.
@@ -123,11 +104,20 @@ PHP_METHOD(OceanMoon_Math_Complex, tanh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
+	/* sinh(z)/cosh(z), checking each is finite, as the package's sinh() and cosh() calls do. */
 	double sinh_re = sinh(x) * cos(y), sinh_im = cosh(x) * sin(y);
+	if (!zend_finite(sinh_re) || !zend_finite(sinh_im)) {
+		complex_throw_non_finite(sinh_re, sinh_im);
+		RETURN_THROWS();
+	}
 	double cosh_re = cosh(x) * cos(y), cosh_im = sinh(x) * sin(y);
+	if (!zend_finite(cosh_re) || !zend_finite(cosh_im)) {
+		complex_throw_non_finite(cosh_re, cosh_im);
+		RETURN_THROWS();
+	}
 
 	double out_re, out_im;
-	if (c_div(sinh_re, sinh_im, cosh_re, cosh_im, &out_re, &out_im) == FAILURE) {
+	if (complex_calc_div(sinh_re, sinh_im, cosh_re, cosh_im, &out_re, &out_im) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -215,7 +205,7 @@ PHP_METHOD(OceanMoon_Math_Complex, atanh)
 	double one_minus_z_re = 1 - x, one_minus_z_im = -y;
 
 	double div_re, div_im;
-	if (c_div(one_plus_z_re, one_plus_z_im, one_minus_z_re, one_minus_z_im, &div_re, &div_im) == FAILURE) {
+	if (complex_calc_div(one_plus_z_re, one_plus_z_im, one_minus_z_re, one_minus_z_im, &div_re, &div_im) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -224,7 +214,9 @@ PHP_METHOD(OceanMoon_Math_Complex, atanh)
 		RETURN_THROWS();
 	}
 
-	if (complex_create(return_value, 0.5 * ln_re, 0.5 * ln_im) == FAILURE) {
+	/* Multiply by 0.5 with the full product (a+bi)(0.5+0i), as the package's mul() does, so a zero part gets the
+	 * same sign. */
+	if (complex_create(return_value, ln_re * 0.5 - ln_im * 0.0, ln_re * 0.0 + ln_im * 0.5) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

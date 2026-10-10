@@ -48,7 +48,7 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
 	}
 
 	if (!zend_finite(d)) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot create a complex number from non-finite values.", 0);
+		complex_throw_non_finite(d, 0.0);
 		return FAILURE;
 	}
 	*out_real = d;

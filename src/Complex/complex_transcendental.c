@@ -22,59 +22,71 @@
 #include "complex_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
+#include "floats.h"
 
 /* {{{ complex_calc_exp
  *
  * Matches the PHP package's Complex::exp(): e^z. Uses the same shortcuts (matching well-known
  * values exactly, including the two Eulerian identities), falling back to Euler's formula
- * (e^(a+bi) = e^a * (cos(b) + i*sin(b))) for the general case. Always succeeds - e^z is finite
- * for every finite z, so there's no exception path here (unlike complex_calc_ln()).
+ * (e^(a+bi) = e^a * (cos(b) + i*sin(b))) for the general case, like the package's
+ * fromPolar(exp(real), imag). Returns FAILURE (with an exception already thrown) if e^a overflows,
+ * with fromPolar()'s message.
  */
-void complex_calc_exp(double real, double imag, double *out_real, double *out_imag)
+zend_result complex_calc_exp(double real, double imag, double *out_real, double *out_imag)
 {
 	if (imag == 0.0) {
 		if (real == 0.0) {
 			*out_real = 1.0;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 		if (real == 1.0) {
 			*out_real = M_E;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 		if (real == M_LN2) {
 			*out_real = 2.0;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 		if (real == log(M_PI)) {
 			*out_real = M_PI;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 		if (real == M_LN10) {
 			*out_real = 10.0;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 	} else if (real == 0.0) {
 		/* Eulerian identities: e^(i*pi) = -1, e^(i*tau) = 1. */
 		if (imag == M_PI) {
 			*out_real = -1.0;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 		if (imag == 2 * M_PI) {
 			*out_real = 1.0;
 			*out_imag = 0.0;
-			return;
+			return SUCCESS;
 		}
 	}
 
 	/* General solution: Euler's formula. */
-	*out_real = exp(real) * cos(imag);
-	*out_imag = exp(real) * sin(imag);
+	double mag = exp(real);
+	if (!zend_finite(mag)) {
+		zend_string *mag_str = math_floats_to_str(mag);
+		zend_string *msg = strpprintf(0, "Cannot create Complex with non-finite magnitude: %s.", ZSTR_VAL(mag_str));
+		zend_string_release(mag_str);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+	*out_real = mag * cos(imag);
+	*out_imag = mag * sin(imag);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -141,7 +153,9 @@ PHP_METHOD(OceanMoon_Math_Complex, exp)
 
 	double real, imag, out_real, out_imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
-	complex_calc_exp(real, imag, &out_real, &out_imag);
+	if (complex_calc_exp(real, imag, &out_real, &out_imag) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (complex_create(return_value, out_real, out_imag) == FAILURE) {
 		RETURN_THROWS();
@@ -200,7 +214,7 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 			RETURN_THROWS();
 		}
 		if (!zend_finite(d)) {
-			zend_throw_exception(spl_ce_DomainException, "Cannot create a complex number from non-finite values.", 0);
+			complex_throw_non_finite(d, 0.0);
 			RETURN_THROWS();
 		}
 		if (complex_create(&base_storage, d, 0.0) == FAILURE) {
@@ -258,7 +272,9 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		result = complex_create(return_value, M_LOG10E, 0.0);
 	} else if (imag == 0.0 && base_imag == 0.0 && real > 0.0 && base_real > 0.0) {
 		/* Positive reals only: log() returns the principal value only there, so a negative real $this or $base takes the general branch below. */
-		result = complex_create(return_value, log(real) / log(base_real), 0.0);
+		/* Matches PHP's log($x, $base), which uses log2() or log10() for those bases. */
+		double value = base_real == 2.0 ? log2(real) : base_real == 10.0 ? log10(real) : log(real) / log(base_real);
+		result = complex_create(return_value, value, 0.0);
 	} else {
 		/* General solution: log_b(z) = ln(z) / ln(b). */
 		double lnz_real, lnz_imag, lnb_real, lnb_imag;
@@ -266,14 +282,13 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		if (result == SUCCESS) {
 			result = complex_calc_ln(base_obj, &lnb_real, &lnb_imag);
 		}
+		/* ln(b) is non-zero, since base == 1 was rejected above. */
+		double out_real, out_imag;
 		if (result == SUCCESS) {
-			/* |ln(b)|^2 is non-zero (base == 1 was rejected above); ln(z) == 0 is fine, giving 0/x = 0. */
-			double f = (lnb_real * lnb_real) + (lnb_imag * lnb_imag);
-			result = complex_create(
-				return_value,
-				(lnz_real * lnb_real + lnz_imag * lnb_imag) / f,
-				(lnz_imag * lnb_real - lnz_real * lnb_imag) / f
-			);
+			result = complex_calc_div(lnz_real, lnz_imag, lnb_real, lnb_imag, &out_real, &out_imag);
+		}
+		if (result == SUCCESS) {
+			result = complex_create(return_value, out_real, out_imag);
 		}
 	}
 

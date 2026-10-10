@@ -289,8 +289,8 @@ to the power p:
 
 - `float ** Rational` gives a real odd root of a negative base: `(-8.0) ** new Rational(1, 3)` is `-2.0`, where PHP's
   own `**` gives `NAN`.
-- Where the result would be `NAN` from finite operands, such as `(-0.25) ** 0.5`, the operation throws
-  `DomainException` instead.
+- Where the result would be `NAN` from finite operands, such as `(-0.25) ** 0.5`, the operation throws `DomainException`
+  instead.
 - A `NAN` operand gives `NAN`, and an infinite operand follows `float` arithmetic, as for the other operators.
 - Overflow gives `INF`, as for any `float` operation.
 
@@ -360,8 +360,8 @@ If either operand is a `float`, the `Rational` operand will be widened to a `flo
 normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. If
 that overflows, the values are compared as floats instead, so two very close `Rational` values can compare as equal.
 
-PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`.
-So `$r == null` is `false` and `$r == true` is `true`, rather than throwing.
+PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`. So
+`$r == null` is `false` and `$r == true` is `true`, rather than throwing.
 
 See **[Comparison Operators](Comparison_Operators.md)** - how comparison works across all four classes, including the `equal()`/`approxEqual()`
 methods recommended over the operators themselves.
@@ -642,6 +642,49 @@ $r1 != 0.5;   // false
 | `$i != $r`   | `!new Rational($i)->equal($r)` or `!$r->equal($i)` |
 | `$r != $f`   | `!$r->equal($f)`                                   |
 | `$f != $r`   | `$f !== $r->toFloat()` or `!$r->equal($f)`         |
+
+---
+
+## Casting to PHP Number Types
+
+A `Rational` can be cast to either PHP number type:
+
+- `(float) $r` gives the same value as `$r->toFloat()`: the nearest float.
+- `(int) $r` gives the same value as `$r->trunc()`, truncating toward zero, as `(int)` does for a float. For example,
+  `(int) new Rational(-7, 3)` is `-2`, like `(int) (-7 / 3)`. To round another way, use `round()`, `floor()` or
+  `ceil()`.
+
+The cast is exact, so unlike `(int) $r->toFloat()`, `(int) $r` is right even when the numerator is beyond a float's
+53-bit precision. It can't overflow, since the result is never larger in magnitude than the numerator.
+
+`floatval()`, `intval()` and `settype()` use the same casts.
+
+Other casts behave as for any object:
+
+- `(string) $r` calls `__toString()`, e.g. `'-3/4'`.
+- `(bool) $r` is always `true`, even for zero.
+
+Without the extension, `(float) $r` and `(int) $r` warn and give `1.0` and `1`, so code that relies on them needs the
+extension. PHPStan reports both casts as errors. See [Static Analysis](../Usage/Static_Analysis.md#known-limitation-number-casts).
+
+**Examples:**
+
+```php
+$r = new Rational(-7, 3);
+(float) $r;   // -2.3333333333333335
+(int) $r;     // -2
+floatval($r); // -2.3333333333333335
+intval($r);   // -2
+(string) $r;  // '-7/3'
+```
+
+**Equivalence table:**
+
+| Operation     | Equivalent to      |
+| ------------- | ------------------ |
+| `(float) $r`  | `$r->toFloat()`    |
+| `(int) $r`    | `$r->trunc()`      |
+| `(string) $r` | `$r->__toString()` |
 
 ---
 

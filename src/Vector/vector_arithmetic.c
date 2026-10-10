@@ -400,9 +400,83 @@ PHP_METHOD(OceanMoon_Math_Vector, div)
 }
 /* }}} */
 
+/* {{{ vector_calc_hadamard_mul
+ *
+ * The computational core of hadamardMul(), shared with the `*` operator's `Vector * Vector` form
+ * (vector_operators.c). Matches the PHP package's Vector::hadamardMul(): element-wise product.
+ */
+zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval *return_value)
+{
+	if (vector_check_same_count(self, other, "compute Hadamard product with") == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < count; i++) {
+		double a, b;
+		vector_read_element(self, i, &a);
+		vector_read_element(other, i, &b);
+		if (vector_write_element(result, i, a * b) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ vector_calc_hadamard_div
+ *
+ * The computational core of hadamardDiv(), shared with the `/` operator's `Vector / Vector` form
+ * (vector_operators.c). Matches the PHP package's Vector::hadamardDiv(): element-wise quotient.
+ */
+zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval *return_value)
+{
+	if (vector_check_same_count(self, other, "compute Hadamard quotient with") == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_long count = vector_read_count(self);
+	if (vector_create(return_value, count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < count; i++) {
+		double a, b;
+		vector_read_element(self, i, &a);
+		vector_read_element(other, i, &b);
+
+		if (b == 0.0) {
+			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
+			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+
+		if (vector_write_element(result, i, a / b) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::hadamardMul(Vector $other): Vector
  *
- * Matches the PHP package's Vector::hadamardMul(): element-wise product.
+ * Matches the PHP package's Vector::hadamardMul(), via vector_calc_hadamard_mul().
  */
 PHP_METHOD(OceanMoon_Math_Vector, hadamardMul)
 {
@@ -412,35 +486,15 @@ PHP_METHOD(OceanMoon_Math_Vector, hadamardMul)
 		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
-
-	if (vector_check_same_count(self, other_obj, "compute Hadamard product with") == FAILURE) {
+	if (vector_calc_hadamard_mul(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other_obj, i, &b);
-		if (vector_write_element(result, i, a * b) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */
 
 /* {{{ OceanMoon\Math\Vector::hadamardDiv(Vector $other): Vector
  *
- * Matches the PHP package's Vector::hadamardDiv(): element-wise quotient.
+ * Matches the PHP package's Vector::hadamardDiv(), via vector_calc_hadamard_div().
  */
 PHP_METHOD(OceanMoon_Math_Vector, hadamardDiv)
 {
@@ -450,38 +504,8 @@ PHP_METHOD(OceanMoon_Math_Vector, hadamardDiv)
 		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_object *other_obj = Z_OBJ_P(other);
-
-	if (vector_check_same_count(self, other_obj, "compute Hadamard quotient with") == FAILURE) {
+	if (vector_calc_hadamard_div(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other_obj, i, &b);
-
-		if (b == 0.0) {
-			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
-			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
-
-		if (vector_write_element(result, i, a / b) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */

@@ -50,27 +50,25 @@ final class VectorBinaryOperatorExtension implements OperatorTypeSpecifyingExten
             return $leftIsVector && $rightIsVector;
         }
 
-        // The `/` operator only accepts Vector / int|float or int|float / Vector.
-        // The Vector / Vector form is not yet supported.
+        // The `/` operator accepts Vector / int|float, int|float / Vector, and Vector / Vector (Hadamard division).
         if ($operatorSigil === '/') {
-            return $leftIsVector && $this->isScalar($rightSide) || $this->isScalar($leftSide) && $rightIsVector;
+            return $leftIsVector && ($this->isScalar($rightSide) || $rightIsVector)
+                || $this->isScalar($leftSide) && $rightIsVector;
         }
 
         // The `*` accepts:
         // 1. Vector * int|float
         // 2. int|float * Vector
-        // 3. Vector * Matrix
+        // 3. Vector * Vector (Hadamard product)
+        // 4. Vector * Matrix
         // Matrix * Vector is supported, but not here; see MatrixBinaryOperatorExtension.
-        // Vector * Vector is unsupported, as there's no unambiguous meaning.
         if ($leftIsVector && $this->isScalar($rightSide)) {
             return true;
         }
-        // Check for .
         if ($rightIsVector && $this->isScalar($leftSide)) {
             return true;
         }
-        // Check for .
-        return $leftIsVector && (new ObjectType(Matrix::class))->isSuperTypeOf($rightSide)->yes();
+        return $leftIsVector && ($rightIsVector || (new ObjectType(Matrix::class))->isSuperTypeOf($rightSide)->yes());
     }
 
     public function specifyType(string $operatorSigil, Type $leftSide, Type $rightSide): Type

@@ -160,6 +160,20 @@ PHPStan-only file (`phpstan/constants.php`) that declares `const M_I = new Compl
 listed in `scanFiles` alongside the stubs. It's never processed by `gen_stub.php` and never executed at runtime - it
 exists solely for this purpose.
 
+## Known limitation: number casts
+
+`(float) $r` and `(int) $r` on a `Rational` work at runtime (see [Rational Operators](../Reference/Rational.md#casting-to-php-number-types)), but PHPStan reports them as
+`cast.double` and `cast.int`, and `floatval($r)` and `intval($r)` as `argument.type`. PHPStan's cast rule asks the
+operand's type how it converts to a number, and an object type always answers "it can't". Unlike operators, casts have
+no extension point to change that.
+
+Ignore the error where you use the cast, or call `$r->toFloat()` or `$r->trunc()` instead:
+
+```php
+$f = (float) $r; // @phpstan-ignore cast.double
+$i = (int) $r;   // @phpstan-ignore cast.int
+```
+
 ## Known limitation: not yet usable from a consuming project
 
 Everything above documents how PHPStan is made to understand **this repo's own code** (`tests/phpunit/`, per

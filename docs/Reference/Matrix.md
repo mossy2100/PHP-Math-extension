@@ -79,6 +79,12 @@ $sum = $m1 + $m2;  // Matrix + Matrix → Matrix
 
 Both matrices must have the same dimensions. No other form is supported - there's no scalar addition for `Matrix`.
 
+**Throws:**
+
+- `DomainException` if an element of the result isn't finite.
+- `LengthException` if the matrices have different dimensions.
+- `TypeError` if the other operand isn't a `Matrix`.
+
 **Examples:**
 
 ```php
@@ -102,6 +108,12 @@ $diff = $m1 - $m2;  // Matrix - Matrix → Matrix
 ```
 
 Both matrices must have the same dimensions. As with `+`, no other form is supported.
+
+**Throws:**
+
+- `DomainException` if an element of the result isn't finite.
+- `LengthException` if the matrices have different dimensions.
+- `TypeError` if the other operand isn't a `Matrix`.
 
 **Examples:**
 
@@ -135,6 +147,12 @@ of rows in the second.
 
 For `Matrix * Vector`, the `Vector` is treated as a single-column `Matrix`, and the result is a `Vector`. It isn't
 commutative: `Vector * Matrix` is a distinct calculation, documented in [Vector Operators](Vector.md#-multiply).
+
+**Throws:**
+
+- `DomainException` if the scalar or an element of the result isn't finite.
+- `LengthException` if the right operand's row count (or a vector's count) doesn't equal the left matrix's column count.
+- `TypeError` if the other operand isn't a `Matrix`, `Vector`, `int` or `float`.
 
 **Examples:**
 
@@ -181,6 +199,12 @@ Unsupported form:
    [`$m1 * $m2->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv)) for `A * B⁻¹`, `$m2 ** -1 * $m1` for `B⁻¹ * A`, or [`$m1->hadamardDiv($m2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#hadamarddiv) for the element-wise
    quotient.
 
+**Throws:**
+
+- `ArithmeticException` if dividing by zero, or by a matrix with a zero element.
+- `DomainException` if the scalar divisor or an element of the result isn't finite.
+- `TypeError` if the other operand isn't an `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -211,6 +235,12 @@ The matrix must be square; negative exponents use the matrix inverse.
 Unsupported form:
 
 1. `int ** Matrix`. A scalar raised to a matrix power isn't a standard operation in linear algebra.
+
+**Throws:**
+
+- `ArithmeticException` if the exponent is negative and the matrix isn't invertible (its determinant is zero).
+- `DomainException` if the matrix isn't square, or an element of the result isn't finite.
+- `TypeError` if the exponent isn't an `int`.
 
 **Examples:**
 

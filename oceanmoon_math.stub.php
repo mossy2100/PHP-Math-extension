@@ -167,6 +167,8 @@ final class Rational implements \Stringable
     public function floor(): int {}
 
     public function ceil(): int {}
+
+    public function trunc(): int {}
 }
 
 final class Vector implements \Stringable, \Countable, \ArrayAccess

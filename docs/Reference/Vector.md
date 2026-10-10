@@ -78,6 +78,12 @@ $sum = $v1 + $v2;  // Vector + Vector → Vector
 
 Element-wise; both vectors must be the same count. No other form is supported - there's no scalar addition for `Vector`.
 
+**Throws:**
+
+- `DomainException` if an element of the result isn't finite.
+- `LengthException` if the vectors have different counts.
+- `TypeError` if the other operand isn't a `Vector`.
+
 **Examples:**
 
 ```php
@@ -102,6 +108,12 @@ $diff = $v1 - $v2;  // Vector - Vector → Vector
 
 Element-wise; both vectors must be the same count. As with `+`, no other form is supported.
 
+**Throws:**
+
+- `DomainException` if an element of the result isn't finite.
+- `LengthException` if the vectors have different counts.
+- `TypeError` if the other operand isn't a `Vector`.
+
 **Examples:**
 
 ```php
@@ -121,9 +133,10 @@ $v1 - $v2;  // [3, 3, 3]
 ### \* (multiply)
 
 ```php
-$result = $v * $x;  // Vector * int|float → Vector
-$result = $x * $v;  // int|float * Vector → Vector
-$result = $v * $m;  // Vector * Matrix → Vector
+$result = $v * $x;    // Vector * int|float → Vector
+$result = $x * $v;    // int|float * Vector → Vector
+$result = $v1 * $v2;  // Vector * Vector → Vector (Hadamard product)
+$result = $v * $m;    // Vector * Matrix → Vector
 ```
 
 Multiplying by a scalar is element-wise, and commutative, so reversing the operands gives the same result.
@@ -132,14 +145,14 @@ For `Vector * Matrix`, the `Vector` is treated as a 1×n row matrix and multipli
 multiplication. The number of rows in the `Matrix` must equal the `Vector`'s count. The `Matrix * Vector` operation is
 documented in [Matrix Operators](Matrix.md#-multiply).
 
-Unsupported form:
+`Vector * Vector` is the Hadamard (element-wise) product, matching [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul). The vectors must have the same
+count. For the other ways to multiply two vectors, call the method: [`dot()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#dot), [`cross()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#cross) or [`outer()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#outer).
 
-1. `Vector * Vector`. This form is unsupported because there are several ways to multiply 2 vectors. Instead, call the
-   relevant method:
-   - [`dot()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#dot)
-   - [`cross()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#cross)
-   - [`outer()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#outer)
-   - [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul)
+**Throws:**
+
+- `DomainException` if the scalar or an element of the result isn't finite.
+- `LengthException` if the vectors have different counts, or the matrix's row count doesn't equal the vector's count.
+- `TypeError` if the other operand isn't a `Vector`, `Matrix`, `int` or `float`.
 
 **Examples:**
 
@@ -150,6 +163,10 @@ $v * 2;     // [2, 4, 6]
 $v * 2.5;   // [2.5, 5, 7.5]
 2.5 * $v;   // [2.5, 5, 7.5]
 
+$v1 = Vector::fromArray([1, 2, 3]);
+$v2 = Vector::fromArray([4, 5, 6]);
+$v1 * $v2;  // [4, 10, 18]
+
 $m = Matrix::fromArray([[1, 0], [0, 1]]);
 $v = Vector::fromArray([1, 2]);
 $v * $m;    // [1, 2]  ($v is treated as a 1×2 row matrix)
@@ -157,33 +174,43 @@ $v * $m;    // [1, 2]  ($v is treated as a 1×2 row matrix)
 
 **Equivalence table:**
 
-| Operation | Equivalent to |
-| --------- | ------------- |
-| `$v * $x` | `$v->mul($x)` |
-| `$x * $v` | `$v->mul($x)` |
-| `$v * $m` | `$v->mul($m)` |
+| Operation   | Equivalent to           |
+| ----------- | ----------------------- |
+| `$v * $x`   | `$v->mul($x)`           |
+| `$x * $v`   | `$v->mul($x)`           |
+| `$v1 * $v2` | `$v1->hadamardMul($v2)` |
+| `$v * $m`   | `$v->mul($m)`           |
 
 ---
 
 ### / (divide)
 
 ```php
-$result = $v / $x;  // Vector / int|float → Vector
-$result = $x / $v;  // int|float / Vector → Vector
+$result = $v / $x;    // Vector / int|float → Vector
+$result = $x / $v;    // int|float / Vector → Vector
+$result = $v1 / $v2;  // Vector / Vector → Vector (Hadamard division)
 ```
 
-Both forms are element-wise, and not commutative. `int|float / Vector` divides the scalar by each element of the
+All three forms are element-wise, and not commutative. `int|float / Vector` divides the scalar by each element of the
 `Vector` in turn. There's no equivalent method for it, but the equivalence table shows how to get the same result. It
 throws `ArithmeticException` if any of the vector's elements equal zero, matching `reciprocal()`.
 
-Unsupported forms:
+`Vector / Vector` divides each element of `$v1` by the matching element of `$v2`, matching [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv). The vectors
+must have the same count, and it throws `ArithmeticException` if any element of `$v2` is zero.
 
-1. `Vector / Vector`. Vectors have no multiplicative inverse for a Vector to be multiplied by. If you want element-wise
-   (Hadamard) division, call [`$v1->hadamardDiv($v2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv).
-2. `Vector / Matrix`. Division of a vector by a matrix isn't a typical operation. If the intent is to multiply a vector
+Unsupported form:
+
+1. `Vector / Matrix`. Division of a vector by a matrix isn't a typical operation. If the intent is to multiply a vector
    by a matrix's inverse (i.e. compute v ⨉ M⁻¹) it can be achieved with `$v * $m ** -1` or, equivalently,
    `$v * $m->inv()`. This requires the matrix to be square, in addition to having the same number of columns as the
    vector has elements.
+
+**Throws:**
+
+- `ArithmeticException` if dividing by zero, or by a vector with a zero element.
+- `DomainException` if the scalar divisor or an element of the result isn't finite.
+- `LengthException` if the vectors have different counts.
+- `TypeError` if the other operand isn't a `Vector`, `int` or `float`.
 
 **Examples:**
 
@@ -194,14 +221,19 @@ $v / 2.5;   // [0.8, 1.6, 2.4]
 
 $v = Vector::fromArray([1, 2, 4]);
 8 / $v;     // [8, 4, 2]
+
+$v1 = Vector::fromArray([2, 9, 6]);
+$v2 = Vector::fromArray([1, 3, 4]);
+$v1 / $v2;  // [2, 3, 1.5]
 ```
 
 **Equivalence table:**
 
-| Operation | Equivalent to                                          |
-| --------- | ------------------------------------------------------ |
-| `$v / $x` | `$v->div($x)`                                          |
-| `$x / $v` | `$x * $v->reciprocal()` or `$v->reciprocal()->mul($x)` |
+| Operation   | Equivalent to                                          |
+| ----------- | ------------------------------------------------------ |
+| `$v / $x`   | `$v->div($x)`                                          |
+| `$x / $v`   | `$x * $v->reciprocal()` or `$v->reciprocal()->mul($x)` |
+| `$v1 / $v2` | `$v1->hadamardDiv($v2)`                                |
 
 ---
 

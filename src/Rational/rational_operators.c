@@ -468,6 +468,7 @@ zend_result rational_operators_minit(void)
 	memcpy(&rational_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rational_object_handlers.do_operation = rational_do_operation;
 	rational_object_handlers.compare = rational_do_compare;
+	rational_object_handlers.cast_object = rational_cast_object;
 	rational_ce_Rational->create_object = rational_create_object;
 
 	return SUCCESS;

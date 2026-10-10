@@ -10,6 +10,8 @@
 # include "config.h"
 #endif
 
+#include <math.h>
+
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
@@ -137,6 +139,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, inv)
  *
  * The shared core behind inv(): cofactor expansion via the adjugate matrix. Used directly by
  * pow()'s negative-exponent branch (matrix_power.c) as well as by inv() itself.
+ *
+ * Matches the PHP package's Matrix::inv(): it first scales the matrix so the largest element is in
+ * the range [1, 2), so the determinant and cofactors of a matrix with uniformly tiny or huge elements
+ * don't underflow or overflow. Scaling by a power of 2 is exact, so ordinary results are unchanged.
+ * inv(A) = inv(A / s) / s.
  */
 zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 {
@@ -148,19 +155,38 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 		return FAILURE;
 	}
 
+	zend_long n = row_count;
+
+	/* Scale so the largest element is in the range [1, 2). */
+	double max = 0.0;
+	for (zend_long i = 0; i < n; i++) {
+		for (zend_long j = 0; j < n; j++) {
+			double value;
+			matrix_read_element(self, i, j, &value);
+			max = fmax(max, fabs(value));
+		}
+	}
+	double scale = max == 0.0 ? 1.0 : math_floats_power_of_two_scale(max);
+
+	zval scaled_zv;
+	if (matrix_calc_div_scalar(self, scale, &scaled_zv) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *scaled = Z_OBJ(scaled_zv);
+
 	zval data_array;
-	matrix_to_data_array(self, &data_array);
+	matrix_to_data_array(scaled, &data_array);
 	double det = matrix_calc_det(&data_array);
 	zval_ptr_dtor(&data_array);
 
 	if (det == 0.0) {
+		zval_ptr_dtor(&scaled_zv);
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot invert Matrix with zero determinant.", 0);
 		return FAILURE;
 	}
 
-	zend_long n = row_count;
-
 	if (matrix_create(return_value, n, n) == FAILURE) {
+		zval_ptr_dtor(&scaled_zv);
 		return FAILURE;
 	}
 	zend_object *adjugate = Z_OBJ_P(return_value);
@@ -168,13 +194,14 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 	for (zend_long i = 0; i < n; i++) {
 		for (zend_long j = 0; j < n; j++) {
 			zval minor;
-			matrix_get_minor(self, i, j, &minor);
+			matrix_get_minor(scaled, i, j, &minor);
 			double minor_det = matrix_calc_det(&minor);
 			zval_ptr_dtor(&minor);
 
 			double cofactor = ((i + j) % 2 == 0 ? 1.0 : -1.0) * minor_det;
 			/* Note: transposed. */
-			if (matrix_write_element(adjugate, j, i, cofactor / det) == FAILURE) {
+			if (matrix_write_element(adjugate, j, i, cofactor / det / scale) == FAILURE) {
+				zval_ptr_dtor(&scaled_zv);
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				return FAILURE;
@@ -182,6 +209,7 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 		}
 	}
 
+	zval_ptr_dtor(&scaled_zv);
 	return SUCCESS;
 }
 /* }}} */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fa8f6db70ccf03cc27d1ead0febbd6b4a7ca4a67 */
+ * Stub hash: b0c8f1187141f013ee928f1d8a4b52dcbae5865f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -194,6 +194,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Rational_fl
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Rational_ceil arginfo_class_OceanMoon_Math_Rational_floor
+
+#define arginfo_class_OceanMoon_Math_Rational_trunc arginfo_class_OceanMoon_Math_Rational_floor
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Vector___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
@@ -466,6 +468,7 @@ ZEND_METHOD(OceanMoon_Math_Rational, sqr);
 ZEND_METHOD(OceanMoon_Math_Rational, round);
 ZEND_METHOD(OceanMoon_Math_Rational, floor);
 ZEND_METHOD(OceanMoon_Math_Rational, ceil);
+ZEND_METHOD(OceanMoon_Math_Rational, trunc);
 ZEND_METHOD(OceanMoon_Math_Vector, __construct);
 ZEND_METHOD(OceanMoon_Math_Vector, fromArray);
 ZEND_METHOD(OceanMoon_Math_Vector, toArray);
@@ -606,6 +609,7 @@ static const zend_function_entry class_OceanMoon_Math_Rational_methods[] = {
 	ZEND_ME(OceanMoon_Math_Rational, round, arginfo_class_OceanMoon_Math_Rational_round, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, floor, arginfo_class_OceanMoon_Math_Rational_floor, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, ceil, arginfo_class_OceanMoon_Math_Rational_ceil, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Rational, trunc, arginfo_class_OceanMoon_Math_Rational_trunc, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
