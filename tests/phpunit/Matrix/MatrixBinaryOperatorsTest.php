@@ -230,8 +230,24 @@ class MatrixBinaryOperatorsTest extends TestCase
     }
 
     /**
+     * Test Matrix * Vector with an incompatible count throws the same exception as mul().
+     */
+    public function testMulMatrixTimesVectorIncompatibleCountThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $v = Vector::fromArray([1, 2, 3]);
+
+        $this->expectException(LengthException::class);
+        $this->expectExceptionMessage("Invalid Vector count: 3. Must equal this Matrix's column count: 2.");
+        $result = $m * $v;
+    }
+
+    /**
      * Test Matrix * Vector: the Vector is treated as a single-column matrix, result is a Vector -
-     * equivalent to mulVector(), not mul().
+     * equivalent to mul().
      */
     public function testMulMatrixTimesVector(): void
     {
@@ -243,7 +259,7 @@ class MatrixBinaryOperatorsTest extends TestCase
         $result = $m * $v;
 
         $this->assertSame([5.0, 11.0], $result->toArray());
-        $this->assertEquals($m->mulVector($v), $result);
+        $this->assertEquals($m->mul($v), $result);
     }
 
     /**
@@ -358,6 +374,21 @@ class MatrixBinaryOperatorsTest extends TestCase
 
         $this->expectException(ArithmeticException::class);
         $m / 0; // @phpstan-ignore binaryOp.invalid
+    }
+
+    /**
+     * Test division by a non-finite scalar throws DomainException, matching div().
+     */
+    public function testDivByNonFiniteThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [2, 4],
+            [6, 8],
+        ]);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid scalar: -INF. Must be finite.');
+        $result = $m / -INF;
     }
 
     /**

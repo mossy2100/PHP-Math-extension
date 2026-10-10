@@ -14,10 +14,13 @@
 #include "php.h"
 #include "matrix_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
+#include "floats.h"
 
 /* {{{ OceanMoon\Math\Matrix::norm(): float
  *
- * Matches the PHP package's Matrix::norm(): the Frobenius norm.
+ * Matches the PHP package's Matrix::norm(): the Frobenius norm, i.e. the magnitude of the elements as one Vector.
+ * Like vector_compute_magnitude() (Vector/vector_linear_algebra.c), it scales the elements by a power of 2 so
+ * their squares can't overflow or underflow, then undoes the scaling.
  */
 PHP_METHOD(OceanMoon_Math_Matrix, norm)
 {
@@ -27,16 +30,32 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
 
+	/* Handle a zero or empty matrix. */
+	double max = 0.0;
+	for (zend_long i = 0; i < row_count; i++) {
+		for (zend_long j = 0; j < column_count; j++) {
+			double value;
+			matrix_read_element(self, i, j, &value);
+			max = fmax(max, fabs(value));
+		}
+	}
+	double scale = math_floats_power_of_two_scale(max);
+	if (scale == 0.0) {
+		RETURN_DOUBLE(0.0);
+	}
+
+	/* Calculate the norm of the scaled matrix, then undo the scaling. */
 	double sum = 0.0;
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
 			double value;
 			matrix_read_element(self, i, j, &value);
-			sum += value * value;
+			double scaled = value / scale;
+			sum += scaled * scaled;
 		}
 	}
 
-	RETURN_DOUBLE(sqrt(sum));
+	RETURN_DOUBLE(scale * sqrt(sum));
 }
 /* }}} */
 

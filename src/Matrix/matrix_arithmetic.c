@@ -16,6 +16,7 @@
 #include "matrix_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
+#include "floats.h"
 
 /* {{{ matrix_to_data_array
  *
@@ -342,10 +343,56 @@ zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::mul(float|Matrix $other): Matrix
+/* {{{ matrix_calc_mul_vector
  *
- * Matches the PHP package's Matrix::mul(): scalar branch scales every element; Matrix branch does
- * real matrix multiplication.
+ * The shared core behind mul()'s Vector branch (Ax, treating the vector as a column vector), also
+ * used by the `*` operator's `Matrix * Vector` form (matrix_operators.c). Matches the PHP package's
+ * Matrix::mul(): element i of the result is the dot product of this Matrix's row i with $vector.
+ */
+zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+	zend_long vector_count = vector_read_count(vector);
+
+	if (column_count != vector_count) {
+		zend_string *msg = strpprintf(
+			0, "Invalid Vector count: " ZEND_LONG_FMT ". Must equal this Matrix's column count: "
+			ZEND_LONG_FMT ".", vector_count, column_count
+		);
+		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	if (vector_create(return_value, row_count) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *result = Z_OBJ_P(return_value);
+
+	for (zend_long i = 0; i < row_count; i++) {
+		double sum = 0.0;
+		for (zend_long k = 0; k < column_count; k++) {
+			double a, b;
+			matrix_read_element(self, i, k, &a);
+			vector_read_element(vector, k, &b);
+			sum += a * b;
+		}
+		if (vector_write_element(result, i, sum) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Matrix::mul(float|Vector|Matrix $other): Vector|Matrix
+ *
+ * Matches the PHP package's Matrix::mul(): scalar branch scales every element; Vector branch gives
+ * Ax as a Vector; Matrix branch does real matrix multiplication.
  */
 PHP_METHOD(OceanMoon_Math_Matrix, mul)
 {
@@ -365,8 +412,15 @@ PHP_METHOD(OceanMoon_Math_Matrix, mul)
 		return;
 	}
 
+	if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), vector_ce_Vector)) {
+		if (matrix_calc_mul_vector(self, Z_OBJ_P(other), return_value) == FAILURE) {
+			RETURN_THROWS();
+		}
+		return;
+	}
+
 	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), matrix_ce_Matrix)) {
-		zend_argument_type_error(1, "must be of type float|Matrix, %s given", zend_zval_type_name(other));
+		zend_argument_type_error(1, "must be of type float|Vector|Matrix, %s given", zend_zval_type_name(other));
 		RETURN_THROWS();
 	}
 
@@ -430,6 +484,16 @@ zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *
  */
 zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *return_value)
 {
+	/* Dividing by ±INF would otherwise silently give a zero matrix. */
+	if (!zend_finite(scalar)) {
+		zend_string *scalar_str = math_floats_to_str(scalar);
+		zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
+		zend_string_release(scalar_str);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
 	if (scalar == 0.0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 		return FAILURE;

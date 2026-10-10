@@ -20,7 +20,7 @@ use PHPStan\Type\UnionType;
  * mirrors. Same approach as ComplexBinaryOperatorExtension/RationalBinaryOperatorExtension.
  *
  * Unlike Rational, there's no float-widening rule here: every supported form results in a Matrix,
- * except `Matrix * Vector`, which results in a Vector (equivalent to mulVector()) - specifyType()
+ * except `Matrix * Vector`, which results in a Vector (equivalent to mul() with a Vector) - specifyType()
  * only needs to special-case that one combination.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag.
@@ -83,7 +83,7 @@ final class MatrixBinaryOperatorExtension implements OperatorTypeSpecifyingExten
     public function specifyType(string $operatorSigil, Type $leftSide, Type $rightSide): Type
     {
         // Matrix * Vector is the one form that doesn't result in a Matrix - equivalent to
-        // mulVector(), it results in a Vector.
+        // mul() with a Vector, it results in a Vector.
         if ($operatorSigil === '*' && (new ObjectType(Vector::class))->isSuperTypeOf($rightSide)->yes()) {
             return new ObjectType(Vector::class);
         }

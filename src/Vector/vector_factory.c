@@ -2,7 +2,7 @@
  * vector_factory.c
  *
  * Factory methods for OceanMoon\Math\Vector: fromArray(). Mirrors the PHP package's
- * Vector::fromArray(): validates the argument is a list of int|float values, then builds a
+ * Vector::fromArray(): validates the argument is a list of finite int|float values, then builds a
  * Vector from it.
  */
 
@@ -15,7 +15,7 @@
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
-#include "types.h"
+#include "floats.h"
 
 /* {{{ OceanMoon\Math\Vector::fromArray(array $arr): Vector */
 PHP_METHOD(OceanMoon_Math_Vector, fromArray)
@@ -51,11 +51,26 @@ PHP_METHOD(OceanMoon_Math_Vector, fromArray)
 	zval *value;
 	ZEND_HASH_FOREACH_VAL(arr, value)
 	{
+		/* Check the value is a number. */
 		if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_DOUBLE) {
 			zend_string *msg = strpprintf(
-				0, "Invalid element type at index " ZEND_LONG_FMT ": %s. Must be int or float.",
-				index, math_types_debug_type_name(value)
+				0, "Cannot create Vector from array. Element at index " ZEND_LONG_FMT " must be an int or float.", index
 			);
+			zend_throw_exception(spl_ce_InvalidArgumentException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			zval_ptr_dtor(return_value);
+			ZVAL_UNDEF(return_value);
+			RETURN_THROWS();
+		}
+
+		/* Check the value is finite. */
+		if (Z_TYPE_P(value) == IS_DOUBLE && !zend_finite(Z_DVAL_P(value))) {
+			zend_string *value_str = math_floats_to_str(Z_DVAL_P(value));
+			zend_string *msg = strpprintf(
+				0, "Cannot create Vector from array. Element at index " ZEND_LONG_FMT " (%s) must be finite.",
+				index, ZSTR_VAL(value_str)
+			);
+			zend_string_release(value_str);
 			zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
 			zend_string_release(msg);
 			zval_ptr_dtor(return_value);

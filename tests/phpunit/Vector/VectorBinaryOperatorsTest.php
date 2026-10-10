@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OceanMoon\Math\Tests\Vector;
 
+use DomainException;
 use LengthException;
 use OceanMoon\Core\Exceptions\ArithmeticException;
 use OceanMoon\Math\Matrix;
@@ -266,6 +267,18 @@ class VectorBinaryOperatorsTest extends TestCase
 
         $this->expectException(ArithmeticException::class);
         $v / 0; // @phpstan-ignore binaryOp.invalid
+    }
+
+    /**
+     * Test division by a non-finite scalar throws DomainException, matching div().
+     */
+    public function testDivByNonFiniteThrows(): void
+    {
+        $v = Vector::fromArray([2, 4, 6]);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid scalar: INF. Must be finite.');
+        $result = $v / INF;
     }
 
     /**

@@ -154,12 +154,11 @@ zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *
 		case ZEND_MUL:
 			return complex_create(result, a_real * b_real - a_imag * b_imag, a_real * b_imag + a_imag * b_real);
 		case ZEND_DIV: {
-			if (b_real == 0.0 && b_imag == 0.0) {
-				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+			double real, imag;
+			if (complex_calc_div(a_real, a_imag, b_real, b_imag, &real, &imag) == FAILURE) {
 				return FAILURE;
 			}
-			double f = (b_real * b_real) + (b_imag * b_imag);
-			return complex_create(result, (a_real * b_real + a_imag * b_imag) / f, (a_imag * b_real - a_real * b_imag) / f);
+			return complex_create(result, real, imag);
 		}
 		default:
 			return FAILURE;

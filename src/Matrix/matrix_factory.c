@@ -15,7 +15,7 @@
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
-#include "types.h"
+#include "floats.h"
 
 /* {{{ OceanMoon\Math\Matrix::fromArray(array $arr): Matrix */
 PHP_METHOD(OceanMoon_Math_Matrix, fromArray)
@@ -47,8 +47,18 @@ PHP_METHOD(OceanMoon_Math_Matrix, fromArray)
 	zval *row_zval;
 	ZEND_HASH_FOREACH_VAL(arr, row_zval)
 	{
-		/* Check each row is a list array. */
-		if (Z_TYPE_P(row_zval) != IS_ARRAY || !zend_array_is_list(Z_ARRVAL_P(row_zval))) {
+		/* Check each row is an array. */
+		if (Z_TYPE_P(row_zval) != IS_ARRAY) {
+			zend_string *msg = strpprintf(
+				0, "Cannot create Matrix from array. Row " ZEND_LONG_FMT " must be an array.", row_index
+			);
+			zend_throw_exception(spl_ce_InvalidArgumentException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			RETURN_THROWS();
+		}
+
+		/* Check each row is a list. */
+		if (!zend_array_is_list(Z_ARRVAL_P(row_zval))) {
 			zend_string *msg = strpprintf(
 				0, "Cannot create Matrix from array. Row " ZEND_LONG_FMT " must be a list.", row_index
 			);
@@ -69,16 +79,30 @@ PHP_METHOD(OceanMoon_Math_Matrix, fromArray)
 			RETURN_THROWS();
 		}
 
-		/* Check each value is a number. */
+		/* Check each value is a finite number. */
 		zend_long col_index = 0;
 		zval *value;
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(row_zval), value)
 		{
+			/* Check the value is a number. */
 			if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_DOUBLE) {
 				zend_string *msg = strpprintf(
-					0, "Invalid element type at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ": %s. "
-					"Must be int or float.", row_index, col_index, math_types_debug_type_name(value)
+					0, "Cannot create Matrix from array. Element at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT
+					" must be an int or float.", row_index, col_index
 				);
+				zend_throw_exception(spl_ce_InvalidArgumentException, ZSTR_VAL(msg), 0);
+				zend_string_release(msg);
+				RETURN_THROWS();
+			}
+
+			/* Check the value is finite. */
+			if (Z_TYPE_P(value) == IS_DOUBLE && !zend_finite(Z_DVAL_P(value))) {
+				zend_string *value_str = math_floats_to_str(Z_DVAL_P(value));
+				zend_string *msg = strpprintf(
+					0, "Cannot create Matrix from array. Element at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT
+					" (%s) must be finite.", row_index, col_index, ZSTR_VAL(value_str)
+				);
+				zend_string_release(value_str);
 				zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
 				zend_string_release(msg);
 				RETURN_THROWS();

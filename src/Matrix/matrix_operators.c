@@ -9,9 +9,8 @@
  *
  * Delegates entirely to the same "calc core" functions the named methods use (matrix_calc_add()/
  * matrix_calc_sub()/matrix_calc_mul_scalar()/matrix_calc_mul_matrix()/matrix_calc_mul_vector()/
- * matrix_calc_div_scalar()/matrix_calc_pow(), spread across matrix_arithmetic.c/
- * matrix_linear_algebra.c/matrix_power.c), so operator and method results/exceptions are
- * guaranteed identical.
+ * matrix_calc_div_scalar()/matrix_calc_pow(), spread across matrix_arithmetic.c/matrix_power.c),
+ * so operator and method results/exceptions are guaranteed identical.
  *
  * Installed on matrix_object_handlers in matrix_minit() (matrix.c), alongside that table's
  * `clone_obj` override - Matrix, like Vector, needs two different handler overrides on the one

@@ -21,6 +21,7 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "../Matrix/matrix_internal.h"
 #include "exceptions.h"
+#include "floats.h"
 
 /* {{{ vector_check_same_count
  *
@@ -310,6 +311,16 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
  */
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 {
+	/* Dividing by ±INF would otherwise silently give a zero vector. */
+	if (!zend_finite(scalar)) {
+		zend_string *scalar_str = math_floats_to_str(scalar);
+		zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
+		zend_string_release(scalar_str);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
 	if (scalar == 0.0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 		return FAILURE;

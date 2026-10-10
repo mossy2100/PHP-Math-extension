@@ -102,5 +102,20 @@ zend_string *math_floats_to_str(double value)
 	zval tmp;
 	ZVAL_DOUBLE(&tmp, value);
 	convert_to_string(&tmp);
-	return Z_STR(tmp);
+	zend_string *str = Z_STR(tmp);
+
+	/* If nothing distinguishes the string from an int (no decimal point or exponent), append
+	 * ".0", matching stringifyFloat(). */
+	if (strpbrk(ZSTR_VAL(str), ".eE") == NULL) {
+		zend_string *with_suffix = zend_string_concat2(ZSTR_VAL(str), ZSTR_LEN(str), ".0", 2);
+		zend_string_release(str);
+		return with_suffix;
+	}
+
+	return str;
+}
+
+double math_floats_power_of_two_scale(double max_abs)
+{
+	return max_abs == 0.0 ? 0.0 : exp2(floor(log2(max_abs)));
 }

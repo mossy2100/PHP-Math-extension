@@ -82,12 +82,21 @@ bool math_floats_to_int(double f, zend_long *out);
  * Ports OceanMoon\Core\Stringify::stringifyFloat(): NAN/+INF/-INF stringify to their literal
  * names ("NAN", "INF", "-INF"); every other (finite) value goes through the engine's normal
  * (string) cast machinery, for byte-for-byte parity with what `(string) $value` would produce in
- * PHP (governed by the `precision` ini setting). Used for embedding a float value in an exception
- * message.
+ * PHP (governed by the `precision` ini setting), with ".0" appended if the result would otherwise
+ * look like an int. Used for embedding a float value in an exception message.
  *
  * Returns a new zend_string the caller owns and must eventually release.
  */
 zend_string *math_floats_to_str(double value);
+/* }}} */
+
+/* {{{ math_floats_power_of_two_scale
+ *
+ * Ports the PHP package's Vector::powerOfTwoScale(), given the largest absolute value: the power of 2 that scales
+ * it into the range [1, 2), or 0.0 if it's zero. Dividing by a power of 2 is exact, so it can be used to keep
+ * intermediate values (e.g. squares) in range without changing the result. PHP's log($x, 2) calls log2().
+ */
+double math_floats_power_of_two_scale(double max_abs);
 /* }}} */
 
 #endif /* PHP_MATH_FLOATS_H */

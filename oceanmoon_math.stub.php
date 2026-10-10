@@ -51,7 +51,7 @@ final class Complex implements \Stringable, \ArrayAccess
 
     public function div(Complex|float $other): Complex {}
 
-    public function pow(Complex|float $other): Complex {}
+    public function pow(Complex|float $exp): Complex {}
 
     public function sqr(): Complex {}
 
@@ -158,7 +158,7 @@ final class Rational implements \Stringable
 
     public function div(Rational|int $other): Rational {}
 
-    public function pow(int $exponent): Rational {}
+    public function pow(int|Rational $exp): Rational {}
 
     public function sqr(): Rational {}
 
@@ -288,7 +288,8 @@ final class Matrix implements \Stringable, \Countable, \ArrayAccess
 
     public function sub(Matrix $other): Matrix {}
 
-    public function mul(float|Matrix $other): Matrix {}
+    /** @phpstan-return ($other is Vector ? Vector : Matrix) */
+    public function mul(float|Vector|Matrix $other): Vector|Matrix {}
 
     public function div(float $scalar): Matrix {}
 
@@ -296,11 +297,9 @@ final class Matrix implements \Stringable, \Countable, \ArrayAccess
 
     public function hadamardDiv(Matrix $other): Matrix {}
 
-    public function pow(int $exponent): Matrix {}
+    public function pow(int $exp): Matrix {}
 
     public function sqr(): Matrix {}
-
-    public function mulVector(Vector $vector): Vector {}
 
     public function t(): Matrix {}
 

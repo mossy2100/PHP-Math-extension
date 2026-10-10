@@ -7,7 +7,7 @@
 # -d extension=... flag on every invocation.
 #
 # Usage:
-#   scripts/enable          # PHP 8.4 (composer enable)
+#   scripts/enable          # the PHP version on PATH (composer enable)
 #   scripts/enable 8.5      # PHP 8.5
 #   PHP_VERSION=8.5 scripts/enable
 #
@@ -29,8 +29,15 @@ if [[ $# -ge 1 ]]; then
     PHP_VERSION="$1"
 fi
 
-# Resolves the target PHP toolchain (default 8.4). Has to run before SCAN_DIR below, which must
-# come from the PHP that will actually load the module.
+# With no version given, target the PHP on PATH - the one that runs `php script.php` - rather than
+# php-env's default (8.4, the published build target), since that's the PHP an ad-hoc script will
+# actually use. Falls back to php-env's default if there's no php on PATH.
+if [[ -z "${PHP_VERSION:-}" ]] && command -v php > /dev/null; then
+    PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;')"
+fi
+
+# Resolves the target PHP toolchain. Has to run before SCAN_DIR below, which must come from the PHP
+# that will actually load the module.
 # shellcheck source=php-env
 source "$EXT_DIR/scripts/php-env"
 

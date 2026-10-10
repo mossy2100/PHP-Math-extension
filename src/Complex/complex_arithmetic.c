@@ -10,6 +10,8 @@
 # include "config.h"
 #endif
 
+#include <math.h>
+
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
@@ -74,7 +76,7 @@ PHP_METHOD(OceanMoon_Math_Complex, neg)
 
 /* {{{ OceanMoon\Math\Complex::inv(): Complex
  *
- * Matches the PHP package's Complex::inv() (1 / $this): 1/(c+di) = (c-di)/(c^2+d^2).
+ * Matches the PHP package's Complex::inv(): `new self(1)->div($this)`.
  */
 PHP_METHOD(OceanMoon_Math_Complex, inv)
 {
@@ -83,13 +85,9 @@ PHP_METHOD(OceanMoon_Math_Complex, inv)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (real == 0.0 && imag == 0.0) {
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-		RETURN_THROWS();
-	}
-
-	double f = (real * real) + (imag * imag);
-	if (complex_create(return_value, real / f, -imag / f) == FAILURE) {
+	double out_real, out_imag;
+	if (complex_calc_div(1.0, 0.0, real, imag, &out_real, &out_imag) == FAILURE
+		|| complex_create(return_value, out_real, out_imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -190,9 +188,54 @@ PHP_METHOD(OceanMoon_Math_Complex, mul)
 }
 /* }}} */
 
+/* {{{ complex_calc_div
+ *
+ * Matches the PHP package's Complex::div(): (a+bi)/(c+di) using Smith's algorithm, which avoids the overflow and
+ * underflow of computing c^2+d^2 directly. With finite operands and a non-zero divisor, a non-finite part can only
+ * be ±INF, so that's reported as overflow.
+ */
+zend_result complex_calc_div(double a, double b, double c, double d, double *out_real, double *out_imag)
+{
+	if (c == 0.0 && d == 0.0) {
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+		return FAILURE;
+	}
+
+	double real, imag;
+	if (fabs(c) >= fabs(d)) {
+		double r = d / c;
+		double den = c + d * r;
+		real = (a + b * r) / den;
+		imag = (b - a * r) / den;
+	} else {
+		double r = c / d;
+		double den = c * r + d;
+		real = (a * r + b) / den;
+		imag = (b * r - a) / den;
+	}
+
+	if (!zend_finite(real) || !zend_finite(imag)) {
+		zend_string *dividend_str = complex_parts_to_str(a, b);
+		zend_string *divisor_str = complex_parts_to_str(c, d);
+		zend_string *msg = strpprintf(
+			0, "Cannot divide %s by %s. The result would overflow.", ZSTR_VAL(dividend_str), ZSTR_VAL(divisor_str)
+		);
+		zend_string_release(dividend_str);
+		zend_string_release(divisor_str);
+		zend_throw_exception(spl_ce_OverflowException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	*out_real = real;
+	*out_imag = imag;
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Complex::div(Complex|float $other): Complex
  *
- * Matches the PHP package's Complex::div(): (a+bi)/(c+di) = [(ac+bd) + (bc-ad)i]/(c^2+d^2).
+ * Matches the PHP package's Complex::div(), via complex_calc_div().
  */
 PHP_METHOD(OceanMoon_Math_Complex, div)
 {
@@ -207,16 +250,11 @@ PHP_METHOD(OceanMoon_Math_Complex, div)
 		RETURN_THROWS();
 	}
 
-	if (c == 0.0 && d == 0.0) {
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-		RETURN_THROWS();
-	}
-
 	double a, b;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &a, &b);
 
-	double f = (c * c) + (d * d);
-	if (complex_create(return_value, (a * c + b * d) / f, (b * c - a * d) / f) == FAILURE) {
+	double real, imag;
+	if (complex_calc_div(a, b, c, d, &real, &imag) == FAILURE || complex_create(return_value, real, imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

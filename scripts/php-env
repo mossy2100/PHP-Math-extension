@@ -7,7 +7,8 @@
 #   source "$EXT_DIR/scripts/php-env"
 #
 # Input (optional):
-#   PHP_VERSION  Target PHP minor version. Default 8.4. Recognised: 8.4, 8.5.
+#   PHP_VERSION  Target PHP minor version. Default 8.4. Recognised: 8.4, 8.5. scripts/enable and
+#                scripts/disable set it from the php on PATH when no version is given.
 #
 # Sets in the sourcing shell:
 #   PATH              Target bin dir prepended, so php, phpize and php-config all agree.

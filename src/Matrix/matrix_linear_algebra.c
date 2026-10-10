@@ -1,7 +1,7 @@
 /*
  * matrix_linear_algebra.c
  *
- * Linear algebra methods for OceanMoon\Math\Matrix: mulVector(), t(), det(), trace(). Mirrors the
+ * Linear algebra methods for OceanMoon\Math\Matrix: t(), det(), trace(). Mirrors the
  * "Linear algebra methods" region of the PHP package's Matrix class.
  */
 
@@ -14,72 +14,6 @@
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
-
-/* {{{ matrix_calc_mul_vector
- *
- * The computational core of mulVector(), shared with the `*` operator's `Matrix * Vector` form
- * (matrix_operators.c). Matches the PHP package's Matrix::mulVector(): `$this->mul($vector->
- * toColumnMatrix())->getColumn(0)`. Implemented directly here (rather than building an
- * intermediate column Matrix) since the result is equivalent: row i of the product is the dot
- * product of this Matrix's row i with $vector.
- */
-zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval *return_value)
-{
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-	zend_long vector_count = vector_read_count(vector);
-
-	if (column_count != vector_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid Matrix row count: " ZEND_LONG_FMT ". Must equal this Matrix's column count: "
-			ZEND_LONG_FMT ".", vector_count, column_count
-		);
-		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
-		return FAILURE;
-	}
-
-	if (vector_create(return_value, row_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		double sum = 0.0;
-		for (zend_long k = 0; k < column_count; k++) {
-			double a, b;
-			matrix_read_element(self, i, k, &a);
-			vector_read_element(vector, k, &b);
-			sum += a * b;
-		}
-		if (vector_write_element(result, i, sum) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ OceanMoon\Math\Matrix::mulVector(Vector $vector): Vector
- *
- * Matches the PHP package's Matrix::mulVector().
- */
-PHP_METHOD(OceanMoon_Math_Matrix, mulVector)
-{
-	zval *vector;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(vector, vector_ce_Vector)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (matrix_calc_mul_vector(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(vector), return_value) == FAILURE) {
-		RETURN_THROWS();
-	}
-}
-/* }}} */
 
 /* {{{ OceanMoon\Math\Matrix::t(): Matrix
  *

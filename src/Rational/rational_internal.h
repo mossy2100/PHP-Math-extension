@@ -32,9 +32,18 @@ void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_de
 zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value);
 zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value);
 
-/* The computational core of pow(), defined in rational_power.c. Shared with the ** operator
- * (rational_operators.c). */
+/* The computational cores of pow() for each exponent type, and of the `int ** Rational`
+ * operator, defined in rational_power.c. Shared with the ** operator (rational_operators.c). */
 zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, zval *return_value);
+zend_result rational_calc_pow_rational(zend_long num, zend_long den, zend_long p, zend_long q, zval *return_value);
+zend_result rational_calc_int_pow_rational(zend_long base, zend_long p, zend_long q, zval *return_value);
+
+/* Power error-message helpers, defined in rational_power.c. Shared with the float ** forms
+ * (rational_operators.c). */
+#define RATIONAL_POW_IRRATIONAL "The result is irrational."
+#define RATIONAL_POW_NOT_REAL "The result is not real."
+zend_string *rational_ratio_to_str(zend_long num, zend_long den);
+void rational_throw_pow_error(zend_class_entry *ce, zend_string *base, zend_string *exp, const char *reason);
 
 /* The computational core of fromFloat(), defined in rational_factory.c. Shared with fromString()
  * (same file) and the operators (rational_operators.c, for a float operand). */

@@ -7,13 +7,14 @@
  * single `compare` object handler). Mirrors docs/Rational.md in this repo - these operators
  * only exist here in the extension; the userland package has no way to overload operators, so
  * it exposes the same behavior only as named methods (add()/sub()/mul()/div()/pow()/neg()/
- * compare()/etc.), none of which accept a float operand (see docs/Rational.md's "Numeric type
- * widening" section for why the operators can support float where the methods can't).
+ * compare()/etc.). None of those arithmetic methods accepts a float operand (see docs/Rational.md's
+ * "Numeric type widening" section for why the operators can support float where the methods can't).
  *
  * Numeric widening: when either operand of +, -, *, /, or ** is a genuine float, both operands
  * widen to float and the result is an ordinary float - matching how int widens to float
  * whenever a float is involved in plain PHP arithmetic. When no float is involved, an int
- * operand instead widens to Rational, and the result stays an exact Rational.
+ * operand instead widens to Rational, and the result stays an exact Rational. The one exception
+ * is `int ** Rational`, whose int base doesn't widen (see rational_calc_int_pow_rational()).
  *
  * Also owns installing the custom object handlers table (do_operation/compare) on
  * Rational's class entry - unlike Complex, Rational has no lazy computed properties needing
@@ -35,6 +36,7 @@
 #include "rational_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
+#include "floats.h"
 #include "integers.h"
 
 /* {{{ rop_add_checked/rop_sub_checked/rop_mul_checked
@@ -106,7 +108,7 @@ static zend_result rational_operand_to_parts(zval *zv, zend_long *out_num, zend_
 /* {{{ rational_operand_to_double
  *
  * Resolves an operator operand (Rational, int, or float - anything else is unsupported) to its
- * float value, for the float-widening path of +, -, *, /, and **. A Rational widens via ordinary
+ * float value, for the float-widening path of +, -, *, and /. A Rational widens via ordinary
  * numerator/denominator division (matching toFloat(), rational_conversion.c), not through
  * rational_calc_from_float() - that function does the reverse conversion (float -> Rational)
  * and doesn't apply here.
@@ -177,40 +179,141 @@ static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zva
 }
 /* }}} */
 
+/* {{{ rational_calc_pow_float
+ *
+ * The `Rational ** float` operator: the float toFloat() ** exp. Like the
+ * other operators' float paths, a NAN exponent gives NAN and an infinite one follows float
+ * arithmetic. Where C's (and so PHP's) pow() would give NAN from a finite exponent (a negative
+ * base with a non-integer exponent), this throws instead. Overflow gives INF, as for any float.
+ * Raising zero to a negative power throws, matching pow() (PHP 8.4 also deprecates 0 ** a
+ * negative number).
+ */
+static zend_result rational_calc_pow_float(zend_long num, zend_long den, double exponent, zval *return_value)
+{
+	/* A NAN operand gives NAN, as for the other operators. C's pow(1, NAN) would give 1. */
+	if (zend_isnan(exponent)) {
+		ZVAL_DOUBLE(return_value, ZEND_NAN);
+		return SUCCESS;
+	}
+
+	if (num == 0 && exponent < 0) {
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to negative power.", 0);
+		return FAILURE;
+	}
+
+	double result = pow((double) num / (double) den, exponent);
+	if (zend_isnan(result)) {
+		rational_throw_pow_error(spl_ce_DomainException, rational_ratio_to_str(num, den), math_floats_to_str(exponent),
+			RATIONAL_POW_NOT_REAL);
+		return FAILURE;
+	}
+
+	ZVAL_DOUBLE(return_value, result);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ rational_calc_float_pow_rational
+ *
+ * The `float ** Rational` operator, with the Rational exponent p/q in
+ * lowest terms. The result is a float, but unlike PHP's own float ** float, a negative base has a
+ * real result for an odd root (odd q): (-8.0) ** (1/3) is -2.0, not NAN. Like the other
+ * operators' float paths, a NAN base gives NAN and an infinite one follows float arithmetic. An
+ * even root of a negative base (-INF included) throws rather than return NAN. Zero to a negative
+ * power also throws, matching pow(). Overflow gives INF, as for any float.
+ */
+static zend_result rational_calc_float_pow_rational(double base, zend_long p, zend_long q, zval *return_value)
+{
+	/* A NAN operand gives NAN, as for the other operators. C's pow(NAN, 0) would give 1. */
+	if (zend_isnan(base)) {
+		ZVAL_DOUBLE(return_value, ZEND_NAN);
+		return SUCCESS;
+	}
+
+	/* Handle a zero base, matching pow(). */
+	if (base == 0.0) {
+		if (p < 0) {
+			zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to negative power.", 0);
+			return FAILURE;
+		}
+		ZVAL_DOUBLE(return_value, p == 0 ? 1.0 : 0.0);
+		return SUCCESS;
+	}
+
+	double exponent = (double) p / (double) q;
+	double result;
+
+	if (base < 0) {
+		/* A negative base has a real result only for an odd root. */
+		if (q % 2 == 0) {
+			rational_throw_pow_error(spl_ce_DomainException, math_floats_to_str(base), rational_ratio_to_str(p, q),
+				RATIONAL_POW_NOT_REAL);
+			return FAILURE;
+		}
+		/* The odd root of a negative number is the negative of the root of its magnitude, so the
+		 * result is negative if p is odd. */
+		double magnitude = pow(-base, exponent);
+		result = p % 2 == 0 ? magnitude : -magnitude;
+	} else {
+		result = pow(base, exponent);
+	}
+
+	ZVAL_DOUBLE(return_value, result);
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ rational_do_pow
  *
- * The ** case of rational_do_operation(), split out for readability. Three forms are supported:
+ * The ** case of rational_do_operation(), split out for readability. Five forms are supported:
  *
- *   1. `Rational ** int`   - exact aⁿ/bⁿ algorithm, via rational_calc_pow().
- *   2. `Rational ** float` - both operands widen to float, per docs/Rational.md.
- *   3. `float ** Rational` - likewise widens to float.
+ *   1. `Rational ** int`      - exact, via rational_calc_pow(), the same as pow(int).
+ *   2. `Rational ** Rational` - exact, via rational_calc_pow_rational(), the same as
+ *                               pow(Rational).
+ *   3. `int ** Rational`      - exact, via rational_calc_int_pow_rational(), with the same rules.
+ *   4. `Rational ** float`    - a float, via rational_calc_pow_float().
+ *   5. `float ** Rational`    - a float, via rational_calc_float_pow_rational(), which gives a
+ *                               real odd root of a negative base.
  *
- * `Rational ** Rational` and `int ** Rational` are both unsupported (FAILURE): int only ever
- * widens to Rational, never straight to float, and a Rational exponent has no exact Rational
- * result - so an int base has no path forward once the exponent is Rational (see
- * docs/Rational.md's "** (power)" section for the fuller reasoning).
+ * So, as for the other arithmetic operators, the result is a float if either operand is a float,
+ * and otherwise an exact Rational. An exact form throws a DomainException if the result is
+ * irrational or not real, rather than falling back to a float. A float form follows float
+ * arithmetic for a non-finite operand (NAN gives NAN) and gives INF on overflow, like the other
+ * operators, but throws rather than give NAN from finite operands.
  */
 static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 {
 	bool op1_is_rational = Z_TYPE_P(op1) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op1), rational_ce_Rational);
 	bool op2_is_rational = Z_TYPE_P(op2) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op2), rational_ce_Rational);
 
-	if (op1_is_rational && Z_TYPE_P(op2) == IS_LONG) {
+	if (op1_is_rational) {
 		zend_long num, den;
 		rational_read_parts(Z_OBJ_P(op1), &num, &den);
-		return rational_calc_pow(num, den, Z_LVAL_P(op2), result);
+
+		if (Z_TYPE_P(op2) == IS_LONG) {
+			return rational_calc_pow(num, den, Z_LVAL_P(op2), result);
+		}
+		if (Z_TYPE_P(op2) == IS_DOUBLE) {
+			return rational_calc_pow_float(num, den, Z_DVAL_P(op2), result);
+		}
+		if (op2_is_rational) {
+			zend_long p, q;
+			rational_read_parts(Z_OBJ_P(op2), &p, &q);
+			return rational_calc_pow_rational(num, den, p, q, result);
+		}
+		return FAILURE;
 	}
 
-	if ((op1_is_rational && Z_TYPE_P(op2) == IS_DOUBLE) || (Z_TYPE_P(op1) == IS_DOUBLE && op2_is_rational)) {
-		double base, exponent;
-		if (rational_operand_to_double(op1, &base) == FAILURE) {
-			return FAILURE;
+	if (op2_is_rational) {
+		zend_long p, q;
+		rational_read_parts(Z_OBJ_P(op2), &p, &q);
+
+		if (Z_TYPE_P(op1) == IS_LONG) {
+			return rational_calc_int_pow_rational(Z_LVAL_P(op1), p, q, result);
 		}
-		if (rational_operand_to_double(op2, &exponent) == FAILURE) {
-			return FAILURE;
+		if (Z_TYPE_P(op1) == IS_DOUBLE) {
+			return rational_calc_float_pow_rational(Z_DVAL_P(op1), p, q, result);
 		}
-		ZVAL_DOUBLE(result, pow(base, exponent));
-		return SUCCESS;
 	}
 
 	return FAILURE;
@@ -221,7 +324,7 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
  *
  * The `do_operation` object handler backing Rational's arithmetic operator overloads: +, -, *, /
  * for Rational|int|float on either side, and ** (see rational_do_pow()'s doc comment for its
- * three supported forms). Unary - needs no special-casing here: PHP has no dedicated opcode for
+ * five supported forms). Unary - needs no special-casing here: PHP has no dedicated opcode for
  * it, and the compiler lowers `-$r` to `$r * -1` (see zend_compile_unary_pm() in
  * Zend/zend_compile.c and complex_do_operation()'s doc comment in Complex/complex_operators.c
  * for the fuller explanation), so it's already covered by the ZEND_MUL case. (Unary + similarly

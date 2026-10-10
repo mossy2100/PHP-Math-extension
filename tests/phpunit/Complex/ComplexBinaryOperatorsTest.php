@@ -6,6 +6,7 @@ namespace OceanMoon\Math\Tests\Complex;
 
 use OceanMoon\Core\Exceptions\ArithmeticException;
 use OceanMoon\Math\Complex;
+use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -261,6 +262,28 @@ class ComplexBinaryOperatorsTest extends TestCase
 
         $this->expectException(ArithmeticException::class);
         $z / new Complex(0, 0);
+    }
+
+    /**
+     * Test division by a tiny divisor whose squared modulus would underflow gives the right result, matching div().
+     */
+    public function testDivByTinyDivisor(): void
+    {
+        // 1 / (1e-300 + 1e-300i) = 5e299 - 5e299i.
+        $z = 1 / new Complex(1e-300, 1e-300);
+
+        $this->assertEqualsWithDelta(1.0, $z->real / 5e299, 1e-15);
+        $this->assertEqualsWithDelta(1.0, $z->imaginary / -5e299, 1e-15);
+    }
+
+    /**
+     * Test division throws OverflowException when the result is too large to represent, matching div().
+     */
+    public function testDivOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot divide 1.0E+300 by 1.0E-300. The result would overflow.');
+        new Complex(1e300) / new Complex(1e-300);
     }
 
     /**

@@ -152,12 +152,12 @@ $m1 * $v;    // [5, 11]  ($v is treated as a 2×1 column matrix)
 
 **Equivalence table:**
 
-| Operation   | Equivalent to       |
-| ----------- | ------------------- |
-| `$m * $x`   | `$m->mul($x)`       |
-| `$x * $m`   | `$m->mul($x)`       |
-| `$m1 * $m2` | `$m1->mul($m2)`     |
-| `$m * $v`   | `$m->mulVector($v)` |
+| Operation   | Equivalent to   |
+| ----------- | --------------- |
+| `$m * $x`   | `$m->mul($x)`   |
+| `$x * $m`   | `$m->mul($x)`   |
+| `$m1 * $m2` | `$m1->mul($m2)` |
+| `$m * $v`   | `$m->mul($v)`   |
 
 ---
 

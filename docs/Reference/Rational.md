@@ -25,6 +25,9 @@ result could technically be represented as an `int`).
 - `Rational` + `int` → the `int` is widened to a `Rational`, and the operation happens on two `Rational` values.
 - `Rational` + `float` → the `Rational` is widened to a `float`, and the operation happens on two `float` values.
 
+Unlike PHP, a `Rational` result is never widened to a `float` when it gets too big for an `int`: the operation throws
+`OverflowException` instead. To get a `float` result, one operand must be a `float`.
+
 ---
 
 ## Unary Arithmetic Operators
@@ -79,10 +82,10 @@ $negated = -$r;  // -2/3
 
 ## Binary Arithmetic Operators
 
-`+`, `-`, `*`, and `/` each accept a `Rational`, `int`, or `float` operand on either side.
+`+`, `-`, `*`, `/` and `**` each accept a `Rational`, `int`, or `float` operand on either side.
 
-`add()`/`sub()`/`mul()`/`div()` only accept `self|int`, and can only be called on a `Rational`; there's no way to write
-`$x->sub($r)` for an `int` `$x`.
+`add()`/`sub()`/`mul()`/`div()`/`pow()` only accept `self|int`, and can only be called on a `Rational`; there's no way
+to write `$x->sub($r)` for an `int` `$x`.
 
 The operators lift that restriction: `$r` and `$x` can appear in either order, and `int - Rational` (i.e. `$x - $r`)
 computes the same result you'd get by promoting `$x` to a `Rational` first, then subtracting, matching what
@@ -104,6 +107,11 @@ $sum = $f + $r;    // float + Rational → float
 ```
 
 Addition is commutative, so reversing the operands gives the same result.
+
+**Throws:**
+
+- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**
 
@@ -141,6 +149,11 @@ $diff = $f - $r;    // float - Rational → float
 
 Subtraction isn't commutative, so `int|float - Rational` is a distinct case from `Rational - int|float`.
 
+**Throws:**
+
+- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -176,6 +189,11 @@ $product = $f * $r;    // float * Rational → float
 ```
 
 Multiplication is commutative, so reversing the operands gives the same result.
+
+**Throws:**
+
+- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**
 
@@ -217,6 +235,12 @@ way to compute a multiplicative inverse - see "Inverting with `1 / r` or `r ** -
 Dividing by zero throws `ArithmeticException`, matching `div()`, even when the divisor is a `float` (`$r / 0.0`). PHP's
 own `/` also throws for a zero divisor, but a `DivisionByZeroError`, so catch `ArithmeticException` here instead.
 
+**Throws:**
+
+- `ArithmeticException` if dividing by zero, including `0.0`.
+- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
+
 **Examples:**
 
 ```php
@@ -244,39 +268,63 @@ $r1 / 0.75;   // 0.8888...
 ### \*\* (power)
 
 ```php
-$result = $r ** $i;  // Rational ** int → Rational
-$result = $r ** $f;  // Rational ** float → float
-$result = $f ** $r;  // float ** Rational → float
+$result = $r1 ** $r2;  // Rational ** Rational → Rational
+$result = $r ** $i;    // Rational ** int → Rational
+$result = $i ** $r;    // int ** Rational → Rational
+$result = $r ** $f;    // Rational ** float → float
+$result = $f ** $r;    // float ** Rational → float
 ```
 
 `Rational ** int` is calculated as `(a/b)ⁿ = aⁿ/bⁿ` and simplified.
 
-A number raised to a fractional power generally isn't itself rational (e.g. `2 ** (1/2)` is `sqrt(2)`), so `pow()`
-doesn't accept a `Rational` or `float` exponent, and neither `Rational ** Rational` nor `int ** Rational` is supported
-here either.
+`Rational ** Rational` and `int ** Rational` are exact. An exponent `p/q` (in lowest terms) means the q-th root, raised
+to the power p:
 
-By the widening rule above, `int` only ever widens to `Rational`, never directly to `float` - so an `int` base has no
-path to a `float` result unless the _other_ operand is already a genuine `float`. `float ** Rational` and
-`Rational ** float` are both supported on that basis: the `Rational` is widened to a `float` first, then computed as a
-regular `float ** float`.
+- The result exists only if the base's numerator and denominator are both perfect q-th powers. Otherwise it's
+  irrational, and the operation throws `DomainException`. A whole-number exponent (`q` = 1) is never irrational.
+- A negative base has a real result only for an odd root (odd `q`). An even root of a negative base throws
+  `DomainException`.
+
+`Rational ** float` and `float ** Rational` widen the `Rational` to a `float` and return a `float`:
+
+- `float ** Rational` gives a real odd root of a negative base: `(-8.0) ** new Rational(1, 3)` is `-2.0`, where PHP's
+  own `**` gives `NAN`.
+- Where the result would be `NAN` from finite operands, such as `(-0.25) ** 0.5`, the operation throws
+  `DomainException` instead.
+- A `NAN` operand gives `NAN`, and an infinite operand follows `float` arithmetic, as for the other operators.
+- Overflow gives `INF`, as for any `float` operation.
+
+**Throws:**
+
+- `ArithmeticException` if raising zero to a negative power.
+- `DomainException` if an exact result is irrational or not real, or a `float` result would be `NAN` from finite
+  operands.
+- `OverflowException` if an exact result's numerator or denominator overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**
 
 ```php
 $r = new Rational(2, 3);
-$r ** 2;     // 4/9
-$r ** -2;    // 9/4  (a negative exponent gives the reciprocal)
-$r ** 0.5;   // 0.816497
-2.5 ** $r;   // 1.842016
+$r ** 2;                                     // 4/9
+$r ** -2;                                    // 9/4 (a negative exponent gives the reciprocal)
+4 ** new Rational(1, 2);                     // 2
+new Rational(4, 9) ** new Rational(1, 2);    // 2/3
+new Rational(-8, 27) ** new Rational(1, 3);  // -2/3
+2 ** new Rational(1, 2);                     // throws DomainException (irrational)
+$r ** 0.5;                                   // 0.816497
+2.5 ** $r;                                   // 1.842016
 ```
 
 **Equivalence table:**
 
-| Operation  | Equivalent to         |
-| ---------- | --------------------- |
-| `$r ** $i` | `$r->pow($i)`         |
-| `$r ** $f` | `$r->toFloat() ** $f` |
-| `$f ** $r` | `$f ** $r->toFloat()` |
+| Operation    | Equivalent to                                                     |
+| ------------ | ----------------------------------------------------------------- |
+| `$r1 ** $r2` | `$r1->pow($r2)`                                                   |
+| `$r ** $i`   | `$r->pow($i)`                                                     |
+| `$i ** $r`   | `new Rational($i)->pow($r)`                                       |
+| `$r ** $f`   | `$r->toFloat() ** $f`                                             |
+| `$f ** $r`   | `$f ** $r->toFloat()`, but with real odd roots of a negative `$f` |
 
 ---
 
@@ -309,9 +357,11 @@ $r ** -1;   // 4/3, same result
   exceptions for anything else.
 
 If either operand is a `float`, the `Rational` operand will be widened to a `float`, and the two values compared
-normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. In
-the event of integer overflow an `OverflowException` will occur; to avoid this, convert at least one operand to a
-`float`.
+normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. If
+that overflows, the values are compared as floats instead, so two very close `Rational` values can compare as equal.
+
+PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`.
+So `$r == null` is `false` and `$r == true` is `true`, rather than throwing.
 
 See **[Comparison Operators](Comparison_Operators.md)** - how comparison works across all four classes, including the `equal()`/`approxEqual()`
 methods recommended over the operators themselves.
@@ -329,6 +379,11 @@ $result = $f <=> $r;    // float <=> Rational → int
 ```
 
 Returns `-1` for "less than", `0` for "equal" (that is, _numerically_ equal), and `1` for "greater than".
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -364,6 +419,11 @@ $result = $r < $f;    // Rational < float → bool
 $result = $f < $r;    // float < Rational → bool
 ```
 
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
+
 **Examples:**
 
 ```php
@@ -397,6 +457,11 @@ $result = $i <= $r;    // int <= Rational → bool
 $result = $r <= $f;    // Rational <= float → bool
 $result = $f <= $r;    // float <= Rational → bool
 ```
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -432,6 +497,11 @@ $result = $r > $f;    // Rational > float → bool
 $result = $f > $r;    // float > Rational → bool
 ```
 
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
+
 **Examples:**
 
 ```php
@@ -466,6 +536,11 @@ $result = $r >= $f;    // Rational >= float → bool
 $result = $f >= $r;    // float >= Rational → bool
 ```
 
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
+
 **Examples:**
 
 ```php
@@ -499,6 +574,11 @@ $result = $i == $r;    // int == Rational → bool
 $result = $r == $f;    // Rational == float → bool
 $result = $f == $r;    // float == Rational → bool
 ```
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -535,6 +615,11 @@ $result = $f != $r;    // float != Rational → bool
 ```
 
 There's no `notEqual()` method, so each equivalent negates `equal()`.
+
+**Throws:**
+
+- `DomainException` if the other operand is `NAN`.
+- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 

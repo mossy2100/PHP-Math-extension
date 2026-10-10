@@ -22,7 +22,8 @@ use PHPStan\Type\UnionType;
  * Unlike Complex, the result type here isn't always Rational: per docs/Rational.md's "Numeric
  * type widening" section, a genuine float operand widens the whole operation to float, so
  * specifyType() must compute the result type from the operand types rather than returning a
- * constant.
+ * constant. ** follows the same rule as the other operators: a float if either operand is a
+ * float, otherwise a Rational (see rational_do_pow() in rational_operators.c).
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag.
  */
@@ -46,23 +47,6 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
         $leftIsRational = $rationalType->isSuperTypeOf($leftSide)->yes();
         $rightIsRational = $rationalType->isSuperTypeOf($rightSide)->yes();
 
-        if ($operatorSigil === '**') {
-            // Three forms are supported: Rational ** int (exact), and Rational ** float /
-            // float ** Rational (both widen to float). Rational ** Rational and int ** Rational
-            // have no exact result and no float operand to trigger widening, so they're
-            // unsupported - see rational_do_pow()'s doc comment in rational_operators.c and
-            // docs/Rational.md's "** (power)" section for the full reasoning. Anything else
-            // should fall through to PHPStan's own "invalid binary operation" handling, matching
-            // the runtime TypeError.
-            if ($leftIsRational && (new IntegerType())->isSuperTypeOf($rightSide)->yes()) {
-                return true;
-            }
-            if ($leftIsRational && (new FloatType())->isSuperTypeOf($rightSide)->yes()) {
-                return true;
-            }
-            return $rightIsRational && (new FloatType())->isSuperTypeOf($leftSide)->yes();
-        }
-
         // At least one side must definitely be a Rational - otherwise this is ordinary
         // int|float arithmetic PHPStan already handles fine on its own.
         if (!$leftIsRational && !$rightIsRational) {
@@ -77,15 +61,6 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
     public function specifyType(string $operatorSigil, Type $leftSide, Type $rightSide): Type
     {
         $rationalType = new ObjectType(Rational::class);
-
-        if ($operatorSigil === '**') {
-            // Only the exact `Rational ** int` form stays Rational; both float-involving forms
-            // (already the only other ones isOperatorSupported() allows) widen to float.
-            if ($rationalType->isSuperTypeOf($leftSide)->yes() && (new IntegerType())->isSuperTypeOf($rightSide)->yes()) {
-                return $rationalType;
-            }
-            return new FloatType();
-        }
 
         if ($this->isFloat($leftSide) || $this->isFloat($rightSide)) {
             return new FloatType();

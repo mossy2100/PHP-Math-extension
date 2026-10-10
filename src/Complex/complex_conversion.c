@@ -37,31 +37,27 @@ static zend_string *complex_double_to_str(double value)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::__toString(): string
+/* {{{ complex_parts_to_str
  *
- * Matches the PHP package's Complex::__toString().
+ * Formats a complex number from its parts, matching the PHP package's Complex::__toString(). Shared by
+ * __toString() and by exception messages that embed a Complex (complex_calc_div() in complex_arithmetic.c).
+ *
+ * Returns a new zend_string the caller owns and must eventually release.
  */
-PHP_METHOD(OceanMoon_Math_Complex, __toString)
+zend_string *complex_parts_to_str(double real, double imag)
 {
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	double real, imag;
-	complex_read_parts(self, &real, &imag);
-
 	/* Real number: imaginary part is zero. */
 	if (imag == 0.0) {
-		RETURN_STR(complex_double_to_str(real));
+		return complex_double_to_str(real);
 	}
 
 	/* Real part is zero, imaginary part non-zero. */
 	if (real == 0.0) {
 		if (imag == 1.0) {
-			RETURN_STRINGL("i", 1);
+			return zend_string_init("i", 1, 0);
 		}
 		if (imag == -1.0) {
-			RETURN_STRINGL("-i", 2);
+			return zend_string_init("-i", 2, 0);
 		}
 
 		smart_str buf = {0};
@@ -69,8 +65,7 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 		smart_str_append(&buf, imag_str);
 		zend_string_release(imag_str);
 		smart_str_appendc(&buf, 'i');
-		smart_str_0(&buf);
-		RETURN_STR(buf.s);
+		return smart_str_extract(&buf);
 	}
 
 	/* Both parts non-zero: "a + bi" or "a - bi" form. */
@@ -87,8 +82,23 @@ PHP_METHOD(OceanMoon_Math_Complex, __toString)
 		zend_string_release(imag_str);
 	}
 	smart_str_appendc(&buf, 'i');
-	smart_str_0(&buf);
-	RETURN_STR(buf.s);
+	return smart_str_extract(&buf);
 }
 /* }}} */
 
+/* {{{ OceanMoon\Math\Complex::__toString(): string
+ *
+ * Matches the PHP package's Complex::__toString().
+ */
+PHP_METHOD(OceanMoon_Math_Complex, __toString)
+{
+	zend_object *self = Z_OBJ_P(ZEND_THIS);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	double real, imag;
+	complex_read_parts(self, &real, &imag);
+
+	RETURN_STR(complex_parts_to_str(real, imag));
+}
+/* }}} */

@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Matches the `oceanmoon/math` `[Unreleased]` changes.
+
+### Added
+
+- **`Rational::pow()` accepts a `Rational` exponent**, matching the package. `p/q` means the q-th root, raised to the
+  power p. The result is exact, or it throws `DomainException`.
+- **`**` supports a `Rational` exponent:**
+  - `Rational ** Rational` and `int ** Rational` are exact, like `pow()`. For example, `4 ** new Rational(1, 2)` is
+    `2`.
+  - `float ** Rational` gives a float, with a real result for an odd root of a negative base:
+    `(-8.0) ** new Rational(1, 3)` is `-2.0`, not `NAN`.
+
+### Changed
+
+- **`Matrix::mul()` accepts a `Vector`, replacing `Matrix::mulVector()` (breaking).** `$m->mul($v)` is _Ax_ and
+  returns a `Vector`. PHPStan infers the return type from the argument type.
+- **`Vector::fromArray()`/`Matrix::fromArray()` (breaking):** a non-numeric element, or a `Matrix` row that isn't an
+  array, throws `InvalidArgumentException` instead of `DomainException`. A non-finite element, or a row that isn't a
+  list, still throws `DomainException`. The messages match the package.
+- **`Vector::normalize()`** throws "Cannot normalize zero Vector." for a zero or empty vector, instead of "Cannot
+  divide by zero."
+- **`Rational ** float` and `float ** Rational`** throw instead of giving `NAN` from finite operands: an even root of
+  a negative base throws `DomainException`, and zero to a negative power throws `ArithmeticException`. A `NAN`
+  operand still gives `NAN`.
+- **`scripts/enable` and `scripts/disable`** default to the PHP on `PATH`, rather than 8.4.
+
+### Fixed
+
+- **`pow()` parameter names** didn't match the package, which broke named arguments. `Complex::pow()`,
+  `Rational::pow()` and `Matrix::pow()` now all take `$exp`.
+- **Ported the package's float range fixes:**
+  - `Complex::div()`, `inv()` and `/` use Smith's algorithm, so a very small or large divisor gives the right result.
+    They throw `OverflowException` when the result is too large to represent.
+  - `Vector::div()`, `Matrix::div()` and `/` throw `DomainException` for a non-finite scalar, instead of silently
+    giving zeros.
+  - `Vector::magnitude`, `Matrix::norm()` and `Vector::normalize()` scale the elements by a power of 2 first, so
+    squaring them can't overflow or underflow.
+  - `Vector::cross()` gives the right result whenever it fits, including for huge parallel vectors, and throws
+    `OverflowException` otherwise.
+- **Builds with `-ffp-contract=off`.** The compiler could fuse a multiply and an add into one instruction, which
+  rounds differently from PHP. That broke exact parity with the package, e.g. in `Vector::cross()`.
+
+### Documentation
+
+- `docs/Reference/Rational.md` documents `**` with a `Rational` exponent, and has a **Throws:** block for each
+  operator.
+
+---
+
 ## [4.0.1] - 2026-10-10
 
 First release. The version matches `oceanmoon/math` 4.0.1, whose API this release mirrors. The two stay in step from now
@@ -28,7 +79,7 @@ on.
 
   - `Complex` and `Rational` accept an `int` or `float` operand on either side.
   - A `float` operand widens a `Rational` operation to a `float` result. An `int` keeps it exact.
-  - `Matrix * Vector` is equivalent to `mulVector()`, and `Vector * Matrix` to `Vector::mul()`.
+  - `Matrix * Vector` is equivalent to `mul()` with a Vector, and `Vector * Matrix` to `Vector::mul()`.
   - `int|float / Vector` and `int|float / Matrix` divide the scalar by each element, like `$x * $v->reciprocal()`.
   - Unsupported forms, such as `Vector * Vector` or `Matrix / Matrix`, throw `TypeError`.
   - `Complex` ordering is lexicographic (real part, then imaginary). It's useful for sorting, but not mathematically
