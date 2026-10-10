@@ -10,7 +10,7 @@
 extern zend_module_entry oceanmoon_math_module_entry;
 #define phpext_oceanmoon_math_ptr &oceanmoon_math_module_entry
 
-#define PHP_OCEANMOON_MATH_VERSION "0.1.0"
+#define PHP_OCEANMOON_MATH_VERSION "4.0.1"
 
 #ifdef ZTS
 #include "TSRM.h"

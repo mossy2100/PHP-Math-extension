@@ -12,7 +12,7 @@ use PHPStan\Type\UnaryOperatorTypeSpecifyingExtension;
 /**
  * Teaches PHPStan about Matrix's unary operator overloading: + (identity) and - (negate). Both are
  * backed by the same `do_operation` handler as the binary operators (see
- * MatrixBinaryOperatorExtension) -- PHP has no dedicated opcode for unary +/-, so the compiler
+ * MatrixBinaryOperatorExtension) - PHP has no dedicated opcode for unary +/-, so the compiler
  * lowers `-$A`/`+$A` to `$A * -1`/`$A * 1`, but PHPStan works from the parsed AST, where these are
  * distinct unary nodes, so both need listing here regardless of how the VM later lowers them.
  *

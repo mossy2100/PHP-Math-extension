@@ -2,7 +2,7 @@
  * matrix_arrayaccess.c
  *
  * ArrayAccess methods for OceanMoon\Math\Matrix: offsetExists(), offsetGet(), offsetSet(),
- * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Matrix class --
+ * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Matrix class -
  * offsetGet() returns the Matrix's actual internal row Vector (a live reference, unlike getRow()'s
  * independent copy), which is what makes `$m[$row][$col] = $x` work.
  */

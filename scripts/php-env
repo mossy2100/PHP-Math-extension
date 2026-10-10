@@ -2,7 +2,7 @@
 #
 # Resolve which PHP the extension is built, tested and enabled against, and put that PHP's
 # toolchain first on PATH. Sourced by scripts/build, scripts/test-phpunit and
-# scripts/enable and scripts/disable -- never executed directly.
+# scripts/enable and scripts/disable - never executed directly.
 #
 #   source "$EXT_DIR/scripts/php-env"
 #
@@ -22,8 +22,8 @@
 # Returns 1 with a diagnostic on stderr if the requested toolchain is missing or doesn't match.
 #
 # Why 8.4 is the default: a compiled extension is ABI-locked to the exact PHP minor version it was
-# built against, and the published module targets 8.4 (the minimum PHP for the OceanMoon packages
-# -- see README, "Why PHP 8.4?"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
+# built against, and the published module targets 8.4 (the minimum PHP for the OceanMoon packages -
+# see README, "Why PHP 8.4?"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
 # inheriting PATH therefore silently builds for the wrong version.
 
 target_version="${PHP_VERSION:-8.4}"
@@ -55,7 +55,7 @@ PHP_CONFIG="$PHP_BIN/php-config"
 
 # Per-version out-of-tree build directory. scripts/build recreates this from scratch each time and
 # runs phpize/configure/make inside it, so each tree has its own generated Makefile and its own
-# modules/ -- which is what the build system's hard-coded `modules/` paths (the test, install and
+# modules/ - which is what the build system's hard-coded `modules/` paths (the test, install and
 # clean targets) expect. Two trees can therefore coexist without colliding.
 ext_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PHP_BUILD_DIR="$ext_dir/build/$PHP_VERSION"

@@ -19,7 +19,7 @@ bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol
 		return false;
 	}
 
-	/* Tolerance math doesn't apply to infinities -- fall back to exact equality. */
+	/* Tolerance math doesn't apply to infinities - fall back to exact equality. */
 	if (isinf(a) || isinf(b)) {
 		return a == b;
 	}

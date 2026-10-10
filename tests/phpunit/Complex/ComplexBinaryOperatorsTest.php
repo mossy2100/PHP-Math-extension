@@ -11,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for Complex's binary operator overloads (+, -, *, /, **), only available in the
- * extension -- see docs/Complex.md in this repo. Each operator accepts a Complex or int|float
+ * extension - see docs/Complex.md in this repo. Each operator accepts a Complex or int|float
  * operand on either side and is equivalent to calling the same-named method, throwing the same
- * exceptions under the same conditions -- mirrors the structure of the package's own
+ * exceptions under the same conditions - mirrors the structure of the package's own
  * ComplexBinaryArithmeticTest/ComplexPowerTest, whose add()/sub()/mul()/div()/pow() these
  * operators are equivalent to.
  */
@@ -229,7 +229,7 @@ class ComplexBinaryOperatorsTest extends TestCase
 
     /**
      * Test int|float / Complex: not commutative with Complex / int|float, the scalar is promoted
-     * to a Complex with a zero imaginary part, then divided normally -- this also gives a way to
+     * to a Complex with a zero imaginary part, then divided normally - this also gives a way to
      * compute a multiplicative inverse (see "Inverting" tests below).
      */
     public function testDivScalarOverComplex(): void

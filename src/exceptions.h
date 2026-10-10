@@ -3,12 +3,12 @@
  *
  * Registers OceanMoon\Core\Exceptions\FormatException and ArithmeticException as far as the math
  * extension needs them (both are trivial empty subclasses of the built-in DomainException in the
- * PHP source -- no methods or properties of their own to port). Not the whole of
+ * PHP source - no methods or properties of their own to port). Not the whole of
  * OceanMoon\Core\Exceptions, just the two custom exception types Complex/Rational/Vector/Matrix
  * actually throw.
  *
  * Registered against spl_ce_DomainException, PHP's own built-in class entry, so no other Core
- * class needs to exist natively for these to work -- same reasoning as floats.h/integers.h being
+ * class needs to exist natively for these to work - same reasoning as floats.h/integers.h being
  * pure, standalone helpers with no dependency on a ported OceanMoon\Core class.
  */
 

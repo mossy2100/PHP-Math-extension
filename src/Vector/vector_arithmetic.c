@@ -6,9 +6,8 @@
  * "Binary arithmetic methods" regions of the PHP package's Vector class.
  *
  * vector_calc_div() is factored out here (rather than inlined in the div() method body) because
- * it's shared with normalized()/normalize() (vector_linear_algebra.c/vector_modification.c),
- * matching the "shared calc core" pattern used throughout this extension (e.g. Rational's
- * pow()/operator sharing rational_calc_pow()).
+ * it's shared with normalize() (vector_linear_algebra.c), matching the "shared calc core" pattern
+ * used throughout this extension (e.g. Rational's pow()/operator sharing rational_calc_pow()).
  */
 
 #ifdef HAVE_CONFIG_H
@@ -244,7 +243,7 @@ zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *retur
  *
  * The computational core of mul()'s Matrix branch, shared with the `*` operator
  * (vector_operators.c): converts this Vector to a row Matrix, multiplies by $other, and extracts
- * the (only) resulting row as a Vector -- `$this->toRowMatrix()->mul($other)->getRow(0)`.
+ * the (only) resulting row as a Vector - `$this->toRowMatrix()->mul($other)->getRow(0)`.
  */
 zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value)
 {
@@ -306,8 +305,8 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 
 /* {{{ vector_calc_div
  *
- * The computational core of div(), shared with normalized()/normalize()
- * (vector_linear_algebra.c/vector_modification.c). Matches the PHP package's Vector::div().
+ * The computational core of div(), shared with normalize() (vector_linear_algebra.c). Matches
+ * the PHP package's Vector::div().
  */
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 {
@@ -338,7 +337,7 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 
 /* {{{ vector_calc_scalar_div
  *
- * The computational core of the `/` operator's `float / Vector` form (vector_operators.c) --
+ * The computational core of the `/` operator's `float / Vector` form (vector_operators.c) -
  * Vector has no named method for this direction, only the operator (`Vector / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
  * $vector->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().

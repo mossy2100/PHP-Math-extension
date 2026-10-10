@@ -2,7 +2,7 @@
  * vector_arrayaccess.c
  *
  * ArrayAccess methods for OceanMoon\Math\Vector: offsetExists(), offsetGet(), offsetSet(),
- * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Vector class --
+ * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Vector class -
  * unlike Complex (immutable), Vector is mutable, so offsetSet() actually writes; only
  * offsetUnset() always throws, since Vector has a fixed count.
  */

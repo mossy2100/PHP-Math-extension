@@ -2,17 +2,17 @@
 #
 # Compile the extension into build/<php-version>/modules/oceanmoon_math.so. Runs the full phpize/configure/make
 # pipeline every time (not just `make`), since config.m4/config.w32 changes (e.g. adding a new
-# .c file) require phpize/configure to be re-run to pick them up -- `make` alone would silently
+# .c file) require phpize/configure to be re-run to pick them up - `make` alone would silently
 # keep building the old file list.
 #
-# Builds against PHP 8.4 by default (currently supports 8.4 and 8.5 -- see README "Why PHP 8.4?"),
+# Builds against PHP 8.4 by default (currently supports 8.4 and 8.5 - see README "Why PHP 8.4?"),
 # resolved by scripts/php-env rather than inherited from PATH, because the 8.4 formula is keg-only
 # and /opt/homebrew/bin/php is 8.5. A compiled extension is ABI-locked to the exact PHP minor
 # version it was built against (Zend Extension API number), so the resulting .so only loads under
 # that same version.
 #
 # Usage:
-#   scripts/build           # composer build -- PHP 8.4
+#   scripts/build           # composer build - PHP 8.4
 #   scripts/build 8.5       # PHP 8.5
 #   PHP_VERSION=8.5 scripts/build
 #
@@ -38,7 +38,7 @@ stale_artifacts=( \( -name '*.lo' -o -name '*.o' -o -name '.libs' -o -name '.dep
 
 # Refuse to build from a polluted source tree. src/ is copied as a directory (see below), and `make`
 # treats a copied object file as up to date, so a tree in this state builds a module that doesn't match
-# the sources -- silently. That is how the 8.4 build came to register Vector::$count as `get`; see 1.1 in
+# the sources - silently. That is how the 8.4 build came to register Vector::$count as `get`; see 1.1 in
 # _dev/Math Extension - Claude Review 2026-09-26.md.
 pollution=$(find src "${stale_artifacts[@]}" -print)
 if [[ -n "$pollution" ]]; then
@@ -51,7 +51,7 @@ if [[ -n "$pollution" ]]; then
         fi
         echo
         echo "A build tree is a copy of src/, and make treats copied objects as up to date, so building from"
-        echo "this state would link code that no longer matches the sources. Remove them and re-run -- they"
+        echo "this state would link code that no longer matches the sources. Remove them and re-run - they"
         echo "are untracked build output, so this is safe:"
         echo
         echo "  git clean -Xfd src/"
@@ -62,8 +62,8 @@ fi
 echo "Building oceanmoon_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_MODULE"
 
 # Recreate this version's build tree from scratch. Building out of tree is what lets the build
-# system's fixed paths work: the generated Makefile -- and build/Makefile.global, which phpize
-# copies verbatim from whichever PHP it was run against -- hard-code `modules/` for the test,
+# system's fixed paths work: the generated Makefile - and build/Makefile.global, which phpize
+# copies verbatim from whichever PHP it was run against - hard-code `modules/` for the test,
 # install and clean targets, so the module has to land in a directory literally called modules/.
 # Giving each PHP version its own tree lets both do that without colliding.
 #
@@ -84,7 +84,7 @@ cp -R \
     src \
     "$PHP_BUILD_DIR"/
 # Belt and braces after the directory copy. The guard above should have refused a polluted src/, so this
-# normally finds nothing; it stays because the failure it prevents is silent -- a copied object file makes
+# normally finds nothing; it stays because the failure it prevents is silent - a copied object file makes
 # `make` skip that translation unit, and the module then no longer matches the sources.
 find "$PHP_BUILD_DIR" "${stale_artifacts[@]}" -exec rm -rf {} +
 # The .phpt tests go in at their usual path, so `make test TESTS=tests/phpt/` works in the tree.

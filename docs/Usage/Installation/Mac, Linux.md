@@ -2,10 +2,10 @@
 
 ## Installation via PIE (recommended)
 
-[PIE](https://github.com/php/pie) (PHP Installer for Extensions) is the official successor to PECL for installing native
-PHP extensions, and is what this package's `composer.json` `"type": "php-ext"` configuration (`extension-name`,
-`support-zts`, `support-nts`, `configure-options`) is designed for — plain `composer require` can't compile and install
-a native extension, since Composer only manages PHP-space autoloading, not native builds.
+[PIE](https://github.com/php/pie) (PHP Installer for Extensions) is the official successor to PECL for installing native PHP extensions, and is what
+this package's `composer.json` `"type": "php-ext"` configuration (`extension-name`, `support-zts`, `support-nts`,
+`configure-options`) is designed for - plain `composer require` can't compile and install a native extension, since
+Composer only manages PHP-space autoloading, not native builds.
 
 ```bash
 pie install oceanmoon/math-ext
@@ -18,7 +18,7 @@ pie repository:add vcs https://github.com/mossy2100/PHP-Math-extension.git
 pie install oceanmoon/math-ext
 ```
 
-PIE requires the same build tools as a manual build (below) — a C compiler and the PHP development headers — since, on
+PIE requires the same build tools as a manual build (below) - a C compiler and the PHP development headers - since, on
 Mac/Linux, it runs the standard `phpize`/`configure`/`make`/`make install` pipeline itself rather than fetching a
 prebuilt binary.
 
@@ -33,14 +33,14 @@ See [Development](../Development.md#building) for the full `phpize`/`configure`/
 
 ### Enable the extension
 
-#### Option 1 (recommended) — Use the provided composer command
+#### Option 1 (recommended) - Use the provided composer command
 
 Go to the local folder containing the git repository for the extension. Let's call this `extension-dir`.
 
 Run `composer enable`.
 
 This will set up a custom `oceanmoon_math.ini` file in the PHP scan directory (as described below), telling PHP to load
-the compiled `oceanmoon_math.so` extension directly from the `extension-dir/build/<php-version>/modules` subfolder — the
+the compiled `oceanmoon_math.so` extension directly from the `extension-dir/build/<php-version>/modules` subfolder - the
 one matching the PHP version the module was built for (see `PHP_VERSION` in [Development](../Development.md#building)).
 
 The advantage of this approach is that PHP is linked to the repo's own build rather than a copied file, so every
@@ -49,7 +49,7 @@ subsequent rebuild is picked up automatically without redeploying.
 Run `composer disable` to disable the extension. This doesn't affect the `.so` file but will remove `oceanmoon_math.ini`
 so the extension isn't loaded by PHP.
 
-#### Option 2 — Manual setup
+#### Option 2 - Manual setup
 
 Decide whether you want to copy `oceanmoon_math.so` to PHP's extensions folder and load it from there, or just link
 directly to the build version (i.e. the one in `extension-dir/build/<php-version>/modules`).
@@ -100,8 +100,8 @@ extension={path to oceanmoon_math.so}
 ### Restart, if PHP is running as a persistent daemon
 
 If you're only using PHP from the command line (CLI SAPI), a new `.ini` file takes effect on the very next `php`
-invocation — nothing to restart. But if PHP is also running as a long-lived process — `php-fpm`, or `mod_php` under
-Apache — that process already loaded its extensions when it started, and won't notice a new `.ini` file until it's
+invocation - nothing to restart. But if PHP is also running as a long-lived process - `php-fpm`, or `mod_php` under
+Apache - that process already loaded its extensions when it started, and won't notice a new `.ini` file until it's
 restarted. Common local setups that fall into this category: Laravel Valet, Herd, or `brew services start php`.
 
 ```bash
@@ -123,6 +123,6 @@ php -m | grep oceanmoon_math
 The response should just be `oceanmoon_math`.
 
 **Note:** this only confirms the CLI SAPI has it loaded. If your actual use case is a web request handled by
-`php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list — `php -m`
+`php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list - `php -m`
 here says nothing about whether _that_ process has it. Confirm via a script executed through the web server itself (e.g.
 `<?php var_dump(extension_loaded('oceanmoon_math'));`), not just the command line.

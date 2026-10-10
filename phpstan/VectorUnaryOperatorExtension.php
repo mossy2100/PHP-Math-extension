@@ -12,7 +12,7 @@ use PHPStan\Type\UnaryOperatorTypeSpecifyingExtension;
 /**
  * Teaches PHPStan about Vector's unary operator overloading: + (identity) and - (negate). Both are
  * backed by the same `do_operation` handler as the binary operators (see
- * VectorBinaryOperatorExtension) -- PHP has no dedicated opcode for unary +/-, so the compiler
+ * VectorBinaryOperatorExtension) - PHP has no dedicated opcode for unary +/-, so the compiler
  * lowers `-$v`/`+$v` to `$v * -1`/`$v * 1`, but PHPStan works from the parsed AST, where these are
  * distinct unary nodes, so both need listing here regardless of how the VM later lowers them.
  *

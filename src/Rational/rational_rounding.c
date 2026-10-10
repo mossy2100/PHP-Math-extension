@@ -20,11 +20,12 @@
  * numerator and denominator, never converting to a float, so there's no precision loss.
  *
  * php_math_round_mode_from_enum() (used by Complex::round() too) translates the RoundingMode enum
- * case into one of PHP's eight distinct legacy PHP_ROUND_* ints (ext/standard/php_math_round_mode.h)
- * -- unlike Complex's use of it, which only needs to distinguish tie-breaking behavior for a
- * single "round to nearest" implementation, this switches on all eight directly, since Rational's
- * own round() implements NegativeInfinity/PositiveInfinity/TowardsZero/AwayFromZero natively
- * rather than delegating to PHP's built-in round().
+ * case into one of PHP's eight distinct legacy PHP_ROUND_* ints
+ * (ext/standard/php_math_round_mode.h) - unlike Complex's use of it, which only needs to
+ * distinguish tie-breaking behavior for a single "round to nearest" implementation, this switches
+ * on all eight directly, since Rational's own round() implements
+ * NegativeInfinity/PositiveInfinity/TowardsZero/AwayFromZero natively rather than delegating to
+ * PHP's built-in round().
  */
 PHP_METHOD(OceanMoon_Math_Rational, round)
 {

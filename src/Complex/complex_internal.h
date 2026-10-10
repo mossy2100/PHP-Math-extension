@@ -4,7 +4,7 @@
  * Cross-file declarations shared between complex.c and the other complex_*.c
  * implementation files in this directory. Also exposes complex_minit()/
  * complex_rinit() to ../oceanmoon_math.c, which calls them from the module's real
- * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION. Not a public API -- nothing here is
+ * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION. Not a public API - nothing here is
  * exposed to other extensions.
  */
 
@@ -12,9 +12,17 @@
 #define PHP_COMPLEX_INTERNAL_H
 
 #include "php.h"
+#include "types.h"
 
 /* The registered class entry for OceanMoon\Math\Complex. Defined in complex.c. */
 extern zend_class_entry *complex_ce_Complex;
+
+/* Slot offsets of the $real, $imaginary, $magnitude and $phase properties, set in complex_minit().
+ * See math_types_property_offset() (types.h). */
+extern uint32_t complex_offset_real;
+extern uint32_t complex_offset_imaginary;
+extern uint32_t complex_offset_magnitude;
+extern uint32_t complex_offset_phase;
 
 /* Shared helpers, defined in complex.c. See their doc comments there. */
 zend_result complex_init(zend_object *obj, double real, double imag);

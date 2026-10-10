@@ -1,8 +1,8 @@
 # Development
 
 Building, testing, and the project layout, for anyone working on the extension's C source itself. If you just want to
-*install* the extension to use it in a project, see [Installation](Installation.md) instead — manual installation
-links back to the Building section below, but that's the only overlap.
+*install* the extension to use it in a project, see [Installation](Installation.md) instead - manual installation links back to the
+Building section below, but that's the only overlap.
 
 ---
 
@@ -32,15 +32,15 @@ build/8.4/     # phpize/configure/make run here; the module ends up in build/8.4
 build/8.5/
 ```
 
-Building out of tree isn't just tidiness — it's required. The generated `Makefile`, and the `build/Makefile.global`
-that `phpize` copies verbatim from whichever PHP it was run against, hard-code `modules/` for the test, install and
-clean targets. Only the build step honours a configurable output directory (`phplibdir`), so a single tree can't serve
-two PHP versions however you shuffle the `.so` files: as soon as it isn't in `modules/`, `make test` and `make install`
-break. One tree per version gives each its own `modules/`, and both work unmodified.
+Building out of tree isn't just tidiness - it's required. The generated `Makefile`, and the `build/Makefile.global` that
+`phpize` copies verbatim from whichever PHP it was run against, hard-code `modules/` for the test, install and clean
+targets. Only the build step honours a configurable output directory (`phplibdir`), so a single tree can't serve two PHP
+versions however you shuffle the `.so` files: as soon as it isn't in `modules/`, `make test` and `make install` break.
+One tree per version gives each its own `modules/`, and both work unmodified.
 
 Recreating the tree from scratch each time also means stale artifacts can't accumulate. That matters here because the
-Makefile's `-include *.dep` dependency files record the *absolute* PHP include paths of whichever PHP generated them,
-so a `.dep` left by another version's build (or made stale by a Homebrew PHP upgrade) makes `make` fail outright.
+Makefile's `-include *.dep` dependency files record the *absolute* PHP include paths of whichever PHP generated them, so
+a `.dep` left by another version's build (or made stale by a Homebrew PHP upgrade) makes `make` fail outright.
 
 Confirm the extension loads (adjust the version to match):
 
@@ -53,7 +53,7 @@ You should see simply `oceanmoon_math`.
 ### Building by hand
 
 `scripts/build` is a thin wrapper you can replicate. Source `php-env` first to get the toolchain for the version you
-want onto `PATH`, then run the standard pipeline in a tree — and use its variables rather than hardcoding keg paths
+want onto `PATH`, then run the standard pipeline in a tree - and use its variables rather than hardcoding keg paths
 (`/opt/homebrew/opt/php@8.4/bin`), which vary by formula name and PHP patch version. Run this from the repo root:
 
 ```bash
@@ -67,8 +67,8 @@ phpize
 make
 ```
 
-Sourcing `php-env` first is the important part: `phpize` is version-specific (each PHP install ships its own, with
-that version's prefix baked in), so without it `phpize` resolves to whatever is on your `PATH` — on macOS that's
+Sourcing `php-env` first is the important part: `phpize` is version-specific (each PHP install ships its own, with that
+version's prefix baked in), so without it `phpize` resolves to whatever is on your `PATH` - on macOS that's
 `/opt/homebrew/bin/phpize`, which is 8.5.
 
 ---
@@ -80,19 +80,19 @@ scripts/test-phpunit                           # PHPUnit conformance tests (test
 (cd build/8.4 && make test TESTS=tests/phpt/)  # .phpt tests, run inside that version's build tree
 ```
 
-`make test` has to run from inside a build tree, because that's what its relative `modules/` reference resolves
-against. Note that `phpize` doesn't define `TESTS`, so `make test` on its own finds nothing — point it at the tests as
-above, or it just reports "No tests were run".
+`make test` has to run from inside a build tree, because that's what its relative `modules/` reference resolves against.
+Note that `phpize` doesn't define `TESTS`, so `make test` on its own finds nothing - point it at the tests as above, or
+it just reports "No tests were run".
 
 ---
 
 ## Project Structure
 
 - Top level: `oceanmoon_math.c` (MINIT/RINIT/MINFO/module entry), `php_oceanmoon_math.h`, and `oceanmoon_math.stub.php`
-  (plus its generated `oceanmoon_math_arginfo.h`) — one monolithic stub for the whole extension, following the
+  (plus its generated `oceanmoon_math_arginfo.h`) - one monolithic stub for the whole extension, following the
   convention used by most PHP core extensions (`php_dom.stub.php`, `php_reflection.stub.php`, `random.stub.php`, etc.)
   rather than one stub per class.
 - `src/`: everything else.
-  - `floats.c`/`.h`, `integers.c`/`.h`, `types.c`/`.h`, `exceptions.c`/`.h` — shared helpers with no class affinity.
-  - One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class — its
+  - `floats.c`/`.h`, `integers.c`/`.h`, `types.c`/`.h`, `exceptions.c`/`.h` - shared helpers with no class affinity.
+  - One subfolder per class (`Complex/`, `Rational/`, `Vector/`, `Matrix/`): everything specific to that class - its
     `.c` implementation files and its `_internal.h`.

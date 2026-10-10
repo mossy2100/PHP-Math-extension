@@ -33,7 +33,7 @@ PHP_METHOD(OceanMoon_Math_Rational, toFloat)
  *
  * Matches the PHP package's Rational::toMixedNumber(): an [integer part, fractional remainder]
  * tuple, using trunc/frac semantics (the remainder carries the same sign as the original). For
- * the proper-fraction case, the PHP source returns `$this` itself (not a copy) as the remainder --
+ * the proper-fraction case, the PHP source returns `$this` itself (not a copy) as the remainder -
  * replicated here by adding the same zend_object (with an incremented refcount) to the returned
  * array, rather than constructing a new, distinct-but-equal Rational.
  */
@@ -85,7 +85,7 @@ PHP_METHOD(OceanMoon_Math_Rational, toMixedNumber)
 	}
 
 	/* Calculate the integer part and the remainder. The remainder will have the same sign as the
-	 * original fraction -- C's `/`/`%` already truncate toward zero for this, same as PHP's
+	 * original fraction - C's `/`/`%` already truncate toward zero for this, same as PHP's
 	 * intdiv()/%. */
 	zend_long int_part = num / den;
 	zend_long rem = num % den;

@@ -10,7 +10,7 @@
  *
  * Shared, non-class-specific infrastructure (floats.c/floats.h, integers.c/integers.h,
  * exceptions.c/exceptions.h) lives flat at the top of src/ rather than in a per-class
- * subdirectory -- it isn't a ported PHP class, it's support code every class-specific file can
+ * subdirectory - it isn't a ported PHP class, it's support code every class-specific file can
  * depend on. Only exceptions.c needs an MINIT hook (class registration); floats.c/integers.c are
  * pure functions with no PHP-visible state to initialize.
  */

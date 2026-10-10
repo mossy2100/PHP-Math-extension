@@ -2,12 +2,12 @@
  * vector_properties.c
  *
  * The `magnitude` computed property on OceanMoon\Math\Vector: computed fresh from the current
- * elements on every read, never cached -- mirrors the PHP package's property-hook-based
+ * elements on every read, never cached - mirrors the PHP package's property-hook-based
  * $magnitude (a `get`-only hook with no backing storage), implemented here via a custom
  * `read_property` object handler since internal (C-registered) classes don't support property
  * hooks. Unlike Complex's magnitude/phase (stored, eagerly computed once at construction, since
  * Complex is immutable), Vector is mutable, so caching would need every mutating method (set(),
- * and anything built on it) to remember to invalidate it -- simpler to just never cache.
+ * and anything built on it) to remember to invalidate it - simpler to just never cache.
  *
  * Also installs the custom object handlers (do_operation, create_object) shared by every Vector
  * instance.
@@ -27,13 +27,15 @@
  * current elements and returns it directly via `rv`, without touching the (unused) backing
  * property slot. Falls through to zend_std_read_property() for every other property.
  *
- * Deliberately passes NULL for cache_slot on the fallthrough call rather than forwarding the
- * opcode's real cache_slot. The opcode that fetches an object property (e.g. ZEND_FETCH_OBJ_R)
- * uses *cache_slot to remember "this class's property X is at offset N" across repeated
- * executions of the same bytecode location (e.g. a loop body); if populated, the engine's fast
- * path could read the raw property slot directly on a later iteration, bypassing this handler
- * entirely and returning the (permanently unset) backing value instead of a fresh computation --
- * see Complex/complex_properties.c's git history for the same bug, hit and fixed there first.
+ * The opcode that fetches an object property (e.g. ZEND_FETCH_OBJ_R) uses *cache_slot to remember
+ * "this class's property X is at offset N", so later executions of the same bytecode location
+ * (e.g. a loop body) read the slot directly without calling this handler. That must never happen
+ * for "magnitude": the engine would read its permanently unset backing slot instead of a fresh
+ * computation (see Complex/complex_properties.c's git history for the same bug, hit there first).
+ * It can't, because "magnitude" returns above without reaching zend_std_read_property(), which is
+ * what fills the cache. A cache slot belongs to one opcode with one constant property name, so
+ * forwarding it for every other property ($count, and $data within the class) is safe, and keeps
+ * userland reads of $v->count as fast as for any plain object.
  */
 static zval *vector_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
@@ -42,7 +44,7 @@ static zval *vector_read_property(zend_object *object, zend_string *member, int 
 		return rv;
 	}
 
-	return zend_std_read_property(object, member, type, NULL, rv);
+	return zend_std_read_property(object, member, type, cache_slot, rv);
 }
 /* }}} */
 
@@ -50,7 +52,7 @@ static zval *vector_read_property(zend_object *object, zend_string *member, int 
  *
  * Custom `write_property` handler: rejects writes to "magnitude" with the same "Property
  * OceanMoon\Math\Vector::$magnitude is read-only" Error the PHP package's `get`-only property
- * hook produces natively -- without this override, the backing slot declared for `magnitude`
+ * hook produces natively - without this override, the backing slot declared for `magnitude`
  * (needed so the property exists at all for reflection/property_exists()) would silently accept
  * writes that read_property() above then ignores on every subsequent read, a silent no-op instead
  * of the loud failure the package gives. Falls through to zend_std_write_property() for every
@@ -68,7 +70,7 @@ static zval *vector_write_property(zend_object *object, zend_string *member, zva
 /* }}} */
 
 /* The custom object handlers for Vector, installed by vector_create_object(). A copy of the
- * standard handlers with `do_operation`, `read_property`, and `write_property` overridden -- the
+ * standard handlers with `do_operation`, `read_property`, and `write_property` overridden - the
  * first for operator support, the other two so `magnitude` behaves like the package's read-only
  * property hook: computed fresh on every read, and rejecting writes, instead of silently
  * accepting them into an ignored backing slot. */

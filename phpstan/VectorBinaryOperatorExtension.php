@@ -16,11 +16,11 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Vector's binary operator overloading (+, -, *, /), which only exists at
  * the C level (the `do_operation` object handler in Vector/vector_operators.c) and so is otherwise
- * entirely invisible to static analysis -- see docs/Vector.md for the runtime behavior this
+ * entirely invisible to static analysis - see docs/Vector.md for the runtime behavior this
  * mirrors. Same approach as ComplexBinaryOperatorExtension/RationalBinaryOperatorExtension.
  *
- * Unlike Rational, every supported form here always results in a Vector -- there's no
- * float-widening rule -- so specifyType() can return a constant like ComplexBinaryOperatorExtension
+ * Unlike Rational, every supported form here always results in a Vector - there's no
+ * float-widening rule - so specifyType() can return a constant like ComplexBinaryOperatorExtension
  * does, rather than computing the result type from the operand types.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag.
@@ -30,7 +30,7 @@ final class VectorBinaryOperatorExtension implements OperatorTypeSpecifyingExten
     /**
      * The binary operators Vector overloads. Matches vector_do_operation()'s switch in
      * Vector/vector_operators.c, other than `+`/`-` when used as unary operators, which PHPStan
-     * treats as distinct AST nodes from their binary counterparts -- see
+     * treats as distinct AST nodes from their binary counterparts - see
      * VectorUnaryOperatorExtension. No `**`: raising a vector to a power isn't a valid operation.
      */
     private const OPERATORS = ['+', '-', '*', '/'];

@@ -23,7 +23,7 @@
 /* {{{ c_sqrt
  *
  * Principal square root of a plain (real, imaginary) pair. Duplicated (rather than shared) from
- * complex_trigonometric.c's static of the same name -- both are small, file-local pure functions,
+ * complex_trigonometric.c's static of the same name - both are small, file-local pure functions,
  * not worth promoting to complex_internal.h for two call sites.
  */
 static void c_sqrt(double re, double im, double *out_re, double *out_im)

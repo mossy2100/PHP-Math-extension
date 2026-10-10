@@ -61,7 +61,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, get)
 
 /* {{{ OceanMoon\Math\Matrix::getRow(int $row): Vector
  *
- * Matches the PHP package's Matrix::getRow(): `clone $this->data[$row]` -- an independent copy,
+ * Matches the PHP package's Matrix::getRow(): `clone $this->data[$row]` - an independent copy,
  * unlike offsetGet()'s live reference.
  */
 PHP_METHOD(OceanMoon_Math_Matrix, getRow)

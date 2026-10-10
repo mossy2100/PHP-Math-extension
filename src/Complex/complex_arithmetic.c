@@ -24,7 +24,7 @@
  * parameter, an internal function's zval parameter isn't automatically coerced or validated
  * against its declared arginfo type before the function body runs, so both `int` (PHP's usual
  * float-parameter widening) and `float` are accepted and treated as a Complex with a zero
- * imaginary part here -- matching the PHP package's `new self($other)` conversion, including its
+ * imaginary part here - matching the PHP package's `new self($other)` conversion, including its
  * finite-value validation. Anything else (including a non-Complex object) throws TypeError.
  *
  * Returns FAILURE (with an exception already thrown) for a non-finite float/int or a wrong type.

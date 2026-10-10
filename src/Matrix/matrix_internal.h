@@ -6,6 +6,12 @@
 
 extern zend_class_entry *matrix_ce_Matrix;
 
+/* Slot offsets of the $rowCount, $columnCount and $data properties, set in matrix_minit(). See
+ * math_types_property_offset() (types.h). */
+extern uint32_t matrix_offset_row_count;
+extern uint32_t matrix_offset_column_count;
+extern uint32_t matrix_offset_data;
+
 zend_result matrix_init(zend_object *obj, zend_long row_count, zend_long column_count);
 zend_result matrix_create(zval *return_value, zend_long row_count, zend_long column_count);
 zend_long matrix_read_row_count(zend_object *obj);

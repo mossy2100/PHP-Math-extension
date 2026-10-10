@@ -193,8 +193,6 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess
 
     public function set(int $index, float $value): void {}
 
-    public function normalize(): void {}
-
     public function equal(mixed $other): bool {}
 
     public function approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool {}
@@ -221,7 +219,7 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess
 
     public function outer(Vector $other): Matrix {}
 
-    public function normalized(): Vector {}
+    public function normalize(): Vector {}
 
     public function sum(): float {}
 

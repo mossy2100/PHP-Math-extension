@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Disable oceanmoon_math globally on this machine, by removing the conf.d ini file that
-# scripts/enable writes. This doesn't touch the built .so itself -- it just stops PHP loading it.
+# scripts/enable writes. This doesn't touch the built .so itself - it just stops PHP loading it.
 #
 # Usage:
 #   scripts/disable          # PHP 8.4 (composer disable)

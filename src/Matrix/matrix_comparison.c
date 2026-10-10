@@ -2,7 +2,7 @@
  * matrix_comparison.c
  *
  * Comparison methods for OceanMoon\Math\Matrix: equal(), approxEqual(). Mirrors the "Comparison
- * methods" region of the PHP package's Matrix class -- both only accept another Matrix (same-type
+ * methods" region of the PHP package's Matrix class - both only accept another Matrix (same-type
  * comparison only, per the finalized comparison-trait policy: mixed $other, never self, throw for
  * anything else).
  */

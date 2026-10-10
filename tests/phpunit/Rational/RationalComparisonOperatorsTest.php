@@ -12,10 +12,10 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for Rational's comparison operator overloads (<, <=, >, >=, <=>, ==, !=), only available
- * in the extension -- see docs/Rational.md in this repo. `Rational` is the only one of the four
+ * in the extension - see docs/Rational.md in this repo. `Rational` is the only one of the four
  * classes to get comparison operators, since it has a genuine natural ordering (unlike Complex,
  * Vector, and Matrix). All six operators are backed by a single native `compare` object handler,
- * equivalent to compare() -- PHP has no way to wire up a subset of these independently, and
+ * equivalent to compare() - PHP has no way to wire up a subset of these independently, and
  * ==/!= come along as an unavoidable side effect of that (this project's own conventions still
  * prefer equal()/approxCompare() over ==/!= in new code, per docs/Rational.md).
  */
@@ -146,7 +146,7 @@ class RationalComparisonOperatorsTest extends TestCase
     #region Operator == tests.
 
     /**
-     * Test == uses exact value comparison, not identity -- two distinct instances representing
+     * Test == uses exact value comparison, not identity - two distinct instances representing
      * the same value are ==, matching equal().
      */
     public function testEqual(): void

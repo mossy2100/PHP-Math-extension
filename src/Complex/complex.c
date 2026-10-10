@@ -42,13 +42,29 @@
 
 /* The registered class entry for OceanMoon\Math\Complex. */
 zend_class_entry *complex_ce_Complex;
+uint32_t complex_offset_real;
+uint32_t complex_offset_imaginary;
+uint32_t complex_offset_magnitude;
+uint32_t complex_offset_phase;
+
+/* {{{ complex_write_double
+ *
+ * Stores a double in one of Complex's float property slots.
+ */
+static void complex_write_double(zend_object *obj, uint32_t offset, double value)
+{
+	zval zv;
+	ZVAL_DOUBLE(&zv, value);
+	math_types_write_property(obj, offset, &zv);
+}
+/* }}} */
 
 /* {{{ complex_init
  *
  * Validate real/imaginary and set them, along with the derived magnitude/phase, on an
  * already-allocated Complex object. Shared by __construct and complex_create() (used by the
  * from*() factory methods), mirroring how the PHP implementation's factory methods all funnel
- * through `new self(...)`, so the finite-value check -- and the magnitude/phase computation --
+ * through `new self(...)`, so the finite-value check - and the magnitude/phase computation -
  * live in exactly one place.
  *
  * magnitude/phase are computed here, eagerly, rather than lazily on first read: Complex is
@@ -65,14 +81,10 @@ zend_result complex_init(zend_object *obj, double real, double imag)
 		return FAILURE;
 	}
 
-	zend_update_property_double(complex_ce_Complex, obj, "real", sizeof("real") - 1, real);
-	zend_update_property_double(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, imag);
-	zend_update_property_double(
-		complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, complex_compute_magnitude(real, imag)
-	);
-	zend_update_property_double(
-		complex_ce_Complex, obj, "phase", sizeof("phase") - 1, complex_compute_phase(real, imag)
-	);
+	complex_write_double(obj, complex_offset_real, real);
+	complex_write_double(obj, complex_offset_imaginary, imag);
+	complex_write_double(obj, complex_offset_magnitude, complex_compute_magnitude(real, imag));
+	complex_write_double(obj, complex_offset_phase, complex_compute_phase(real, imag));
 
 	return SUCCESS;
 }
@@ -97,29 +109,23 @@ zend_result complex_create(zval *return_value, double real, double imag)
  */
 void complex_read_parts(zend_object *obj, double *out_real, double *out_imag)
 {
-	zval rv1, rv2;
-	*out_real = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "real", sizeof("real") - 1, 1, &rv1));
-	*out_imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+	*out_real = zval_get_double(math_types_read_property(obj, complex_offset_real));
+	*out_imag = zval_get_double(math_types_read_property(obj, complex_offset_imaginary));
 }
 /* }}} */
 
 /* {{{ complex_read_magnitude_phase
  *
  * Reads the magnitude/phase properties off a zend_object already known to be a Complex instance,
- * via zend_read_property() (not complex_read_parts()'s real/imaginary) -- these are eagerly
+ * directly from their slots (not complex_read_parts()'s real/imaginary) - these are eagerly
  * populated at construction (complex_init()), so this just reads the stored values rather than
  * recomputing hypot()/atan2() directly. Shared by ln() (complex_transcendental.c) and
  * roots()/sqrt() (complex_power.c).
  */
 void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase)
 {
-	zval rv1, rv2;
-	*out_magnitude = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, 1, &rv1));
-	*out_phase = zval_get_double(
-		zend_read_property(complex_ce_Complex, obj, "phase", sizeof("phase") - 1, 1, &rv2));
+	*out_magnitude = zval_get_double(math_types_read_property(obj, complex_offset_magnitude));
+	*out_phase = zval_get_double(math_types_read_property(obj, complex_offset_phase));
 }
 /* }}} */
 
@@ -152,8 +158,8 @@ static bool complex_is_imaginary_unit(char c)
  * Hand-rolled equivalent of the PHP package's `rxNum` regex fragment (unsigned):
  *   (?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?
  * i.e. digits with an optional trailing ".digits" part, OR a leading "." with required
- * digits -- either way, optionally followed by a well-formed exponent. Tries to match at
- * `pos` in `str` (length `len`, no sign -- the sign is handled by the caller, matching how the
+ * digits - either way, optionally followed by a well-formed exponent. Tries to match at
+ * `pos` in `str` (length `len`, no sign - the sign is handled by the caller, matching how the
  * PHP pattern captures it in a separate group). On success, sets *out_value to the parsed
  * magnitude and *out_consumed to how many characters matched, and returns true. Deliberately
  * consumes nothing beyond a valid match (e.g. "3e" matches just "3", leaving "e" for the caller
@@ -218,7 +224,7 @@ static bool complex_match_number(const char *str, size_t len, size_t pos, double
  *
  * Advances past a run of whitespace characters starting at `pos`, matching a bare `\s*` in the
  * PHP package's regex patterns (used only around the +/- separator between the real and
- * imaginary parts -- everywhere else, e.g. between a coefficient and its i suffix, the package's
+ * imaginary parts - everywhere else, e.g. between a coefficient and its i suffix, the package's
  * patterns have no \s*, so no whitespace is tolerated there either).
  */
 static size_t complex_skip_spaces(const char *str, size_t len, size_t pos)
@@ -234,7 +240,7 @@ static size_t complex_skip_spaces(const char *str, size_t len, size_t pos)
  *
  * Whole-string equivalent of PHP's is_numeric(): an optional leading sign followed by a
  * complex_match_number() match that consumes every remaining character. Rejects "nan"/"inf" the
- * same way complex_match_number() does -- neither contains only digits/dot/exponent characters.
+ * same way complex_match_number() does - neither contains only digits/dot/exponent characters.
  */
 static bool complex_is_pure_number(const char *str, size_t len, double *out_value)
 {
@@ -433,7 +439,7 @@ PHP_METHOD(OceanMoon_Math_Complex, fromString)
  * radians). The phase is wrapped into (-pi, pi] via math_floats_wrap(), mirroring the PHP
  * package's Floats::wrap($phase) call. complex_create() (via complex_init()) already populates
  * magnitude/phase from real/imaginary via hypot()/atan2(); this then overwrites both with the
- * exact input values -- a deliberate extension-only precision improvement over the PHP package
+ * exact input values - a deliberate extension-only precision improvement over the PHP package
  * (which just recomputes from cos($phase)/sin($phase) like any other constructor call), avoiding
  * any round-trip floating-point difference between the polar input and what recomputing from
  * cos($phase)/sin($phase) would give back.
@@ -464,8 +470,8 @@ zend_result complex_from_polar(zval *return_value, double mag, double phase)
 	}
 
 	zend_object *obj = Z_OBJ_P(return_value);
-	zend_update_property_double(complex_ce_Complex, obj, "magnitude", sizeof("magnitude") - 1, mag);
-	zend_update_property_double(complex_ce_Complex, obj, "phase", sizeof("phase") - 1, phase);
+	complex_write_double(obj, complex_offset_magnitude, mag);
+	complex_write_double(obj, complex_offset_phase, phase);
 
 	return SUCCESS;
 }
@@ -495,6 +501,10 @@ PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
 zend_result complex_minit(void)
 {
 	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable, zend_ce_arrayaccess);
+	complex_offset_real = math_types_property_offset(complex_ce_Complex, "real");
+	complex_offset_imaginary = math_types_property_offset(complex_ce_Complex, "imaginary");
+	complex_offset_magnitude = math_types_property_offset(complex_ce_Complex, "magnitude");
+	complex_offset_phase = math_types_property_offset(complex_ce_Complex, "phase");
 
 	return complex_properties_minit();
 }

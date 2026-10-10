@@ -54,7 +54,7 @@ static zend_result rational_mul_checked(zend_long a, zend_long b, zend_long *out
 
 /* {{{ rational_gcd2
  *
- * gcd() of two values already known to be genuine Rational numerator/denominator components --
+ * gcd() of two values already known to be genuine Rational numerator/denominator components -
  * by this class's own invariant, never both 0 or ZEND_LONG_MIN, so math_integers_gcd() can't
  * actually fail for these call sites (unlike rational_init(), which must handle raw, possibly
  * invalid caller-supplied longs). Falls back to 1 (no reduction) if that reasoning is ever wrong,
@@ -76,7 +76,7 @@ static zend_long rational_gcd2(zend_long a, zend_long b)
  * The computational core of mul(), factored out (declared in rational_internal.h) so div() below
  * and pow() (rational_power.c) can reuse the same gcd-based cross-cancellation instead of
  * duplicating it: (a/b) * (c/d) = ac/bd, cancelling gcd(a,d) and gcd(b,c) first to avert overflow.
- * div() calls this as rational_calc_mul(a, b, d, c, ...) -- (a/b) / (c/d) = (a/b) * (d/c) -- and
+ * div() calls this as rational_calc_mul(a, b, d, c, ...) - (a/b) / (c/d) = (a/b) * (d/c) - and
  * pow()'s exponent-2/exponent-PHP_INT_MIN shortcuts call it directly too.
  */
 zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value)
@@ -122,7 +122,7 @@ zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value)
 /* {{{ rational_operand_components
  *
  * Shared by add()/sub()/mul()/div(): resolves $other (declared `Rational|int` in the stub) into a
- * (c, d) pair, alongside this object's own (a, b) -- matching the PHP package's
+ * (c, d) pair, alongside this object's own (a, b) - matching the PHP package's
  * getOperandComponents(). Unlike a userland-typed parameter, an internal function's zval
  * parameter isn't automatically validated against its declared arginfo type before the function
  * body runs, so this does it manually, matching the pattern used throughout the Complex/ files.
@@ -330,7 +330,7 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
 		RETURN_THROWS();
 	}
 
-	/* (a/b) / (c/d) = (a/b) * (d/c) -- reuse rational_calc_mul() with c/d swapped. */
+	/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
 	if (rational_calc_mul(a, b, d, c, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}

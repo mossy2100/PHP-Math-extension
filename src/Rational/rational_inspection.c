@@ -2,7 +2,7 @@
  * rational_inspection.c
  *
  * Inspection methods for OceanMoon\Math\Rational: isInt(), sign(). Mirrors the "Inspection methods"
- * region of the PHP package's Rational class, where sign() delegates to Numbers::sign() -- the same
+ * region of the PHP package's Rational class, where sign() delegates to Numbers::sign() - the same
  * helper this extension ports to src/integers.c for the integer case.
  */
 
@@ -18,7 +18,7 @@
  *
  * Matches the PHP package's Rational::isInt(): a denominator of 1 means the value is a whole number.
  * Rationals are always stored in canonical, reduced form (see rational_init()), so that is the only
- * test needed -- 4/2 is stored as 2/1.
+ * test needed - 4/2 is stored as 2/1.
  */
 PHP_METHOD(OceanMoon_Math_Rational, isInt)
 {
@@ -35,8 +35,8 @@ PHP_METHOD(OceanMoon_Math_Rational, isInt)
  *
  * Matches the PHP package's Rational::sign(), which delegates to Numbers::sign($this->numerator,
  * $zeroForZero): 1 for positive, -1 for negative, and for zero either 0 ($zeroForZero, the default)
- * or 1. The numerator carries the value's sign -- rational_init() normalises so the denominator is
- * always positive -- so it is the whole input the sign depends on.
+ * or 1. The numerator carries the value's sign - rational_init() normalises so the denominator is
+ * always positive - so it is the whole input the sign depends on.
  */
 PHP_METHOD(OceanMoon_Math_Rational, sign)
 {

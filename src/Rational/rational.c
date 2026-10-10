@@ -27,6 +27,8 @@
 
 /* The registered class entry for OceanMoon\Math\Rational. */
 zend_class_entry *rational_ce_Rational;
+uint32_t rational_offset_numerator;
+uint32_t rational_offset_denominator;
 
 /* {{{ rational_init
  *
@@ -40,9 +42,9 @@ zend_class_entry *rational_ce_Rational;
  *
  *  - `den == ZEND_LONG_MIN && num == -den`: evaluating `-den` when den is ZEND_LONG_MIN is
  *    undefined behavior in C (negating the minimum representable value overflows). PHP's
- *    equivalent `$num === -$den` never actually matches in this case anyway -- PHP silently
+ *    equivalent `$num === -$den` never actually matches in this case anyway - PHP silently
  *    promotes `-PHP_INT_MIN` to a float, so the strict `===` against an int `$num` is always
- *    false by type mismatch alone -- so guarding this comparison with `den != ZEND_LONG_MIN &&`
+ *    false by type mismatch alone - so guarding this comparison with `den != ZEND_LONG_MIN &&`
  *    to skip it entirely reproduces the same "never matches" outcome without the UB.
  *  - The final `if ($den < 0) { $num = -$num; $den = -$den; }` negations are safe here because,
  *    by this point, neither value can still be ZEND_LONG_MIN: the only way either could have
@@ -51,7 +53,7 @@ zend_class_entry *rational_ce_Rational;
  *    ZEND_LONG_MIN operand to a normal-range value before this point is reached.
  *
  * Returns FAILURE (with an exception already thrown) if den is zero, or if the ratio can't be
- * represented (one of num/den is ZEND_LONG_MIN and the other is odd -- ZEND_LONG_MIN can't be
+ * represented (one of num/den is ZEND_LONG_MIN and the other is odd - ZEND_LONG_MIN can't be
  * safely negated, which the reduction/normalization steps below would otherwise require).
  */
 zend_result rational_init(zend_object *obj, zend_long num, zend_long den)
@@ -107,8 +109,11 @@ zend_result rational_init(zend_object *obj, zend_long num, zend_long den)
 		}
 	}
 
-	zend_update_property_long(rational_ce_Rational, obj, "numerator", sizeof("numerator") - 1, num);
-	zend_update_property_long(rational_ce_Rational, obj, "denominator", sizeof("denominator") - 1, den);
+	zval zv;
+	ZVAL_LONG(&zv, num);
+	math_types_write_property(obj, rational_offset_numerator, &zv);
+	ZVAL_LONG(&zv, den);
+	math_types_write_property(obj, rational_offset_denominator, &zv);
 
 	return SUCCESS;
 }
@@ -133,11 +138,8 @@ zend_result rational_create(zval *return_value, zend_long num, zend_long den)
  */
 void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_den)
 {
-	zval rv1, rv2;
-	*out_num = zval_get_long(
-		zend_read_property(rational_ce_Rational, obj, "numerator", sizeof("numerator") - 1, 1, &rv1));
-	*out_den = zval_get_long(
-		zend_read_property(rational_ce_Rational, obj, "denominator", sizeof("denominator") - 1, 1, &rv2));
+	*out_num = zval_get_long(math_types_read_property(obj, rational_offset_numerator));
+	*out_den = zval_get_long(math_types_read_property(obj, rational_offset_denominator));
 }
 /* }}} */
 
@@ -167,6 +169,8 @@ PHP_METHOD(OceanMoon_Math_Rational, __construct)
 zend_result rational_minit(void)
 {
 	rational_ce_Rational = register_class_OceanMoon_Math_Rational(zend_ce_stringable);
+	rational_offset_numerator = math_types_property_offset(rational_ce_Rational, "numerator");
+	rational_offset_denominator = math_types_property_offset(rational_ce_Rational, "denominator");
 
 	return rational_operators_minit();
 }

@@ -5,7 +5,7 @@
  * "Transcendental methods" region of the PHP package's Complex class.
  *
  * complex_calc_exp()/complex_calc_ln() are the computational cores, factored out so pow()
- * (complex_power.c) and log() (this file) can call them directly as pure functions -- reusing
+ * (complex_power.c) and log() (this file) can call them directly as pure functions - reusing
  * exp()/ln()'s shortcuts without going through a full PHP method dispatch (e.g. `$other->exp()`,
  * `$this->ln()`).
  */
@@ -27,7 +27,7 @@
  *
  * Matches the PHP package's Complex::exp(): e^z. Uses the same shortcuts (matching well-known
  * values exactly, including the two Eulerian identities), falling back to Euler's formula
- * (e^(a+bi) = e^a * (cos(b) + i*sin(b))) for the general case. Always succeeds -- e^z is finite
+ * (e^(a+bi) = e^a * (cos(b) + i*sin(b))) for the general case. Always succeeds - e^z is finite
  * for every finite z, so there's no exception path here (unlike complex_calc_ln()).
  */
 void complex_calc_exp(double real, double imag, double *out_real, double *out_imag)
@@ -81,7 +81,7 @@ void complex_calc_exp(double real, double imag, double *out_real, double *out_im
 /* {{{ complex_calc_ln
  *
  * Matches the PHP package's Complex::ln(): the natural logarithm. Uses the same shortcuts for
- * well-known values, falling back to ln(z) = ln|z| + i*arg(z) for the general case -- reading the
+ * well-known values, falling back to ln(z) = ln|z| + i*arg(z) for the general case - reading the
  * magnitude/phase properties off obj (rather than recomputing hypot()/atan2() directly) so the
  * result matches the PHP package's `log($this->magnitude)`/`$this->phase` exactly.
  *
@@ -171,7 +171,7 @@ PHP_METHOD(OceanMoon_Math_Complex, ln)
  * change-of-base formula log_b(z) = ln(z) / ln(b). Unlike add()/sub()/mul()/div()/pow(), $base
  * needs to exist as a genuine Complex object (not just a (real, imaginary) pair) when it reaches
  * the general-solution branch, since complex_calc_ln() reads the magnitude/phase properties off a
- * real object -- matching the PHP source, where a float $base is promoted via
+ * real object - matching the PHP source, where a float $base is promoted via
  * `new self($base)` before `$base->ln()` is ever called. A promoted float therefore gets a
  * throwaway Complex allocated here, destroyed before returning.
  */

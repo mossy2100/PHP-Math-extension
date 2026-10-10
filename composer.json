@@ -11,24 +11,14 @@
         "squizlabs/php_codesniffer": "^4.0",
         "phpstan/phpstan": "^2.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "oceanmoon/coding-standard": "dev-main as 2.99.0",
-        "oceanmoon/core": "dev-main"
+        "oceanmoon/coding-standard": "^2.2",
+        "oceanmoon/core": "^4.0"
     },
     "autoload-dev": {
         "psr-4": {
             "OceanMoon\\Math\\PHPStan\\": "phpstan/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../packages/Core"
-        },
-        {
-            "type": "path",
-            "url": "../../packages/CodingStandard"
-        }
-    ],
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true

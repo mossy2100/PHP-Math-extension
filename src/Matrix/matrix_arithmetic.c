@@ -19,7 +19,7 @@
 
 /* {{{ matrix_to_data_array
  *
- * Builds a list<list<float>> zval from a Matrix object, matching toArray()'s output -- used by
+ * Builds a list<list<float>> zval from a Matrix object, matching toArray()'s output - used by
  * inv()/det() as the input to matrix_calc_det().
  */
 static void matrix_to_data_array(zend_object *obj, zval *out)
@@ -461,7 +461,7 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
 
 /* {{{ matrix_calc_scalar_div
  *
- * The computational core of the `/` operator's `float / Matrix` form (matrix_operators.c) --
+ * The computational core of the `/` operator's `float / Matrix` form (matrix_operators.c) -
  * Matrix has no named method for this direction, only the operator (`Matrix / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
  * $matrix->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().

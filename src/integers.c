@@ -52,7 +52,7 @@ math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
 		return MATH_INTEGERS_NEGATIVE_EXPONENT;
 	}
 
-	/* Exponentiation by squaring, checking for overflow at every multiplication -- there's no
+	/* Exponentiation by squaring, checking for overflow at every multiplication - there's no
 	 * single overflow-checked "pow" builtin to call once, so the check has to happen at each step
 	 * the way the naive a**b computation would eventually overflow at the same magnitude. */
 	zend_long result = 1;
@@ -68,7 +68,7 @@ math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
 
 		exponent /= 2;
 
-		/* Skip the final, unused squaring of `base` once the loop is about to end -- squaring a
+		/* Skip the final, unused squaring of `base` once the loop is about to end - squaring a
 		 * large base one step too many can overflow even when the true result doesn't need it. */
 		if (exponent > 0) {
 			if (math_integers_mul(base, base, &base) != MATH_INTEGERS_OK) {
@@ -89,7 +89,7 @@ math_integers_result math_integers_gcd(const zend_long *nums, size_t count, zend
 
 	/* Run Euclid's algorithm on the raw (signed) values, without calling abs() on any
 	 * intermediate value. A remainder's magnitude is always smaller than the divisor's, so it
-	 * can never itself be ZEND_LONG_MIN -- abs() is only ever needed once, on the final result. */
+	 * can never itself be ZEND_LONG_MIN - abs() is only ever needed once, on the final result. */
 	zend_long result = nums[0];
 
 	for (size_t i = 1; i < count; i++) {
@@ -99,7 +99,7 @@ math_integers_result math_integers_gcd(const zend_long *nums, size_t count, zend
 			zend_long temp = b;
 			/* result % -1 is always 0, but evaluating that expression directly is undefined
 			 * behavior in C when result == ZEND_LONG_MIN (INT_MIN % -1 overflows, unlike PHP's %
-			 * operator, which handles it safely) -- special-case it instead. */
+			 * operator, which handles it safely) - special-case it instead. */
 			b = (b == -1) ? 0 : result % b;
 			result = temp;
 		}

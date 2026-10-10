@@ -2,7 +2,7 @@
  * vector_comparison.c
  *
  * Comparison methods for OceanMoon\Math\Vector: equal(), approxEqual(). Mirrors the "Comparison
- * methods" region of the PHP package's Vector class -- both only accept another Vector (same-type
+ * methods" region of the PHP package's Vector class - both only accept another Vector (same-type
  * comparison only, per the finalized comparison-trait policy: mixed $other, never self, throw for
  * anything else).
  */

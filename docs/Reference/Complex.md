@@ -1,29 +1,30 @@
 # Complex Operators
 
-Operator overloading for `OceanMoon\Math\Complex`, available only when this extension is loaded — plain PHP classes
+Operator overloading for `OceanMoon\Math\Complex`, available only when this extension is loaded - plain PHP classes
 can't overload operators, so none of this exists in the userland package. For everything else about `Complex`
 (properties, factory methods, conversion, comparison, all the trigonometric/transcendental methods, etc.), see the
-package's own [Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md) — this page
-covers only the operators the extension adds on top of it.
+package's own [Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md) - this page covers only the operators the extension adds on top of it.
+
+On this page, `$z`, `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
 
 ## Unary Arithmetic Operators
 
 ### + (clone)
 
 ```php
-$copy = +$z;
+$copy = +$z;  // +Complex → Complex
 ```
 
-Equivalent to `clone $z`. Returns an equal `Complex` with the same real and imaginary parts.
+Returns an equal `Complex` with the same real and imaginary parts.
 
-**Example:**
+**Examples:**
 
 ```php
-$z1 = new Complex(3, 4);
-$z2 = +$z1;  // 3 + 4i
+$z = new Complex(3, 4);
+$copy = +$z;  // 3 + 4i
 ```
 
-Equivalence table for the unary `+` operator, where `$z` is a `Complex`.
+**Equivalence table:**
 
 | Operation | Equivalent to |
 | --------- | ------------- |
@@ -31,22 +32,20 @@ Equivalence table for the unary `+` operator, where `$z` is a `Complex`.
 
 ---
 
-### — (negate)
+### - (negate)
 
 ```php
-$negated = -$z;
+$negated = -$z;  // -Complex → Complex
 ```
 
-Equivalent to `$z->neg()`.
-
-**Example:**
+**Examples:**
 
 ```php
 $z = new Complex(3, 4);
 $negated = -$z;  // -3 - 4i
 ```
 
-Equivalence table for the unary `-` operator, where `$z` is a `Complex`.
+**Equivalence table:**
 
 | Operation | Equivalent to |
 | --------- | ------------- |
@@ -57,23 +56,21 @@ Equivalence table for the unary `-` operator, where `$z` is a `Complex`.
 ### ~ (conjugate)
 
 ```php
-$conjugate = ~$z;
+$conjugate = ~$z;  // ~Complex → Complex
 ```
-
-Equivalent to `$z->conj()`.
 
 There's no natural PHP operator for "complex conjugate", so `~` (which usually means bitwise `NOT`) is repurposed for
 it. This notation originated with GCC (GNU Compiler Collection), which extends standard C the same way, giving `~`
 complex-conjugate behaviour when applied to its built-in `_Complex` types.
 
-**Example:**
+**Examples:**
 
 ```php
 $z = new Complex(3, 4);
-$result = ~$z;  // 3 - 4i
+$conjugate = ~$z;  // 3 - 4i
 ```
 
-Equivalence table for the `~` operator, where `$z` is a `Complex`.
+**Equivalence table:**
 
 | Operation | Equivalent to |
 | --------- | ------------- |
@@ -84,11 +81,11 @@ Equivalence table for the `~` operator, where `$z` is a `Complex`.
 ## Binary Arithmetic Operators
 
 Each operator accepts a `Complex` or `int|float` operand on either side. Each is equivalent to calling the same-named
-method directly, and throws the same exceptions, under the same conditions, as that method — see the linked method docs
+method directly, and throws the same exceptions, under the same conditions, as that method - see the linked method docs
 for specifics.
 
 This is a genuine flexibility gain over the fluent method API, not just shorter syntax. `$z->add($x)` is naturally
-`Complex + int|float` — the method is called _on_ a `Complex`, so that side is fixed. There's no equally natural way to
+`Complex + int|float` - the method is called _on_ a `Complex`, so that side is fixed. There's no equally natural way to
 write `int|float + Complex` with the fluent API alone; you'd need to promote the scalar first, e.g.
 `(new Complex($x))->add($z)`. The `+` operator accepts either order directly, so `$x + $z` and `$z + $x` both just work.
 
@@ -97,197 +94,173 @@ different values and the operator lets you express whichever order the math actu
 promotion detour.
 
 Operators also come with precedence and associativity rules that PHP itself resolves, whereas a fluent chain of method
-calls has no notion of precedence at all — it only ever evaluates in the order you nest the calls, so you have to work
+calls has no notion of precedence at all - it only ever evaluates in the order you nest the calls, so you have to work
 out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
 ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
 requires you to have already done that grouping in your head before writing a single method call. This applies equally
-to every class this extension adds operators to, so see [Operator Precedence](../../README.md#operator-precedence) in the
-main README for the shared precedence table and PHP manual link.
+to every class this extension adds operators to, so see [Operator Precedence](../../README.md#operator-precedence) in the main README for the shared precedence
+table and PHP manual link.
 
 ---
 
 ### + (add)
 
 ```php
-$sum = $z1 + $z2;
+$sum = $z1 + $z2;  // Complex + Complex → Complex
+$sum = $z + $x;    // Complex + int|float → Complex
+$sum = $x + $z;    // int|float + Complex → Complex
 ```
 
-Equivalent to [`$z1->add($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#add).
+Addition is commutative, so reversing the operands gives the same result.
 
-Forms:
-
-1. `Complex + Complex`.
-2. `Complex + int|float`.
-3. `int|float + Complex`. Addition is commutative, so this gives the same result as #2.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 4);
 $z2 = new Complex(1, 2);
-$z1 + $z2;    // 4 + 6i    (Complex + Complex)
-$z1 + 2;     // 5 + 4i    (Complex + int)
-2 + $z1;     // 5 + 4i    (int + Complex - same result, addition is commutative)
-$z1 + 2.5;   // 5.5 + 4i  (Complex + float)
-2.5 + $z1;   // 5.5 + 4i  (float + Complex - same result, addition is commutative)
+$z1 + $z2;   // 4 + 6i
+$z1 + 2;     // 5 + 4i
+2 + $z1;     // 5 + 4i
+$z1 + 2.5;   // 5.5 + 4i
+2.5 + $z1;   // 5.5 + 4i
 ```
 
-Equivalence table for the `+` operator, where `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
+**Equivalence table:**
 
-| Operation   | Equivalent to               | Also equivalent |
-| ----------- | --------------------------- | --------------- |
-| `$z1 + $z2` | `$z1->add($z2)`             |                 |
-| `$z1 + $x`  | `$z1->add($x)`              |                 |
-| `$x + $z1`  | `new Complex($x)->add($z1)` | `$z1->add($x)`  |
+| Operation   | Equivalent to                               |
+| ----------- | ------------------------------------------- |
+| `$z1 + $z2` | `$z1->add($z2)`                             |
+| `$z + $x`   | `$z->add($x)`                               |
+| `$x + $z`   | `new Complex($x)->add($z)` or `$z->add($x)` |
 
 ---
 
-### — (subtract)
+### - (subtract)
 
 ```php
-$diff = $z1 - $z2;
+$diff = $z1 - $z2;  // Complex - Complex → Complex
+$diff = $z - $x;    // Complex - int|float → Complex
+$diff = $x - $z;    // int|float - Complex → Complex
 ```
 
-Equivalent to [`$z1->sub($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#sub).
+Subtraction isn't commutative, so `int|float - Complex` is a distinct case from `Complex - int|float`.
 
-Forms:
-
-1. `Complex - Complex`.
-2. `Complex - int|float`.
-3. `int|float - Complex`. Subtraction isn't commutative, so this is a distinct case from #2 — the scalar is promoted to
-   a `Complex` with a zero imaginary part, then subtracted normally.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(5, 7);
 $z2 = new Complex(2, 3);
-$z1 - $z2;    // 3 + 4i     (Complex - Complex)
-$z1 - 2;     // 3 + 7i     (Complex - int)
-2 - $z1;     // -3 - 7i    (int - Complex)
-$z1 - 2.5;   // 2.5 + 7i   (Complex - float)
-2.5 - $z1;   // -2.5 - 7i  (float - Complex)
+$z1 - $z2;   // 3 + 4i
+$z1 - 2;     // 3 + 7i
+2 - $z1;     // -3 - 7i
+$z1 - 2.5;   // 2.5 + 7i
+2.5 - $z1;   // -2.5 - 7i
 ```
 
-Equivalence table for the `-` operator, where `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
+**Equivalence table:**
 
-| Operation   | Equivalent to               | Also equivalent |
-| ----------- | --------------------------- | --------------- |
-| `$z1 - $z2` | `$z1->sub($z2)`             |                 |
-| `$z1 - $x`  | `$z1->sub($x)`              |                 |
-| `$x - $z1`  | `new Complex($x)->sub($z1)` | `-$z1->sub($x)` |
+| Operation   | Equivalent to                                |
+| ----------- | -------------------------------------------- |
+| `$z1 - $z2` | `$z1->sub($z2)`                              |
+| `$z - $x`   | `$z->sub($x)`                                |
+| `$x - $z`   | `new Complex($x)->sub($z)` or `-$z->sub($x)` |
 
 ---
 
 ### \* (multiply)
 
 ```php
-$product = $z1 * $z2;
+$product = $z1 * $z2;  // Complex * Complex → Complex
+$product = $z * $x;    // Complex * int|float → Complex
+$product = $x * $z;    // int|float * Complex → Complex
 ```
 
-Equivalent to [`$z1->mul($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#mul).
+Multiplication is commutative, so reversing the operands gives the same result.
 
-Forms:
-
-1. `Complex * Complex`.
-2. `Complex * int|float`.
-3. `int|float * Complex`. Multiplication is commutative, so this gives the same result as #2.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(1, 2);
 $z2 = new Complex(3, 4);
-$z1 * $z2;    // -5 + 10i   (Complex * Complex)
-$z1 * 2;     // 2 + 4i     (Complex * int)
-2 * $z1;     // 2 + 4i     (int * Complex - same result, multiplication is commutative)
-$z1 * 2.5;   // 2.5 + 5i   (Complex * float)
-2.5 * $z1;   // 2.5 + 5i   (float * Complex - same result, multiplication is commutative)
+$z1 * $z2;   // -5 + 10i
+$z1 * 2;     // 2 + 4i
+2 * $z1;     // 2 + 4i
+$z1 * 2.5;   // 2.5 + 5i
+2.5 * $z1;   // 2.5 + 5i
 ```
 
-Equivalence table for the `*` operator, where `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
+**Equivalence table:**
 
-| Operation   | Equivalent to               | Also equivalent |
-| ----------- | --------------------------- | --------------- |
-| `$z1 * $z2` | `$z1->mul($z2)`             |                 |
-| `$z1 * $x`  | `$z1->mul($x)`              |                 |
-| `$x * $z1`  | `new Complex($x)->mul($z1)` | `$z1->mul($x)`  |
+| Operation   | Equivalent to                               |
+| ----------- | ------------------------------------------- |
+| `$z1 * $z2` | `$z1->mul($z2)`                             |
+| `$z * $x`   | `$z->mul($x)`                               |
+| `$x * $z`   | `new Complex($x)->mul($z)` or `$z->mul($x)` |
 
 ---
 
 ### / (divide)
 
 ```php
-$quotient = $z1 / $z2;
+$quotient = $z1 / $z2;  // Complex / Complex → Complex
+$quotient = $z / $x;    // Complex / int|float → Complex
+$quotient = $x / $z;    // int|float / Complex → Complex
 ```
 
-Equivalent to [`$z1->div($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#div).
+Division isn't commutative, so `int|float / Complex` is a distinct case from `Complex / int|float`. It also gives a way
+to compute a multiplicative inverse - see "Inverting with `1 / z` or `z ** -1`" below.
 
-Forms:
-
-1. `Complex / Complex`.
-2. `Complex / int|float`.
-3. `int|float / Complex`. Division isn't commutative, so this is a distinct case from #2 — the scalar is promoted to a
-   `Complex` with a zero imaginary part, then divided normally. This also gives a way to compute a multiplicative
-   inverse — see "Inverting with `1 / z` or `z ** -1`" below.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(6, 8);
 $z2 = new Complex(3, 4);
-$z1 / $z2;    // 2               (Complex / Complex; real only - the imaginary parts cancel here)
-$z1 / 2;     // 3 + 4i          (Complex / int)
-1 / $z2;     // 0.12 - 0.16i    (int / Complex - the inverse of $z2)
-$z1 / 2.5;   // 2.4 + 3.2i      (Complex / float)
-2.5 / $z1;   // 0.15 - 0.2i     (float / Complex)
+$z1 / $z2;   // 2             (the imaginary parts cancel)
+$z1 / 2;     // 3 + 4i
+1 / $z2;     // 0.12 - 0.16i  (the inverse of $z2)
+$z1 / 2.5;   // 2.4 + 3.2i
+2.5 / $z1;   // 0.15 - 0.2i
 ```
 
-Equivalence table for the `/` operator, where `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
+**Equivalence table:**
 
-| Operation   | Equivalent to               |
-| ----------- | --------------------------- |
-| `$z1 / $z2` | `$z1->div($z2)`             |
-| `$z1 / $x`  | `$z1->div($x)`              |
-| `$x / $z1`  | `new Complex($x)->div($z1)` |
+| Operation   | Equivalent to              |
+| ----------- | -------------------------- |
+| `$z1 / $z2` | `$z1->div($z2)`            |
+| `$z / $x`   | `$z->div($x)`              |
+| `$x / $z`   | `new Complex($x)->div($z)` |
 
 ---
 
 ### \*\* (power)
 
 ```php
-$result = $z1 ** $z2;
+$result = $z1 ** $z2;  // Complex ** Complex → Complex
+$result = $z ** $x;    // Complex ** int|float → Complex
+$result = $x ** $z;    // int|float ** Complex → Complex
 ```
 
-Equivalent to [`$z1->pow($z2)`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#pow).
+Exponentiation isn't commutative, so `int|float ** Complex` is a distinct case from `Complex ** int|float`.
 
-Forms:
-
-1. `Complex ** Complex`.
-2. `Complex ** int|float`.
-3. `int|float ** Complex`. Not commutative with #2 in general — the scalar is promoted to a `Complex` with a zero
-   imaginary part, then raised to the (possibly complex) power on the right, using the same `pow()` method (which
-   already accepts a `Complex` exponent for exactly this reason).
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 4);
 $z2 = new Complex(1, 1);
-$z1 ** $z2;   // -1.63 + 1.12i   (Complex ** Complex)
-$z1 ** 2;    // -7 + 24i        (Complex ** int)
-2 ** $z1;    // -7.46 + 2.89i   (int ** Complex)
-$z1 ** 0.5;  // 2 + i           (Complex ** float; principal square root)
-2.5 ** $z1;  // -13.53 - 7.81i  (float ** Complex)
+$z1 ** $z2;   // -1.63 + 1.12i
+$z1 ** 2;     // -7 + 24i
+2 ** $z1;     // -7.46 + 2.89i
+$z1 ** 0.5;   // 2 + i           (the principal square root)
+2.5 ** $z1;   // -13.53 - 7.81i
 ```
 
-Equivalence table for the `**` operator, where `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
+**Equivalence table:**
 
-| Operation    | Equivalent to               |
-| ------------ | --------------------------- |
-| `$z1 ** $z2` | `$z1->pow($z2)`             |
-| `$z1 ** $x`  | `$z1->pow($x)`              |
-| `$x ** $z1`  | `new Complex($x)->pow($z1)` |
+| Operation    | Equivalent to              |
+| ------------ | -------------------------- |
+| `$z1 ** $z2` | `$z1->pow($z2)`            |
+| `$z ** $x`   | `$z->pow($x)`              |
+| `$x ** $z`   | `new Complex($x)->pow($z)` |
 
 ---
 
@@ -297,9 +270,8 @@ The fluent API provided by the package includes an `inv()` method, which inverts
 couple of alternative ways to achieve the same thing.
 
 Since `int|float / Complex` is supported (see `/` above), `1 / $z` computes the same multiplicative inverse as
-[`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via
-`pow()` too, since raising to the power -1 is the mathematical definition of a multiplicative inverse. All three throw
-`ArithmeticException` if `$z` is zero, matching `inv()`.
+[`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via `pow()` too, since raising to the power -1 is the mathematical
+definition of a multiplicative inverse. All three throw `ArithmeticException` if `$z` is zero, matching `inv()`.
 
 **Example:**
 
@@ -314,58 +286,54 @@ $z ** -1;   // 0.12 - 0.16i, same result
 
 ## Comparison Operators
 
-- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together — PHP does not provide a
-  mechanism to override these individually.
-- Unlike every other operator on this page, this isn't backed by an equivalent named method in the userland package -
-  `Complex` has no `compare()`/`lessThan()`/etc., since comparing complex numbers isn't mathematically meaningful
-  (there's no total order compatible with the field operations `+`/`-`/`*`/`/`). These operators exist anyway because a
-  deterministic total order is still useful for practical purposes — sorting, deduplication, and the like — as long as
-  you don't read anything mathematical into the result.
-- The ordering is plain lexicographic: real part first, then imaginary part if the real parts are equal. This is
-  exactly what PHP's own default object comparison already gives two `Complex` instances for free, since `$real` is
-  declared before `$imaginary` in the class — the only thing the operators add on top of that default behaviour is
-  accepting an `int|float` operand on either side, promoted the same way [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) promotes one (to a `Complex` with
-  a zero imaginary part).
+The ordering operators (`<`, `<=`, `>`, `>=`, and `<=>`) aren't backed by a named method in the package, unlike the
+other operators on this page. `Complex` has no `compare()` or `lessThan()`, because ordering complex numbers isn't
+mathematically meaningful unless both are real.
 
-### Forms
+They exist anyway because of how PHP extensions work. Letting `==` and `!=` compare a `Complex` with an `int` or `float`
+requires a `compare` handler, and PHP derives all seven comparison operators from that one handler's result. There's no
+way to provide `==` and `!=` without the others.
 
-The same forms apply to all comparison operators:
+The ordering is lexicographic: real parts are compared first, then imaginary parts if the real parts are equal. This is
+what PHP's default object comparison already gives two `Complex` instances, since `$real` is declared before
+`$imaginary`. The handler adds one thing: an `int` or `float` operand is accepted on either side, promoted to a
+`Complex` with a zero imaginary part, as [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) does.
 
-1. `Complex # Complex`
-2. `Complex # int|float`
-3. `int|float # Complex`
+A `NAN` operand throws `DomainException`, matching `equal()` - there's no meaningful comparison with "not a number".
+`INF` and `-INF` are supported despite being outside `Complex`'s always-finite range: a `Complex` is always less than
+`INF` and greater than `-INF`.
 
-A `NAN` operand throws `DomainException`, matching `equal()` — there's no meaningful ordering against "not a number".
-`INF`/`-INF` are supported despite being outside `Complex`'s always-finite range: a `Complex` is always less than
-`+INF` and always greater than `-INF`.
+See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes.
 
 ---
 
 ### <=> (spaceship)
 
-Returns `-1` for "less than", `0` for "equal", and `1` for "greater than": real parts are compared first, and
-imaginary parts only if the real parts are equal.
-
 ```php
-$result = $z1 <=> $z2;  // -1, 0, or 1
+$result = $z1 <=> $z2;  // Complex <=> Complex → int
+$result = $z <=> $x;    // Complex <=> int|float → int
+$result = $x <=> $z;    // int|float <=> Complex → int
 ```
 
-**Example:**
+Returns `-1` for "less than", `0` for "equal", and `1` for "greater than": real parts are compared first, and imaginary
+parts only if the real parts are equal.
+
+**Examples:**
 
 ```php
 $z1 = new Complex(1, 5);
 $z2 = new Complex(2, 1);
-$z1 <=> $z2;      // -1  (1 < 2; real parts alone decide it)
+$z1 <=> $z2;   // -1  (1 < 2, so the real parts alone decide it)
 
 $z1 = new Complex(3, 1);
 $z2 = new Complex(3, 5);
-$z1 <=> $z2;      // -1  (real parts equal, so 1 < 5 decides it)
+$z1 <=> $z2;   // -1  (the real parts are equal, so 1 < 5 decides it)
 
-$z1 = new Complex(5, 0);
-$z1 <=> 5;       // 0    (Complex <=> int)
-$z1 <=> 6.0;     // -1   (Complex <=> float)
-$z1 <=> INF;     // -1   (a Complex is always finite, so always less than +INF)
-$z1 <=> NAN;     // throws DomainException
+$z = new Complex(5, 0);
+$z <=> 5;      // 0
+$z <=> 6.0;    // -1
+$z <=> INF;    // -1  (a Complex is always finite, so always less than +INF)
+$z <=> NAN;    // throws DomainException
 ```
 
 ---
@@ -373,19 +341,19 @@ $z1 <=> NAN;     // throws DomainException
 ### < (less than)
 
 ```php
-$result = $z1 < $z2;
+$result = $z1 < $z2;  // Complex < Complex → bool
+$result = $z < $x;    // Complex < int|float → bool
+$result = $x < $z;    // int|float < Complex → bool
 ```
 
-Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(1, 0);
 $z2 = new Complex(2, 0);
 $z1 < $z2;   // true
-$z1 < 1.5;  // true
-1.5 < $z1;  // false
+$z1 < 1.5;   // true
+1.5 < $z1;   // false
 ```
 
 ---
@@ -393,19 +361,19 @@ $z1 < 1.5;  // true
 ### <= (less than or equal)
 
 ```php
-$result = $z1 <= $z2;
+$result = $z1 <= $z2;  // Complex <= Complex → bool
+$result = $z <= $x;    // Complex <= int|float → bool
+$result = $x <= $z;    // int|float <= Complex → bool
 ```
 
-Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(1, 0);
 $z2 = new Complex(2, 0);
-$z1 <= $z2;               // true
+$z1 <= $z2;                // true
 $z1 <= new Complex(1, 0);  // true
-$z2 <= $z1;               // false
+$z2 <= $z1;                // false
 ```
 
 ---
@@ -413,18 +381,18 @@ $z2 <= $z1;               // false
 ### > (greater than)
 
 ```php
-$result = $z1 > $z2;
+$result = $z1 > $z2;  // Complex > Complex → bool
+$result = $z > $x;    // Complex > int|float → bool
+$result = $x > $z;    // int|float > Complex → bool
 ```
 
-Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 0);
 $z2 = new Complex(2, 0);
 $z1 > $z2;   // true
-2.5 > $z2;  // true
+2.5 > $z2;   // true
 ```
 
 ---
@@ -432,67 +400,82 @@ $z1 > $z2;   // true
 ### >= (greater than or equal)
 
 ```php
-$result = $z1 >= $z2;
+$result = $z1 >= $z2;  // Complex >= Complex → bool
+$result = $z >= $x;    // Complex >= int|float → bool
+$result = $x >= $z;    // int|float >= Complex → bool
 ```
 
-Ordering comparison, derived from the `<=>` handler. Returns a `bool`.
-
-**Example:**
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 0);
 $z2 = new Complex(2, 0);
-$z1 >= $z2;               // true
+$z1 >= $z2;                // true
 $z1 >= new Complex(3, 0);  // true
-$z2 >= $z1;               // false
+$z2 >= $z1;                // false
 ```
 
 ---
 
 ### == (equal)
 
-Numeric equality, derived from the `<=>` handler. Returns a `bool`. Two distinct instances representing the same value
-are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) — this is value
-equality, not identity.
-
 ```php
-$result = $z1 == $z2;
+$result = $z1 == $z2;  // Complex == Complex → bool
+$result = $z == $x;    // Complex == int|float → bool
+$result = $x == $z;    // int|float == Complex → bool
 ```
 
-**Example:**
+Two distinct instances representing the same value are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) - this is value equality, not identity.
+
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 4);
 $z2 = new Complex(3, 4);
-$z1 == $z2;  // true (same value, different instances)
-$z1 == 5;   // false
+$z1 == $z2;   // true  (same value, different instances)
+$z1 == 5;     // false
 ```
+
+**Equivalence table:**
+
+| Operation    | Equivalent to     |
+| ------------ | ----------------- |
+| `$z1 == $z2` | `$z1->equal($z2)` |
+| `$z == $x`   | `$z->equal($x)`   |
+| `$x == $z`   | `$z->equal($x)`   |
 
 ---
 
 ### != (not equal)
 
-The negation of `==`. Returns a `bool`.
-
 ```php
-$result = $z1 != $z2;
+$result = $z1 != $z2;  // Complex != Complex → bool
+$result = $z != $x;    // Complex != int|float → bool
+$result = $x != $z;    // int|float != Complex → bool
 ```
 
-**Example:**
+The negation of `==`.
+
+**Examples:**
 
 ```php
 $z1 = new Complex(3, 4);
 $z2 = new Complex(3, 5);
-$z1 != $z2;  // true
+$z1 != $z2;   // true
 ```
+
+**Equivalence table:**
+
+| Operation    | Equivalent to      |
+| ------------ | ------------------ |
+| `$z1 != $z2` | `!$z1->equal($z2)` |
+| `$z != $x`   | `!$z->equal($x)`   |
+| `$x != $z`   | `!$z->equal($x)`   |
 
 ---
 
 ## See Also
 
-- **[Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)** — the full class documentation in the
-  Math package
-- **[Rational Operators](Rational.md)** — the other class with comparison operators, backed by its own `compare()`
-  method (unlike `Complex`, which has no such method — see "Comparison Operators" above)
-- **[Comparison Operators](Comparison_Operators.md)** — how comparison works across all four classes, including why
-  `Complex`'s ordering operators come along with `==`/`!=` as an unavoidable side effect
+- **[Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)** - the full class documentation in the Math package.
+- **[Rational Operators](Rational.md)** - the other class with comparison operators, backed by its own `compare()` method (unlike
+  `Complex`, which has no such method - see "Comparison Operators" above).

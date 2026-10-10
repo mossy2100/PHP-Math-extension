@@ -52,7 +52,7 @@ static zend_result rational_pow_checked(zend_long a, zend_long b, zend_long *out
  * dispatch each time.
  *
  * Matches the PHP package's Rational::pow() exactly, including its shortcuts (exponent 0, base 0,
- * exponent 1/2/-1, exponent ZEND_LONG_MIN) -- the exponent-2 and exponent-ZEND_LONG_MIN branches
+ * exponent 1/2/-1, exponent ZEND_LONG_MIN) - the exponent-2 and exponent-ZEND_LONG_MIN branches
  * reuse rational_calc_mul()/rational_calc_inv() (rational_arithmetic.c) directly, same as the PHP
  * source's sqr()/mul()/inv() delegations.
  */
@@ -72,18 +72,18 @@ zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, 
 		return rational_create(return_value, 0, 1);
 	}
 
-	/* Exponent 1: any number to power 1 is itself -- a new, distinct instance (matching the PHP
+	/* Exponent 1: any number to power 1 is itself - a new, distinct instance (matching the PHP
 	 * source's `clone $this`), not literally the same object. */
 	if (exponent == 1) {
 		return rational_create(return_value, num, den);
 	}
 
-	/* Exponent 2: delegate to sqr() (mul(this, this) -- reuses rational_calc_mul() directly). */
+	/* Exponent 2: delegate to sqr() (mul(this, this) - reuses rational_calc_mul() directly). */
 	if (exponent == 2) {
 		return rational_calc_mul(num, den, num, den, return_value);
 	}
 
-	/* Exponent -1: delegate to inv(). Safe -- base != 0 already established above. */
+	/* Exponent -1: delegate to inv(). Safe - base != 0 already established above. */
 	if (exponent == -1) {
 		return rational_calc_inv(num, den, return_value);
 	}
@@ -156,7 +156,7 @@ PHP_METHOD(OceanMoon_Math_Rational, pow)
 /* {{{ OceanMoon\Math\Rational::sqr(): Rational
  *
  * Matches the PHP package's Rational::sqr(): this * this. Equivalent to pow(2), but more
- * efficient/readable -- reuses rational_calc_mul() directly, same as rational_calc_pow()'s own
+ * efficient/readable - reuses rational_calc_mul() directly, same as rational_calc_pow()'s own
  * exponent-2 shortcut above.
  */
 PHP_METHOD(OceanMoon_Math_Rational, sqr)

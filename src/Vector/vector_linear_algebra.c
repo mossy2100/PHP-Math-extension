@@ -1,7 +1,7 @@
 /*
  * vector_linear_algebra.c
  *
- * Linear algebra methods for OceanMoon\Math\Vector: dot(), cross(), outer(), normalized(). Mirrors
+ * Linear algebra methods for OceanMoon\Math\Vector: dot(), cross(), outer(), normalize(). Mirrors
  * the "Linear algebra methods" region of the PHP package's Vector class.
  */
 
@@ -22,7 +22,7 @@
  *
  * Matches the PHP package's Vector::$magnitude hook: sqrt(sum of squares). Backs the `magnitude`
  * computed property (vector_properties.c), and is also called directly (bypassing property read
- * dispatch) by normalized() below and normalize() (vector_modification.c).
+ * dispatch) by normalize() below.
  */
 double vector_compute_magnitude(zend_object *obj)
 {
@@ -169,12 +169,12 @@ PHP_METHOD(OceanMoon_Math_Vector, outer)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::normalized(): Vector
+/* {{{ OceanMoon\Math\Vector::normalize(): Vector
  *
- * Matches the PHP package's Vector::normalized(): div($this->magnitude), via the same
+ * Matches the PHP package's Vector::normalize(): div($this->magnitude), via the same
  * vector_calc_div() core div() itself uses (vector_arithmetic.c).
  */
-PHP_METHOD(OceanMoon_Math_Vector, normalized)
+PHP_METHOD(OceanMoon_Math_Vector, normalize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

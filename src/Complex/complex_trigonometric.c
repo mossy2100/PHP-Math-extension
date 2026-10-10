@@ -10,9 +10,9 @@
  * promoting each intermediate value to a real Complex object and going through full method
  * dispatch for every step (as complex_operators.c's `**` case must, since complex_calc_pow() needs
  * a real object to read cached magnitude/phase off), this file works the chain in plain doubles via
- * the c_*() helpers below -- there's no cache to benefit from for a value that's freshly computed
+ * the c_*() helpers below - there's no cache to benefit from for a value that's freshly computed
  * and only used once. This also means these helpers skip the well-known-value shortcuts
- * complex_calc_ln()/pow()'s sqrt step take (real() sqrt via complex_from_polar()) -- fine here,
+ * complex_calc_ln()/pow()'s sqrt step take (real() sqrt via complex_from_polar()) - fine here,
  * since an intermediate value from one of these formulas landing exactly on a shortcut input (e.g.
  * exactly 1+0i) is not a correctness concern, just a missed micro-optimization, and every caller of
  * these methods in the test suite compares results with EPSILON tolerance, not bit-for-bit.
@@ -32,7 +32,7 @@
 
 /* {{{ c_sqrt
  *
- * Principal square root of a plain (real, imaginary) pair, via magnitude/phase -- the same
+ * Principal square root of a plain (real, imaginary) pair, via magnitude/phase - the same
  * approach as OceanMoon_Math_Complex::sqrt() (complex_power.c), but operating on raw doubles
  * rather than reading a real object's (possibly cached) magnitude/phase properties.
  */

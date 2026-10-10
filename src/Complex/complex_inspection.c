@@ -20,13 +20,11 @@
  */
 PHP_METHOD(OceanMoon_Math_Complex, isReal)
 {
-	zval rv;
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv));
+	double imag = zval_get_double(math_types_read_property(self, complex_offset_imaginary));
 
 	RETURN_BOOL(imag == 0.0);
 }

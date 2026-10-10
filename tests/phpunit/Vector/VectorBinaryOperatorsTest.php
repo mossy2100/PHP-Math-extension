@@ -13,9 +13,9 @@ use PHPUnit\Framework\TestCase;
 use TypeError;
 
 /**
- * Tests for Vector's binary operator overloads (+, -, *, /), only available in the extension --
+ * Tests for Vector's binary operator overloads (+, -, *, /), only available in the extension -
  * see docs/Vector.md in this repo. Each is equivalent to calling the same-named method directly,
- * and throws the same exceptions under the same conditions -- except that + and - only accept
+ * and throws the same exceptions under the same conditions - except that + and - only accept
  * another Vector (no scalar form exists), * accepts a scalar (either side, commutative) or a
  * Matrix (Vector on the left only), and / accepts a scalar divisor (Vector on the left) or a
  * scalar dividend (Vector on the right, element-wise, with no equivalent named method).
@@ -138,15 +138,15 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrix(): void
     {
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, 0],
             [0, 1],
         ]);
         $v = Vector::fromArray([1, 2]);
-        $result = $v * $matA;
+        $result = $v * $m;
 
         $this->assertSame([1.0, 2.0], $result->toArray());
-        $this->assertEquals($v->mul($matA), $result);
+        $this->assertEquals($v->mul($m), $result);
     }
 
     /**
@@ -154,7 +154,7 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrixIncompatibleDimensionsThrows(): void
     {
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, 0, 0],
             [0, 1, 0],
             [0, 0, 1],
@@ -162,7 +162,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1, 2]);
 
         $this->expectException(LengthException::class);
-        $result = $v * $matA;
+        $result = $v * $m;
     }
 
     /**
@@ -206,7 +206,7 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test int|float / Vector: not commutative with Vector / int|float -- element-wise, divides the
+     * Test int|float / Vector: not commutative with Vector / int|float - element-wise, divides the
      * scalar by each element in turn, equivalent to $x * $v->reciprocal().
      */
     public function testDivScalarOverVector(): void
@@ -248,13 +248,13 @@ class VectorBinaryOperatorsTest extends TestCase
     public function testDivVectorOverMatrixThrows(): void
     {
         $v = Vector::fromArray([1, 2]);
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, 0],
             [0, 1],
         ]);
 
         $this->expectException(TypeError::class);
-        $result = $v / $matA; // @phpstan-ignore binaryOp.invalid
+        $result = $v / $m; // @phpstan-ignore binaryOp.invalid
     }
 
     /**

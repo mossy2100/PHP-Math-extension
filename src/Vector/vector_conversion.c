@@ -104,15 +104,14 @@ PHP_METHOD(OceanMoon_Math_Vector, toColumnMatrix)
  *
  * Matches the PHP package's Vector::toArray(): a copy of the internal data. Arrays are
  * copy-on-write in PHP, so simply returning the property's own array (via RETURN_ZVAL with the
- * copy flag) is already safe -- the caller gets an independent array the moment either side
+ * copy flag) is already safe - the caller gets an independent array the moment either side
  * mutates it.
  */
 PHP_METHOD(OceanMoon_Math_Vector, toArray)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zval rv;
-	zval *data = zend_read_property(vector_ce_Vector, Z_OBJ_P(ZEND_THIS), "data", sizeof("data") - 1, 1, &rv);
+	zval *data = math_types_read_property(Z_OBJ_P(ZEND_THIS), vector_offset_data);
 	RETURN_ZVAL(data, 1, 0);
 }
 /* }}} */

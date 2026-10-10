@@ -5,7 +5,7 @@
  * object handlers (do_operation, compare, create_object) shared by every Complex instance.
  *
  * magnitude/phase are plain stored properties, eagerly computed once in complex_init()
- * (complex.c) at construction time -- Complex is immutable, so there's nothing to keep them in
+ * (complex.c) at construction time - Complex is immutable, so there's nothing to keep them in
  * sync with afterward. This matches the PHP package's constructor, which computes both directly
  * rather than via a lazy property hook.
  */

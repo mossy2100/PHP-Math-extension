@@ -18,11 +18,11 @@ use PHPStan\Type\UnionType;
  * which only exists at the C level (the `compare` object handler in
  * Rational/rational_operators.c) and so is otherwise entirely invisible to static analysis. `==`/
  * `!=` are covered here too, since PHP wires them to the same `compare` handler as an unavoidable
- * side effect of `<=>` existing -- see docs/Rational.md. Never applies to ===/!==, which always
+ * side effect of `<=>` existing - see docs/Rational.md. Never applies to ===/!==, which always
  * mean reference identity for objects regardless of any compare handler.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag,
- * same as the arithmetic extensions -- PHPStan doesn't have a separate extension point for the
+ * same as the arithmetic extensions - PHPStan doesn't have a separate extension point for the
  * `compare` object handler specifically; comparison sigils go through the same interface.
  */
 final class RationalComparisonOperatorExtension implements OperatorTypeSpecifyingExtension
@@ -37,7 +37,7 @@ final class RationalComparisonOperatorExtension implements OperatorTypeSpecifyin
 
         $rationalType = new ObjectType(Rational::class);
 
-        // At least one side must definitely be a Rational -- otherwise this is an ordinary
+        // At least one side must definitely be a Rational - otherwise this is an ordinary
         // comparison PHPStan already handles fine on its own.
         if (!$rationalType->isSuperTypeOf($leftSide)->yes() && !$rationalType->isSuperTypeOf($rightSide)->yes()) {
             return false;

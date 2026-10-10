@@ -3,16 +3,22 @@
  *
  * Cross-file declarations shared between vector.c and the other vector_*.c implementation files
  * in this directory. Also exposes vector_minit() to ../oceanmoon_math.c, which calls it from the module's
- * real PHP_MINIT_FUNCTION. Not a public API -- nothing here is exposed to other extensions.
+ * real PHP_MINIT_FUNCTION. Not a public API - nothing here is exposed to other extensions.
  */
 
 #ifndef PHP_VECTOR_INTERNAL_H
 #define PHP_VECTOR_INTERNAL_H
 
 #include "php.h"
+#include "types.h"
 
 /* The registered class entry for OceanMoon\Math\Vector. Defined in vector.c. */
 extern zend_class_entry *vector_ce_Vector;
+
+/* Slot offsets of the $count and $data properties, set in vector_minit(). See
+ * math_types_property_offset() (types.h). */
+extern uint32_t vector_offset_count;
+extern uint32_t vector_offset_data;
 
 /* Shared helpers, defined in vector.c. See their doc comments there. */
 zend_result vector_init(zend_object *obj, zend_long count);
@@ -27,16 +33,16 @@ zend_result vector_properties_minit(void);
 
 /* Computes the magnitude (Euclidean norm) of a Vector: sqrt(sum of squares). Defined in
  * vector_linear_algebra.c; backs the `magnitude` computed property (vector_properties.c), and is
- * also called directly (bypassing property read dispatch) by normalized()
- * (vector_linear_algebra.c) and normalize() (vector_modification.c). */
+ * also called directly (bypassing property read dispatch) by normalize() (vector_linear_algebra.c).
+ */
 double vector_compute_magnitude(zend_object *obj);
 
 /* The computational cores of add()/sub()/mul()/div(), defined in vector_arithmetic.c. Shared with
  * the operator overloads (vector_operators.c) so operator and method results/exceptions are
- * guaranteed identical; vector_calc_div() is also shared with normalized()/normalize()
- * (vector_linear_algebra.c/vector_modification.c). vector_calc_scalar_div() backs only the `/`
- * operator's `float / Vector` form -- there's no equivalent named method, since Vector::div() only
- * ever divides the Vector by a scalar, never the reverse. */
+ * guaranteed identical; vector_calc_div() is also shared with normalize() (vector_linear_algebra.c).
+ * vector_calc_scalar_div() backs only the `/` operator's `float / Vector` form - there's no
+ * equivalent named method, since Vector::div() only ever divides the Vector by a scalar, never the
+ * reverse. */
 zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value);

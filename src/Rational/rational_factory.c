@@ -28,11 +28,11 @@
  * directly for its "looks like a float" branch, without going through a full PHP method dispatch.
  *
  * Matches the PHP package's Rational::fromFloat() exactly, including its continued-fractions
- * approximation for non-whole-number values -- see the PHP source's own doc comment for the
+ * approximation for non-whole-number values - see the PHP source's own doc comment for the
  * algorithm reference. The accumulated numerator/denominator (h/k) are tracked via
  * math_integers_mul()/math_integers_add() instead of PHP's "let it silently promote to float and
  * check is_float()" overflow detection, since C has no such promotion (signed overflow is
- * undefined behavior, not an observable value) -- see integers.h.
+ * undefined behavior, not an observable value) - see integers.h.
  *
  * One additional guard has no PHP equivalent: if the working value `x` ever grows too large to
  * safely truncate to a zend_long, this bails out to the best approximation found so far, same as
@@ -54,7 +54,7 @@ zend_result rational_calc_from_float(double value, zval *return_value)
 	}
 
 	/* Check if the value equals a valid integer. Deliberately excludes the ZEND_LONG_MIN result
-	 * itself (`i > ZEND_LONG_MIN`, not `>=`) -- rational_create(ZEND_LONG_MIN, 1) would throw
+	 * itself (`i > ZEND_LONG_MIN`, not `>=`) - rational_create(ZEND_LONG_MIN, 1) would throw
 	 * (denominator 1 is odd), so that exact value falls through to the general algorithm below,
 	 * which handles it via the max-magnitude shortcut instead. */
 	zend_long i;
@@ -171,14 +171,14 @@ PHP_METHOD(OceanMoon_Math_Rational, fromFloat)
 
 /* {{{ rational_filter_var
  *
- * Calls the real userland filter_var($str, $filter) -- rather than reimplementing
- * FILTER_VALIDATE_INT/FILTER_VALIDATE_FLOAT's parsing rules in C -- so fromString()'s int/float
+ * Calls the real userland filter_var($str, $filter) - rather than reimplementing
+ * FILTER_VALIDATE_INT/FILTER_VALIDATE_FLOAT's parsing rules in C - so fromString()'s int/float
  * detection is guaranteed byte-for-byte identical to the PHP package's, which uses the same
  * function. $filter is looked up by its constant name each call rather than hard-coded, in case
  * its integer value ever changes (unlikely, but free to guard against).
  *
  * Returns FAILURE only if the FILTER_VALIDATE_* constant itself can't be found (ext/filter not
- * loaded) or the call itself fails -- an unmatched value (filter_var() returning false) is still
+ * loaded) or the call itself fails - an unmatched value (filter_var() returning false) is still
  * SUCCESS, with *out left as IS_FALSE for the caller to check.
  */
 static zend_result rational_filter_var(zend_string *str, const char *filter_const_name, size_t filter_const_name_len, zval *out)
@@ -267,7 +267,7 @@ PHP_METHOD(OceanMoon_Math_Rational, fromString)
 		return;
 	}
 
-	/* Check for a string that looks like a fraction (int/int) -- exactly one '/' character,
+	/* Check for a string that looks like a fraction (int/int) - exactly one '/' character,
 	 * matching explode('/', $str) having exactly 2 parts. */
 	const char *start = ZSTR_VAL(trimmed);
 	size_t len = ZSTR_LEN(trimmed);

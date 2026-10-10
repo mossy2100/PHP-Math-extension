@@ -12,12 +12,12 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for Complex's comparison operator overloads (<, <=, >, >=, <=>, ==, !=), only available in
- * the extension -- see docs/Complex.md in this repo. Comparing complex numbers isn't mathematically
+ * the extension - see docs/Complex.md in this repo. Comparing complex numbers isn't mathematically
  * meaningful (there's no total order compatible with the field operations), so these use plain
- * lexicographic (real, then imaginary) ordering -- exactly what PHP's own default object comparison
+ * lexicographic (real, then imaginary) ordering - exactly what PHP's own default object comparison
  * already gives two Complex instances for free, since real is declared before imaginary. The only
  * genuinely new behavior is accepting an int|float operand on either side, promoted the same way
- * equal() promotes one. All six operators are backed by a single native `compare` object handler --
+ * equal() promotes one. All six operators are backed by a single native `compare` object handler -
  * PHP has no way to wire up a subset of these independently, and ==/!= come along as an unavoidable
  * side effect of that.
  */
@@ -187,7 +187,7 @@ class ComplexComparisonOperatorsTest extends TestCase
     #region Operator == tests.
 
     /**
-     * Test == uses exact value comparison, not identity -- two distinct instances representing
+     * Test == uses exact value comparison, not identity - two distinct instances representing
      * the same value are ==, matching equal().
      */
     public function testEqual(): void

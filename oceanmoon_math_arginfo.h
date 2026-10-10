@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e6b8a84144c07e6d54c31d4f7e165d9f64770d1b */
+ * Stub hash: 1e5020f8b1a4edfeb6e7760cc217b191f4ec21e6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -219,9 +219,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Vector_set,
 	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Vector_normalize, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
-
 #define arginfo_class_OceanMoon_Math_Vector_equal arginfo_class_OceanMoon_Math_Complex_equal
 
 #define arginfo_class_OceanMoon_Math_Vector_approxEqual arginfo_class_OceanMoon_Math_Complex_approxEqual
@@ -259,7 +256,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_outer
 	ZEND_ARG_OBJ_INFO(0, other, OceanMoon\\Math\\Vector, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OceanMoon_Math_Vector_normalized arginfo_class_OceanMoon_Math_Vector_neg
+#define arginfo_class_OceanMoon_Math_Vector_normalize arginfo_class_OceanMoon_Math_Vector_neg
 
 #define arginfo_class_OceanMoon_Math_Vector_sum arginfo_class_OceanMoon_Math_Rational_toFloat
 
@@ -479,7 +476,6 @@ ZEND_METHOD(OceanMoon_Math_Vector, toColumnMatrix);
 ZEND_METHOD(OceanMoon_Math_Vector, __toString);
 ZEND_METHOD(OceanMoon_Math_Vector, get);
 ZEND_METHOD(OceanMoon_Math_Vector, set);
-ZEND_METHOD(OceanMoon_Math_Vector, normalize);
 ZEND_METHOD(OceanMoon_Math_Vector, equal);
 ZEND_METHOD(OceanMoon_Math_Vector, approxEqual);
 ZEND_METHOD(OceanMoon_Math_Vector, neg);
@@ -493,7 +489,7 @@ ZEND_METHOD(OceanMoon_Math_Vector, hadamardDiv);
 ZEND_METHOD(OceanMoon_Math_Vector, dot);
 ZEND_METHOD(OceanMoon_Math_Vector, cross);
 ZEND_METHOD(OceanMoon_Math_Vector, outer);
-ZEND_METHOD(OceanMoon_Math_Vector, normalized);
+ZEND_METHOD(OceanMoon_Math_Vector, normalize);
 ZEND_METHOD(OceanMoon_Math_Vector, sum);
 ZEND_METHOD(OceanMoon_Math_Vector, prod);
 ZEND_METHOD(OceanMoon_Math_Vector, count);
@@ -625,7 +621,6 @@ static const zend_function_entry class_OceanMoon_Math_Vector_methods[] = {
 	ZEND_ME(OceanMoon_Math_Vector, __toString, arginfo_class_OceanMoon_Math_Vector___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, get, arginfo_class_OceanMoon_Math_Vector_get, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, set, arginfo_class_OceanMoon_Math_Vector_set, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Vector, normalize, arginfo_class_OceanMoon_Math_Vector_normalize, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, equal, arginfo_class_OceanMoon_Math_Vector_equal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, approxEqual, arginfo_class_OceanMoon_Math_Vector_approxEqual, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, neg, arginfo_class_OceanMoon_Math_Vector_neg, ZEND_ACC_PUBLIC)
@@ -639,7 +634,7 @@ static const zend_function_entry class_OceanMoon_Math_Vector_methods[] = {
 	ZEND_ME(OceanMoon_Math_Vector, dot, arginfo_class_OceanMoon_Math_Vector_dot, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, cross, arginfo_class_OceanMoon_Math_Vector_cross, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, outer, arginfo_class_OceanMoon_Math_Vector_outer, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Vector, normalized, arginfo_class_OceanMoon_Math_Vector_normalized, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Vector, normalize, arginfo_class_OceanMoon_Math_Vector_normalize, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, sum, arginfo_class_OceanMoon_Math_Vector_sum, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, prod, arginfo_class_OceanMoon_Math_Vector_prod, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, count, arginfo_class_OceanMoon_Math_Vector_count, ZEND_ACC_PUBLIC)

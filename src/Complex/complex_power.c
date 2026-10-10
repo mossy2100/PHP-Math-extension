@@ -21,13 +21,13 @@
 /* {{{ complex_calc_pow
  *
  * The computational core of pow(), factored out so complex_do_operation() (complex_operators.c)
- * can reuse it for the `**` operator without going through a full PHP method dispatch -- matching
+ * can reuse it for the `**` operator without going through a full PHP method dispatch - matching
  * the "read the base's own magnitude/phase" behavior below exactly, base_obj plays the role
  * Z_OBJ_P(ZEND_THIS) plays for the method call.
  *
  * Matches the PHP package's Complex::pow(): z^w. Only the principal value is returned for
  * multivalued cases. Uses the same shortcuts as the PHP source (0 exponent, 0 base, exponent 1/
- * 2/-1, base e), falling back to z^w = e^(w * ln(z)) for the general case -- calling
+ * 2/-1, base e), falling back to z^w = e^(w * ln(z)) for the general case - calling
  * complex_calc_exp()/complex_calc_ln() directly rather than going through a full PHP method
  * dispatch.
  *
@@ -74,7 +74,7 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 		return SUCCESS;
 	}
 
-	/* Exponent -1: delegate to inv(). Safe -- base != 0 already established above. */
+	/* Exponent -1: delegate to inv(). Safe - base != 0 already established above. */
 	if (other_real == -1.0 && other_imag == 0.0) {
 		double f = (real * real) + (imag * imag);
 		*out_real = real / f;

@@ -2,7 +2,7 @@
  * complex_arrayaccess.c
  *
  * ArrayAccess methods for OceanMoon\Math\Complex: offsetExists(), offsetGet(), offsetSet(),
- * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Complex class --
+ * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Complex class -
  * $z[0]/$z[1] read the real/imaginary parts; the class is immutable, so offsetSet()/offsetUnset()
  * always throw.
  */

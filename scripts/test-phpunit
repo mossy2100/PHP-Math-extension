@@ -7,7 +7,7 @@
 # The run is hermetic: PHP_INI_SCAN_DIR is cleared so this machine's conf.d directory is not scanned.
 # scripts/enable writes an oceanmoon_math.ini there pointing at this same module, and loading it twice
 # makes PHP warn ("Module "oceanmoon_math" is already loaded") at startup. Clearing the scan directory
-# also means the suite always tests the module built here, whatever is enabled globally -- the mirror
+# also means the suite always tests the module built here, whatever is enabled globally - the mirror
 # image of packages/Math's own test script, which clears the same variable to keep this extension out
 # of the package's pure-PHP run.
 #
@@ -20,7 +20,7 @@
 # Everything after the optional version argument goes straight to PHPUnit, and phpunit.xml supplies
 # the default suite (tests/phpunit), so no path argument is needed. Going through composer is the one
 # wrinkle: composer parses anything starting with `-` itself and silently drops options it doesn't
-# recognise, so PHPUnit's own options need `--` to get past it -- `composer test 8.5 -- --filter
+# recognise, so PHPUnit's own options need `--` to get past it - `composer test 8.5 -- --filter
 # testConstructor`. Positional arguments (the version, a path) are forwarded as-is, which is why
 # `composer test 8.5` needs no `--`.
 
@@ -31,7 +31,7 @@ EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Optional leading version argument, matching scripts/build and scripts/enable (`composer test 8.5`).
 # PHP_VERSION is the mechanism shared with the other scripts. Consume the argument only when it looks
 # like a version, so the PHPUnit arguments this script also accepts (a test path, --filter) pass
-# through untouched -- and so anything else numeric reaches php-env, which rejects unsupported versions
+# through untouched - and so anything else numeric reaches php-env, which rejects unsupported versions
 # with a diagnostic naming the supported ones.
 if [[ $# -ge 1 && "$1" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
     PHP_VERSION="$1"
@@ -44,18 +44,18 @@ fi
 source "$EXT_DIR/scripts/php-env"
 
 if [ ! -f "$PHP_MODULE" ]; then
-    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL -- run 'composer build $PHP_VERSION' first." >&2
+    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL - run 'composer build $PHP_VERSION' first." >&2
     exit 1
 fi
 
 if [ ! -f "$EXT_DIR/vendor/bin/phpunit" ]; then
-    echo "vendor/bin/phpunit not found -- run 'composer install' in $EXT_DIR first." >&2
+    echo "vendor/bin/phpunit not found - run 'composer install' in $EXT_DIR first." >&2
     exit 1
 fi
 
 # The conformance suite is the package's own tests, symlinked in one directory per class
 # (tests/phpunit/<Class>/shared -> packages/Math/tests/<Class>/shared). Those links are the whole feature-
-# parity check, and PHPUnit skips a symlink it can't resolve without saying a word -- so with a missing
+# parity check, and PHPUnit skips a symlink it can't resolve without saying a word - so with a missing
 # sibling checkout this script would report a green run of the extension's own operator tests and check no
 # parity at all. Refuse to run the default suite in that state. A caller who names targets of their own is
 # taken at their word, since a subset run doesn't claim to check parity.
@@ -70,7 +70,7 @@ if [[ $# -eq 0 ]]; then
 
     if (( ${#unresolved[@]} > 0 )); then
         {
-            echo "Cannot run the conformance suite -- these shared test directories are missing or empty:"
+            echo "Cannot run the conformance suite - these shared test directories are missing or empty:"
             for entry in "${unresolved[@]}"; do
                 echo "  $entry"
             done
@@ -91,11 +91,11 @@ fi
 echo "Testing $PHP_MODULE against PHP $PHP_VERSION_FULL"
 
 # Run from the repo root: PHPUnit looks for phpunit.xml in the working directory, and resolves the
-# paths inside it -- and any path argument -- relative to there.
+# paths inside it - and any path argument - relative to there.
 cd "$EXT_DIR"
 
 # Clear the ini scan directory for this process, so conf.d/oceanmoon_math.ini (written by
-# scripts/enable) can't load the module a second time -- the -d extension= below is the only load.
+# scripts/enable) can't load the module a second time - the -d extension= below is the only load.
 PHP_INI_SCAN_DIR= exec php \
     -d extension="$PHP_MODULE" \
     "$EXT_DIR/vendor/bin/phpunit" \

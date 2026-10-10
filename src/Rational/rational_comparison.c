@@ -3,7 +3,7 @@
  *
  * Comparison methods for OceanMoon\Math\Rational: compare(), approxEqual(), plus the methods the
  * PHP package's Rational class inherits from the ApproxComparable trait (equal(), lessThan(),
- * lessThanOrEqual(), greaterThan(), greaterThanOrEqual(), approxCompare()) -- internal classes
+ * lessThanOrEqual(), greaterThan(), greaterThanOrEqual(), approxCompare()) - internal classes
  * can't use traits, so this file ports both the class's own methods and the trait's, matching the
  * "Comparison methods" region of the PHP package's Rational class plus
  * OceanMoon\Core\Traits\Comparison\Comparable/ApproxComparable.
@@ -62,7 +62,7 @@ static void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b
  * PHP source's Comparable trait derives all of those from a single compare() method.
  *
  * Matches the PHP package's Rational::compare() exactly: an int operand is promoted to a
- * temporary (numerator, 1) pair directly (skipping actual object construction -- a denominator of
+ * temporary (numerator, 1) pair directly (skipping actual object construction - a denominator of
  * 1 is always already canonical, so there's nothing rational_create() would do beyond copying the
  * values); a float operand compares via toFloat(); a Rational operand compares via
  * rational_compare_parts(). PHP_INT_MIN is special-cased the same way the PHP source is: a

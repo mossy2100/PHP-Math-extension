@@ -8,7 +8,7 @@
  * handler, ==/!=). These don't exist in the PHP package: comparing complex numbers this way isn't
  * mathematically meaningful (there's no total order compatible with the field operations), but a
  * deterministic total order is still useful for sorting/deduplication, so the operators use plain
- * lexicographic (real, then imaginary) ordering -- exactly what PHP's default object comparison
+ * lexicographic (real, then imaginary) ordering - exactly what PHP's default object comparison
  * already gives you for two Complex instances for free (real is declared before imaginary), which
  * is why the PHP package needs no changes at all for this. The only thing that genuinely requires
  * new code is accepting an int|float operand on either side (promoted the same way equal() does).
@@ -36,7 +36,7 @@
  * instance or a number (int/float); anything else throws InvalidArgumentException. A NAN float
  * throws DomainException (no meaningful comparison result); a non-finite float (+-INF) still
  * populates *out_real, *out_imag (with the signed infinity itself, imaginary 0) but also reports
- * *out_finite = false, since a Complex is always finite and so never equal to it -- equal()/
+ * *out_finite = false, since a Complex is always finite and so never equal to it - equal()/
  * approxEqual() use that to return false outright, while complex_calc_compare() uses the sign of
  * *out_real to order against it instead.
  *
@@ -148,7 +148,7 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
  *
  * The computational core of the <, <=, >, >=, <=> operators (complex_do_compare(), below): plain
  * lexicographic (real, then imaginary) ordering, matching PHP's own default object comparison for
- * two Complex instances (real is declared before imaginary) -- the only genuinely new behavior
+ * two Complex instances (real is declared before imaginary) - the only genuinely new behavior
  * here is accepting an int|float operand via complex_normalize_operand(), the same promotion
  * equal()/approxEqual() use.
  *
@@ -194,8 +194,8 @@ zend_result complex_calc_compare(zend_object *self_obj, zval *other, int *out)
  * zend_is_identical() in Zend/zend_operators.c).
  *
  * Called with the original op1/op2 in their expression order, whichever side the Complex instance
- * is actually on (PHP picks op1's handler if op1 is a suitable object, else op2's -- see
- * zend_compare()'s IS_OBJECT branch in Zend/zend_operators.c) -- so this determines which side is
+ * is actually on (PHP picks op1's handler if op1 is a suitable object, else op2's - see
+ * zend_compare()'s IS_OBJECT branch in Zend/zend_operators.c) - so this determines which side is
  * `self` and, if it's op2 (e.g. `5 <=> $z`), negates the result to correct for comparing in the
  * opposite direction from what complex_calc_compare() (self vs. other) computes.
  *

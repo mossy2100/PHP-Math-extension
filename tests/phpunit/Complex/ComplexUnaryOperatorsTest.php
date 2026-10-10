@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Complex's unary operator overloads (+, -, ~), only available in the extension -- see
+ * Tests for Complex's unary operator overloads (+, -, ~), only available in the extension - see
  * docs/Complex.md in this repo. Mirrors the structure of the package's own
  * ComplexUnaryArithmeticTest, whose neg()/conj() tests the - and ~ operators are equivalent to.
  */

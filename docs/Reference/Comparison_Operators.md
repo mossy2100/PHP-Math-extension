@@ -3,46 +3,46 @@
 Comparison operators are backed by PHP's `compare` object handler rather than `do_operation`, and they're the one area
 where the extension's four classes differ from each other.
 
-This document covers what the extension changes. For how comparison works *without* the extension — including the
-defaults PHP applies to any object — see the matching [Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md) document in the Math package.
+This document covers what the extension changes. For how comparison works *without* the extension - including the
+defaults PHP applies to any object - see the matching [Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md) document in the Math package.
 
 There are two types of comparison operators in PHP:
 
 1. **Loose**: `<=>`, `==`, `!=`, `<`, `<=`, `>`, `>=`. Flexible about type.
-2. **Strict**: `===`, `!==`. These include the operands' types in the comparison, and for objects they mean
-   reference identity rather than value equality.
+2. **Strict**: `===`, `!==`. These include the operands' types in the comparison, and for objects they mean reference
+   identity rather than value equality.
 
 ---
 
 ## Loose Comparison Operators
 
 A PHP extension can't override a subset of the loose operators independently: a single `compare` object handler backs
-`<=>`, and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result — there's no way to implement
+`<=>`, and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result - there's no way to implement
 some of the six and fall back to PHP's default for the rest.
 
 `Complex` and `Rational` provide `compare` handlers, so their comparison operators accept `int`/`float` operands as well
-as their own type. Without one — as when using the package alone — comparing with an `int`/`float` instead emits a
+as their own type. Without one - as when using the package alone - comparing with an `int`/`float` instead emits a
 notice and reads the object as `1`, so `Complex(5, 0) == 5` and `Rational(1, 2) == 0.5` are both `false`.
 
-`Vector` and `Matrix` provide no `compare` handler: there's no natural way to order a whole element list against
-another the way there is for a 2-element `(real, imaginary)` tuple or a single rational value, so they keep PHP's own
-default object `compare` handler, like any plain PHP object.
+`Vector` and `Matrix` provide no `compare` handler: there's no natural way to order a whole element list against another
+the way there is for a 2-element `(real, imaginary)` tuple or a single rational value, so they keep PHP's own default
+object `compare` handler, like any plain PHP object.
 
-- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect — see
+- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect - see
   [Rational operators](Rational.md#comparison-operators).
-- `Complex`'s ordering is plain lexicographic (real part first, then imaginary) — useful for sorting and deduplication,
+- `Complex`'s ordering is plain lexicographic (real part first, then imaginary) - useful for sorting and deduplication,
   but not mathematically meaningful, since there's no total order compatible with complex arithmetic. It's exactly what
   PHP's own default object comparison already gives two `Complex` instances for free (`$real` is declared before
   `$imaginary`); the operators only add accepting an `int`/`float` operand on either side. An ordering is undefined for
   complex values that aren't real, so the ordering operators are useful only for practical ordering (sorting,
-  deduplication) rather than mathematical comparison — and they can't be omitted individually, since PHP wires all six
-  to that one `compare` handler. See [Complex operators](Complex.md#comparison-operators) for the details. When comparing
-  `Complex` values that *are* real (no imaginary part) with other such `Complex` values, or `int` or `float` values, the
-  result is equivalent to comparing two reals.
+  deduplication) rather than mathematical comparison - and they can't be omitted individually, since PHP wires all six
+  to that one `compare` handler. See [Complex operators](Complex.md#comparison-operators) for the details. When comparing `Complex` values that *are* real
+  (no imaginary part) with other such `Complex` values, or `int` or `float` values, the result is equivalent to
+  comparing two reals.
 
 Both `Complex` and `Rational` accept an `int`/`float` operand on either side, promoted the same way their `equal()`
-method promotes one, and throw for a `NAN` operand (no meaningful comparison result) — see each class's own
-docs for specifics.
+method promotes one, and throw for a `NAN` operand (no meaningful comparison result) - see each class's own docs for
+specifics.
 
 ---
 
@@ -65,9 +65,9 @@ $z1 === $z2;  // false (different instances)
 ## Equality Methods
 
 `Vector` and `Matrix` provide no comparison operators of their own, so the default object comparison described under
-[Loose comparison operators](#loose-comparison-operators) above applies to them. For `==`/`!=` that happens to give a
-reasonable element-wise equality result, but without `approxEqual()`'s floating-point tolerance; their ordering
-operators (`<`, `<=`, `>`, `>=`, `<=>`) aren't mathematically meaningful, for the same reason `Complex`'s aren't.
+[Loose comparison operators](#loose-comparison-operators) above applies to them. For `==`/`!=` that happens to give a reasonable element-wise equality
+result, but without `approxEqual()`'s floating-point tolerance; their ordering operators (`<`, `<=`, `>`, `>=`, `<=>`)
+aren't mathematically meaningful, for the same reason `Complex`'s aren't.
 
 Some coding standards (PHPStan strict rules, Slevomat, and others) discourage or disallow `==`/`!=` in favour of
 explicit method calls regardless, so `equal()`/`approxEqual()` remain the recommended way to test value equality across
@@ -88,11 +88,8 @@ See:
 
 ## See Also
 
-- **[Complex Operators](Complex.md)** and **[Rational Operators](Rational.md)** — the two classes with an
-  extension-provided `compare` handler, and what their orderings mean
-- **[Vector Operators](Vector.md)** and **[Matrix Operators](Matrix.md)** — neither gets an extension-provided
-  comparison handler
-- **[Operator Precedence](../../README.md#operator-precedence)** — where comparison operators sit in the precedence
-  order, covered in the main README
-- **[Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md)** (Math
-  package) — the full account of how comparison behaves without the extension
+- **[Complex Operators](Complex.md)** and **[Rational Operators](Rational.md)** - the two classes with an extension-provided `compare` handler, and
+  what their orderings mean
+- **[Vector Operators](Vector.md)** and **[Matrix Operators](Matrix.md)** - neither gets an extension-provided comparison handler
+- **[Operator Precedence](../../README.md#operator-precedence)** - where comparison operators sit in the precedence order, covered in the main README
+- **[Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md)** (Math package) - the full account of how comparison behaves without the extension

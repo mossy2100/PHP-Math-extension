@@ -3,7 +3,7 @@
  *
  * Operator overloading for OceanMoon\Math\Complex: +, -, *, /, ** (each accepting a Complex or
  * int|float operand on either side), plus unary - (negate) and ~ (conjugate). Mirrors
- * docs/Complex.md in this repo -- these operators only exist here in the extension; the userland
+ * docs/Complex.md in this repo - these operators only exist here in the extension; the userland
  * package has no way to overload operators, so it exposes the same behavior only as named methods
  * (add()/sub()/mul()/div()/pow()/neg()/conj()).
  */
@@ -21,9 +21,9 @@
 
 /* {{{ complex_operand_to_parts
  *
- * Resolves an operator operand (Complex, int, or float -- anything else is unsupported) into a
+ * Resolves an operator operand (Complex, int, or float - anything else is unsupported) into a
  * (real, imaginary) pair. Unlike complex_read_other() (complex_arithmetic.c), used for the named
- * methods, this never throws a TypeError for a wrong type -- it just returns FAILURE without an
+ * methods, this never throws a TypeError for a wrong type - it just returns FAILURE without an
  * exception, so the caller can return FAILURE from the do_operation handler in turn, letting the
  * engine fall through to its own standard "Unsupported operand types: Complex OP T" TypeError,
  * which is more idiomatic for operator misuse than a method-argument-shaped message. A non-finite
@@ -60,8 +60,8 @@ static zend_result complex_operand_to_parts(zval *zv, double *out_real, double *
 /* {{{ complex_operator_pow
  *
  * Backs the ZEND_POW case of complex_do_operation(): resolves the exponent (op2) into a (real,
- * imaginary) pair, then the base (op1) into a genuine zend_object* -- promoting it to a temporary
- * Complex first if it isn't already one -- since complex_calc_pow() (complex_power.c) needs a real
+ * imaginary) pair, then the base (op1) into a genuine zend_object* - promoting it to a temporary
+ * Complex first if it isn't already one - since complex_calc_pow() (complex_power.c) needs a real
  * object for its general-case ln() call to read the magnitude/phase properties.
  * Mirrors how complex_transcendental.c's log() promotes a scalar $base for the same reason.
  */
@@ -112,9 +112,9 @@ static zend_result complex_operator_pow(zval *result, zval *op1, zval *op2)
  * on complex_object_handlers in complex_properties_minit() (complex_properties.c).
  *
  * Called by the engine whenever at least one operand of one of the above opcodes is an object
- * with a do_operation handler (op1 checked first, then op2 -- see
+ * with a do_operation handler (op1 checked first, then op2 - see
  * ZEND_TRY_BINARY_OBJECT_OPERATION()/ZEND_TRY_UNARY_OBJECT_OPERATION() in Zend/zend_operators.c).
- * For ZEND_BW_NOT (unary), op2 is always NULL and op1 is always the Complex being conjugated --
+ * For ZEND_BW_NOT (unary), op2 is always NULL and op1 is always the Complex being conjugated -
  * PHP has no dedicated opcode for unary +/-; the compiler lowers `-$z`/`+$z` to `$z * -1`/`$z * 1`
  * (see zend_compile_unary_pm() in Zend/zend_compile.c), so those already work correctly through
  * the ZEND_MUL case below without any special-casing here.

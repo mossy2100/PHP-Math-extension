@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Vector's unary operator overloads (+, -), only available in the extension -- see
+ * Tests for Vector's unary operator overloads (+, -), only available in the extension - see
  * docs/Vector.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$v * 1`/
  * `$v * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
  */

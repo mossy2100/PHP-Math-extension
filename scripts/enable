@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Enable oceanmoon_math globally on this machine, by writing a conf.d ini file that points directly
-# at this repo's own built module (build/<php-version>/modules/oceanmoon_math.so) -- so enabling
+# at this repo's own built module (build/<php-version>/modules/oceanmoon_math.so) - so enabling
 # always picks up the latest local build, with no separate "copy the .so somewhere" step needed.
 # Useful for ad-hoc scripts/demos that expect the extension to "just be there" without an explicit
 # -d extension=... flag on every invocation.
@@ -38,12 +38,12 @@ SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
 INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
 
 if [[ ! -f "$PHP_MODULE" ]]; then
-    echo "oceanmoon_math.so not found at $PHP_MODULE -- run 'composer build' first." >&2
+    echo "oceanmoon_math.so not found at $PHP_MODULE - run 'composer build' first." >&2
     exit 1
 fi
 
 if [[ -z "$SCAN_DIR" ]]; then
-    echo "No php.ini scan directory configured for PHP $PHP_VERSION_FULL -- can't enable globally." >&2
+    echo "No php.ini scan directory configured for PHP $PHP_VERSION_FULL - can't enable globally." >&2
     exit 1
 fi
 

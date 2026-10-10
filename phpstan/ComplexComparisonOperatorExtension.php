@@ -18,11 +18,11 @@ use PHPStan\Type\UnionType;
  * which only exists at the C level (the `compare` object handler in
  * Complex/complex_comparison.c) and so is otherwise entirely invisible to static analysis. `==`/
  * `!=` are covered here too, since PHP wires them to the same `compare` handler as an unavoidable
- * side effect of `<=>` existing -- see docs/Complex.md. Never applies to ===/!==, which always
+ * side effect of `<=>` existing - see docs/Complex.md. Never applies to ===/!==, which always
  * mean reference identity for objects regardless of any compare handler.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag,
- * same as the arithmetic extensions -- PHPStan doesn't have a separate extension point for the
+ * same as the arithmetic extensions - PHPStan doesn't have a separate extension point for the
  * `compare` object handler specifically; comparison sigils go through the same interface.
  */
 final class ComplexComparisonOperatorExtension implements OperatorTypeSpecifyingExtension
@@ -37,7 +37,7 @@ final class ComplexComparisonOperatorExtension implements OperatorTypeSpecifying
 
         $complexType = new ObjectType(Complex::class);
 
-        // At least one side must definitely be a Complex -- otherwise this is an ordinary
+        // At least one side must definitely be a Complex - otherwise this is an ordinary
         // comparison PHPStan already handles fine on its own.
         if (!$complexType->isSuperTypeOf($leftSide)->yes() && !$complexType->isSuperTypeOf($rightSide)->yes()) {
             return false;

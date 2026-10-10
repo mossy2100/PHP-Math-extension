@@ -12,7 +12,7 @@ use PHPStan\Type\UnaryOperatorTypeSpecifyingExtension;
 /**
  * Teaches PHPStan about Complex's unary operator overloading: + (identity), - (negate), and ~
  * (conjugate). All three are backed by the same `do_operation` handler as the binary operators
- * (see ComplexBinaryOperatorExtension) -- the Zend VM itself has no dedicated opcode for unary +/-, and
+ * (see ComplexBinaryOperatorExtension) - the Zend VM itself has no dedicated opcode for unary +/-, and
  * lowers `+$z`/`-$z` to `$z * 1`/`$z * -1` at compile time (see complex_do_operation()'s doc
  * comment in Complex/complex_operators.c), but that's a runtime-compilation detail PHPStan never
  * sees: PHPStan works from the original parsed AST, where `+$z` and `-$z` are distinct unary

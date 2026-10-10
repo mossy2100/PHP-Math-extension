@@ -22,7 +22,7 @@
  * Converts a double to a zend_string the exact same way PHP's own (string) cast does (governed
  * by the `precision` ini setting), by wrapping it in a zval and running it through the engine's
  * normal string-conversion machinery. This gives byte-for-byte parity with the PHP package's
- * __toString(), which itself just does (string) $this->real, etc. -- no bespoke formatting logic
+ * __toString(), which itself just does (string) $this->real, etc. - no bespoke formatting logic
  * to keep in sync.
  *
  * Takes ownership of the resulting zend_string; the caller must eventually release it (or hand
@@ -43,15 +43,12 @@ static zend_string *complex_double_to_str(double value)
  */
 PHP_METHOD(OceanMoon_Math_Complex, __toString)
 {
-	zval rv1, rv2;
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	double real = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "real", sizeof("real") - 1, 1, &rv1));
-	double imag = zval_get_double(
-		zend_read_property(complex_ce_Complex, self, "imaginary", sizeof("imaginary") - 1, 1, &rv2));
+	double real, imag;
+	complex_read_parts(self, &real, &imag);
 
 	/* Real number: imaginary part is zero. */
 	if (imag == 0.0) {

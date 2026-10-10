@@ -1,7 +1,7 @@
 /*
  * integers.h
  *
- * Shared overflow-checked integer helpers, not specific to any one class -- ports of
+ * Shared overflow-checked integer helpers, not specific to any one class - ports of
  * OceanMoon\Core\Integers, intended for Rational's arithmetic methods.
  *
  * Unlike the PHP source (which detects overflow for free, by checking whether the engine silently
@@ -22,7 +22,7 @@
 /* {{{ math_integers_result
  *
  * Every function in this file returns one of these instead of throwing directly, matching the
- * "pure C, caller throws" pattern used throughout this file and floats.h -- the caller picks the
+ * "pure C, caller throws" pattern used throughout this file and floats.h - the caller picks the
  * PHP exception class/message (OverflowException, DomainException, ArgumentCountError; see
  * OceanMoon\Core\Integers' PHP source for which applies to which failure).
  */
@@ -75,8 +75,8 @@ math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
  * result) so a ZEND_LONG_MIN input combined with any other non-zero, non-ZEND_LONG_MIN value
  * still produces the correct result. `nums` must have at least one element (MATH_INTEGERS_EMPTY
  * if count == 0, matching the PHP version's LengthException). Returns MATH_INTEGERS_OVERFLOW only
- * for the genuinely unrepresentable case -- the true result is ZEND_LONG_MIN's own magnitude,
- * which doesn't fit in a zend_long -- matching the PHP version's OverflowException.
+ * for the genuinely unrepresentable case - the true result is ZEND_LONG_MIN's own magnitude,
+ * which doesn't fit in a zend_long - matching the PHP version's OverflowException.
  */
 math_integers_result math_integers_gcd(const zend_long *nums, size_t count, zend_long *out);
 /* }}} */

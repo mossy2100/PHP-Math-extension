@@ -8,7 +8,7 @@
  * files in this directory.
  *
  * Unlike Complex/Rational (which store their state as individual scalar properties), Vector's
- * $data is a genuine PHP array property (list<float>), matching the pure-PHP class exactly --
+ * $data is a genuine PHP array property (list<float>), matching the pure-PHP class exactly -
  * letting the Zend engine's own array/zval machinery handle allocation and refcounting, rather
  * than a custom object struct. Every read/write of an element goes through vector_read_element()/
  * vector_write_element() below, which is the one place bounds-checking and finite-value validation
@@ -37,6 +37,8 @@
 
 /* The registered class entry for OceanMoon\Math\Vector. */
 zend_class_entry *vector_ce_Vector;
+uint32_t vector_offset_count;
+uint32_t vector_offset_data;
 
 /* {{{ vector_init
  *
@@ -63,10 +65,12 @@ zend_result vector_init(zend_object *obj, zend_long count)
 		zend_hash_next_index_insert(Z_ARRVAL(data), &zero);
 	}
 
-	zend_update_property(vector_ce_Vector, obj, "data", sizeof("data") - 1, &data);
-	zval_ptr_dtor(&data);
+	/* Moves data into the slot (no extra reference to release). */
+	math_types_write_property(obj, vector_offset_data, &data);
 
-	zend_update_property_long(vector_ce_Vector, obj, "count", sizeof("count") - 1, count);
+	zval count_zval;
+	ZVAL_LONG(&count_zval, count);
+	math_types_write_property(obj, vector_offset_count, &count_zval);
 
 	return SUCCESS;
 }
@@ -89,9 +93,7 @@ zend_result vector_create(zval *return_value, zend_long count)
  */
 zend_long vector_read_count(zend_object *obj)
 {
-	zval rv;
-	zval *count = zend_read_property(vector_ce_Vector, obj, "count", sizeof("count") - 1, 1, &rv);
-	return zval_get_long(count);
+	return zval_get_long(math_types_read_property(obj, vector_offset_count));
 }
 /* }}} */
 
@@ -116,8 +118,7 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
 		return FAILURE;
 	}
 
-	zval rv;
-	zval *data = zend_read_property(vector_ce_Vector, obj, "data", sizeof("data") - 1, 1, &rv);
+	zval *data = math_types_read_property(obj, vector_offset_data);
 	zval *element = zend_hash_index_find(Z_ARRVAL_P(data), (zend_ulong) index);
 	*out_value = Z_DVAL_P(element);
 
@@ -130,7 +131,7 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
  * Bounds-checked, finite-value-checked write of $data[$index] off a zend_object already known to
  * be a Vector instance. Used by set()/offsetSet() and, for the same correctness-by-construction
  * reason as vector_read_element(), by every other method that builds a new Vector result
- * element-by-element -- this is also where a non-finite result (e.g. a scalar multiplication
+ * element-by-element - this is also where a non-finite result (e.g. a scalar multiplication
  * overflowing to INF) gets caught.
  *
  * Returns FAILURE (with an exception already thrown) for an out-of-range index or a non-finite
@@ -158,8 +159,7 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 		return FAILURE;
 	}
 
-	zval rv;
-	zval *data = zend_read_property(vector_ce_Vector, obj, "data", sizeof("data") - 1, 1, &rv);
+	zval *data = math_types_read_property(obj, vector_offset_data);
 	SEPARATE_ARRAY(data);
 	zval new_value;
 	ZVAL_DOUBLE(&new_value, value);
@@ -192,6 +192,8 @@ PHP_METHOD(OceanMoon_Math_Vector, __construct)
 zend_result vector_minit(void)
 {
 	vector_ce_Vector = register_class_OceanMoon_Math_Vector(zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess);
+	vector_offset_count = math_types_property_offset(vector_ce_Vector, "count");
+	vector_offset_data = math_types_property_offset(vector_ce_Vector, "data");
 
 	return vector_properties_minit();
 }

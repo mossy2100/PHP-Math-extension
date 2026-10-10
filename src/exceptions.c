@@ -21,7 +21,7 @@ zend_result math_exceptions_minit(void)
 
 	/* Registered under the exact same fully-qualified name as the userland
 	 * OceanMoon\Core\Exceptions\FormatException class, so PHP code written against the userland
-	 * Core package works unchanged when this extension is loaded -- same approach as Complex
+	 * Core package works unchanged when this extension is loaded - same approach as Complex
 	 * registering as OceanMoon\Math\Complex rather than some extension-local name. Both are trivial
 	 * empty subclasses of DomainException in the PHP source, with no methods/properties of their
 	 * own, so there's nothing else to generate a stub/arginfo for. */

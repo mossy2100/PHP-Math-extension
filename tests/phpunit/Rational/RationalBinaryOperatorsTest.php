@@ -12,11 +12,11 @@ use TypeError;
 
 /**
  * Tests for Rational's binary arithmetic operator overloads (+, -, *, /, **), only available in
- * the extension -- see docs/Rational.md in this repo. +, -, *, / each accept a Rational, int, or
+ * the extension - see docs/Rational.md in this repo. +, -, *, / each accept a Rational, int, or
  * float operand on either side. When no float is involved, an int operand widens to Rational and
  * the result is an exact Rational, equivalent to calling the same-named method
  * (add()/sub()/mul()/div()) and throwing the same exceptions under the same conditions. When
- * either operand is a genuine float, both widen to float and the result is an ordinary float --
+ * either operand is a genuine float, both widen to float and the result is an ordinary float -
  * something none of the equivalent methods support. ** has its own rules: `Rational ** int` is
  * exact (equivalent to pow(int $exponent)); `Rational ** float` and `float ** Rational` both
  * widen to float; `Rational ** Rational` and `int ** Rational` are unsupported.
@@ -286,7 +286,7 @@ class RationalBinaryOperatorsTest extends TestCase
 
     /**
      * Test int / Rational: not commutative with Rational / int, the int is widened to a Rational
-     * first, then divided normally -- this also gives a way to compute a multiplicative inverse
+     * first, then divided normally - this also gives a way to compute a multiplicative inverse
      * (see "Inverting" tests below).
      */
     public function testDivIntOverRational(): void
@@ -424,7 +424,7 @@ class RationalBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Rational ** Rational is unsupported -- a Rational exponent has no exact Rational
+     * Test Rational ** Rational is unsupported - a Rational exponent has no exact Rational
      * result, and there's no float operand present to trigger the float-widening pathway either.
      */
     public function testPowRationalToRationalThrows(): void

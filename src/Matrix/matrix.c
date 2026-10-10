@@ -7,12 +7,12 @@
  * well as the other matrix_*.c implementation files in this directory.
  *
  * Matrix's $data is a genuine PHP array property, one Vector object per row (list<Vector>),
- * matching the pure-PHP class exactly -- see Matrix.php's own $data property doc comment for why
+ * matching the pure-PHP class exactly - see Matrix.php's own $data property doc comment for why
  * row Vectors are mutated in place rather than replaced (offsetGet() hands out a live reference).
  *
  * This is also where the one genuinely new C pattern in this plan lives: a custom `clone_obj`
  * object handler. PHP's default object clone (zend_objects_clone_obj) copies the $data array
- * itself (cheap, COW) but not the Vector *objects* referenced inside it -- a cloned Matrix would
+ * itself (cheap, COW) but not the Vector *objects* referenced inside it - a cloned Matrix would
  * share row Vectors with the original, so mutating a row of one (via set()/setRow()/offsetSet())
  * would silently mutate the other too. matrix_clone_obj() below does the default shallow clone
  * first, then deep-clones each row Vector, exactly mirroring Matrix::__clone()'s
@@ -40,6 +40,9 @@
 
 /* The registered class entry for OceanMoon\Math\Matrix. */
 zend_class_entry *matrix_ce_Matrix;
+uint32_t matrix_offset_row_count;
+uint32_t matrix_offset_column_count;
+uint32_t matrix_offset_data;
 
 /* The custom object handlers for Matrix, installed by matrix_create_object(). A copy of the
  * standard handlers with `clone_obj` overridden so cloning deep-clones row Vectors, matching the
@@ -85,11 +88,14 @@ zend_result matrix_init(zend_object *obj, zend_long row_count, zend_long column_
 		zend_hash_next_index_insert(Z_ARRVAL(data), &row);
 	}
 
-	zend_update_property(matrix_ce_Matrix, obj, "data", sizeof("data") - 1, &data);
-	zval_ptr_dtor(&data);
+	/* Moves data into the slot (no extra reference to release). */
+	math_types_write_property(obj, matrix_offset_data, &data);
 
-	zend_update_property_long(matrix_ce_Matrix, obj, "rowCount", sizeof("rowCount") - 1, row_count);
-	zend_update_property_long(matrix_ce_Matrix, obj, "columnCount", sizeof("columnCount") - 1, column_count);
+	zval count_zval;
+	ZVAL_LONG(&count_zval, row_count);
+	math_types_write_property(obj, matrix_offset_row_count, &count_zval);
+	ZVAL_LONG(&count_zval, column_count);
+	math_types_write_property(obj, matrix_offset_column_count, &count_zval);
 
 	return SUCCESS;
 }
@@ -109,32 +115,26 @@ zend_result matrix_create(zval *return_value, zend_long row_count, zend_long col
 /* {{{ matrix_read_row_count */
 zend_long matrix_read_row_count(zend_object *obj)
 {
-	zval rv;
-	zval *row_count = zend_read_property(matrix_ce_Matrix, obj, "rowCount", sizeof("rowCount") - 1, 1, &rv);
-	return zval_get_long(row_count);
+	return zval_get_long(math_types_read_property(obj, matrix_offset_row_count));
 }
 /* }}} */
 
 /* {{{ matrix_read_column_count */
 zend_long matrix_read_column_count(zend_object *obj)
 {
-	zval rv;
-	zval *column_count = zend_read_property(
-		matrix_ce_Matrix, obj, "columnCount", sizeof("columnCount") - 1, 1, &rv);
-	return zval_get_long(column_count);
+	return zval_get_long(math_types_read_property(obj, matrix_offset_column_count));
 }
 /* }}} */
 
 /* {{{ matrix_read_row
  *
- * Returns the zend_object* for the live row Vector at $data[$row], without bounds checking --
+ * Returns the zend_object* for the live row Vector at $data[$row], without bounds checking -
  * callers that accept caller-supplied row indexes must bounds-check first (matching
  * vector_read_element()'s convention).
  */
 zend_object *matrix_read_row(zend_object *obj, zend_long row)
 {
-	zval rv;
-	zval *data = zend_read_property(matrix_ce_Matrix, obj, "data", sizeof("data") - 1, 1, &rv);
+	zval *data = math_types_read_property(obj, matrix_offset_data);
 	zval *row_zval = zend_hash_index_find(Z_ARRVAL_P(data), (zend_ulong) row);
 	return Z_OBJ_P(row_zval);
 }
@@ -249,8 +249,7 @@ static zend_object *matrix_clone_obj(zend_object *object)
 
 	zend_long row_count = matrix_read_row_count(new_obj);
 
-	zval rv;
-	zval *data = zend_read_property(matrix_ce_Matrix, new_obj, "data", sizeof("data") - 1, 1, &rv);
+	zval *data = math_types_read_property(new_obj, matrix_offset_data);
 	SEPARATE_ARRAY(data);
 	HashTable *ht = Z_ARRVAL_P(data);
 
@@ -289,6 +288,9 @@ static zend_object *matrix_create_object(zend_class_entry *ce)
 zend_result matrix_minit(void)
 {
 	matrix_ce_Matrix = register_class_OceanMoon_Math_Matrix(zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess);
+	matrix_offset_row_count = math_types_property_offset(matrix_ce_Matrix, "rowCount");
+	matrix_offset_column_count = math_types_property_offset(matrix_ce_Matrix, "columnCount");
+	matrix_offset_data = math_types_property_offset(matrix_ce_Matrix, "data");
 
 	memcpy(&matrix_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	matrix_object_handlers.clone_obj = matrix_clone_obj;

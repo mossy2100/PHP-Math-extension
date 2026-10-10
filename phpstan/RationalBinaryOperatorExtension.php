@@ -15,7 +15,7 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Rational's binary operator overloading (+, -, *, /, **), which only
  * exists at the C level (the `do_operation` object handler in
- * Rational/rational_operators.c) and so is otherwise entirely invisible to static analysis -- see
+ * Rational/rational_operators.c) and so is otherwise entirely invisible to static analysis - see
  * docs/Rational.md for the runtime behavior this mirrors. Same approach as
  * ComplexBinaryOperatorExtension.
  *
@@ -31,7 +31,7 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
     /**
      * The binary operators Rational overloads. Matches rational_do_operation()'s switch in
      * Rational/rational_operators.c, other than `+`/`-` when used as unary operators, which
-     * PHPStan treats as distinct AST nodes from their binary counterparts -- see
+     * PHPStan treats as distinct AST nodes from their binary counterparts - see
      * RationalUnaryOperatorExtension.
      */
     private const OPERATORS = ['+', '-', '*', '/', '**'];
@@ -50,7 +50,7 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
             // Three forms are supported: Rational ** int (exact), and Rational ** float /
             // float ** Rational (both widen to float). Rational ** Rational and int ** Rational
             // have no exact result and no float operand to trigger widening, so they're
-            // unsupported -- see rational_do_pow()'s doc comment in rational_operators.c and
+            // unsupported - see rational_do_pow()'s doc comment in rational_operators.c and
             // docs/Rational.md's "** (power)" section for the full reasoning. Anything else
             // should fall through to PHPStan's own "invalid binary operation" handling, matching
             // the runtime TypeError.
@@ -63,7 +63,7 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
             return $rightIsRational && (new FloatType())->isSuperTypeOf($leftSide)->yes();
         }
 
-        // At least one side must definitely be a Rational -- otherwise this is ordinary
+        // At least one side must definitely be a Rational - otherwise this is ordinary
         // int|float arithmetic PHPStan already handles fine on its own.
         if (!$leftIsRational && !$rightIsRational) {
             return false;

@@ -15,7 +15,7 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Complex's binary operator overloading (+, -, *, /, **), which only exists
  * at the C level (the `do_operation` object handler in Complex/complex_operators.c) and so is
- * otherwise entirely invisible to static analysis -- see docs/Complex.md for the runtime behavior
+ * otherwise entirely invisible to static analysis - see docs/Complex.md for the runtime behavior
  * this mirrors. Same problem, and same fix, as PHPStan needing this for GMP/BCMath, which is what
  * this extension type is designed for; see
  * https://phpstan.org/developing-extensions/operator-type-specifying-extensions.
@@ -28,7 +28,7 @@ final class ComplexBinaryOperatorExtension implements OperatorTypeSpecifyingExte
      * The binary operators Complex overloads. Matches complex_do_operation()'s switch in
      * Complex/complex_operators.c, other than `~` (always unary) and `+`/`-` when used as unary
      * operators, all three of which PHPStan treats as distinct AST nodes from their binary
-     * counterparts -- see ComplexUnaryOperatorExtension.
+     * counterparts - see ComplexUnaryOperatorExtension.
      */
     private const OPERATORS = ['+', '-', '*', '/', '**'];
 
@@ -38,7 +38,7 @@ final class ComplexBinaryOperatorExtension implements OperatorTypeSpecifyingExte
             return false;
         }
 
-        // At least one side must definitely be a Complex -- otherwise this is ordinary int|float
+        // At least one side must definitely be a Complex - otherwise this is ordinary int|float
         // arithmetic PHPStan already handles fine on its own.
         $complexType = new ObjectType(Complex::class);
         if (!$complexType->isSuperTypeOf($leftSide)->yes() && !$complexType->isSuperTypeOf($rightSide)->yes()) {
@@ -46,7 +46,7 @@ final class ComplexBinaryOperatorExtension implements OperatorTypeSpecifyingExte
         }
 
         // Both sides must be Complex|int|float, matching what complex_operand_to_parts() actually
-        // accepts at runtime -- anything else (e.g. Complex + string) should fall through to
+        // accepts at runtime - anything else (e.g. Complex + string) should fall through to
         // PHPStan's own "invalid binary operation" handling instead of being claimed here.
         return $this->isComplexOrScalar($leftSide) && $this->isComplexOrScalar($rightSide);
     }

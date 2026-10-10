@@ -16,11 +16,11 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Matrix's binary operator overloading (+, -, *, /, **), which only exists at
  * the C level (the `do_operation` object handler in Matrix/matrix_operators.c) and so is otherwise
- * entirely invisible to static analysis -- see docs/Matrix.md for the runtime behavior this
+ * entirely invisible to static analysis - see docs/Matrix.md for the runtime behavior this
  * mirrors. Same approach as ComplexBinaryOperatorExtension/RationalBinaryOperatorExtension.
  *
  * Unlike Rational, there's no float-widening rule here: every supported form results in a Matrix,
- * except `Matrix * Vector`, which results in a Vector (equivalent to mulVector()) -- specifyType()
+ * except `Matrix * Vector`, which results in a Vector (equivalent to mulVector()) - specifyType()
  * only needs to special-case that one combination.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag.
@@ -30,7 +30,7 @@ final class MatrixBinaryOperatorExtension implements OperatorTypeSpecifyingExten
     /**
      * The binary operators Matrix overloads. Matches matrix_do_operation()'s switch in
      * Matrix/matrix_operators.c, other than `+`/`-` when used as unary operators, which PHPStan
-     * treats as distinct AST nodes from their binary counterparts -- see
+     * treats as distinct AST nodes from their binary counterparts - see
      * MatrixUnaryOperatorExtension.
      */
     private const OPERATORS = ['+', '-', '*', '/', '**'];
@@ -82,7 +82,7 @@ final class MatrixBinaryOperatorExtension implements OperatorTypeSpecifyingExten
 
     public function specifyType(string $operatorSigil, Type $leftSide, Type $rightSide): Type
     {
-        // Matrix * Vector is the one form that doesn't result in a Matrix -- equivalent to
+        // Matrix * Vector is the one form that doesn't result in a Matrix - equivalent to
         // mulVector(), it results in a Vector.
         if ($operatorSigil === '*' && (new ObjectType(Vector::class))->isSuperTypeOf($rightSide)->yes()) {
             return new ObjectType(Vector::class);

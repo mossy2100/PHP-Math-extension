@@ -9,9 +9,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Matrix's unary operator overloads (+, -), only available in the extension -- see
- * docs/Matrix.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$matA * 1`/
- * `$matA * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
+ * Tests for Matrix's unary operator overloads (+, -), only available in the extension - see
+ * docs/Matrix.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$m * 1`/
+ * `$m * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
  */
 #[CoversClass(Matrix::class)]
 class MatrixUnaryOperatorsTest extends TestCase
@@ -23,52 +23,52 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $matA = Matrix::fromArray([
+        $m1 = Matrix::fromArray([
             [1, 2],
             [3, 4],
         ]);
-        $matB = +$matA;
+        $m2 = +$m1;
 
         $this->assertSame([
             [1.0, 2.0],
             [3.0, 4.0],
-        ], $matB->toArray());
+        ], $m2->toArray());
     }
 
     /**
-     * Test that unary + returns a new instance, not $matA itself (Matrix is mutable, so this matters).
+     * Test that unary + returns a new instance, not $m1 itself (Matrix is mutable, so this matters).
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $matA = Matrix::fromArray([
+        $m1 = Matrix::fromArray([
             [1, 2],
             [3, 4],
         ]);
-        $matB = +$matA;
+        $m2 = +$m1;
 
-        $this->assertNotSame($matA, $matB);
+        $this->assertNotSame($m1, $m2);
 
-        $matB->set(0, 0, 99);
-        $this->assertSame(1.0, $matA->get(0, 0));
+        $m2->set(0, 0, 99);
+        $this->assertSame(1.0, $m1->get(0, 0));
     }
 
     /**
-     * Test that unary + deep-clones the row Vectors too, not just the Matrix object -- mutating a
-     * row of the clone via ArrayAccess (e.g. $matB[0][1] = ...) must not affect $matA's row, which
+     * Test that unary + deep-clones the row Vectors too, not just the Matrix object - mutating a
+     * row of the clone via ArrayAccess (e.g. $m2[0][1] = ...) must not affect $m1's row, which
      * would happen if the clone's $data array held the same row Vector instances as the original.
      */
     public function testUnaryPlusClonesRows(): void
     {
-        $matA = Matrix::fromArray([
+        $m1 = Matrix::fromArray([
             [1, 2],
             [3, 4],
         ]);
-        $matB = +$matA;
+        $m2 = +$m1;
 
-        $this->assertNotSame($matA[0], $matB[0]);
+        $this->assertNotSame($m1[0], $m2[0]);
 
-        $matB[0][1] = -1;
-        $this->assertSame(2.0, $matA->get(0, 1));
+        $m2[0][1] = -1;
+        $this->assertSame(2.0, $m1->get(0, 1));
     }
 
     #endregion
@@ -80,17 +80,17 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinus(): void
     {
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, -2],
             [3, -4],
         ]);
-        $negated = -$matA;
+        $negated = -$m;
 
         $this->assertSame([
             [-1.0, 2.0],
             [-3.0, 4.0],
         ], $negated->toArray());
-        $this->assertEquals($matA->neg(), $negated);
+        $this->assertEquals($m->neg(), $negated);
     }
 
     /**
@@ -98,17 +98,17 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinusDoesNotMutate(): void
     {
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, -2],
             [3, -4],
         ]);
 
-        $result = -$matA;
+        $result = -$m;
 
         $this->assertSame([
             [1.0, -2.0],
             [3.0, -4.0],
-        ], $matA->toArray());
+        ], $m->toArray());
     }
 
     /**
@@ -116,11 +116,11 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testDoubleUnaryMinus(): void
     {
-        $matA = Matrix::fromArray([
+        $m = Matrix::fromArray([
             [1, -2],
             [3, -4],
         ]);
-        $result = -(-$matA);
+        $result = -(-$m);
 
         $this->assertSame([
             [1.0, -2.0],

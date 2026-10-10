@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Rational's unary operator overloads (+, -), only available in the extension -- see
+ * Tests for Rational's unary operator overloads (+, -), only available in the extension - see
  * docs/Rational.md in this repo. Mirrors the structure of the package's own
  * RationalUnaryArithmeticTest, whose neg() tests the - operator is equivalent to.
  */
