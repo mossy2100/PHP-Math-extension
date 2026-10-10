@@ -1,13 +1,13 @@
 # Vector Operators
 
-Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded - plain PHP classes can't
+Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded. Plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Vector` (properties,
 factory methods, conversion, comparison, dot/cross product, `ArrayAccess`, etc.), see the package's own
-[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md) - this page covers only the operators the extension adds on top of it.
+[Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md). This page covers only the operators the extension adds on top of it.
 
 `Vector` gets the four basic arithmetic operators: `+`, `-`, `*`, and `/`. It does not get (nor require) `**` as raising
 a vector to a power is not a valid mathematical operation. The extension adds no comparison operators either: there's no
-natural sort order for a vector, so no `compare` handler is installed - PHP's own default object comparison still
+natural sort order for a vector, so no `compare` handler is installed. PHP's own default object comparison still
 applies, as it does to any plain PHP object (see [Comparison Operators](Comparison_Operators.md)).
 
 On this page, `$v`, `$v1` and `$v2` are `Vector` values, `$m` is a `Matrix`, and `$x` is an `int` or `float`.
@@ -66,7 +66,7 @@ $negated = -$v;  // [-1, 2, -3]
 ## Binary Arithmetic Operators
 
 Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
-conditions, as that method - see the linked method docs for specifics.
+conditions, as that method. See the linked method docs for specifics.
 
 ---
 
@@ -76,7 +76,7 @@ conditions, as that method - see the linked method docs for specifics.
 $sum = $v1 + $v2;  // Vector + Vector → Vector
 ```
 
-Element-wise; both vectors must be the same count. No other form is supported - there's no scalar addition for `Vector`.
+Element-wise; both vectors must be the same count. No other form is supported: there's no scalar addition for `Vector`.
 
 **Throws:**
 

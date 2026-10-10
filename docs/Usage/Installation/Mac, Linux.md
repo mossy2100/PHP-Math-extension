@@ -4,7 +4,7 @@
 
 [PIE](https://github.com/php/pie) (PHP Installer for Extensions) is the official successor to PECL for installing native PHP extensions, and is what
 this package's `composer.json` `"type": "php-ext"` configuration (`extension-name`, `support-zts`, `support-nts`,
-`configure-options`) is designed for - plain `composer require` can't compile and install a native extension, since
+`configure-options`) is designed for. Plain `composer require` can't compile and install a native extension, since
 Composer only manages PHP-space autoloading, not native builds.
 
 ```bash
@@ -100,7 +100,7 @@ extension={path to oceanmoon_math.so}
 ### Restart, if PHP is running as a persistent daemon
 
 If you're only using PHP from the command line (CLI SAPI), a new `.ini` file takes effect on the very next `php`
-invocation - nothing to restart. But if PHP is also running as a long-lived process - `php-fpm`, or `mod_php` under
+invocation, with nothing to restart. But if PHP is also running as a long-lived process - `php-fpm`, or `mod_php` under
 Apache - that process already loaded its extensions when it started, and won't notice a new `.ini` file until it's
 restarted. Common local setups that fall into this category: Laravel Valet, Herd, or `brew services start php`.
 
@@ -123,6 +123,6 @@ php -m | grep oceanmoon_math
 The response should just be `oceanmoon_math`.
 
 **Note:** this only confirms the CLI SAPI has it loaded. If your actual use case is a web request handled by
-`php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list - `php -m`
+`php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list, so `php -m`
 here says nothing about whether _that_ process has it. Confirm via a script executed through the web server itself (e.g.
 `<?php var_dump(extension_loaded('oceanmoon_math'));`), not just the command line.

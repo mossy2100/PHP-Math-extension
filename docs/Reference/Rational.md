@@ -1,11 +1,11 @@
 # Rational Operators
 
-Operator overloading for `OceanMoon\Math\Rational`, available only when this extension is loaded - plain PHP classes
+Operator overloading for `OceanMoon\Math\Rational`, available only when this extension is loaded. Plain PHP classes
 can't overload operators, so none of this exists in the userland package. For everything else about `Rational`
 (properties, factory methods, conversion, `compare()`/`approxCompare()`, rounding, etc.), see the package's own
-[Rational documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) - this page covers only the operators the extension adds on top of it.
+[Rational documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md). This page covers only the operators the extension adds on top of it.
 
-`Rational` is one of two of the four classes for which comparison operators are provided (the other is `Complex` - see
+`Rational` is one of two of the four classes for which comparison operators are provided (the other is `Complex`; see
 [Complex Operators](Complex.md#comparison-operators)). Unlike `Complex`, `Rational` has a genuine natural ordering; `Vector` and `Matrix` get no
 extension-provided comparison operators, and PHP's default object comparison still applies to both (see
 [Comparison Operators](Comparison_Operators.md)).
@@ -15,7 +15,7 @@ On this page, `$r`, `$r1` and `$r2` are `Rational` values, `$i` is an `int`, `$f
 
 ---
 
-## Numeric type widening
+## Numeric Type Widening
 
 PHP already widens `int` to `float` when the two mix in an operation (e.g. `3 + 4.0` produces a `float`, even though the
 result could technically be represented as an `int`).
@@ -92,7 +92,7 @@ computes the same result you'd get by promoting `$x` to a `Rational` first, then
 `$x->sub($r)` would compute, if that was possible.
 
 A genuine `float` operand is different: since the methods don't accept `float` at all, that case doesn't reduce to a
-method call in any order - the operator instead widens per the rule above and returns a `float`.
+method call in any order. The operator instead widens per the rule above and returns a `float`.
 
 ---
 
@@ -230,7 +230,7 @@ $quotient = $f / $r;    // float / Rational → float
 ```
 
 Division isn't commutative, so `int|float / Rational` is a distinct case from `Rational / int|float`. It also gives a
-way to compute a multiplicative inverse - see "Inverting with `1 / r` or `r ** -1`" below.
+way to compute a multiplicative inverse. See "Inverting with `1 / r` or `r ** -1`" below.
 
 Dividing by zero throws `ArithmeticException`, matching `div()`, even when the divisor is a `float` (`$r / 0.0`). PHP's
 own `/` also throws for a zero divisor, but a `DivisionByZeroError`, so catch `ArithmeticException` here instead.
@@ -351,7 +351,7 @@ $r ** -1;   // 4/3, same result
 
 ## Comparison Operators
 
-- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together - PHP does not provide a
+- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together. PHP doesn't provide a
   mechanism to override these individually.
 - The handler is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare): it accepts `Rational`, `int`, or `float` operands and throws the same
   exceptions for anything else.

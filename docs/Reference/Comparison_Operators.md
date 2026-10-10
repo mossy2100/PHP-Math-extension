@@ -17,31 +17,31 @@ There are two types of comparison operators in PHP:
 ## Loose Comparison Operators
 
 A PHP extension can't override a subset of the loose operators independently: a single `compare` object handler backs
-`<=>`, and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result - there's no way to implement
+`<=>`, and PHP derives the other five (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result. There's no way to implement
 some of the six and fall back to PHP's default for the rest.
 
 `Complex` and `Rational` provide `compare` handlers, so their comparison operators accept `int`/`float` operands as well
 as their own type. Without one - as when using the package alone - comparing with an `int`/`float` instead emits a
 notice and reads the object as `1`, so `Complex(5, 0) == 5` and `Rational(1, 2) == 0.5` are both `false`.
 
-`Vector` and `Matrix` provide no `compare` handler: there's no natural way to order a whole element list against another
-the way there is for a 2-element `(real, imaginary)` tuple or a single rational value, so they keep PHP's own default
-object `compare` handler, like any plain PHP object.
+`Vector` and `Matrix` provide no `compare` handler. There's no natural way to order one list of elements against
+another, as there is for a `(real, imaginary)` pair or a single rational value. So they keep PHP's own default object
+`compare` handler, like any plain PHP object.
 
-- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect - see
+- `Rational` has a genuine natural ordering, so its comparison operators mean exactly what you'd expect. See
   [Rational operators](Rational.md#comparison-operators).
-- `Complex`'s ordering is plain lexicographic (real part first, then imaginary) - useful for sorting and deduplication,
-  but not mathematically meaningful, since there's no total order compatible with complex arithmetic. It's exactly what
-  PHP's own default object comparison already gives two `Complex` instances for free (`$real` is declared before
-  `$imaginary`); the operators only add accepting an `int`/`float` operand on either side. An ordering is undefined for
-  complex values that aren't real, so the ordering operators are useful only for practical ordering (sorting,
-  deduplication) rather than mathematical comparison - and they can't be omitted individually, since PHP wires all six
-  to that one `compare` handler. See [Complex operators](Complex.md#comparison-operators) for the details. When comparing `Complex` values that *are* real
-  (no imaginary part) with other such `Complex` values, or `int` or `float` values, the result is equivalent to
+- `Complex`'s ordering is plain lexicographic (real part first, then imaginary). It's useful for sorting and
+  deduplication, but not mathematically meaningful, since there's no total order compatible with complex arithmetic.
+  It's exactly what PHP's own default object comparison already gives two `Complex` instances for free (`$real` is
+  declared before `$imaginary`); the operators only add accepting an `int`/`float` operand on either side. An ordering
+  is undefined for complex values that aren't real, so the ordering operators are useful only for practical ordering
+  (sorting, deduplication) rather than mathematical comparison. They can't be omitted individually, since PHP wires all
+  six to that one `compare` handler. See [Complex operators](Complex.md#comparison-operators) for the details. When comparing `Complex` values that *are*
+  real (no imaginary part) with other such `Complex` values, or `int` or `float` values, the result is equivalent to
   comparing two reals.
 
 Both `Complex` and `Rational` accept an `int`/`float` operand on either side, promoted the same way their `equal()`
-method promotes one, and throw for a `NAN` operand (no meaningful comparison result) - see each class's own docs for
+method promotes one, and throw for a `NAN` operand (no meaningful comparison result). See each class's own docs for
 specifics.
 
 ---

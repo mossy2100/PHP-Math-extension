@@ -8,7 +8,7 @@
  * only exist here in the extension; the userland package has no way to overload operators, so
  * it exposes the same behavior only as named methods (add()/sub()/mul()/div()/pow()/neg()/
  * compare()/etc.). None of those arithmetic methods accepts a float operand (see docs/Rational.md's
- * "Numeric type widening" section for why the operators can support float where the methods can't).
+ * "Numeric Type Widening" section for why the operators can support float where the methods can't).
  *
  * Numeric widening: when either operand of +, -, *, /, or ** is a genuine float, both operands
  * widen to float and the result is an ordinary float - matching how int widens to float
@@ -331,7 +331,7 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
  * lowers to `$r * 1`.)
  *
  * For +, -, *, /: if either operand is a genuine float, both widen to float and
- * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric type widening"
+ * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric Type Widening"
  * section); otherwise an int operand widens to Rational and the exact-Rational path below
  * applies, matching add()/sub()/mul()/div().
  */

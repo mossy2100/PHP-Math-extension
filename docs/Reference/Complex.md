@@ -1,9 +1,9 @@
 # Complex Operators
 
-Operator overloading for `OceanMoon\Math\Complex`, available only when this extension is loaded - plain PHP classes
-can't overload operators, so none of this exists in the userland package. For everything else about `Complex`
-(properties, factory methods, conversion, comparison, all the trigonometric/transcendental methods, etc.), see the
-package's own [Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md) - this page covers only the operators the extension adds on top of it.
+Operator overloading for `OceanMoon\Math\Complex`, available only when this extension is loaded. Plain PHP classes can't
+overload operators, so none of this exists in the userland package. For everything else about `Complex` (properties,
+factory methods, conversion, comparison, all the trigonometric/transcendental methods, etc.), see the package's own
+[Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md). This page covers only the operators the extension adds on top of it.
 
 On this page, `$z`, `$z1` and `$z2` are `Complex` values, and `$x` is an `int` or `float`.
 
@@ -81,7 +81,7 @@ $conjugate = ~$z;  // 3 - 4i
 ## Binary Arithmetic Operators
 
 Each operator accepts a `Complex` or `int|float` operand on either side. Each is equivalent to calling the same-named
-method directly, and throws the same exceptions, under the same conditions, as that method - see the linked method docs
+method directly, and throws the same exceptions, under the same conditions, as that method. See the linked method docs
 for specifics.
 
 This is a genuine flexibility gain over the fluent method API, not just shorter syntax. `$z->add($x)` is naturally
@@ -94,7 +94,7 @@ different values and the operator lets you express whichever order the math actu
 promotion detour.
 
 Operators also come with precedence and associativity rules that PHP itself resolves, whereas a fluent chain of method
-calls has no notion of precedence at all - it only ever evaluates in the order you nest the calls, so you have to work
+calls has no notion of precedence at all. It only ever evaluates in the order you nest the calls, so you have to work
 out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
 ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
 requires you to have already done that grouping in your head before writing a single method call. This applies equally
@@ -223,7 +223,7 @@ $quotient = $x / $z;    // int|float / Complex → Complex
 ```
 
 Division isn't commutative, so `int|float / Complex` is a distinct case from `Complex / int|float`. It also gives a way
-to compute a multiplicative inverse - see "Inverting with `1 / z` or `z ** -1`" below.
+to compute a multiplicative inverse. See "Inverting with `1 / z` or `z ** -1`" below.
 
 **Throws:**
 
@@ -327,7 +327,7 @@ what PHP's default object comparison already gives two `Complex` instances, sinc
 `$imaginary`. The handler adds one thing: an `int` or `float` operand is accepted on either side, promoted to a
 `Complex` with a zero imaginary part, as [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) does.
 
-A `NAN` operand throws `DomainException`, matching `equal()` - there's no meaningful comparison with "not a number".
+A `NAN` operand throws `DomainException`, matching `equal()`. There's no meaningful comparison with "not a number".
 `INF` and `-INF` are supported despite being outside `Complex`'s always-finite range: a `Complex` is always less than
 `INF` and greater than `-INF`.
 
@@ -481,7 +481,7 @@ $result = $z == $x;    // Complex == int|float → bool
 $result = $x == $z;    // int|float == Complex → bool
 ```
 
-Two distinct instances representing the same value are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) - this is value equality, not identity.
+Two distinct instances representing the same value are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal). This is value equality, not identity.
 
 **Throws:**
 
@@ -544,4 +544,4 @@ $z1 != $z2;   // true
 
 - **[Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)** - the full class documentation in the Math package.
 - **[Rational Operators](Rational.md)** - the other class with comparison operators, backed by its own `compare()` method (unlike
-  `Complex`, which has no such method - see "Comparison Operators" above).
+  `Complex`, which has no such method; see "Comparison Operators" above).

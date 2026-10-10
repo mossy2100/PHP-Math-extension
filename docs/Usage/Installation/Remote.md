@@ -1,8 +1,8 @@
 # Installation: Remote (VPS / Cloud Servers)
 
-A remote Linux server (a DigitalOcean Droplet, an EC2 instance, a plain VPS, etc.) is really just Linux - if the hosting
-provider gives you a shell with root/sudo access and lets you install PHP extensions at all (many managed/ shared hosts
-explicitly don't - see the main `README.md`'s Key Features and Static Analysis sections), you have two options:
+A remote Linux server (a DigitalOcean Droplet, an EC2 instance, a plain VPS, etc.) is really just Linux. If the hosting
+provider gives you a shell with root/sudo access and lets you install PHP extensions at all (many managed or shared
+hosts explicitly don't; see the main `README.md`'s Key Features and Static Analysis sections), you have two options:
 
 1. **[PIE](https://github.com/php/pie)**, exactly as described in the Mac/Linux installation doc, if the server has a C compiler and the PHP
    development headers installed (or you're willing to install them).
@@ -54,7 +54,7 @@ Expected output looks like: `Scan this dir for additional .ini files => /etc/php
 ## Step 4: Create the `.ini` configuration file
 
 On Debian/Ubuntu-family systems, create the configuration file in the central `mods-available` folder rather than
-directly in the scan directory - this is what lets a single `.ini` be shared between the CLI, FPM, and Apache SAPIs via
+directly in the scan directory. This is what lets a single `.ini` be shared between the CLI, FPM, and Apache SAPIs via
 symlinks, rather than needing a separate copy configured per SAPI:
 
 ```bash
@@ -81,7 +81,7 @@ sudo phpenmod oceanmoon_math
 ## Step 6: Restart the service that actually serves your requests
 
 This is the step it's easiest to forget: enabling the module doesn't take effect for a _running_ `php-fpm`/Apache
-process until it's restarted - only the next fresh CLI invocation picks it up automatically.
+process until it's restarted. Only the next fresh CLI invocation picks it up automatically.
 
 - **Nginx (LEMP)**:
   ```bash
@@ -98,8 +98,8 @@ process until it's restarted - only the next fresh CLI invocation picks it up au
 php -m | grep oceanmoon_math
 ```
 
-This confirms the **CLI SAPI** loaded it. It does _not_ confirm `php-fpm`/Apache did - that's a separate process with
-its own independently-loaded extension list. To actually confirm the SAPI serving your web requests has it, either:
+This confirms the **CLI SAPI** loaded it. It does _not_ confirm `php-fpm`/Apache did. That's a separate process with its
+own independently-loaded extension list. To actually confirm the SAPI serving your web requests has it, either:
 
 - Check via a script executed through the web server itself, e.g. a route/page that runs
   `var_dump(extension_loaded('oceanmoon_math'));`, or

@@ -73,14 +73,18 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 ## Development and Quality Assurance
 
-[Claude Chat](https://claude.ai) and [Claude Code](https://www.claude.com/product/claude-code) were used extensively in the development of this extension - from designing the C-level
-object-handler architecture (`do_operation`/`compare` overloads, lazily-computed properties, the custom `clone_obj`
-handler `Matrix` needs for deep-cloning its row `Vector`s) to writing and reviewing the C implementation, stub files,
-and documentation. All code was reviewed by the author. Correctness is validated by a PHPUnit conformance test suite
-that runs the userland package's own test suite (`oceanmoon/math`) against this extension's native classes
-(`tests/phpunit/`), so behavior stays identical between the two - not just method signatures - plus [PHPStan](https://phpstan.org/) (to level
-9), including custom operator-type-specifying extensions so static analysis understands the operator overloads that only
-exist here.
+[Claude Chat](https://claude.ai) and [Claude Code](https://www.claude.com/product/claude-code) were used extensively in developing this extension:
+
+- Designing the C-level object-handler architecture: the `do_operation`/`compare` overloads, lazily-computed properties,
+  and the custom `clone_obj` handler `Matrix` needs to deep-clone its row `Vector`s.
+- Writing and reviewing the C implementation, stub files and documentation.
+
+All code was reviewed by the author. Correctness is validated by:
+
+- A PHPUnit conformance suite (`tests/phpunit/`), which runs the userland package's own tests (`oceanmoon/math`) against
+  this extension's native classes. So behavior stays identical between the two, not just the method signatures.
+- [PHPStan](https://phpstan.org/) at level 9, with custom operator-type-specifying extensions so static analysis understands the operator
+  overloads that only exist here.
 
 ---
 
@@ -88,23 +92,25 @@ exist here.
 
 - **PHP 8.4.x or 8.5.x** (NTS or ZTS). The published build targets 8.4, matching the rest of the OceanMoon PHP package
   family; see "Why PHP 8.4?" below for how to build for 8.5 (or another version) yourself instead.
-- To build from source: a C compiler and the PHP development headers (`phpize`, `php-config`) - see Installation, below.
+- To build from source: a C compiler and the PHP development headers (`phpize`, `php-config`). See Installation, below.
 
 #### Why PHP 8.4?
 
 A compiled PHP extension is ABI-locked to the exact PHP minor version it was built against (its Zend Extension API
-number) - the same `.so` can't just be loaded into a different version, and in the worst case a mismatched build can
+number). The same `.so` can't just be loaded into a different version, and in the worst case a mismatched build can
 compile "successfully" against the wrong version's headers while silently reading/writing the wrong struct layout at
 runtime.
 
 The published, prebuilt module is compiled against PHP 8.4, to match the minimum PHP version required by
 `oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. It's still ABI-locked to 8.4 specifically,
-though - it won't load under 8.5 or any other version.
+though: it won't load under 8.5 or any other version.
 
-**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Usage/Development.md#building), it's simple enough -
-`composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4. The C source supports both 8.4 and 8.5
-already, so this is just a case of building against the PHP version you have installed. Each version builds into its own
-tree (`build/8.4/`, `build/8.5/`, each with its module in `modules/` inside it), so you can keep both side by side.
+**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Usage/Development.md#building):
+
+- `composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4.
+- The C source supports both, so you just build against the PHP version you have installed.
+- Each version builds into its own tree (`build/8.4/`, `build/8.5/`, each with its module in `modules/`), so you can
+  keep both side by side.
 
 **If you're on another version of PHP,** in all likelihood the extension won't build due to changes in the internal Zend
 engine APIs and structures that PHP's C extension interface depends on. These aren't part of PHP's stable,
@@ -127,7 +133,7 @@ See: [Static Analysis](docs/Usage/Static_Analysis.md) for how to extend PHPStan 
 ## Classes
 
 Each class's full API (properties, factory methods, conversion, comparison, everything else) is documented in the Math
-package itself - this extension is a drop-in replacement, not a different API. The table below covers what the extension
+package itself. This extension is a drop-in replacement, not a different API. The table below covers what the extension
 adds (operator overloading) and links to both sets of docs for each class.
 
 | Class      | Arithmetic operators                      | Comparison operators                    | Class reference                                                              | Operator docs                                    |
@@ -152,20 +158,19 @@ operators (`===`, `!==`) can't be overloaded. See [Comparison Operators](docs/Re
 
 ## Operator Precedence
 
-A fluent chain of method calls has no notion of precedence at all - it only ever evaluates in the order you nest the
+A fluent chain of method calls has no notion of precedence at all. It only ever evaluates in the order you nest the
 calls, so `$z1->add($z2->mul($z3))` requires you to have already worked out the correct grouping yourself before writing
 a single method call. Operators come with precedence and associativity rules that PHP itself resolves instead, so
 `$z1 + $z2 * $z3` reads the same as ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically.
 
 That precedence isn't something any of these classes control, though. A PHP extension can overload what an operator
 _does_ (via the `do_operation`/`compare` object handlers, which is how every operator on this page exists at all) but
-not how tightly it binds relative to other operators - precedence and associativity are fixed by the language grammar
+not how tightly it binds relative to other operators. Precedence and associativity are fixed by the language grammar
 itself, entirely outside any extension's control. So none of `Complex`/`Rational`/`Vector`/`Matrix` get their own
 precedence rules; they all just inherit PHP's, same as `int`/`float`.
 
-This is actually a blessing - most PHP developers will know the most important operator precedence rules already
-(multiplication before addition, etc.) - so, keeping them fixed should reduce bugs. Refer to the
-[full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
+This is actually a blessing. Most PHP developers already know the most important precedence rules (multiplication before
+addition, etc.), so keeping them fixed should reduce bugs. Refer to the [full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
 
 The table below shows just the rules relevant to this extension, tightest-binding first:
 

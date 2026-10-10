@@ -1,12 +1,12 @@
 # Matrix Operators
 
-Operator overloading for `OceanMoon\Math\Matrix`, available only when this extension is loaded - plain PHP classes can't
+Operator overloading for `OceanMoon\Math\Matrix`, available only when this extension is loaded. Plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Matrix` (properties,
 factory methods, conversion, comparison, transpose/determinant/inverse, `ArrayAccess`, etc.), see the package's own
-[Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md) - this page covers only the operators the extension adds on top of it.
+[Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md). This page covers only the operators the extension adds on top of it.
 
 `Matrix` gets the four basic arithmetic operators (`+`, `-`, `*`, `/`) plus `**` for matrix powers. The extension adds
-no comparison operators either: there's no natural sort order for a matrix, so no `compare` handler is installed - PHP's
+no comparison operators either: there's no natural sort order for a matrix, so no `compare` handler is installed. PHP's
 own default object comparison still applies, as it does to any plain PHP object (see [Comparison Operators](Comparison_Operators.md)).
 
 On this page, `$m`, `$m1` and `$m2` are `Matrix` values, `$v` is a `Vector`, `$i` is an `int`, and `$x` is an `int` or
@@ -23,7 +23,7 @@ $copy = +$m;  // +Matrix → Matrix
 ```
 
 Returns a new `Matrix` with the same elements. Since `Matrix` is mutable, this matters: mutating the copy never affects
-the original, and vice versa - including at the row level, since cloning a `Matrix` deep-clones its row `Vector`s too
+the original, and vice versa, including at the row level, since cloning a `Matrix` deep-clones its row `Vector`s too
 (matching the package's own `Matrix::__clone()`).
 
 **Examples:**
@@ -67,7 +67,7 @@ $negated = -$m;  // [[-1, 2], [-3, 4]]
 ## Binary Arithmetic Operators
 
 Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
-conditions, as that method - see the linked method docs for specifics.
+conditions, as that method. See the linked method docs for specifics.
 
 ---
 
@@ -77,7 +77,7 @@ conditions, as that method - see the linked method docs for specifics.
 $sum = $m1 + $m2;  // Matrix + Matrix → Matrix
 ```
 
-Both matrices must have the same dimensions. No other form is supported - there's no scalar addition for `Matrix`.
+Both matrices must have the same dimensions. No other form is supported: there's no scalar addition for `Matrix`.
 
 **Throws:**
 
@@ -187,9 +187,9 @@ $result = $x / $m;  // int|float / Matrix → Matrix
 ```
 
 Both forms are element-wise, and not commutative. `int|float / Matrix` divides the scalar by each element of the
-`Matrix` in turn. There's no equivalent named method for this direction - `Matrix::div()` only ever divides the `Matrix`
+`Matrix` in turn. There's no equivalent named method for this direction. `Matrix::div()` only ever divides the `Matrix`
 by a scalar, never the reverse. It throws `ArithmeticException` for a zero element, matching `reciprocal()`. This is
-distinct from `x * A⁻¹` (inverse scaling) - use `$x * $m ** -1` (or `$x * $m->inv()`) for that instead.
+distinct from `x * A⁻¹` (inverse scaling). Use `$x * $m ** -1` (or `$x * $m->inv()`) for that instead.
 
 Unsupported form:
 
