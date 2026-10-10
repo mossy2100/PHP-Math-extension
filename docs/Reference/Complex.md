@@ -80,26 +80,9 @@ $conjugate = ~$z;  // 3 - 4i
 
 ## Binary Arithmetic Operators
 
-Each operator accepts a `Complex` or `int|float` operand on either side. Each is equivalent to calling the same-named
-method directly, and throws the same exceptions, under the same conditions, as that method. See the linked method docs
-for specifics.
-
-This is a genuine flexibility gain over the fluent method API, not just shorter syntax. `$z->add($x)` is naturally
-`Complex + int|float` - the method is called _on_ a `Complex`, so that side is fixed. There's no equally natural way to
-write `int|float + Complex` with the fluent API alone; you'd need to promote the scalar first, e.g.
-`(new Complex($x))->add($z)`. The `+` operator accepts either order directly, so `$x + $z` and `$z + $x` both just work.
-
-This matters most for the non-commutative operators (`-`, `/`, `**`), where `$x - $z` and `$z - $x` are genuinely
-different values and the operator lets you express whichever order the math actually calls for, without a scalar
-promotion detour.
-
-Operators also come with precedence and associativity rules that PHP itself resolves, whereas a fluent chain of method
-calls has no notion of precedence at all. It only ever evaluates in the order you nest the calls, so you have to work
-out the correct grouping yourself and encode it directly as nested `->` calls. `$z1 + $z2 * $z3` reads the same as
-ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically; the fluent equivalent, `$z1->add($z2->mul($z3))`,
-requires you to have already done that grouping in your head before writing a single method call. This applies equally
-to every class this extension adds operators to, so see [Operator Precedence](../../README.md#operator-precedence) in the main README for the shared precedence
-table and PHP manual link.
+Each operator accepts a `Complex` or `int|float` operand on either side. An `int|float` operand is promoted to a
+`Complex`, so `$x - $z` gives what `new Complex($x)->sub($z)` would. The equivalence table in each section gives the
+matching method.
 
 ---
 
@@ -318,23 +301,17 @@ The ordering operators (`<`, `<=`, `>`, `>=`, and `<=>`) aren't backed by a name
 other operators on this page. `Complex` has no `compare()` or `lessThan()`, because ordering complex numbers isn't
 mathematically meaningful unless both are real.
 
-They exist anyway because of how PHP extensions work. Letting `==` and `!=` compare a `Complex` with an `int` or `float`
-requires a `compare` handler, and PHP derives all seven comparison operators from that one handler's result. There's no
-way to provide `==` and `!=` without the others.
+They exist anyway because letting `==` and `!=` compare a `Complex` with an `int` or `float` needs a `compare` handler,
+and PHP derives all seven comparison operators from that one handler. See [Comparison Operators](Comparison_Operators.md#loose-comparison-operators) for how the handlers work
+across all four classes, including `NAN`, `null` and `bool` operands.
 
 The ordering is lexicographic: real parts are compared first, then imaginary parts if the real parts are equal. This is
 what PHP's default object comparison already gives two `Complex` instances, since `$real` is declared before
-`$imaginary`. The handler adds one thing: an `int` or `float` operand is accepted on either side, promoted to a
-`Complex` with a zero imaginary part, as [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal) does.
+`$imaginary`. The handler adds accepting an `int` or `float` operand on either side, promoted to a `Complex` with a zero
+imaginary part. For real values, the result is the same as comparing two reals.
 
-A `NAN` operand throws `DomainException`, matching `equal()`. There's no meaningful comparison with "not a number".
 `INF` and `-INF` are supported despite being outside `Complex`'s always-finite range: a `Complex` is always less than
 `INF` and greater than `-INF`.
-
-PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`. So
-`$z == null` is `false` and `$z == true` is `true`, rather than throwing.
-
-See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes.
 
 ---
 

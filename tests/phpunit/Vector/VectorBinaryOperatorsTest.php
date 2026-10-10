@@ -167,7 +167,7 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Vector * Vector is the Hadamard (element-wise) product, matching hadamardMul().
+     * Test Vector * Vector is the Hadamard (element-wise) product, matching mul() with a Vector.
      */
     public function testMulVectorTimesVector(): void
     {
@@ -176,11 +176,11 @@ class VectorBinaryOperatorsTest extends TestCase
         $result = $v1 * $v2;
 
         $this->assertSame([4.0, 10.0, 18.0], $result->toArray());
-        $this->assertEquals($v1->hadamardMul($v2), $result);
+        $this->assertEquals($v1->mul($v2), $result);
     }
 
     /**
-     * Test Vector * Vector with different counts throws the same exception as hadamardMul().
+     * Test Vector * Vector with different counts throws the same exception as mul().
      */
     public function testMulVectorTimesVectorDifferentCountsThrows(): void
     {
@@ -188,7 +188,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v2 = Vector::fromArray([4, 5]);
 
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage('Cannot compute Hadamard product with Vector of incorrect count: 2. Expected 3.');
+        $this->expectExceptionMessage('Cannot multiply by Vector of incorrect count: 2. Expected 3.');
         $result = $v1 * $v2;
     }
 
@@ -245,7 +245,7 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Vector / Vector is Hadamard (element-wise) division, matching hadamardDiv().
+     * Test Vector / Vector is Hadamard (element-wise) division, matching div() with a Vector.
      */
     public function testDivVectorOverVector(): void
     {
@@ -254,11 +254,11 @@ class VectorBinaryOperatorsTest extends TestCase
         $result = $v1 / $v2;
 
         $this->assertSame([2.0, 3.0, 1.5], $result->toArray());
-        $this->assertEquals($v1->hadamardDiv($v2), $result);
+        $this->assertEquals($v1->div($v2), $result);
     }
 
     /**
-     * Test Vector / Vector with a zero element in the divisor throws the same exception as hadamardDiv().
+     * Test Vector / Vector with a zero element in the divisor throws the same exception as div().
      */
     public function testDivVectorOverVectorZeroElementThrows(): void
     {
@@ -271,7 +271,7 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Vector / Vector with different counts throws the same exception as hadamardDiv().
+     * Test Vector / Vector with different counts throws the same exception as div().
      */
     public function testDivVectorOverVectorDifferentCountsThrows(): void
     {
@@ -279,9 +279,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v2 = Vector::fromArray([1, 2]);
 
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage(
-            'Cannot compute Hadamard quotient with Vector of incorrect count: 2. Expected 3.'
-        );
+        $this->expectExceptionMessage('Cannot divide by Vector of incorrect count: 2. Expected 3.');
         $result = $v1 / $v2;
     }
 

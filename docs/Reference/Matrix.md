@@ -66,8 +66,7 @@ $negated = -$m;  // [[-1, 2], [-3, 4]]
 
 ## Binary Arithmetic Operators
 
-Each operator is equivalent to calling the same-named method directly, and throws the same exceptions, under the same
-conditions, as that method. See the linked method docs for specifics.
+The equivalence table in each section gives the matching method.
 
 ---
 

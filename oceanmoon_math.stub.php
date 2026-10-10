@@ -207,13 +207,9 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess
 
     public function sub(Vector $other): Vector {}
 
-    public function mul(float|Matrix $other): Vector {}
+    public function mul(float|Vector|Matrix $other): Vector {}
 
-    public function div(float $scalar): Vector {}
-
-    public function hadamardMul(Vector $other): Vector {}
-
-    public function hadamardDiv(Vector $other): Vector {}
+    public function div(float|Vector $other): Vector {}
 
     public function dot(Vector $other): float {}
 

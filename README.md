@@ -39,6 +39,8 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 - **Expressiveness** - mathematical expressions translate directly into code: `$z1 + $z2 * $z3` instead of
   `$z1->add($z2->mul($z3))`.
+- **Either operand order** - `$x - $z` works as well as `$z - $x`. A method can only be called on the object, so the
+  method form of `$x - $z` needs the scalar promoted first: `new Complex($x)->sub($z)`.
 - **Operator precedence** - PHP applies the usual precedence rules automatically. With the fluent method API, the
   programmer must get the order of operations right by hand. See [Operator Precedence](#operator-precedence).
 - **Operations with no method equivalent** - some operator forms have no matching method. For example,

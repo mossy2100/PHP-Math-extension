@@ -18,7 +18,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   - `Rational ** Rational` and `int ** Rational` are exact, like `pow()`. For example, `4 ** new Rational(1, 2)` is `2`.
   - `float ** Rational` gives a float, with a real result for an odd root of a negative base:
     `(-8.0) ** new Rational(1, 3)` is `-2.0`, not `NAN`.
-- **`Vector * Vector` and `Vector / Vector`** are element-wise (Hadamard), matching `hadamardMul()` and `hadamardDiv()`.
+- **`Vector * Vector` and `Vector / Vector`** are element-wise (Hadamard), matching `mul()` and `div()` with a vector.
   Both previously threw `TypeError`.
 - **`Rational::trunc()`**, matching the package: the integer part, truncating toward zero.
 - **`(float) $r` and `(int) $r`** give `$r->toFloat()` and `$r->trunc()`, as do `floatval()`, `intval()` and
@@ -29,6 +29,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 - **`Matrix::mul()` accepts a `Vector`, replacing `Matrix::mulVector()` (breaking).** `$m->mul($v)` is _Ax_ and returns
   a `Vector`. PHPStan infers the return type from the argument type.
+- **`Vector::mul()` and `Vector::div()` accept a `Vector`, replacing `hadamardMul()` and `hadamardDiv()` (breaking),**
+  matching the package. `div()`'s parameter is renamed from `$scalar` to `$other`.
 - **`Vector::fromArray()`/`Matrix::fromArray()` (breaking):** a non-numeric element, or a `Matrix` row that isn't an
   array, throws `InvalidArgumentException` instead of `DomainException`. A non-finite element, or a row that isn't a
   list, still throws `DomainException`. The messages match the package.

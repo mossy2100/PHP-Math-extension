@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0c8f1187141f013ee928f1d8a4b52dcbae5865f */
+ * Stub hash: 4b69afc51f8fd13f758f956f7ce5ae7370af7a9e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -239,16 +239,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OceanMoon_Math_Vector_sub arginfo_class_OceanMoon_Math_Vector_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_mul, 0, 1, OceanMoon\\Math\\Vector, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Matrix, MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix, MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_div, 0, 1, OceanMoon\\Math\\Vector, 0)
-	ZEND_ARG_TYPE_INFO(0, scalar, IS_DOUBLE, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Vector, MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
-
-#define arginfo_class_OceanMoon_Math_Vector_hadamardMul arginfo_class_OceanMoon_Math_Vector_add
-
-#define arginfo_class_OceanMoon_Math_Vector_hadamardDiv arginfo_class_OceanMoon_Math_Vector_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Vector_dot, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_OBJ_INFO(0, other, OceanMoon\\Math\\Vector, 0)
@@ -485,8 +481,6 @@ ZEND_METHOD(OceanMoon_Math_Vector, add);
 ZEND_METHOD(OceanMoon_Math_Vector, sub);
 ZEND_METHOD(OceanMoon_Math_Vector, mul);
 ZEND_METHOD(OceanMoon_Math_Vector, div);
-ZEND_METHOD(OceanMoon_Math_Vector, hadamardMul);
-ZEND_METHOD(OceanMoon_Math_Vector, hadamardDiv);
 ZEND_METHOD(OceanMoon_Math_Vector, dot);
 ZEND_METHOD(OceanMoon_Math_Vector, cross);
 ZEND_METHOD(OceanMoon_Math_Vector, outer);
@@ -630,8 +624,6 @@ static const zend_function_entry class_OceanMoon_Math_Vector_methods[] = {
 	ZEND_ME(OceanMoon_Math_Vector, sub, arginfo_class_OceanMoon_Math_Vector_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, mul, arginfo_class_OceanMoon_Math_Vector_mul, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, div, arginfo_class_OceanMoon_Math_Vector_div, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Vector, hadamardMul, arginfo_class_OceanMoon_Math_Vector_hadamardMul, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Vector, hadamardDiv, arginfo_class_OceanMoon_Math_Vector_hadamardDiv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, dot, arginfo_class_OceanMoon_Math_Vector_dot, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, cross, arginfo_class_OceanMoon_Math_Vector_cross, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, outer, arginfo_class_OceanMoon_Math_Vector_outer, ZEND_ACC_PUBLIC)

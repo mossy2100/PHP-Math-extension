@@ -10,9 +10,9 @@
  *
  * Delegates entirely to the same "calc core" functions the named methods use (vector_calc_add()/
  * vector_calc_sub()/vector_calc_mul_scalar()/vector_calc_mul_matrix()/vector_calc_div()/
- * vector_calc_hadamard_mul()/vector_calc_hadamard_div(), all in vector_arithmetic.c), so operator
+ * vector_calc_mul_vector()/vector_calc_div_vector(), all in vector_arithmetic.c), so operator
  * and method results/exceptions are guaranteed identical. `Vector * Vector` and `Vector / Vector`
- * are element-wise (Hadamard), matching hadamardMul()/hadamardDiv().
+ * are element-wise (Hadamard), matching mul()/div() with a Vector.
  *
  * Installed on vector_object_handlers in vector_properties_minit() (vector_properties.c),
  * alongside that table's `read_property` override - Vector, like Complex, needs two different
@@ -91,7 +91,7 @@ zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *o
 				return vector_calc_mul_scalar(Z_OBJ_P(op2), scalar, result);
 			}
 			if (op1_is_vector && op2_is_vector) {
-				return vector_calc_hadamard_mul(Z_OBJ_P(op1), Z_OBJ_P(op2), result);
+				return vector_calc_mul_vector(Z_OBJ_P(op1), Z_OBJ_P(op2), result);
 			}
 			if (op1_is_vector && Z_TYPE_P(op2) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op2), matrix_ce_Matrix)) {
 				return vector_calc_mul_matrix(Z_OBJ_P(op1), Z_OBJ_P(op2), result);
@@ -108,7 +108,7 @@ zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *o
 				return vector_calc_scalar_div(scalar, Z_OBJ_P(op2), result);
 			}
 			if (op1_is_vector && op2_is_vector) {
-				return vector_calc_hadamard_div(Z_OBJ_P(op1), Z_OBJ_P(op2), result);
+				return vector_calc_div_vector(Z_OBJ_P(op1), Z_OBJ_P(op2), result);
 			}
 			return FAILURE;
 		}

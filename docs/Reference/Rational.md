@@ -82,17 +82,9 @@ $negated = -$r;  // -2/3
 
 ## Binary Arithmetic Operators
 
-`+`, `-`, `*`, `/` and `**` each accept a `Rational`, `int`, or `float` operand on either side.
-
-`add()`/`sub()`/`mul()`/`div()`/`pow()` only accept `self|int`, and can only be called on a `Rational`; there's no way
-to write `$x->sub($r)` for an `int` `$x`.
-
-The operators lift that restriction: `$r` and `$x` can appear in either order, and `int - Rational` (i.e. `$x - $r`)
-computes the same result you'd get by promoting `$x` to a `Rational` first, then subtracting, matching what
-`$x->sub($r)` would compute, if that was possible.
-
-A genuine `float` operand is different: since the methods don't accept `float` at all, that case doesn't reduce to a
-method call in any order. The operator instead widens per the rule above and returns a `float`.
+`+`, `-`, `*`, `/` and `**` each accept a `Rational`, `int`, or `float` operand on either side, widened as described in
+[Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching method. A form with a `float` operand
+has none, since the methods accept only `Rational|int`.
 
 ---
 
@@ -275,15 +267,8 @@ $result = $r ** $f;    // Rational ** float → float
 $result = $f ** $r;    // float ** Rational → float
 ```
 
-`Rational ** int` is calculated as `(a/b)ⁿ = aⁿ/bⁿ` and simplified.
-
-`Rational ** Rational` and `int ** Rational` are exact. An exponent `p/q` (in lowest terms) means the q-th root, raised
-to the power p:
-
-- The result exists only if the base's numerator and denominator are both perfect q-th powers. Otherwise it's
-  irrational, and the operation throws `DomainException`. A whole-number exponent (`q` = 1) is never irrational.
-- A negative base has a real result only for an odd root (odd `q`). An even root of a negative base throws
-  `DomainException`.
+`Rational ** int`, `Rational ** Rational` and `int ** Rational` are exact, calculated as [`pow()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#pow) does. The result is a
+`Rational`, or the operation throws `DomainException` if the result is irrational or not real.
 
 `Rational ** float` and `float ** Rational` widen the `Rational` to a `float` and return a `float`:
 
@@ -351,20 +336,15 @@ $r ** -1;   // 4/3, same result
 
 ## Comparison Operators
 
-- A single `compare` object handler serves `==`, `!=`, `<`, `<=`, `>`, `>=`, and `<=>` together. PHP doesn't provide a
-  mechanism to override these individually.
-- The handler is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare): it accepts `Rational`, `int`, or `float` operands and throws the same
-  exceptions for anything else.
+The `compare` handler behind all seven operators is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare): it accepts `Rational`, `int`, or `float`
+operands and throws the same exceptions for anything else.
 
 If either operand is a `float`, the `Rational` operand will be widened to a `float`, and the two values compared
 normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. If
 that overflows, the values are compared as floats instead, so two very close `Rational` values can compare as equal.
 
-PHP compares an object with `null` or a `bool` itself, without calling the handler, by treating the object as `true`. So
-`$r == null` is `false` and `$r == true` is `true`, rather than throwing.
-
-See **[Comparison Operators](Comparison_Operators.md)** - how comparison works across all four classes, including the `equal()`/`approxEqual()`
-methods recommended over the operators themselves.
+See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes, including `null` and `bool` operands, and the
+`equal()`/`approxEqual()` methods recommended over the operators.
 
 ---
 
