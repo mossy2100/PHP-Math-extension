@@ -15,13 +15,13 @@
 
 /* {{{ OceanMoon\Math\Matrix::count(): int
  *
- * Matches the PHP package's Matrix::count() (Countable): returns $rowCount * $columnCount.
+ * Matches the PHP package's Matrix::count() (Countable): returns $rowCount, matching the row indexes used by
+ * offsetGet() and getIterator().
  */
 PHP_METHOD(OceanMoon_Math_Matrix, count)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	RETURN_LONG(matrix_read_row_count(self) * matrix_read_column_count(self));
+	RETURN_LONG(matrix_read_row_count(Z_OBJ_P(ZEND_THIS)));
 }
 /* }}} */
