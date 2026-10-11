@@ -208,6 +208,16 @@ PHP_METHOD(OceanMoon_Math_Complex, atanh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
+	/* atanh(z) is undefined at z = +-1. */
+	if (y == 0.0 && fabs(x) == 1.0) {
+		zend_throw_exception(
+			math_ce_ArithmeticException,
+			x > 0 ? "Cannot compute inverse hyperbolic tangent of 1." : "Cannot compute inverse hyperbolic tangent of -1.",
+			0
+		);
+		RETURN_THROWS();
+	}
+
 	/* 1 + z, 1 - z. */
 	double one_plus_z_re = 1 + x, one_plus_z_im = y;
 	double one_minus_z_re = 1 - x, one_minus_z_im = -y;

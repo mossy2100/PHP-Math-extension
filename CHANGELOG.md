@@ -29,6 +29,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Changed
 
+- **`Complex::atan()`/`atanh()`** name the function in their singularity messages, matching the package.
 - **`Matrix::count()` returns the number of rows (breaking)**, matching the package, `$m[$i]` and `foreach`.
 - **`Matrix::mul()` accepts a `Vector`, replacing `Matrix::mulVector()` (breaking).** `$m->mul($v)` is _Ax_ and returns
   a `Vector`. PHPStan infers the return type from the argument type.

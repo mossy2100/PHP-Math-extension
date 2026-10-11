@@ -199,6 +199,16 @@ PHP_METHOD(OceanMoon_Math_Complex, atan)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
+	/* atan(z) is undefined at z = +-i. */
+	if (x == 0.0 && fabs(y) == 1.0) {
+		zend_throw_exception(
+			math_ce_ArithmeticException,
+			y > 0 ? "Cannot compute inverse tangent of i." : "Cannot compute inverse tangent of -i.",
+			0
+		);
+		RETURN_THROWS();
+	}
+
 	/* i - z = -x + (1-y)i. i + z = x + (1+y)i. */
 	double i_minus_z_re = -x, i_minus_z_im = 1 - y;
 	double i_plus_z_re = x, i_plus_z_im = 1 + y;
