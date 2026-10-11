@@ -101,6 +101,53 @@ zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d
 }
 /* }}} */
 
+/* {{{ rational_calc_add_sub
+ *
+ * The computational core of add()/sub(), declared in rational_internal.h so the + and - operators
+ * (rational_operators.c) can reuse it. Matches the PHP package's Rational::calcAddSub(): to keep the
+ * intermediate values small, the integer parts are added separately, and the fractions are added
+ * with Knuth's method, which divides out the gcd of the denominators before multiplying. b and d must
+ * be positive.
+ */
+zend_result rational_calc_add_sub(zend_long a, zend_long b, zend_long c, zend_long d, bool subtract, zval *return_value)
+{
+	/* Split each value into an integer part and a fraction, e.g. 7/2 = 3 + 1/2, and add them separately. */
+	zend_long int_part;
+	if ((subtract ? rational_sub_checked(a / b, c / d, &int_part) : rational_add_checked(a / b, c / d, &int_part))
+		== FAILURE) {
+		return FAILURE;
+	}
+	a %= b;
+	c %= d;
+
+	/* Let g = gcd(b, d). Then (a/b) +- (c/d) = t / ((b/g)*d), where t = a*(d/g) +- c*(b/g). */
+	zend_long g = rational_gcd2(b, d);
+	zend_long b_over_g = b / g;
+	zend_long ad, cb, t;
+	if (rational_mul_checked(a, d / g, &ad) == FAILURE || rational_mul_checked(c, b_over_g, &cb) == FAILURE) {
+		return FAILURE;
+	}
+	if ((subtract ? rational_sub_checked(ad, cb, &t) : rational_add_checked(ad, cb, &t)) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* t has no common factor with b/g or d/g, so the only factor to cancel is gcd(t, g). The result is reduced. */
+	zend_long g2 = rational_gcd2(t, g);
+	zend_long num = t / g2;
+	zend_long den, scaled, h;
+	if (rational_mul_checked(b_over_g, d / g2, &den) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* Add the integer part. */
+	if (rational_mul_checked(int_part, den, &scaled) == FAILURE || rational_add_checked(scaled, num, &h) == FAILURE) {
+		return FAILURE;
+	}
+
+	return rational_create(return_value, h, den);
+}
+/* }}} */
+
 /* {{{ rational_calc_inv
  *
  * The computational core of inv(), factored out (declared in rational_internal.h) so pow()'s
@@ -204,7 +251,7 @@ PHP_METHOD(OceanMoon_Math_Rational, inv)
 
 /* {{{ OceanMoon\Math\Rational::add(Rational|int $other): Rational
  *
- * Matches the PHP package's Rational::add(): (a/b) + (c/d) = (ad + bc) / (bd).
+ * Matches the PHP package's Rational::add(), via rational_calc_add_sub().
  */
 PHP_METHOD(OceanMoon_Math_Rational, add)
 {
@@ -219,15 +266,7 @@ PHP_METHOD(OceanMoon_Math_Rational, add)
 		RETURN_THROWS();
 	}
 
-	zend_long ad, bc, h, k;
-	if (rational_mul_checked(a, d, &ad) == FAILURE
-		|| rational_mul_checked(b, c, &bc) == FAILURE
-		|| rational_add_checked(ad, bc, &h) == FAILURE
-		|| rational_mul_checked(b, d, &k) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (rational_create(return_value, h, k) == FAILURE) {
+	if (rational_calc_add_sub(a, b, c, d, false, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -235,7 +274,7 @@ PHP_METHOD(OceanMoon_Math_Rational, add)
 
 /* {{{ OceanMoon\Math\Rational::sub(Rational|int $other): Rational
  *
- * Matches the PHP package's Rational::sub(): (a/b) - (c/d) = (ad - bc) / (bd).
+ * Matches the PHP package's Rational::sub(), via rational_calc_add_sub().
  */
 PHP_METHOD(OceanMoon_Math_Rational, sub)
 {
@@ -250,15 +289,7 @@ PHP_METHOD(OceanMoon_Math_Rational, sub)
 		RETURN_THROWS();
 	}
 
-	zend_long ad, bc, h, k;
-	if (rational_mul_checked(a, d, &ad) == FAILURE
-		|| rational_mul_checked(b, c, &bc) == FAILURE
-		|| rational_sub_checked(ad, bc, &h) == FAILURE
-		|| rational_mul_checked(b, d, &k) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (rational_create(return_value, h, k) == FAILURE) {
+	if (rational_calc_add_sub(a, b, c, d, true, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

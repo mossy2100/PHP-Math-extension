@@ -37,44 +37,6 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
-#include "integers.h"
-
-/* {{{ rop_add_checked/rop_sub_checked/rop_mul_checked
- *
- * Overflow-checked add/sub/mul for the ADD/SUB operator cases below, throwing with the same
- * messages Core\Integers::add()/sub()/mul() use - duplicated from the near-identical helpers in
- * rational_arithmetic.c rather than exposing those too, matching how Complex/complex_operators.c
- * reimplements its own simple arithmetic inline instead of calling into complex_arithmetic.c: the
- * MUL case here doesn't need this (it goes through rational_calc_mul() directly, which already
- * has its own equivalent internally), only ADD/SUB's `ad`/`bc`/`h`/`k` formula does.
- */
-static zend_result rop_add_checked(zend_long a, zend_long b, zend_long *out)
-{
-	if (math_integers_add(a, b, out) != MATH_INTEGERS_OK) {
-		zend_throw_exception(spl_ce_OverflowException, "Overflow in integer addition.", 0);
-		return FAILURE;
-	}
-	return SUCCESS;
-}
-
-static zend_result rop_sub_checked(zend_long a, zend_long b, zend_long *out)
-{
-	if (math_integers_sub(a, b, out) != MATH_INTEGERS_OK) {
-		zend_throw_exception(spl_ce_OverflowException, "Overflow in integer subtraction.", 0);
-		return FAILURE;
-	}
-	return SUCCESS;
-}
-
-static zend_result rop_mul_checked(zend_long a, zend_long b, zend_long *out)
-{
-	if (math_integers_mul(a, b, out) != MATH_INTEGERS_OK) {
-		zend_throw_exception(spl_ce_OverflowException, "Overflow in integer multiplication.", 0);
-		return FAILURE;
-	}
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ rational_operand_to_parts
  *
@@ -381,26 +343,10 @@ zend_result rational_do_operation(uint8_t opcode, zval *result, zval *op1, zval 
 	}
 
 	switch (opcode) {
-		case ZEND_ADD: {
-			zend_long ad, bc, h, k;
-			if (rop_mul_checked(a, d, &ad) == FAILURE
-				|| rop_mul_checked(b, c, &bc) == FAILURE
-				|| rop_add_checked(ad, bc, &h) == FAILURE
-				|| rop_mul_checked(b, d, &k) == FAILURE) {
-				return FAILURE;
-			}
-			return rational_create(result, h, k);
-		}
-		case ZEND_SUB: {
-			zend_long ad, bc, h, k;
-			if (rop_mul_checked(a, d, &ad) == FAILURE
-				|| rop_mul_checked(b, c, &bc) == FAILURE
-				|| rop_sub_checked(ad, bc, &h) == FAILURE
-				|| rop_mul_checked(b, d, &k) == FAILURE) {
-				return FAILURE;
-			}
-			return rational_create(result, h, k);
-		}
+		case ZEND_ADD:
+			return rational_calc_add_sub(a, b, c, d, false, result);
+		case ZEND_SUB:
+			return rational_calc_add_sub(a, b, c, d, true, result);
 		case ZEND_MUL:
 			return rational_calc_mul(a, b, c, d, result);
 		case ZEND_DIV: {

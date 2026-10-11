@@ -87,6 +87,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   the package.
 - **`Complex::sqrt()` and `roots()` are exact on the axes**, matching the package. `pow(0.5)` and `** 0.5` use
   `sqrt()`, as do `asin()`, `acos()`, `asinh()` and `acosh()`. `roots()` refines the root magnitude, like the package.
+- **`Rational::add()`, `sub()`, `+` and `-` only overflow when the result does**, except in rare cases, matching the
+  package.
 - **More `Complex` results match the package exactly:**
   - `fromPolar()` and `roots()` calculate the parts from the phase as given, instead of wrapping it first. The
     magnitude and phase are computed from the parts, as for any other `Complex`, instead of keeping the input values.
