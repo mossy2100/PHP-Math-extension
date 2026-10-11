@@ -346,9 +346,8 @@ $r ** -1;   // 4/3, same result
 The `compare` handler behind all seven operators is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare): it accepts `Rational`, `int`, or `float`
 operands and throws the same exceptions for anything else.
 
-If either operand is a `float`, the `Rational` operand will be widened to a `float`, and the two values compared
-normally as floats. Otherwise, the comparison algorithm uses only integers, to avoid floating point rounding errors. If
-that overflows, the values are compared as floats instead, so two very close `Rational` values can compare as equal.
+The comparison is always exact, including with a `float` operand: the `Rational` isn't converted to a float, which could
+round. For example, `new Rational(1, 3) == 1 / 3` is `false`, since the float is slightly less than 1/3.
 
 See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes, including `null` and `bool` operands, and the
 `equal()`/`approxEqual()` methods recommended over the operators.

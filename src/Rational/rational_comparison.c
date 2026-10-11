@@ -14,6 +14,7 @@
 #endif
 
 #include <float.h>
+#include <math.h>
 
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
@@ -23,6 +24,119 @@
 #include "floats.h"
 #include "integers.h"
 #include "types.h"
+
+/* 2^53, the largest power of 2 below which every integer is exactly representable as a double. */
+#define MATH_MAX_EXACT_INT ((zend_long) 1 << 53)
+
+/* {{{ rational_next_binary_digit
+ *
+ * Matches the PHP package's Rational::nextBinaryDigit(): returns the next binary digit of the fraction rem/den, which
+ * is less than 1, and updates *rem to the rest of it.
+ */
+static int rational_next_binary_digit(zend_long *rem, zend_long den)
+{
+	/* Double the fraction and take its whole number part, without calculating 2 * rem, which could overflow. */
+	if (*rem >= den - *rem) {
+		*rem -= den - *rem;
+		return 1;
+	}
+	*rem += *rem;
+	return 0;
+}
+/* }}} */
+
+/* {{{ rational_compare_fractions
+ *
+ * Matches the PHP package's Rational::compareFractions(): compares two fractions in the range [0, 1) exactly, one
+ * binary digit at a time. The first is rem/den. The second is other_rem/other_den, or, if other_frac isn't NULL,
+ * *other_frac itself.
+ *
+ * This always ends. Two different fractions with denominators below 2^63 differ within 127 binary digits, and a float
+ * fraction has at most 1074.
+ */
+static int rational_compare_fractions(
+	zend_long rem, zend_long den, zend_long other_rem, zend_long other_den, const double *other_frac
+)
+{
+	double frac = other_frac ? *other_frac : 0.0;
+	while (true) {
+		/* If either fraction has no more digits, the one with digits left is greater. */
+		bool has_digits = rem > 0;
+		bool other_has_digits = other_frac ? frac > 0 : other_rem > 0;
+		if (!has_digits || !other_has_digits) {
+			return (int) has_digits - (int) other_has_digits;
+		}
+
+		/* Get the next digit of each. */
+		int digit = rational_next_binary_digit(&rem, den);
+		int other_digit;
+		if (other_frac) {
+			/* Doubling a double is exact. */
+			frac *= 2;
+			other_digit = frac >= 1 ? 1 : 0;
+			frac -= other_digit;
+		} else {
+			other_digit = rational_next_binary_digit(&other_rem, other_den);
+		}
+
+		if (digit != other_digit) {
+			return digit - other_digit;
+		}
+	}
+}
+/* }}} */
+
+/* {{{ rational_split_magnitude
+ *
+ * Splits the magnitude of num/den into a whole number part and a remainder, both non-negative - the magnitudes of the
+ * parts the PHP package's Rational::compareExact() gets from toMixedNumber(). A numerator is never ZEND_LONG_MIN, as
+ * it's in lowest terms, so negating either part is safe.
+ */
+static void rational_split_magnitude(zend_long num, zend_long den, zend_long *whole, zend_long *rem)
+{
+	zend_long q = num / den, r = num % den;
+	*whole = q < 0 ? -q : q;
+	*rem = r < 0 ? -r : r;
+}
+/* }}} */
+
+/* {{{ rational_compare_exact
+ *
+ * Matches the PHP package's Rational::compareExact(): compares num/den exactly, without overflow, with
+ * other_num/other_den, or, if other_float isn't NULL, with *other_float, which must be finite and strictly between
+ * -2^63 and 2^63. Compares the signs, then the whole number parts of the magnitudes, then their fractions.
+ */
+static int rational_compare_exact(
+	zend_long num, zend_long den, zend_long other_num, zend_long other_den, const double *other_float
+)
+{
+	/* Compare the signs. */
+	int sign = (num > 0) - (num < 0);
+	int other_sign = other_float ? (*other_float > 0) - (*other_float < 0) : (other_num > 0) - (other_num < 0);
+	if (sign != other_sign || sign == 0) {
+		return sign < other_sign ? -1 : (sign > other_sign ? 1 : 0);
+	}
+
+	/* The signs are the same, so compare the magnitudes, and flip the result if they're negative. */
+	zend_long whole, rem, other_whole, other_rem = 0;
+	rational_split_magnitude(num, den, &whole, &rem);
+	double other_frac = 0.0;
+	if (other_float) {
+		double abs_value = fabs(*other_float);
+		other_whole = (zend_long) floor(abs_value);
+		/* By Sterbenz's lemma, this subtraction is exact, as floor(abs_value) is either 0 or at least abs_value / 2. */
+		other_frac = abs_value - floor(abs_value);
+	} else {
+		rational_split_magnitude(other_num, other_den, &other_whole, &other_rem);
+	}
+
+	int result = whole < other_whole ? -1 : (whole > other_whole ? 1 : 0);
+	if (result == 0) {
+		result = rational_compare_fractions(rem, den, other_rem, other_den, other_float ? &other_frac : NULL);
+	}
+	return sign * result;
+}
+/* }}} */
 
 /* {{{ rational_compare_parts
  *
@@ -46,12 +160,8 @@ static void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b
 		return;
 	}
 
-	/* In case of integer overflow, compare equivalent floating point values. This could produce a
-	 * result of 0 (equal) if two different rationals convert to the same float, which is possible
-	 * for values with a magnitude >= 2^53, but that's ok (matches the PHP source's own caveat). */
-	double a_float = (double) a_num / (double) a_den;
-	double b_float = (double) b_num / (double) b_den;
-	*out = a_float < b_float ? -1 : (a_float > b_float ? 1 : 0);
+	/* In case of integer overflow, use the slower exact comparison. */
+	*out = rational_compare_exact(a_num, a_den, b_num, b_den, NULL);
 }
 /* }}} */
 
@@ -64,8 +174,8 @@ static void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b
  * Matches the PHP package's Rational::compare() exactly: an int operand is promoted to a
  * temporary (numerator, 1) pair directly (skipping actual object construction - a denominator of
  * 1 is always already canonical, so there's nothing rational_create() would do beyond copying the
- * values); a float operand compares via toFloat(); a Rational operand compares via
- * rational_compare_parts(). PHP_INT_MIN is special-cased the same way the PHP source is: a
+ * values); a float operand compares exactly via rational_compare_exact(); a Rational operand
+ * compares via rational_compare_parts(). PHP_INT_MIN is special-cased the same way the PHP source is: a
  * Rational can never equal PHP_INT_MIN (promoting it to a Rational would throw), but a Rational is
  * always greater than it.
  */
@@ -90,8 +200,22 @@ zend_result rational_calc_compare(zend_object *self_obj, zval *other, int *out)
 			zend_throw_exception(spl_ce_DomainException, "Cannot compare Rational with NAN.", 0);
 			return FAILURE;
 		}
-		double self_float = (double) self_num / (double) self_den;
-		*out = self_float < other_dbl ? -1 : (self_float > other_dbl ? 1 : 0);
+		/* Compare exactly, rather than converting this Rational to a float, which can round. Every Rational is
+		 * strictly between -2^63 and 2^63, so a float outside that range decides the result. */
+		double limit = -(double) ZEND_LONG_MIN;
+		if (other_dbl >= limit) {
+			*out = -1;
+		} else if (other_dbl <= -limit) {
+			*out = 1;
+		} else if (self_num >= -MATH_MAX_EXACT_INT && self_num <= MATH_MAX_EXACT_INT && self_den <= MATH_MAX_EXACT_INT
+			&& (double) self_num / (double) self_den != other_dbl) {
+			/* Fast path: the numerator and denominator are exactly representable as doubles, so the quotient is
+			 * correctly rounded. Rounding preserves order, so if it differs from other_dbl, it's on the same side. */
+			double value = (double) self_num / (double) self_den;
+			*out = value < other_dbl ? -1 : 1;
+		} else {
+			*out = rational_compare_exact(self_num, self_den, 0, 1, &other_dbl);
+		}
 		return SUCCESS;
 	}
 
