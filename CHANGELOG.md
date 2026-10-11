@@ -24,6 +24,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`(float) $r` and `(int) $r`** give `$r->toFloat()` and `$r->trunc()`, as do `floatval()`, `intval()` and
   `settype()`. `(int)` truncates, as it does for a float. Without the extension, both casts warn and give `1.0` or `1`.
   PHPStan reports them as errors, since casts have no extension point.
+- **`Vector` and `Matrix` implement `IteratorAggregate`**, matching the package, so `foreach` yields a Vector's
+  elements and a Matrix's live rows, instead of their public properties.
 
 ### Changed
 

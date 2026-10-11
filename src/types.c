@@ -8,6 +8,7 @@
 # include "config.h"
 #endif
 
+#include "ext/spl/spl_array.h"
 #include "types.h"
 
 const char *math_types_debug_type_name(zval *value)
@@ -45,4 +46,16 @@ uint32_t math_types_property_offset(zend_class_entry *ce, const char *name)
 	ZEND_ASSERT(info != NULL && !(info->flags & ZEND_ACC_STATIC));
 
 	return info->offset;
+}
+
+zend_result math_types_array_iterator(zval *return_value, zval *array)
+{
+	object_init_ex(return_value, spl_ce_ArrayIterator);
+	zend_call_known_instance_method_with_1_params(spl_ce_ArrayIterator->constructor, Z_OBJ_P(return_value), NULL, array);
+	if (EG(exception)) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		return FAILURE;
+	}
+	return SUCCESS;
 }

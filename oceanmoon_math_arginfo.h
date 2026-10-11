@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4b69afc51f8fd13f758f956f7ce5ae7370af7a9e */
+ * Stub hash: 2dbf908373efc0c163e27fb7a2ededadbb468167 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -272,6 +272,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Vector_offsetUnset arginfo_class_OceanMoon_Math_Complex_offsetUnset
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_getIterator, 0, 0, Traversable, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Matrix___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, rowCount, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, columnCount, IS_LONG, 0)
@@ -398,6 +401,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Matrix_offsetUnset arginfo_class_OceanMoon_Math_Complex_offsetUnset
 
+#define arginfo_class_OceanMoon_Math_Matrix_getIterator arginfo_class_OceanMoon_Math_Vector_getIterator
+
 ZEND_METHOD(OceanMoon_Math_Complex, __construct);
 ZEND_METHOD(OceanMoon_Math_Complex, fromString);
 ZEND_METHOD(OceanMoon_Math_Complex, fromPolar);
@@ -492,6 +497,7 @@ ZEND_METHOD(OceanMoon_Math_Vector, offsetExists);
 ZEND_METHOD(OceanMoon_Math_Vector, offsetGet);
 ZEND_METHOD(OceanMoon_Math_Vector, offsetSet);
 ZEND_METHOD(OceanMoon_Math_Vector, offsetUnset);
+ZEND_METHOD(OceanMoon_Math_Vector, getIterator);
 ZEND_METHOD(OceanMoon_Math_Matrix, __construct);
 ZEND_METHOD(OceanMoon_Math_Matrix, fromArray);
 ZEND_METHOD(OceanMoon_Math_Matrix, identity);
@@ -531,6 +537,7 @@ ZEND_METHOD(OceanMoon_Math_Matrix, offsetExists);
 ZEND_METHOD(OceanMoon_Math_Matrix, offsetGet);
 ZEND_METHOD(OceanMoon_Math_Matrix, offsetSet);
 ZEND_METHOD(OceanMoon_Math_Matrix, offsetUnset);
+ZEND_METHOD(OceanMoon_Math_Matrix, getIterator);
 
 static const zend_function_entry class_OceanMoon_Math_Complex_methods[] = {
 	ZEND_ME(OceanMoon_Math_Complex, __construct, arginfo_class_OceanMoon_Math_Complex___construct, ZEND_ACC_PUBLIC)
@@ -635,6 +642,7 @@ static const zend_function_entry class_OceanMoon_Math_Vector_methods[] = {
 	ZEND_ME(OceanMoon_Math_Vector, offsetGet, arginfo_class_OceanMoon_Math_Vector_offsetGet, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, offsetSet, arginfo_class_OceanMoon_Math_Vector_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, offsetUnset, arginfo_class_OceanMoon_Math_Vector_offsetUnset, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Vector, getIterator, arginfo_class_OceanMoon_Math_Vector_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -678,6 +686,7 @@ static const zend_function_entry class_OceanMoon_Math_Matrix_methods[] = {
 	ZEND_ME(OceanMoon_Math_Matrix, offsetGet, arginfo_class_OceanMoon_Math_Matrix_offsetGet, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, offsetSet, arginfo_class_OceanMoon_Math_Matrix_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, offsetUnset, arginfo_class_OceanMoon_Math_Matrix_offsetUnset, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Matrix, getIterator, arginfo_class_OceanMoon_Math_Matrix_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -739,13 +748,13 @@ static zend_class_entry *register_class_OceanMoon_Math_Rational(zend_class_entry
 	return class_entry;
 }
 
-static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess)
+static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "OceanMoon\\Math", "Vector", class_OceanMoon_Math_Vector_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess);
+	zend_class_implements(class_entry, 4, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess, class_entry_IteratorAggregate);
 
 	zval property_count_default_value;
 	ZVAL_LONG(&property_count_default_value, 0);
@@ -766,13 +775,13 @@ static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *
 	return class_entry;
 }
 
-static zend_class_entry *register_class_OceanMoon_Math_Matrix(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess)
+static zend_class_entry *register_class_OceanMoon_Math_Matrix(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "OceanMoon\\Math", "Matrix", class_OceanMoon_Math_Matrix_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess);
+	zend_class_implements(class_entry, 4, class_entry_Stringable, class_entry_Countable, class_entry_ArrayAccess, class_entry_IteratorAggregate);
 
 	zval property_rowCount_default_value;
 	ZVAL_LONG(&property_rowCount_default_value, 0);

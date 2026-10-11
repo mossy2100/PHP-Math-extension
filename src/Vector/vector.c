@@ -207,7 +207,9 @@ PHP_METHOD(OceanMoon_Math_Vector, __construct)
  */
 zend_result vector_minit(void)
 {
-	vector_ce_Vector = register_class_OceanMoon_Math_Vector(zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess);
+	vector_ce_Vector = register_class_OceanMoon_Math_Vector(
+		zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess, zend_ce_aggregate
+	);
 	vector_offset_count = math_types_property_offset(vector_ce_Vector, "count");
 	vector_offset_data = math_types_property_offset(vector_ce_Vector, "data");
 

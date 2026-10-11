@@ -5,6 +5,8 @@
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Vector class -
  * unlike Complex (immutable), Vector is mutable, so offsetSet() actually writes; only
  * offsetUnset() always throws, since Vector has a fixed count.
+ *
+ * Also getIterator(), from the "IteratorAggregate implementation" region, which iterates the elements.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -121,3 +123,19 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetUnset)
 	RETURN_THROWS();
 }
 /* }}} */
+
+/* {{ OceanMoon\Math\Vector::getIterator(): Traversable
+ *
+ * Matches the PHP package's Vector::getIterator(): an ArrayIterator over the elements. The elements are a
+ * snapshot, as ArrayIterator copies the array.
+ */
+PHP_METHOD(OceanMoon_Math_Vector, getIterator)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval *data = math_types_read_property(Z_OBJ_P(ZEND_THIS), vector_offset_data);
+	if (math_types_array_iterator(return_value, data) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }} */

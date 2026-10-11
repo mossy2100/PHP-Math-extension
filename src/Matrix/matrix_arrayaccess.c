@@ -4,7 +4,8 @@
  * ArrayAccess methods for OceanMoon\Math\Matrix: offsetExists(), offsetGet(), offsetSet(),
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Matrix class -
  * offsetGet() returns the Matrix's actual internal row Vector (a live reference, unlike getRow()'s
- * independent copy), which is what makes `$m[$row][$col] = $x` work.
+ * independent copy), which is what makes `$m[$row][$col] = $x` work. Also getIterator(), from the
+ * "IteratorAggregate implementation" region, which yields the same live rows.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -161,3 +162,19 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetUnset)
 	RETURN_THROWS();
 }
 /* }}} */
+
+/* {{ OceanMoon\Math\Matrix::getIterator(): Traversable
+ *
+ * Matches the PHP package's Matrix::getIterator(): an ArrayIterator over the rows. The $data array holds the
+ * row Vector objects, so the rows are live, matching offsetGet().
+ */
+PHP_METHOD(OceanMoon_Math_Matrix, getIterator)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval *data = math_types_read_property(Z_OBJ_P(ZEND_THIS), matrix_offset_data);
+	if (math_types_array_iterator(return_value, data) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }} */

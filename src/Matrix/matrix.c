@@ -303,7 +303,9 @@ static zend_object *matrix_create_object(zend_class_entry *ce)
  */
 zend_result matrix_minit(void)
 {
-	matrix_ce_Matrix = register_class_OceanMoon_Math_Matrix(zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess);
+	matrix_ce_Matrix = register_class_OceanMoon_Math_Matrix(
+		zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess, zend_ce_aggregate
+	);
 	matrix_offset_row_count = math_types_property_offset(matrix_ce_Matrix, "rowCount");
 	matrix_offset_column_count = math_types_property_offset(matrix_ce_Matrix, "columnCount");
 	matrix_offset_data = math_types_property_offset(matrix_ce_Matrix, "data");

@@ -171,7 +171,8 @@ final class Rational implements \Stringable
     public function trunc(): int {}
 }
 
-final class Vector implements \Stringable, \Countable, \ArrayAccess
+/** @implements \IteratorAggregate<int, float> */
+final class Vector implements \Stringable, \Countable, \ArrayAccess, \IteratorAggregate
 {
     public int $count = 0;
 
@@ -232,9 +233,12 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void {}
 
     public function offsetUnset(mixed $offset): void {}
+
+    public function getIterator(): \Traversable {}
 }
 
-final class Matrix implements \Stringable, \Countable, \ArrayAccess
+/** @implements \IteratorAggregate<int, Vector> */
+final class Matrix implements \Stringable, \Countable, \ArrayAccess, \IteratorAggregate
 {
     public int $rowCount = 0;
 
@@ -320,4 +324,6 @@ final class Matrix implements \Stringable, \Countable, \ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void {}
 
     public function offsetUnset(mixed $offset): void {}
+
+    public function getIterator(): \Traversable {}
 }

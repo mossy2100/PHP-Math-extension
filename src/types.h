@@ -45,6 +45,14 @@ void math_types_mark_read_only(zend_class_entry *ce, const char *const *names, s
 uint32_t math_types_property_offset(zend_class_entry *ce, const char *name);
 /* }}} */
 
+/* {{{ math_types_array_iterator
+ *
+ * Sets return_value to `new ArrayIterator($array)`, for a getIterator() method. Returns FAILURE, with an exception
+ * pending, if the constructor throws.
+ */
+zend_result math_types_array_iterator(zval *return_value, zval *array);
+/* }}} */
+
 /* {{{ math_types_read_property
  *
  * Returns the zval in a declared property's slot. The caller must already know the object is an
