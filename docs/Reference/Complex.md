@@ -98,7 +98,8 @@ Addition is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**
@@ -135,7 +136,8 @@ Subtraction isn't commutative, so `int|float - Complex` is a distinct case from 
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**
@@ -172,7 +174,8 @@ Multiplication is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**
@@ -250,7 +253,8 @@ Exponentiation isn't commutative, so `int|float ** Complex` is a distinct case f
 **Throws:**
 
 - `ArithmeticException` if raising zero to a negative or non-real power.
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`, or the result isn't finite.
+- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
 **Examples:**

@@ -139,12 +139,48 @@ static zend_result rational_operand_to_double(zval *zv, double *out)
 }
 /* }}} */
 
+/* {{{ rational_check_float_operand
+ *
+ * Throws DomainException "Invalid operand: <value>. Must be finite." for a non-finite float operand. Like the rest
+ * of the library, the float-widened operators never accept or return ±INF or NAN.
+ */
+static zend_result rational_check_float_operand(zval *zv)
+{
+	if (Z_TYPE_P(zv) != IS_DOUBLE || zend_finite(Z_DVAL_P(zv))) {
+		return SUCCESS;
+	}
+	zend_string *value_str = math_floats_to_str(Z_DVAL_P(zv));
+	zend_string *msg = strpprintf(0, "Invalid operand: %s. Must be finite.", ZSTR_VAL(value_str));
+	zend_string_release(value_str);
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ rational_float_result
+ *
+ * Sets a float operator result, throwing OverflowException "Cannot <operation>. The result would overflow." if it
+ * isn't finite. With finite operands, a NAN result means an intermediate value overflowed, so it's reported the same
+ * way.
+ */
+static zend_result rational_float_result(zval *result, double value, const char *operation)
+{
+	if (!zend_finite(value)) {
+		math_throw_overflow(operation);
+		return FAILURE;
+	}
+	ZVAL_DOUBLE(result, value);
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ rational_do_float_operation
  *
  * The float-widened path of +, -, *, / for when either operand is a genuine float (see
- * rational_do_operation()'s doc comment). Division by zero - including float 0.0 - still
- * throws ArithmeticException here rather than producing INF/-INF/NAN, deliberately departing
- * from ordinary float division (see docs/Rational.md's "/ (divide)" section).
+ * rational_do_operation()'s doc comment). Unlike ordinary float arithmetic, a non-finite operand throws
+ * DomainException, an overflowing result throws OverflowException, and division by zero - including float 0.0 -
+ * throws ArithmeticException (see docs/Reference/Rational.md).
  */
 static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
@@ -155,24 +191,23 @@ static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zva
 	if (rational_operand_to_double(op2, &b) == FAILURE) {
 		return FAILURE;
 	}
+	if (rational_check_float_operand(op1) == FAILURE || rational_check_float_operand(op2) == FAILURE) {
+		return FAILURE;
+	}
 
 	switch (opcode) {
 		case ZEND_ADD:
-			ZVAL_DOUBLE(result, a + b);
-			return SUCCESS;
+			return rational_float_result(result, a + b, "add Rational and float");
 		case ZEND_SUB:
-			ZVAL_DOUBLE(result, a - b);
-			return SUCCESS;
+			return rational_float_result(result, a - b, "subtract Rational and float");
 		case ZEND_MUL:
-			ZVAL_DOUBLE(result, a * b);
-			return SUCCESS;
+			return rational_float_result(result, a * b, "multiply Rational and float");
 		case ZEND_DIV:
 			if (b == 0.0) {
 				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 				return FAILURE;
 			}
-			ZVAL_DOUBLE(result, a / b);
-			return SUCCESS;
+			return rational_float_result(result, a / b, "divide Rational and float");
 		default:
 			return FAILURE;
 	}
@@ -181,21 +216,13 @@ static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zva
 
 /* {{{ rational_calc_pow_float
  *
- * The `Rational ** float` operator: the float toFloat() ** exp. Like the
- * other operators' float paths, a NAN exponent gives NAN and an infinite one follows float
- * arithmetic. Where C's (and so PHP's) pow() would give NAN from a finite exponent (a negative
- * base with a non-integer exponent), this throws instead. Overflow gives INF, as for any float.
- * Raising zero to a negative power throws, matching pow() (PHP 8.4 also deprecates 0 ** a
- * negative number).
+ * The `Rational ** float` operator: the float toFloat() ** exp. The caller has checked the exponent is finite.
+ * Where C's (and so PHP's) pow() would give NAN (a negative base with a non-integer exponent), this throws
+ * DomainException instead, and an overflowing result throws OverflowException. Raising zero to a negative power
+ * throws, matching pow() (PHP 8.4 also deprecates 0 ** a negative number).
  */
 static zend_result rational_calc_pow_float(zend_long num, zend_long den, double exponent, zval *return_value)
 {
-	/* A NAN operand gives NAN, as for the other operators. C's pow(1, NAN) would give 1. */
-	if (zend_isnan(exponent)) {
-		ZVAL_DOUBLE(return_value, ZEND_NAN);
-		return SUCCESS;
-	}
-
 	if (num == 0 && exponent < 0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot raise zero to negative power.", 0);
 		return FAILURE;
@@ -208,8 +235,7 @@ static zend_result rational_calc_pow_float(zend_long num, zend_long den, double 
 		return FAILURE;
 	}
 
-	ZVAL_DOUBLE(return_value, result);
-	return SUCCESS;
+	return rational_float_result(return_value, result, "raise Rational to a float power");
 }
 /* }}} */
 
@@ -217,19 +243,12 @@ static zend_result rational_calc_pow_float(zend_long num, zend_long den, double 
  *
  * The `float ** Rational` operator, with the Rational exponent p/q in
  * lowest terms. The result is a float, but unlike PHP's own float ** float, a negative base has a
- * real result for an odd root (odd q): (-8.0) ** (1/3) is -2.0, not NAN. Like the other
- * operators' float paths, a NAN base gives NAN and an infinite one follows float arithmetic. An
- * even root of a negative base (-INF included) throws rather than return NAN. Zero to a negative
- * power also throws, matching pow(). Overflow gives INF, as for any float.
+ * real result for an odd root (odd q): (-8.0) ** (1/3) is -2.0, not NAN. The caller has checked the base is finite.
+ * An even root of a negative base throws DomainException rather than return NAN, and an overflowing result throws
+ * OverflowException. Zero to a negative power also throws, matching pow().
  */
 static zend_result rational_calc_float_pow_rational(double base, zend_long p, zend_long q, zval *return_value)
 {
-	/* A NAN operand gives NAN, as for the other operators. C's pow(NAN, 0) would give 1. */
-	if (zend_isnan(base)) {
-		ZVAL_DOUBLE(return_value, ZEND_NAN);
-		return SUCCESS;
-	}
-
 	/* Handle a zero base, matching pow(). */
 	if (base == 0.0) {
 		if (p < 0) {
@@ -258,8 +277,7 @@ static zend_result rational_calc_float_pow_rational(double base, zend_long p, ze
 		result = pow(base, exponent);
 	}
 
-	ZVAL_DOUBLE(return_value, result);
-	return SUCCESS;
+	return rational_float_result(return_value, result, "raise float to a Rational power");
 }
 /* }}} */
 
@@ -277,9 +295,8 @@ static zend_result rational_calc_float_pow_rational(double base, zend_long p, ze
  *
  * So, as for the other arithmetic operators, the result is a float if either operand is a float,
  * and otherwise an exact Rational. An exact form throws a DomainException if the result is
- * irrational or not real, rather than falling back to a float. A float form follows float
- * arithmetic for a non-finite operand (NAN gives NAN) and gives INF on overflow, like the other
- * operators, but throws rather than give NAN from finite operands.
+ * irrational or not real, rather than falling back to a float. Like the other operators, a float form throws
+ * DomainException for a non-finite operand and OverflowException for an overflowing result.
  */
 static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 {
@@ -294,6 +311,9 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 			return rational_calc_pow(num, den, Z_LVAL_P(op2), result);
 		}
 		if (Z_TYPE_P(op2) == IS_DOUBLE) {
+			if (rational_check_float_operand(op2) == FAILURE) {
+				return FAILURE;
+			}
 			return rational_calc_pow_float(num, den, Z_DVAL_P(op2), result);
 		}
 		if (op2_is_rational) {
@@ -312,6 +332,9 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 			return rational_calc_int_pow_rational(Z_LVAL_P(op1), p, q, result);
 		}
 		if (Z_TYPE_P(op1) == IS_DOUBLE) {
+			if (rational_check_float_operand(op1) == FAILURE) {
+				return FAILURE;
+			}
 			return rational_calc_float_pow_rational(Z_DVAL_P(op1), p, q, result);
 		}
 	}

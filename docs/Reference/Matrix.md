@@ -80,8 +80,8 @@ Both matrices must have the same dimensions. No other form is supported: there's
 
 **Throws:**
 
-- `DomainException` if an element of the result isn't finite.
 - `LengthException` if the matrices have different dimensions.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Matrix`.
 
 **Examples:**
@@ -110,8 +110,8 @@ Both matrices must have the same dimensions. As with `+`, no other form is suppo
 
 **Throws:**
 
-- `DomainException` if an element of the result isn't finite.
 - `LengthException` if the matrices have different dimensions.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Matrix`.
 
 **Examples:**
@@ -149,8 +149,9 @@ commutative: `Vector * Matrix` is a distinct calculation, documented in [Vector 
 
 **Throws:**
 
-- `DomainException` if the scalar or an element of the result isn't finite.
+- `DomainException` if the scalar isn't finite.
 - `LengthException` if the right operand's row count (or a vector's count) doesn't equal the left matrix's column count.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Matrix`, `Vector`, `int` or `float`.
 
 **Examples:**
@@ -201,7 +202,8 @@ Unsupported form:
 **Throws:**
 
 - `ArithmeticException` if dividing by zero, or by a matrix with a zero element.
-- `DomainException` if the scalar divisor or an element of the result isn't finite.
+- `DomainException` if the scalar divisor isn't finite.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't an `int` or `float`.
 
 **Examples:**
@@ -237,8 +239,9 @@ Unsupported form:
 
 **Throws:**
 
-- `ArithmeticException` if the exponent is negative and the matrix isn't invertible (its determinant is zero).
-- `DomainException` if the matrix isn't square, or an element of the result isn't finite.
+- `ArithmeticException` if the exponent is negative and the matrix is singular.
+- `DomainException` if the matrix isn't square.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the exponent isn't an `int`.
 
 **Examples:**
@@ -261,7 +264,7 @@ $m ** -1;   // [[1, -1], [0, 1]]  (the inverse)
 
 Since `Matrix ** int` is supported, `$m ** -1` computes the same inverse as [`$m->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md#inv), since raising to the power -1
 is the mathematical definition of a matrix inverse. Either will throw `DomainException` if `$m` isn't square, and
-`ArithmeticException` if `$m` isn't invertible (zero determinant).
+`ArithmeticException` if `$m` is singular.
 
 **Example:**
 

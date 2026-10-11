@@ -86,6 +86,9 @@ $negated = -$r;  // -2/3
 [Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching method. A form with a `float` operand
 has none, since the methods accept only `Rational|int`.
 
+Unlike PHP's own `float` arithmetic, a form with a `float` operand never accepts or returns `±INF` or `NAN`. A
+non-finite operand throws `DomainException`, and a result too large to represent throws `OverflowException`.
+
 ---
 
 ### + (add)
@@ -102,6 +105,7 @@ Addition is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result's numerator or denominator overflows an `int`.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
@@ -143,6 +147,7 @@ Subtraction isn't commutative, so `int|float - Rational` is a distinct case from
 
 **Throws:**
 
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result's numerator or denominator overflows an `int`.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
@@ -184,7 +189,9 @@ Multiplication is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
-- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result's numerator or denominator overflows an `int`, or a `float` result is too large to
+  represent.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**
@@ -230,7 +237,9 @@ own `/` also throws for a zero divisor, but a `DivisionByZeroError`, so catch `A
 **Throws:**
 
 - `ArithmeticException` if dividing by zero, including `0.0`.
-- `OverflowException` if the result's numerator or denominator overflows an `int`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
+- `OverflowException` if the result's numerator or denominator overflows an `int`, or a `float` result is too large to
+  represent.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**
@@ -274,17 +283,15 @@ $result = $f ** $r;    // float ** Rational → float
 
 - `float ** Rational` gives a real odd root of a negative base: `(-8.0) ** new Rational(1, 3)` is `-2.0`, where PHP's
   own `**` gives `NAN`.
-- Where the result would be `NAN` from finite operands, such as `(-0.25) ** 0.5`, the operation throws `DomainException`
-  instead.
-- A `NAN` operand gives `NAN`, and an infinite operand follows `float` arithmetic, as for the other operators.
-- Overflow gives `INF`, as for any `float` operation.
+- Where PHP's `**` would give `NAN`, such as `(-0.25) ** 0.5`, the operation throws `DomainException` instead.
+- As for the other operators, a non-finite operand throws `DomainException`, and overflow throws `OverflowException`.
 
 **Throws:**
 
 - `ArithmeticException` if raising zero to a negative power.
-- `DomainException` if an exact result is irrational or not real, or a `float` result would be `NAN` from finite
-  operands.
-- `OverflowException` if an exact result's numerator or denominator overflows an `int`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`, or the result is irrational or not real.
+- `OverflowException` if an exact result's numerator or denominator overflows an `int`, or a `float` result is too large
+  to represent.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**

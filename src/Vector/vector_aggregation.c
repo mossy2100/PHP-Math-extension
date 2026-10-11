@@ -11,6 +11,7 @@
 
 #include "php.h"
 #include "vector_internal.h"
+#include "exceptions.h"
 #include "../../oceanmoon_math_arginfo.h"
 
 /* {{{ OceanMoon\Math\Vector::sum(): float
@@ -29,6 +30,11 @@ PHP_METHOD(OceanMoon_Math_Vector, sum)
 		double element;
 		vector_read_element(self, i, &element);
 		sum += element;
+	}
+
+	if (!zend_finite(sum)) {
+		math_throw_overflow("compute sum of Vector");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(sum);
@@ -51,6 +57,11 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 		double element;
 		vector_read_element(self, i, &element);
 		prod *= element;
+	}
+
+	if (!zend_finite(prod)) {
+		math_throw_overflow("compute product of Vector");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(prod);

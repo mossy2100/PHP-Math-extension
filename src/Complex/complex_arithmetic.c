@@ -86,8 +86,11 @@ PHP_METHOD(OceanMoon_Math_Complex, inv)
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
 	double out_real, out_imag;
-	if (complex_calc_div(1.0, 0.0, real, imag, &out_real, &out_imag) == FAILURE
-		|| complex_create(return_value, out_real, out_imag) == FAILURE) {
+	if (complex_calc_div(1.0, 0.0, real, imag, &out_real, &out_imag) == FAILURE) {
+		math_rethrow_overflow("invert Complex");
+		RETURN_THROWS();
+	}
+	if (complex_create(return_value, out_real, out_imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -130,7 +133,7 @@ PHP_METHOD(OceanMoon_Math_Complex, add)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create(return_value, real + other_real, imag + other_imag) == FAILURE) {
+	if (complex_create_result(return_value, real + other_real, imag + other_imag, "add Complex numbers") == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -156,7 +159,8 @@ PHP_METHOD(OceanMoon_Math_Complex, sub)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create(return_value, real - other_real, imag - other_imag) == FAILURE) {
+	if (complex_create_result(return_value, real - other_real, imag - other_imag, "subtract Complex numbers")
+		== FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -182,7 +186,7 @@ PHP_METHOD(OceanMoon_Math_Complex, mul)
 	double a, b;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &a, &b);
 
-	if (complex_create(return_value, a * c - b * d, a * d + b * c) == FAILURE) {
+	if (complex_create_result(return_value, a * c - b * d, a * d + b * c, "multiply Complex numbers") == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -191,8 +195,8 @@ PHP_METHOD(OceanMoon_Math_Complex, mul)
 /* {{{ complex_calc_div
  *
  * Matches the PHP package's Complex::div(): (a+bi)/(c+di) using Smith's algorithm, which avoids the overflow and
- * underflow of computing c^2+d^2 directly. With finite operands and a non-zero divisor, a non-finite part can only
- * be ±INF, so that's reported as overflow.
+ * underflow of computing c^2+d^2 directly. A non-finite part, or magnitude, is reported as overflow, as the package's
+ * `new self()` of the result does.
  */
 zend_result complex_calc_div(double a, double b, double c, double d, double *out_real, double *out_imag)
 {
@@ -214,16 +218,8 @@ zend_result complex_calc_div(double a, double b, double c, double d, double *out
 		imag = (b * r - a) / den;
 	}
 
-	if (!zend_finite(real) || !zend_finite(imag)) {
-		zend_string *dividend_str = complex_parts_to_str(a, b);
-		zend_string *divisor_str = complex_parts_to_str(c, d);
-		zend_string *msg = strpprintf(
-			0, "Cannot divide %s by %s. The result would overflow.", ZSTR_VAL(dividend_str), ZSTR_VAL(divisor_str)
-		);
-		zend_string_release(dividend_str);
-		zend_string_release(divisor_str);
-		zend_throw_exception(spl_ce_OverflowException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (complex_parts_overflow(real, imag)) {
+		math_throw_overflow("divide Complex numbers");
 		return FAILURE;
 	}
 

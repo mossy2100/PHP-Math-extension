@@ -29,8 +29,7 @@
  * Matches the PHP package's Complex::exp(): e^z. Uses the same shortcuts (matching well-known
  * values exactly, including the two Eulerian identities), falling back to Euler's formula
  * (e^(a+bi) = e^a * (cos(b) + i*sin(b))) for the general case, like the package's
- * fromPolar(exp(real), imag). Returns FAILURE (with an exception already thrown) if e^a overflows,
- * with fromPolar()'s message.
+ * fromPolar(exp(real), imag). Returns FAILURE (with OverflowException already thrown) if e^a overflows.
  */
 zend_result complex_calc_exp(double real, double imag, double *out_real, double *out_imag)
 {
@@ -77,11 +76,7 @@ zend_result complex_calc_exp(double real, double imag, double *out_real, double 
 	/* General solution: Euler's formula. */
 	double mag = exp(real);
 	if (!zend_finite(mag)) {
-		zend_string *mag_str = math_floats_to_str(mag);
-		zend_string *msg = strpprintf(0, "Cannot create Complex with non-finite magnitude: %s.", ZSTR_VAL(mag_str));
-		zend_string_release(mag_str);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		math_throw_overflow("compute exponential of Complex");
 		return FAILURE;
 	}
 	*out_real = mag * cos(imag);
@@ -286,6 +281,9 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		double out_real, out_imag;
 		if (result == SUCCESS) {
 			result = complex_calc_div(lnz_real, lnz_imag, lnb_real, lnb_imag, &out_real, &out_imag);
+			if (result == FAILURE) {
+				math_rethrow_overflow("compute logarithm of Complex");
+			}
 		}
 		if (result == SUCCESS) {
 			result = complex_create(return_value, out_real, out_imag);

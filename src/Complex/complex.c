@@ -72,7 +72,8 @@ static void complex_write_double(zend_object *obj, uint32_t offset, double value
  * property, so both instances being compared need real values (not e.g. one populated, one not)
  * for that comparison to be correct. Matches the PHP package's constructor exactly.
  *
- * Returns FAILURE (with an exception already thrown) if either value is non-finite.
+ * Returns FAILURE (with an exception already thrown) if either value is non-finite (DomainException), or
+ * both are finite but the magnitude overflows (OverflowException).
  */
 zend_result complex_init(zend_object *obj, double real, double imag)
 {
@@ -81,9 +82,27 @@ zend_result complex_init(zend_object *obj, double real, double imag)
 		return FAILURE;
 	}
 
+	/* Both parts are finite, but the magnitude can still overflow when both are close to the float limit. */
+	double magnitude = complex_compute_magnitude(real, imag);
+	if (!zend_finite(magnitude)) {
+		zend_string *real_str = math_floats_to_str(real);
+		zend_string *imag_str = math_floats_to_str(imag);
+		zend_string *msg = strpprintf(
+			0,
+			"Cannot create Complex with real part %s and imaginary part %s. Its magnitude would overflow.",
+			ZSTR_VAL(real_str),
+			ZSTR_VAL(imag_str)
+		);
+		zend_string_release(real_str);
+		zend_string_release(imag_str);
+		zend_throw_exception(spl_ce_OverflowException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
 	complex_write_double(obj, complex_offset_real, real);
 	complex_write_double(obj, complex_offset_imaginary, imag);
-	complex_write_double(obj, complex_offset_magnitude, complex_compute_magnitude(real, imag));
+	complex_write_double(obj, complex_offset_magnitude, magnitude);
 	complex_write_double(obj, complex_offset_phase, complex_compute_phase(real, imag));
 
 	return SUCCESS;
@@ -133,6 +152,22 @@ zend_result complex_create(zval *return_value, double real, double imag)
 {
 	object_init_ex(return_value, complex_ce_Complex);
 	return complex_init(Z_OBJ_P(return_value), real, imag);
+}
+/* }}} */
+
+/* {{{ complex_create_result
+ *
+ * Like complex_create(), for the parts of a calculated result. Matches the PHP package's Complex::fromResult():
+ * with finite operands, a non-finite part (or magnitude) means the result, or an intermediate value, overflowed,
+ * so it throws OverflowException "Cannot <operation>. The result would overflow."
+ */
+zend_result complex_create_result(zval *return_value, double real, double imag, const char *operation)
+{
+	if (!zend_finite(real) || !zend_finite(imag) || !zend_finite(complex_compute_magnitude(real, imag))) {
+		math_throw_overflow(operation);
+		return FAILURE;
+	}
+	return complex_create(return_value, real, imag);
 }
 /* }}} */
 
@@ -438,10 +473,8 @@ static zend_result complex_from_string(zval *return_value, zend_string *str)
 	bool ok = complex_try_parse(trimmed, trimmed_len, &real, &imag);
 
 	if (!ok) {
-		zend_string *msg = strpprintf(0, "Cannot convert string '%s' to Complex. Invalid format.", trimmed);
+		math_throw_invalid_format(trimmed, trimmed_len, "Complex");
 		efree(trimmed);
-		zend_throw_exception(math_ce_FormatException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
 		return FAILURE;
 	}
 

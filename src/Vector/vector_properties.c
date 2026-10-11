@@ -20,6 +20,7 @@
 #include "php.h"
 #include "vector_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
+#include "exceptions.h"
 
 /* {{{ vector_read_property
  *
@@ -40,7 +41,12 @@
 static zval *vector_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	if (zend_string_equals_literal(member, "magnitude")) {
-		ZVAL_DOUBLE(rv, vector_compute_magnitude(object));
+		double magnitude = vector_compute_magnitude(object);
+		if (!zend_finite(magnitude)) {
+			math_throw_overflow("compute magnitude of Vector");
+			return &EG(uninitialized_zval);
+		}
+		ZVAL_DOUBLE(rv, magnitude);
 		return rv;
 	}
 

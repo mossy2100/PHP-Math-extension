@@ -13,6 +13,7 @@
 
 #include "php.h"
 #include "matrix_internal.h"
+#include "exceptions.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "floats.h"
 
@@ -55,7 +56,13 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 		}
 	}
 
-	RETURN_DOUBLE(scale * sqrt(sum));
+	double norm = scale * sqrt(sum);
+	if (!zend_finite(norm)) {
+		math_throw_overflow("compute norm of Matrix");
+		RETURN_THROWS();
+	}
+
+	RETURN_DOUBLE(norm);
 }
 /* }}} */
 
@@ -82,6 +89,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, p1Norm)
 		if (col_sum > max) {
 			max = col_sum;
 		}
+	}
+
+	if (!zend_finite(max)) {
+		math_throw_overflow("compute P1 norm of Matrix");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(max);
@@ -111,6 +123,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, pInfNorm)
 		if (row_sum > max) {
 			max = row_sum;
 		}
+	}
+
+	if (!zend_finite(max)) {
+		math_throw_overflow("compute P-infinity norm of Matrix");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(max);

@@ -80,6 +80,18 @@ class ComplexBinaryOperatorsTest extends TestCase
         $this->assertSame(2.0, $z2->imaginary);
     }
 
+    /**
+     * Test + throws OverflowException when the result overflows, matching add().
+     */
+    public function testAddOverflowThrows(): void
+    {
+        $z = new Complex(1e308);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot add Complex numbers. The result would overflow.');
+        $result = $z + 1e308;
+    }
+
     #endregion
 
     #region Operator - (subtract) tests.
@@ -196,6 +208,18 @@ class ComplexBinaryOperatorsTest extends TestCase
         $this->assertSame(4.0, $z2->imaginary);
     }
 
+    /**
+     * Test * throws OverflowException when the result overflows, matching mul().
+     */
+    public function testMulOverflowThrows(): void
+    {
+        $z = new Complex(1e200, 1);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot multiply Complex numbers. The result would overflow.');
+        $result = $z * $z;
+    }
+
     #endregion
 
     #region Operator / (divide) tests.
@@ -282,7 +306,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     public function testDivOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot divide 1.0E+300 by 1.0E-300. The result would overflow.');
+        $this->expectExceptionMessage('Cannot divide Complex numbers. The result would overflow.');
         new Complex(1e300) / new Complex(1e-300);
     }
 
@@ -359,6 +383,18 @@ class ComplexBinaryOperatorsTest extends TestCase
 
         $this->assertSame(3.0, $z1->real);
         $this->assertSame(4.0, $z1->imaginary);
+    }
+
+    /**
+     * Test ** throws OverflowException when the result overflows, matching pow().
+     */
+    public function testPowOverflowThrows(): void
+    {
+        $z = new Complex(10, 1);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot raise Complex to a power. The result would overflow.');
+        $result = $z ** 1000;
     }
 
     #endregion

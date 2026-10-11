@@ -29,4 +29,39 @@ extern zend_class_entry *math_ce_ArithmeticException;
 zend_result math_exceptions_minit(void);
 /* }}} */
 
+/* {{{ math_throw_overflow
+ *
+ * Throws OverflowException "Cannot <operation>. The result would overflow.", matching the PHP package's overflow
+ * messages. If an exception is already pending, the engine chains it as the new exception's previous.
+ */
+void math_throw_overflow(const char *operation);
+/* }}} */
+
+/* {{{ math_rethrow_overflow
+ *
+ * If the pending exception is an OverflowException from an intermediate step, replaces it with one naming the
+ * operation the caller ran, chaining the original as its previous. Any other pending exception is left alone.
+ * Matches the PHP package catching OverflowException and rethrowing with its own message.
+ */
+void math_rethrow_overflow(const char *operation);
+/* }}} */
+
+/* {{{ math_abbrev_string
+ *
+ * Matches OceanMoon\Core\Stringify::abbrev() for a string, as Stringify::prepEx() shows it in an exception message:
+ * single-quoted, with backslashes and single quotes escaped, and cut to 32 characters, ending "…'", if longer.
+ * Returns NULL if the string isn't valid UTF-8, which Stringify can't show. The caller releases the result.
+ */
+zend_string *math_abbrev_string(const char *str, size_t len);
+/* }}} */
+
+/* {{{ math_throw_invalid_format
+ *
+ * Throws the PHP package's fromString() FormatException for an unparseable string, e.g. "Cannot convert string
+ * '3+4x' to Complex. Invalid format.", with the string abbreviated by math_abbrev_string(). A string that isn't
+ * valid UTF-8 is left out of the message.
+ */
+void math_throw_invalid_format(const char *str, size_t len, const char *class_name);
+/* }}} */
+
 #endif /* PHP_MATH_EXCEPTIONS_H */

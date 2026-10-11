@@ -80,7 +80,7 @@ PHP_METHOD(OceanMoon_Math_Complex, sin)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create(return_value, sin(x) * cosh(y), cos(x) * sinh(y)) == FAILURE) {
+	if (complex_create_result(return_value, sin(x) * cosh(y), cos(x) * sinh(y), "compute sine of Complex") == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -97,7 +97,8 @@ PHP_METHOD(OceanMoon_Math_Complex, cos)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create(return_value, cos(x) * cosh(y), -sin(x) * sinh(y)) == FAILURE) {
+	if (complex_create_result(return_value, cos(x) * cosh(y), -sin(x) * sinh(y), "compute cosine of Complex")
+		== FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -114,20 +115,24 @@ PHP_METHOD(OceanMoon_Math_Complex, tan)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	/* sin(z)/cos(z), checking each is finite, as the package's sin() and cos() calls do. */
+	/* sin(z)/cos(z), checking each is representable, as the package's sin() and cos() calls do. An overflow at any
+	 * step is reported as an overflow of tan() itself. */
 	double sin_re = sin(x) * cosh(y), sin_im = cos(x) * sinh(y);
-	if (!zend_finite(sin_re) || !zend_finite(sin_im)) {
-		complex_throw_non_finite(sin_re, sin_im);
+	if (complex_parts_overflow(sin_re, sin_im)) {
+		math_throw_overflow("compute sine of Complex");
+		math_rethrow_overflow("compute tangent of Complex");
 		RETURN_THROWS();
 	}
 	double cos_re = cos(x) * cosh(y), cos_im = -sin(x) * sinh(y);
-	if (!zend_finite(cos_re) || !zend_finite(cos_im)) {
-		complex_throw_non_finite(cos_re, cos_im);
+	if (complex_parts_overflow(cos_re, cos_im)) {
+		math_throw_overflow("compute cosine of Complex");
+		math_rethrow_overflow("compute tangent of Complex");
 		RETURN_THROWS();
 	}
 
 	double out_re, out_im;
 	if (complex_calc_div(sin_re, sin_im, cos_re, cos_im, &out_re, &out_im) == FAILURE) {
+		math_rethrow_overflow("compute tangent of Complex");
 		RETURN_THROWS();
 	}
 
@@ -151,7 +156,12 @@ PHP_METHOD(OceanMoon_Math_Complex, asin)
 	/* iz = -y + xi. */
 	double iz_re = -y, iz_im = x;
 
-	/* 1 - z^2. */
+	/* 1 - z^2, checking z^2 is representable, as the package's mul() does. */
+	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
+		math_throw_overflow("multiply Complex numbers");
+		math_rethrow_overflow("compute inverse sine of Complex");
+		RETURN_THROWS();
+	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
 	double one_minus_z2_im = -(2 * x * y);
 
@@ -184,7 +194,12 @@ PHP_METHOD(OceanMoon_Math_Complex, acos)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	/* 1 - z^2. */
+	/* 1 - z^2, checking z^2 is representable, as the package's mul() does. */
+	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
+		math_throw_overflow("multiply Complex numbers");
+		math_rethrow_overflow("compute inverse cosine of Complex");
+		RETURN_THROWS();
+	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
 	double one_minus_z2_im = -(2 * x * y);
 
@@ -226,6 +241,7 @@ PHP_METHOD(OceanMoon_Math_Complex, atan)
 
 	double div_re, div_im;
 	if (complex_calc_div(i_minus_z_re, i_minus_z_im, i_plus_z_re, i_plus_z_im, &div_re, &div_im) == FAILURE) {
+		math_rethrow_overflow("compute inverse tangent of Complex");
 		RETURN_THROWS();
 	}
 

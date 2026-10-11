@@ -19,6 +19,11 @@
 #include "exceptions.h"
 #include "floats.h"
 
+static zend_result complex_calc_pow_general(
+	zend_object *base_obj, double real, double imag, double other_real, double other_imag, double *out_real,
+	double *out_imag
+);
+
 /* {{{ complex_calc_pow
  *
  * The computational core of pow(), factored out so complex_do_operation() (complex_operators.c)
@@ -69,7 +74,31 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 		return SUCCESS;
 	}
 
-	/* Exponent 2: delegate to sqr(). */
+	/* As in the package, an overflow at any later step is reported as an overflow of pow() itself. */
+	if (complex_calc_pow_general(base_obj, real, imag, other_real, other_imag, out_real, out_imag) == FAILURE) {
+		math_rethrow_overflow("raise Complex to a power");
+		return FAILURE;
+	}
+	if (complex_parts_overflow(*out_real, *out_imag)) {
+		math_throw_overflow("raise Complex to a power");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ complex_calc_pow_general
+ *
+ * The rest of complex_calc_pow(), once the exponent 0 and 1 and zero base cases are handled. Matches the PHP
+ * package's Complex::calcPow(). An overflow throws with the message of the step that overflowed, which
+ * complex_calc_pow() then replaces.
+ */
+static zend_result complex_calc_pow_general(
+	zend_object *base_obj, double real, double imag, double other_real, double other_imag, double *out_real,
+	double *out_imag
+)
+{
+	/* Exponent 2: delegate to sqr(). The caller checks the result. */
 	if (other_real == 2.0 && other_imag == 0.0) {
 		*out_real = real * real - imag * imag;
 		*out_imag = 2 * real * imag;
@@ -100,8 +129,8 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 			if (fmod(y, 2) == 1.0) {
 				double r = result_real * x_real - result_imag * x_imag;
 				double i = result_real * x_imag + result_imag * x_real;
-				if (!zend_finite(r) || !zend_finite(i)) {
-					complex_throw_non_finite(r, i);
+				if (complex_parts_overflow(r, i)) {
+					math_throw_overflow("multiply Complex numbers");
 					return FAILURE;
 				}
 				result_real = r;
@@ -111,8 +140,8 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 			if (y > 0) {
 				double r = x_real * x_real - x_imag * x_imag;
 				double i = x_real * x_imag + x_imag * x_real;
-				if (!zend_finite(r) || !zend_finite(i)) {
-					complex_throw_non_finite(r, i);
+				if (complex_parts_overflow(r, i)) {
+					math_throw_overflow("multiply Complex numbers");
 					return FAILURE;
 				}
 				x_real = r;
@@ -133,8 +162,8 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 
 	double mul_real = other_real * ln_real - other_imag * ln_imag;
 	double mul_imag = other_real * ln_imag + other_imag * ln_real;
-	if (!zend_finite(mul_real) || !zend_finite(mul_imag)) {
-		complex_throw_non_finite(mul_real, mul_imag);
+	if (complex_parts_overflow(mul_real, mul_imag)) {
+		math_throw_overflow("multiply Complex numbers");
 		return FAILURE;
 	}
 
@@ -179,7 +208,7 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create(return_value, real * real - imag * imag, 2 * real * imag) == FAILURE) {
+	if (complex_create_result(return_value, real * real - imag * imag, 2 * real * imag, "square Complex") == FAILURE) {
 		RETURN_THROWS();
 	}
 }

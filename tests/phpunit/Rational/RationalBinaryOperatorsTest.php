@@ -22,9 +22,8 @@ use PHPUnit\Framework\TestCase;
  * something none of the equivalent methods support. ** follows the same rule: `Rational ** int`,
  * `Rational ** Rational` and `int ** Rational` are exact, and throw if the result is irrational;
  * `Rational ** float` and `float ** Rational` are floats. `Rational ** int` and
- * `Rational ** Rational` are equivalent to pow(). Like the other operators' float forms, a float
- * form gives NAN for a NAN operand, follows float arithmetic for an infinite one, and gives INF on
- * overflow, but throws rather than give NAN from finite operands.
+ * `Rational ** Rational` are equivalent to pow(). Unlike PHP's own float arithmetic, every float form throws
+ * DomainException for a non-finite operand and OverflowException for an overflowing result, and never gives NAN.
  */
 #[CoversClass(Rational::class)]
 class RationalBinaryOperatorsTest extends TestCase
@@ -94,6 +93,16 @@ class RationalBinaryOperatorsTest extends TestCase
         $this->assertSame(2, $r1->denominator);
         $this->assertSame(1, $r2->numerator);
         $this->assertSame(3, $r2->denominator);
+    }
+
+    /**
+     * Test a non-finite float operand throws, rather than following float arithmetic.
+     */
+    public function testAddNonFiniteOperandThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid operand: NAN. Must be finite.');
+        $result = new Rational(1, 2) + NAN;
     }
 
     #endregion
@@ -178,6 +187,16 @@ class RationalBinaryOperatorsTest extends TestCase
         $this->assertSame(4, $r2->denominator);
     }
 
+    /**
+     * Test a non-finite float operand throws, rather than following float arithmetic.
+     */
+    public function testSubNonFiniteOperandThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid operand: NAN. Must be finite.');
+        $result = NAN - new Rational(1, 2);
+    }
+
     #endregion
 
     #region Operator * (multiply) tests.
@@ -245,6 +264,26 @@ class RationalBinaryOperatorsTest extends TestCase
         $this->assertSame(3, $r1->denominator);
         $this->assertSame(3, $r2->numerator);
         $this->assertSame(4, $r2->denominator);
+    }
+
+    /**
+     * Test a non-finite float operand throws, rather than following float arithmetic.
+     */
+    public function testMulNonFiniteOperandThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid operand: NAN. Must be finite.');
+        $result = new Rational(1, 2) * NAN;
+    }
+
+    /**
+     * Test a float result that overflows throws.
+     */
+    public function testMulFloatOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot multiply Rational and float. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) * 1e300;
     }
 
     #endregion
@@ -363,6 +402,26 @@ class RationalBinaryOperatorsTest extends TestCase
         $this->assertSame(4, $r2->denominator);
     }
 
+    /**
+     * Test a non-finite float operand throws, rather than following float arithmetic.
+     */
+    public function testDivNonFiniteOperandThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid operand: NAN. Must be finite.');
+        $result = NAN / new Rational(1, 2);
+    }
+
+    /**
+     * Test a float result that overflows throws.
+     */
+    public function testDivFloatOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot divide Rational and float. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) / 1e-300;
+    }
+
     #endregion
 
     #region Operator ** (power) tests.
@@ -431,11 +490,13 @@ class RationalBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test Rational ** float gives INF on overflow, like any float operation.
+     * Test Rational ** float throws when the result overflows.
      */
-    public function testPowRationalToFloatOverflowGivesInf(): void
+    public function testPowRationalToFloatOverflowThrows(): void
     {
-        $this->assertSame(INF, new Rational(PHP_INT_MAX) ** 100.0);
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot raise Rational to a float power. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) ** 100.0;
     }
 
     /**
@@ -489,64 +550,87 @@ class RationalBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test a NAN float operand gives NAN, like the other operators, including where C's pow()
-     * would give 1.
+     * Data for Rational ** float with a non-finite exponent.
+     *
+     * @return array<string, array{Rational, float, string}> Base, exponent, expected message.
      */
-    public function testPowNanOperandGivesNan(): void
+    public static function powRationalToNonFiniteProvider(): array
     {
-        $this->assertNan(new Rational(1, 2) ** NAN);
-        $this->assertNan(new Rational(1) ** NAN);
-        $this->assertNan(NAN ** new Rational(1, 2));
-        $this->assertNan(NAN ** new Rational(0));
+        return [
+            'NAN'  => [
+                new Rational(1, 2),
+                NAN,
+                'Invalid operand: NAN. Must be finite.',
+            ],
+            'INF'  => [
+                new Rational(2),
+                INF,
+                'Invalid operand: INF. Must be finite.',
+            ],
+            '-INF' => [
+                new Rational(0),
+                -INF,
+                'Invalid operand: -INF. Must be finite.',
+            ],
+        ];
     }
 
     /**
-     * Test Rational ** ±INF follows float arithmetic, like the other operators.
+     * Test Rational ** float throws for a non-finite exponent, rather than following float arithmetic.
      */
-    public function testPowRationalToInfinity(): void
-    {
-        $this->assertSame(INF, new Rational(2) ** INF);
-        $this->assertSame(0.0, new Rational(1, 2) ** INF);
-        $this->assertSame(0.0, new Rational(2) ** -INF);
-    }
-
-    /**
-     * Test ±INF ** Rational follows float arithmetic, like the other operators. An odd root of
-     * -INF is real, as for a finite negative base.
-     */
-    public function testPowInfinityToRational(): void
-    {
-        $this->assertSame(INF, INF ** new Rational(1, 2));
-        $this->assertSame(0.0, INF ** new Rational(-1, 2));
-        $this->assertSame(-INF, (-INF) ** new Rational(1, 3));
-    }
-
-    /**
-     * Test -INF ** Rational throws for an even root, like a finite negative base.
-     */
-    public function testPowNegativeInfinityToEvenRootThrows(): void
+    #[DataProvider('powRationalToNonFiniteProvider')]
+    public function testPowRationalToNonFiniteThrows(Rational $base, float $exp, string $message): void
     {
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Cannot raise -INF to power 1/2. The result is not real.');
-        $result = (-INF) ** new Rational(1, 2);
+        $this->expectExceptionMessage($message);
+        $result = $base ** $exp;
     }
 
     /**
-     * Test zero Rational ** -INF throws, like any negative exponent.
+     * Data for float ** Rational with a non-finite base.
+     *
+     * @return array<string, array{float, Rational, string}> Base, exponent, expected message.
      */
-    public function testPowZeroRationalToNegativeInfinityThrows(): void
+    public static function powNonFiniteToRationalProvider(): array
     {
-        $this->expectException(ArithmeticException::class);
-        $result = new Rational(0) ** -INF;
+        return [
+            'NAN'  => [
+                NAN,
+                new Rational(0),
+                'Invalid operand: NAN. Must be finite.',
+            ],
+            'INF'  => [
+                INF,
+                new Rational(1, 2),
+                'Invalid operand: INF. Must be finite.',
+            ],
+            '-INF' => [
+                -INF,
+                new Rational(1, 2),
+                'Invalid operand: -INF. Must be finite.',
+            ],
+        ];
     }
 
     /**
-     * Test float ** Rational gives INF on overflow, like any float operation.
+     * Test float ** Rational throws for a non-finite base, rather than following float arithmetic.
      */
-    public function testPowFloatToRationalOverflowGivesInf(): void
+    #[DataProvider('powNonFiniteToRationalProvider')]
+    public function testPowNonFiniteToRationalThrows(float $base, Rational $exp, string $message): void
     {
-        $this->assertSame(INF, 1e300 ** new Rational(2));
-        $this->assertSame(-INF, (-1e300) ** new Rational(3));
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage($message);
+        $result = $base ** $exp;
+    }
+
+    /**
+     * Test float ** Rational throws when the result overflows.
+     */
+    public function testPowFloatToRationalOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot raise float to a Rational power. The result would overflow.');
+        $result = (-1e300) ** new Rational(3);
     }
 
     /**

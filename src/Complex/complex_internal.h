@@ -28,6 +28,7 @@ extern uint32_t complex_offset_phase;
 zend_result complex_init(zend_object *obj, double real, double imag);
 void complex_throw_non_finite(double real, double imag);
 zend_result complex_create(zval *return_value, double real, double imag);
+zend_result complex_create_result(zval *return_value, double real, double imag, const char *operation);
 zend_result complex_from_polar(zval *return_value, double mag, double phase);
 void complex_read_parts(zend_object *obj, double *out_real, double *out_imag);
 void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, double *out_phase);
@@ -37,6 +38,13 @@ void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, doubl
  * (complex.c) to populate $magnitude/$phase eagerly at construction time. */
 double complex_compute_magnitude(double real, double imag);
 double complex_compute_phase(double real, double imag);
+
+/* True if a calculated (real, imaginary) pair isn't representable as a Complex: a part, or the magnitude, isn't
+ * finite. Mirrors the PHP package's overflow checks on intermediate results (each `new self()` it makes). */
+static inline bool complex_parts_overflow(double real, double imag)
+{
+	return !zend_finite(real) || !zend_finite(imag) || !zend_finite(complex_compute_magnitude(real, imag));
+}
 
 /* Installs the custom object handlers (do_operation, compare, create_object) shared by every
  * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */

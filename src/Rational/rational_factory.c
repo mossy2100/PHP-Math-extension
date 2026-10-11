@@ -295,8 +295,8 @@ PHP_METHOD(OceanMoon_Math_Rational, fromString)
 		}
 	}
 
+	math_throw_invalid_format(ZSTR_VAL(trimmed), ZSTR_LEN(trimmed), "Rational");
 	zend_string_release(trimmed);
-	zend_throw_exception(math_ce_FormatException, "Cannot convert string to Rational. Invalid format.", 0);
 	RETURN_THROWS();
 }
 /* }}} */

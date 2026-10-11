@@ -169,6 +169,22 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 }
 /* }}} */
 
+/* {{{ vector_write_result
+ *
+ * Like vector_write_element(), for a calculated result. Matches the PHP package's Vector::checkResult(): with
+ * finite operands, a non-finite result means it (or an intermediate value) overflowed, so it throws
+ * OverflowException "Cannot <operation>. The result would overflow." rather than set()'s DomainException.
+ */
+zend_result vector_write_result(zend_object *obj, zend_long index, double value, const char *operation)
+{
+	if (!zend_finite(value)) {
+		math_throw_overflow(operation);
+		return FAILURE;
+	}
+	return vector_write_element(obj, index, value);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::__construct(int $count) */
 PHP_METHOD(OceanMoon_Math_Vector, __construct)
 {

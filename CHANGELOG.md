@@ -36,10 +36,31 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   list, still throws `DomainException`. The messages match the package.
 - **`Vector::normalize()`** throws "Cannot normalize zero Vector." for a zero or empty vector, instead of "Cannot divide
   by zero."
-- **`Rational ** float` and `float ** Rational`** throw instead of giving `NAN` from finite operands: an even root of a
-  negative base throws `DomainException`, and zero to a negative power throws `ArithmeticException`. A `NAN` operand
-  still gives `NAN`.
+- **Overflow throws `OverflowException` everywhere (breaking),** matching the package. This covers the methods and the
+  operators. A result, or an intermediate value, too large to represent throws `OverflowException`, with a message
+  naming the operation, instead of `DomainException` or a return value of `INF` or `NAN`. A non-finite operand still
+  throws `DomainException`.
+- **`new Complex()`** throws `OverflowException` when both parts are finite but the magnitude isn't, matching the
+  package.
+- **`Vector::mul()`, `Matrix::mul()` and `*`** throw `DomainException` for a non-finite scalar, like `div()` and `/`.
+- **`Rational` operators with a `float` operand (breaking)** never accept or return `±INF` or `NAN`, like the rest of
+  the library:
+  - A non-finite `float` operand throws `DomainException`, e.g. "Invalid operand: NAN. Must be finite."
+  - A result too large to represent throws `OverflowException`, e.g. "Cannot multiply Rational and float. The result
+    would overflow."
+  - Where PHP's `**` would give `NAN` from finite operands, an even root of a negative base throws `DomainException`,
+    and zero to a negative power throws `ArithmeticException`.
+- **`Complex::fromString()` and `Rational::fromString()`** include the string in an invalid-format message, quoted and
+  abbreviated to 32 characters, matching the package. `Complex` previously showed it in full, and `Rational` not at all.
 - **`scripts/enable` and `scripts/disable`** default to the PHP on `PATH`, rather than 8.4.
+- **`Matrix::inv()`, `det()` and `pow()` use LU decomposition for matrices larger than 3×3 (breaking),** instead of
+  cofactor expansion, which was O(n!): a 10×10 inverse took about 30 seconds, and now takes well under a millisecond.
+  Matrices up to 3×3 still use the closed-form formulas, which give exact results where the arithmetic allows. Matches
+  the package.
+- **`Matrix::inv()` detects near-singular matrices (breaking).** It throws `ArithmeticException` "Cannot invert singular
+  Matrix." if a pivot is negligible relative to its row, instead of only for an exactly zero determinant. Previously, a
+  matrix such as `[[0.1, 0.3], [0.7, 2.1]]`, singular but with a determinant of about 3e-17 due to rounding, gave an
+  inverse with elements around 1e16. The message was "Cannot invert Matrix with zero determinant."
 
 ### Fixed
 

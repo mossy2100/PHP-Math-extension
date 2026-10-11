@@ -9,6 +9,7 @@ use LengthException;
 use OceanMoon\Core\Exceptions\ArithmeticException;
 use OceanMoon\Math\Matrix;
 use OceanMoon\Math\Vector;
+use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -63,6 +64,18 @@ class VectorBinaryOperatorsTest extends TestCase
 
         $this->assertSame([1.0, 2.0, 3.0], $v1->toArray());
         $this->assertSame([4.0, 5.0, 6.0], $v2->toArray());
+    }
+
+    /**
+     * Test + throws OverflowException when the result overflows, matching add().
+     */
+    public function testAddOverflowThrows(): void
+    {
+        $v = Vector::fromArray([1e308]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot add Vectors. The result would overflow.');
+        $result = $v + $v;
     }
 
     #endregion
@@ -204,6 +217,30 @@ class VectorBinaryOperatorsTest extends TestCase
         $this->assertSame([1.0, 2.0, 3.0], $v->toArray());
     }
 
+    /**
+     * Test * throws OverflowException when the result overflows, matching mul().
+     */
+    public function testMulOverflowThrows(): void
+    {
+        $v = Vector::fromArray([1e200]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot multiply Vector by 1.0E+200. The result would overflow.');
+        $result = 1e200 * $v;
+    }
+
+    /**
+     * Test multiplication by a non-finite scalar throws DomainException, matching mul().
+     */
+    public function testMulByNonFiniteThrows(): void
+    {
+        $v = new Vector(0);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid scalar: INF. Must be finite.');
+        $result = $v * INF;
+    }
+
     #endregion
 
     #region Operator / (divide) tests.
@@ -331,6 +368,18 @@ class VectorBinaryOperatorsTest extends TestCase
         $result = $v / 2;
 
         $this->assertSame([2.0, 4.0, 6.0], $v->toArray());
+    }
+
+    /**
+     * Test scalar / Vector throws OverflowException when the result overflows.
+     */
+    public function testScalarDivOverflowThrows(): void
+    {
+        $v = Vector::fromArray([1e-300]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot divide 1.0E+300 by Vector. The result would overflow.');
+        $result = 1e300 / $v;
     }
 
     #endregion

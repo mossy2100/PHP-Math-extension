@@ -15,6 +15,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
+#include "exceptions.h"
 #include "../../oceanmoon_math_arginfo.h"
 
 /* {{{ matrix_identity
@@ -92,6 +93,8 @@ static zend_result matrix_pow_positive(zend_object *self, zend_long exponent, zv
 }
 /* }}} */
 
+static zend_result matrix_calc_pow_general(zend_object *self, zend_long exponent, zval *return_value);
+
 /* {{{ matrix_calc_pow
  *
  * The computational core of pow(), shared with the `**` operator (matrix_operators.c): identity
@@ -121,6 +124,22 @@ zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_
 		return SUCCESS;
 	}
 
+	/* As in the package, an overflow at any later step is reported as an overflow of pow() itself. */
+	if (matrix_calc_pow_general(self, exponent, return_value) == FAILURE) {
+		math_rethrow_overflow("raise Matrix to a power");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ matrix_calc_pow_general
+ *
+ * The rest of matrix_calc_pow(), once the non-square, exponent 0 and exponent 1 cases are handled. Matches the
+ * PHP package's Matrix::calcPow().
+ */
+static zend_result matrix_calc_pow_general(zend_object *self, zend_long exponent, zval *return_value)
+{
 	/* Handle exponent = PHP_INT_MIN: inv()->pow(PHP_INT_MAX)->mul(inv). The inverse is taken first,
 	 * as in the package: squaring the base first would overflow a diagonal entry above 1 to INF, which
 	 * cannot be represented as a Matrix. */
@@ -196,6 +215,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, sqr)
 	}
 
 	if (matrix_calc_mul_matrix(self, self, return_value) == FAILURE) {
+		math_rethrow_overflow("square Matrix");
 		RETURN_THROWS();
 	}
 }

@@ -79,8 +79,8 @@ Element-wise; both vectors must be the same count. No other form is supported: t
 
 **Throws:**
 
-- `DomainException` if an element of the result isn't finite.
 - `LengthException` if the vectors have different counts.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Vector`.
 
 **Examples:**
@@ -109,8 +109,8 @@ Element-wise; both vectors must be the same count. As with `+`, no other form is
 
 **Throws:**
 
-- `DomainException` if an element of the result isn't finite.
 - `LengthException` if the vectors have different counts.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Vector`.
 
 **Examples:**
@@ -149,8 +149,9 @@ count. For the other ways to multiply two vectors, call the method: [`dot()`](ht
 
 **Throws:**
 
-- `DomainException` if the scalar or an element of the result isn't finite.
+- `DomainException` if the scalar isn't finite.
 - `LengthException` if the vectors have different counts, or the matrix's row count doesn't equal the vector's count.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Vector`, `Matrix`, `int` or `float`.
 
 **Examples:**
@@ -207,8 +208,9 @@ Unsupported form:
 **Throws:**
 
 - `ArithmeticException` if dividing by zero, or by a vector with a zero element.
-- `DomainException` if the scalar divisor or an element of the result isn't finite.
+- `DomainException` if the scalar divisor isn't finite.
 - `LengthException` if the vectors have different counts.
+- `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Vector`, `int` or `float`.
 
 **Examples:**

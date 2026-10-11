@@ -104,7 +104,7 @@ PHP_METHOD(OceanMoon_Math_Vector, reciprocal)
 			RETURN_THROWS();
 		}
 
-		if (vector_write_element(result, i, 1.0 / element) == FAILURE) {
+		if (vector_write_result(result, i, 1.0 / element, "compute reciprocal of Vector") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			RETURN_THROWS();
@@ -134,7 +134,7 @@ zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
-		if (vector_write_element(result, i, a + b) == FAILURE) {
+		if (vector_write_result(result, i, a + b, "add Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -184,7 +184,7 @@ zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
-		if (vector_write_element(result, i, a - b) == FAILURE) {
+		if (vector_write_result(result, i, a - b, "subtract Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -220,21 +220,36 @@ PHP_METHOD(OceanMoon_Math_Vector, sub)
  */
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
 {
+	zend_string *scalar_str = math_floats_to_str(scalar);
+
+	if (!zend_finite(scalar)) {
+		zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
+		zend_string_release(scalar_str);
+		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
 	zend_long count = vector_read_count(self);
 	if (vector_create(return_value, count) == FAILURE) {
+		zend_string_release(scalar_str);
 		return FAILURE;
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
+	zend_string *operation = strpprintf(0, "multiply Vector by %s", ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
 	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(self, i, &element);
-		if (vector_write_element(result, i, element * scalar) == FAILURE) {
+		if (vector_write_result(result, i, element * scalar, ZSTR_VAL(operation)) == FAILURE) {
+			zend_string_release(operation);
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
 		}
 	}
+	zend_string_release(operation);
 
 	return SUCCESS;
 }
@@ -257,6 +272,7 @@ zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 	zend_result mul_result = matrix_calc_mul_matrix(Z_OBJ(row_matrix), other, &product);
 	zval_ptr_dtor(&row_matrix);
 	if (mul_result == FAILURE) {
+		math_rethrow_overflow("multiply Vector by Matrix");
 		return FAILURE;
 	}
 
@@ -339,15 +355,20 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
+	zend_string *scalar_str = math_floats_to_str(scalar);
+	zend_string *operation = strpprintf(0, "divide Vector by %s", ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
 	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(obj, i, &element);
-		if (vector_write_element(result, i, element / scalar) == FAILURE) {
+		if (vector_write_result(result, i, element / scalar, ZSTR_VAL(operation)) == FAILURE) {
+			zend_string_release(operation);
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
 		}
 	}
+	zend_string_release(operation);
 
 	return SUCCESS;
 }
@@ -368,6 +389,10 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
+	zend_string *scalar_str = math_floats_to_str(scalar);
+	zend_string *operation = strpprintf(0, "divide %s by Vector", ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
+
 	for (zend_long i = 0; i < count; i++) {
 		double element;
 		vector_read_element(obj, i, &element);
@@ -376,17 +401,20 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
 			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
 			zend_string_release(msg);
+			zend_string_release(operation);
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
 		}
 
-		if (vector_write_element(result, i, scalar / element) == FAILURE) {
+		if (vector_write_result(result, i, scalar / element, ZSTR_VAL(operation)) == FAILURE) {
+			zend_string_release(operation);
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
 		}
 	}
+	zend_string_release(operation);
 
 	return SUCCESS;
 }
@@ -447,7 +475,7 @@ zend_result vector_calc_mul_vector(zend_object *self, zend_object *other, zval *
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
-		if (vector_write_element(result, i, a * b) == FAILURE) {
+		if (vector_write_result(result, i, a * b, "multiply Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -489,7 +517,7 @@ zend_result vector_calc_div_vector(zend_object *self, zend_object *other, zval *
 			return FAILURE;
 		}
 
-		if (vector_write_element(result, i, a / b) == FAILURE) {
+		if (vector_write_result(result, i, a / b, "divide Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;

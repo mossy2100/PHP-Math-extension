@@ -13,6 +13,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
+#include "exceptions.h"
 #include "../../oceanmoon_math_arginfo.h"
 
 /* {{{ OceanMoon\Math\Matrix::t(): Matrix
@@ -82,6 +83,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 	double det = matrix_calc_det(&data_array);
 	zval_ptr_dtor(&data_array);
 
+	if (!zend_finite(det)) {
+		math_throw_overflow("compute determinant of Matrix");
+		RETURN_THROWS();
+	}
+
 	RETURN_DOUBLE(det);
 }
 /* }}} */
@@ -108,6 +114,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, trace)
 		double value;
 		matrix_read_element(self, i, i, &value);
 		sum += value;
+	}
+
+	if (!zend_finite(sum)) {
+		math_throw_overflow("compute trace of Matrix");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(sum);

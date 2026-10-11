@@ -19,9 +19,23 @@ zend_long matrix_read_column_count(zend_object *obj);
 zend_object *matrix_read_row(zend_object *obj, zend_long row);
 zend_result matrix_read_element(zend_object *obj, zend_long row, zend_long col, double *out_value);
 zend_result matrix_write_element(zend_object *obj, zend_long row, zend_long col, double value);
+zend_result matrix_write_result(zend_object *obj, zend_long row, zend_long col, double value, const char *operation);
 
 double matrix_calc_det(zval *data_array);
 void matrix_get_minor(zend_object *obj, zend_long exclude_row, zend_long exclude_col, zval *out_array);
+
+/* An LU decomposition with partial pivoting, from matrix_lu_decompose(). See its doc comment in matrix_helpers.c. */
+typedef struct {
+	zend_long n;
+	double *lu;       /* n × n, row-major: U on and above the diagonal, L's multipliers below it. */
+	zend_long *perm;  /* Position to original row. */
+	int sign;         /* The permutation's sign, 1 or -1. */
+	bool singular;
+} matrix_lu;
+
+void matrix_lu_decompose(zval *data_array, matrix_lu *out);
+void matrix_lu_free(matrix_lu *lu);
+zend_result matrix_inv_from_lu(const matrix_lu *lu, zval *return_value);
 
 zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_value);
 zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_value);

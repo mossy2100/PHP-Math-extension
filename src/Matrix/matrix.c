@@ -221,6 +221,22 @@ zend_result matrix_write_element(zend_object *obj, zend_long row, zend_long col,
 }
 /* }}} */
 
+/* {{{ matrix_write_result
+ *
+ * Like matrix_write_element(), for a calculated result. Matches the PHP package's Matrix::checkResult(): with
+ * finite operands, a non-finite result means it (or an intermediate value) overflowed, so it throws
+ * OverflowException "Cannot <operation>. The result would overflow." rather than set()'s DomainException.
+ */
+zend_result matrix_write_result(zend_object *obj, zend_long row, zend_long col, double value, const char *operation)
+{
+	if (!zend_finite(value)) {
+		math_throw_overflow(operation);
+		return FAILURE;
+	}
+	return matrix_write_element(obj, row, col, value);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::__construct(int $rowCount, int $columnCount) */
 PHP_METHOD(OceanMoon_Math_Matrix, __construct)
 {

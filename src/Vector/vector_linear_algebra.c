@@ -127,6 +127,11 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 		sum += a * b;
 	}
 
+	if (!zend_finite(sum)) {
+		math_throw_overflow("compute dot product");
+		RETURN_THROWS();
+	}
+
 	RETURN_DOUBLE(sum);
 }
 /* }}} */
@@ -193,17 +198,7 @@ PHP_METHOD(OceanMoon_Math_Vector, cross)
 			cross[i] = cross[i] * min_scale * max_scale;
 		}
 		if (!vector_all_finite(cross)) {
-			zval self_str, other_str;
-			ZVAL_STR(&self_str, zval_get_string(ZEND_THIS));
-			ZVAL_STR(&other_str, zval_get_string(other));
-			zend_string *msg = strpprintf(
-				0, "Cannot compute cross product of %s and %s. The result would overflow.",
-				Z_STRVAL(self_str), Z_STRVAL(other_str)
-			);
-			zval_ptr_dtor(&self_str);
-			zval_ptr_dtor(&other_str);
-			zend_throw_exception(spl_ce_OverflowException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
+			math_throw_overflow("compute cross product");
 			RETURN_THROWS();
 		}
 	}
@@ -250,6 +245,7 @@ PHP_METHOD(OceanMoon_Math_Vector, outer)
 	zval_ptr_dtor(&column_matrix);
 	zval_ptr_dtor(&row_matrix);
 	if (result == FAILURE) {
+		math_rethrow_overflow("compute outer product");
 		RETURN_THROWS();
 	}
 }

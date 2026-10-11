@@ -9,6 +9,7 @@ use LengthException;
 use OceanMoon\Core\Exceptions\ArithmeticException;
 use OceanMoon\Math\Matrix;
 use OceanMoon\Math\Vector;
+use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -288,6 +289,34 @@ class MatrixBinaryOperatorsTest extends TestCase
         ], $m2->toArray());
     }
 
+    /**
+     * Test * throws OverflowException when the result overflows, matching mul().
+     */
+    public function testMulOverflowThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [1e200],
+        ]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot multiply Matrices. The result would overflow.');
+        $result = $m * $m;
+    }
+
+    /**
+     * Test multiplication by a non-finite scalar throws DomainException, matching mul().
+     */
+    public function testMulByNonFiniteThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [1],
+        ]);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid scalar: NAN. Must be finite.');
+        $result = $m * NAN;
+    }
+
     #endregion
 
     #region Operator / (divide) tests.
@@ -409,6 +438,20 @@ class MatrixBinaryOperatorsTest extends TestCase
         ], $m->toArray());
     }
 
+    /**
+     * Test scalar / Matrix throws OverflowException when the result overflows.
+     */
+    public function testScalarDivOverflowThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [1e-300],
+        ]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot divide 1.0E+300 by Matrix. The result would overflow.');
+        $result = 1e300 / $m;
+    }
+
     #endregion
 
     #region Operator ** (power) tests.
@@ -494,6 +537,20 @@ class MatrixBinaryOperatorsTest extends TestCase
             [1.0, 1.0],
             [0.0, 1.0],
         ], $m->toArray());
+    }
+
+    /**
+     * Test ** throws OverflowException when the result overflows, matching pow().
+     */
+    public function testPowOverflowThrows(): void
+    {
+        $m = Matrix::fromArray([
+            [1e200],
+        ]);
+
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot raise Matrix to a power. The result would overflow.');
+        $result = $m ** 3;
     }
 
     #endregion
