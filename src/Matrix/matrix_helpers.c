@@ -14,6 +14,7 @@
 #include "php.h"
 #include "matrix_internal.h"
 #include "exceptions.h"
+#include "floats.h"
 
 #include <float.h>
 #include <math.h>
@@ -243,9 +244,9 @@ zend_result matrix_inv_from_lu(const matrix_lu *lu, zval *return_value)
 			x[i] = sum / a[i * n + i];
 		}
 
-		/* Store the column. */
+		/* Store the column. Normalize, as the substitutions can give -0.0. */
 		for (zend_long i = 0; i < n; i++) {
-			if (matrix_write_result(inverse, i, col, x[i], "invert Matrix") == FAILURE) {
+			if (matrix_write_result(inverse, i, col, math_floats_normalize_zero(x[i]), "invert Matrix") == FAILURE) {
 				efree(y);
 				efree(x);
 				zval_ptr_dtor(return_value);

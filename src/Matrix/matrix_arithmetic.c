@@ -270,7 +270,9 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 
 			double cofactor = ((i + j) % 2 == 0 ? 1.0 : -1.0) * minor_det;
 			/* Note: transposed. */
-			if (matrix_write_result(adjugate, j, i, cofactor / det / scale, "invert Matrix") == FAILURE) {
+			/* Normalize, as negating a zero cofactor gives -0.0. */
+			double element = math_floats_normalize_zero(cofactor / det / scale);
+			if (matrix_write_result(adjugate, j, i, element, "invert Matrix") == FAILURE) {
 				zval_ptr_dtor(&scaled_zv);
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);

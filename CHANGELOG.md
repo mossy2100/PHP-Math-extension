@@ -87,6 +87,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   the package.
 - **`Complex::sqrt()` and `roots()` are exact on the axes**, matching the package. `pow(0.5)` and `** 0.5` use
   `sqrt()`, as do `asin()`, `acos()`, `asinh()` and `acosh()`. `roots()` refines the root magnitude, like the package.
+- **`Matrix::inv()` and `**` with a negative exponent give no negative zeros**, matching the package.
 - **`Complex::tan()`/`tanh()` never overflow**, matching the package's new algorithm.
 - **`Rational` comparison is exact**, matching the package, for the comparison methods and operators. Comparing with a
   `float`, or two Rationals whose cross products overflow, no longer converts to floats.
