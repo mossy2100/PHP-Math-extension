@@ -20,24 +20,6 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
 
-/* {{{ c_sqrt
- *
- * Principal square root of a plain (real, imaginary) pair. Duplicated (rather than shared) from
- * complex_trigonometric.c's static of the same name - both are small, file-local pure functions,
- * not worth promoting to complex_internal.h for two call sites.
- */
-static void c_sqrt(double re, double im, double *out_re, double *out_im)
-{
-	double magnitude = (im == 0.0) ? fabs(re) : hypot(re, im);
-	double phase = (im == 0.0) ? (re < 0 ? M_PI : 0.0) : atan2(im, re);
-
-	double sqrt_mag = sqrt(magnitude);
-	double half_phase = phase / 2.0;
-	*out_re = sqrt_mag * cos(half_phase);
-	*out_im = sqrt_mag * sin(half_phase);
-}
-/* }}} */
-
 /* {{{ c_ln
  *
  * Natural logarithm of a plain (real, imaginary) pair. Returns FAILURE (with ArithmeticException
@@ -50,11 +32,10 @@ static zend_result c_ln(double re, double im, double *out_re, double *out_im)
 		return FAILURE;
 	}
 
-	double magnitude = (im == 0.0) ? fabs(re) : hypot(re, im);
-	double phase = (im == 0.0) ? (re < 0 ? M_PI : 0.0) : atan2(im, re);
-
-	*out_re = log(magnitude);
-	*out_im = phase;
+	/* The same magnitude and phase as the package's constructor, so the phase is wrapped into (-pi, pi], as it is
+	 * there. */
+	*out_re = log(complex_compute_magnitude(re, im));
+	*out_im = complex_compute_phase(re, im);
 	return SUCCESS;
 }
 /* }}} */
@@ -151,10 +132,10 @@ PHP_METHOD(OceanMoon_Math_Complex, asinh)
 		RETURN_THROWS();
 	}
 	double z2_plus_1_re = (x * x - y * y) + 1.0;
-	double z2_plus_1_im = 2 * x * y;
+	double z2_plus_1_im = (x * y + y * x) + 0.0;
 
 	double sqrt_re, sqrt_im;
-	c_sqrt(z2_plus_1_re, z2_plus_1_im, &sqrt_re, &sqrt_im);
+	complex_calc_sqrt(z2_plus_1_re, z2_plus_1_im, &sqrt_re, &sqrt_im);
 
 	double sum_re = x + sqrt_re, sum_im = y + sqrt_im;
 
@@ -187,10 +168,10 @@ PHP_METHOD(OceanMoon_Math_Complex, acosh)
 		RETURN_THROWS();
 	}
 	double z2_minus_1_re = (x * x - y * y) - 1.0;
-	double z2_minus_1_im = 2 * x * y;
+	double z2_minus_1_im = x * y + y * x;
 
 	double sqrt_re, sqrt_im;
-	c_sqrt(z2_minus_1_re, z2_minus_1_im, &sqrt_re, &sqrt_im);
+	complex_calc_sqrt(z2_minus_1_re, z2_minus_1_im, &sqrt_re, &sqrt_im);
 
 	double sum_re = x + sqrt_re, sum_im = y + sqrt_im;
 

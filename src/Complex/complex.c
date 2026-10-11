@@ -501,15 +501,10 @@ PHP_METHOD(OceanMoon_Math_Complex, fromString)
 
 /* {{{ complex_from_polar
  *
- * Shared by fromPolar() and internal callers (exp(), sqrt(), roots() in complex_power.c/
- * complex_transcendental.c) that construct a Complex from polar coordinates (magnitude, phase in
- * radians). The phase is wrapped into (-pi, pi] via math_floats_wrap(), mirroring the PHP
- * package's Floats::wrap($phase) call. complex_create() (via complex_init()) already populates
- * magnitude/phase from real/imaginary via hypot()/atan2(); this then overwrites both with the
- * exact input values - a deliberate extension-only precision improvement over the PHP package
- * (which just recomputes from cos($phase)/sin($phase) like any other constructor call), avoiding
- * any round-trip floating-point difference between the polar input and what recomputing from
- * cos($phase)/sin($phase) would give back.
+ * Shared by fromPolar() and roots() (complex_power.c), which construct a Complex from polar
+ * coordinates (magnitude, phase in radians). Matches the PHP package's Complex::fromPolar(): the
+ * parts are calculated from the phase as given, and complex_create() computes the magnitude and
+ * phase from the parts, as for any other Complex.
  */
 zend_result complex_from_polar(zval *return_value, double mag, double phase)
 {
@@ -526,15 +521,9 @@ zend_result complex_from_polar(zval *return_value, double mag, double phase)
 		return FAILURE;
 	}
 
-	phase = math_floats_wrap(phase, 2 * M_PI, true);
-
 	if (complex_create(return_value, mag * cos(phase), mag * sin(phase)) == FAILURE) {
 		return FAILURE;
 	}
-
-	zend_object *obj = Z_OBJ_P(return_value);
-	complex_write_double(obj, complex_offset_magnitude, mag);
-	complex_write_double(obj, complex_offset_phase, phase);
 
 	return SUCCESS;
 }

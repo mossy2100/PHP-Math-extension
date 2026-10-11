@@ -10,12 +10,12 @@
  * promoting each intermediate value to a real Complex object and going through full method
  * dispatch for every step (as complex_operators.c's `**` case must, since complex_calc_pow() needs
  * a real object to read cached magnitude/phase off), this file works the chain in plain doubles via
- * the c_*() helpers below - there's no cache to benefit from for a value that's freshly computed
- * and only used once. This also means these helpers skip the well-known-value shortcuts
- * complex_calc_ln()/pow()'s sqrt step take (real() sqrt via complex_from_polar()) - fine here,
- * since an intermediate value from one of these formulas landing exactly on a shortcut input (e.g.
- * exactly 1+0i) is not a correctness concern, just a missed micro-optimization, and every caller of
- * these methods in the test suite compares results with EPSILON tolerance, not bit-for-bit.
+ * the c_*() helpers below and complex_calc_sqrt() - there's no cache to benefit from for a value
+ * that's freshly computed and only used once. This also means these helpers skip the well-known-value
+ * shortcuts complex_calc_ln() takes - fine here, since an intermediate value from one of these
+ * formulas landing exactly on a shortcut input (e.g. exactly 1+0i) is not a correctness concern, just
+ * a missed micro-optimization, and every caller of these methods in the test suite compares results
+ * with EPSILON tolerance, not bit-for-bit.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,24 +30,6 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
 
-/* {{{ c_sqrt
- *
- * Principal square root of a plain (real, imaginary) pair, via magnitude/phase - the same
- * approach as OceanMoon_Math_Complex::sqrt() (complex_power.c), but operating on raw doubles
- * rather than reading a real object's (possibly cached) magnitude/phase properties.
- */
-static void c_sqrt(double re, double im, double *out_re, double *out_im)
-{
-	double magnitude = (im == 0.0) ? fabs(re) : hypot(re, im);
-	double phase = (im == 0.0) ? (re < 0 ? M_PI : 0.0) : atan2(im, re);
-
-	double sqrt_mag = sqrt(magnitude);
-	double half_phase = phase / 2.0;
-	*out_re = sqrt_mag * cos(half_phase);
-	*out_im = sqrt_mag * sin(half_phase);
-}
-/* }}} */
-
 /* {{{ c_ln
  *
  * Natural logarithm of a plain (real, imaginary) pair. Returns FAILURE (with ArithmeticException
@@ -60,11 +42,10 @@ static zend_result c_ln(double re, double im, double *out_re, double *out_im)
 		return FAILURE;
 	}
 
-	double magnitude = (im == 0.0) ? fabs(re) : hypot(re, im);
-	double phase = (im == 0.0) ? (re < 0 ? M_PI : 0.0) : atan2(im, re);
-
-	*out_re = log(magnitude);
-	*out_im = phase;
+	/* The same magnitude and phase as the package's constructor, so the phase is wrapped into (-pi, pi], as it is
+	 * there. */
+	*out_re = log(complex_compute_magnitude(re, im));
+	*out_im = complex_compute_phase(re, im);
 	return SUCCESS;
 }
 /* }}} */
@@ -163,10 +144,10 @@ PHP_METHOD(OceanMoon_Math_Complex, asin)
 		RETURN_THROWS();
 	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
-	double one_minus_z2_im = -(2 * x * y);
+	double one_minus_z2_im = 0.0 - (x * y + y * x);
 
 	double sqrt_re, sqrt_im;
-	c_sqrt(one_minus_z2_re, one_minus_z2_im, &sqrt_re, &sqrt_im);
+	complex_calc_sqrt(one_minus_z2_re, one_minus_z2_im, &sqrt_re, &sqrt_im);
 
 	double sum_re = iz_re + sqrt_re, sum_im = iz_im + sqrt_im;
 
@@ -201,10 +182,10 @@ PHP_METHOD(OceanMoon_Math_Complex, acos)
 		RETURN_THROWS();
 	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
-	double one_minus_z2_im = -(2 * x * y);
+	double one_minus_z2_im = 0.0 - (x * y + y * x);
 
 	double sqrt_re, sqrt_im;
-	c_sqrt(one_minus_z2_re, one_minus_z2_im, &sqrt_re, &sqrt_im);
+	complex_calc_sqrt(one_minus_z2_re, one_minus_z2_im, &sqrt_re, &sqrt_im);
 
 	/* i * sqrt: (a+bi)i = -b + ai. */
 	double i_sqrt_re = -sqrt_im, i_sqrt_im = sqrt_re;

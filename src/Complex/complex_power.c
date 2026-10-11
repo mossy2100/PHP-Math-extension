@@ -9,6 +9,7 @@
 # include "config.h"
 #endif
 
+#include <float.h>
 #include <math.h>
 
 #include "php.h"
@@ -101,7 +102,13 @@ static zend_result complex_calc_pow_general(
 	/* Exponent 2: delegate to sqr(). The caller checks the result. */
 	if (other_real == 2.0 && other_imag == 0.0) {
 		*out_real = real * real - imag * imag;
-		*out_imag = 2 * real * imag;
+		*out_imag = real * imag + imag * real;
+		return SUCCESS;
+	}
+
+	/* Exponent 0.5: delegate to sqrt(), which is more accurate. */
+	if (other_real == 0.5 && other_imag == 0.0) {
+		complex_calc_sqrt(real, imag, out_real, out_imag);
 		return SUCCESS;
 	}
 
@@ -208,7 +215,9 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create_result(return_value, real * real - imag * imag, 2 * real * imag, "square Complex") == FAILURE) {
+	double out_real = real * real - imag * imag;
+	double out_imag = real * imag + imag * real;
+	if (complex_create_result(return_value, out_real, out_imag, "square Complex") == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -218,6 +227,7 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
  *
  * Matches the PHP package's Complex::roots(): all $degree roots via De Moivre's theorem, reading
  * the magnitude/phase computed properties (not recomputing them) to match the PHP source exactly.
+ * Roots that lie on an axis are exact, and the square roots are sqrt() and its negative.
  */
 PHP_METHOD(OceanMoon_Math_Complex, roots)
 {
@@ -239,10 +249,11 @@ PHP_METHOD(OceanMoon_Math_Complex, roots)
 
 	array_init(return_value);
 
-	/* Special case of 0: every root is 0. */
-	if (real == 0.0 && imag == 0.0) {
+	/* Special case of 0: every root is 0. Degree 1: the only root is this number. */
+	if ((real == 0.0 && imag == 0.0) || degree == 1) {
 		zval root;
-		if (complex_create(&root, 0.0, 0.0) == FAILURE) {
+		bool is_zero = real == 0.0 && imag == 0.0;
+		if (complex_create(&root, is_zero ? 0.0 : real, is_zero ? 0.0 : imag) == FAILURE) {
 			zval_ptr_dtor(return_value);
 			RETURN_THROWS();
 		}
@@ -250,17 +261,74 @@ PHP_METHOD(OceanMoon_Math_Complex, roots)
 		return;
 	}
 
+	/* Degree 2: sqrt() and its negative, so the results agree. Adding 0.0 turns a negative zero into a positive
+	 * zero. */
+	if (degree == 2) {
+		double root_real, root_imag;
+		complex_calc_sqrt(real, imag, &root_real, &root_imag);
+		zval root, neg_root;
+		if (complex_create(&root, root_real, root_imag) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			RETURN_THROWS();
+		}
+		add_next_index_zval(return_value, &root);
+		if (complex_create(&neg_root, -root_real + 0.0, -root_imag + 0.0) == FAILURE) {
+			zval_ptr_dtor(return_value);
+			RETURN_THROWS();
+		}
+		add_next_index_zval(return_value, &neg_root);
+		return;
+	}
+
 	double magnitude, phase;
 	complex_read_magnitude_phase(Z_OBJ_P(ZEND_THIS), &magnitude, &phase);
 
-	double root_mag = pow(magnitude, 1.0 / (double) degree);
+	/* Raising to the power 1/n is inexact, as 1/n is rounded, e.g. 64 ** (1/3) is 3.9999999999999996. So, refine it
+	 * with one step of Newton's method, keeping whichever is closer. */
+	double n = (double) degree;
+	double root_mag = pow(magnitude, 1.0 / n);
+	double refined = root_mag - (pow(root_mag, n) - magnitude) / (n * pow(root_mag, n - 1));
+	if (fabs(pow(refined, n) - magnitude) < fabs(pow(root_mag, n) - magnitude)) {
+		root_mag = refined;
+	}
 	double theta = phase / (double) degree;
 	double delta = (2 * M_PI) / (double) degree;
 
+	/* If this number lies on an axis, get its phase as a whole number of quarter turns. */
+	bool on_axis = true;
+	zend_long quarter_turns = 0;
+	if (imag == 0.0) {
+		quarter_turns = real > 0 ? 0 : 2;
+	} else if (real == 0.0) {
+		quarter_turns = imag > 0 ? 1 : -1;
+	} else {
+		on_axis = false;
+	}
+
 	for (zend_long k = 0; k < degree; k++) {
-		double root_phase = theta + (double) k * delta;
 		zval root;
-		if (complex_from_polar(&root, root_mag, root_phase) == FAILURE) {
+		zend_result result;
+		/* A root that lies on an axis is the root magnitude times 1, i, -1 or -i, so calculate it exactly. */
+		if (on_axis && (quarter_turns + 4 * k) % degree == 0) {
+			switch (((quarter_turns + 4 * k) / degree) % 4) {
+				case 0:
+					result = complex_create(&root, root_mag, 0.0);
+					break;
+				case 1:
+					result = complex_create(&root, 0.0, root_mag);
+					break;
+				case 2:
+					result = complex_create(&root, -root_mag, 0.0);
+					break;
+				default:
+					result = complex_create(&root, 0.0, -root_mag);
+					break;
+			}
+		} else {
+			double root_phase = theta + (double) k * delta;
+			result = complex_from_polar(&root, root_mag, root_phase);
+		}
+		if (result == FAILURE) {
 			zval_ptr_dtor(return_value);
 			RETURN_THROWS();
 		}
@@ -269,19 +337,60 @@ PHP_METHOD(OceanMoon_Math_Complex, roots)
 }
 /* }}} */
 
+/* {{{ complex_calc_sqrt
+ *
+ * Matches the PHP package's Complex::sqrt(): a numerically stable formula rather than the polar form, so the
+ * result is exact on the axes. With z = a + bi and t = √((|z| + |a|) / 2), √z = t + (b / 2t)i if a ≥ 0, or
+ * |b| / 2t ± ti, taking the sign of b, if a < 0. As with the phase, a zero b counts as positive.
+ */
+void complex_calc_sqrt(double real, double imag, double *out_real, double *out_imag)
+{
+	if (real == 0.0 && imag == 0.0) {
+		*out_real = 0.0;
+		*out_imag = 0.0;
+		return;
+	}
+
+	double magnitude = complex_compute_magnitude(real, imag);
+	double abs_real = fabs(real);
+	double sum = magnitude + abs_real;
+	double t;
+	if (zend_isinf(sum)) {
+		/* Scale down to avoid overflow. */
+		t = 2 * sqrt(magnitude / 8 + abs_real / 8);
+	} else if (sum < 2 * DBL_MIN) {
+		/* Scale up, as halving a subnormal number loses precision. */
+		t = sqrt(2 * sum) / 2;
+	} else {
+		t = sqrt(sum / 2);
+	}
+
+	if (real >= 0) {
+		*out_real = t;
+		*out_imag = imag == 0.0 ? 0.0 : imag / (2 * t);
+	} else {
+		*out_real = fabs(imag) / (2 * t);
+		*out_imag = imag < 0 ? -t : t;
+	}
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Complex::sqrt(): Complex
  *
- * Matches the PHP package's Complex::sqrt(): the principal square root, via magnitude/phase. For
- * both square roots, call roots(2) instead.
+ * Matches the PHP package's Complex::sqrt(): the principal square root. For both square roots, call roots(2)
+ * instead.
  */
 PHP_METHOD(OceanMoon_Math_Complex, sqrt)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	double magnitude, phase;
-	complex_read_magnitude_phase(Z_OBJ_P(ZEND_THIS), &magnitude, &phase);
+	double real, imag;
+	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_from_polar(return_value, sqrt(magnitude), phase / 2.0) == FAILURE) {
+	double out_real, out_imag;
+	complex_calc_sqrt(real, imag, &out_real, &out_imag);
+
+	if (complex_create(return_value, out_real, out_imag) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

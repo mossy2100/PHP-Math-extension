@@ -85,8 +85,20 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
     `log2()` or `log10()`, as PHP's `log()` does.
 - **`Matrix::inv()` and `**` with a negative exponent** work for a matrix of uniformly tiny or huge elements, matching
   the package.
+- **`Complex::sqrt()` and `roots()` are exact on the axes**, matching the package. `pow(0.5)` and `** 0.5` use
+  `sqrt()`, as do `asin()`, `acos()`, `asinh()` and `acosh()`. `roots()` refines the root magnitude, like the package.
+- **More `Complex` results match the package exactly:**
+  - `fromPolar()` and `roots()` calculate the parts from the phase as given, instead of wrapping it first. The
+    magnitude and phase are computed from the parts, as for any other `Complex`, instead of keeping the input values.
+    For example, `fromPolar(0, 1)` had a phase of 1.
+  - `sqr()`, `pow(2)` and the inverse functions calculate z² as `mul()` does, which differed when a product of the
+    parts was subnormal.
+  - The inverse functions wrap the phase of their logarithm step, as `ln()` does, so an underflowed phase gives `+0`.
 - **Builds with `-ffp-contract=off`.** The compiler could fuse a multiply and an add into one instruction, which rounds
   differently from PHP. That broke exact parity with the package, e.g. in `Vector::cross()`.
+- **Builds with `-fno-builtin-sin -fno-builtin-cos`.** The compiler combined `sin(x)` and `cos(x)` into one `sincos`
+  call, which on macOS can round differently from PHP's `sin()`. That broke exact parity in every method that uses
+  both, e.g. `fromPolar()`, `exp()`, `sin()` and `cos()`.
 
 ### Documentation
 

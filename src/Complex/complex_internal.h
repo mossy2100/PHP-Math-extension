@@ -46,6 +46,10 @@ static inline bool complex_parts_overflow(double real, double imag)
 	return !zend_finite(real) || !zend_finite(imag) || !zend_finite(complex_compute_magnitude(real, imag));
 }
 
+/* Principal square root of a (real, imaginary) pair, matching the PHP package's Complex::sqrt(). Defined in
+ * complex_power.c; also used by the inverse trigonometric and hyperbolic methods. */
+void complex_calc_sqrt(double real, double imag, double *out_real, double *out_imag);
+
 /* Installs the custom object handlers (do_operation, compare, create_object) shared by every
  * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */
 zend_result complex_properties_minit(void);
