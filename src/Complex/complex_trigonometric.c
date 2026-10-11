@@ -87,7 +87,8 @@ PHP_METHOD(OceanMoon_Math_Complex, cos)
 
 /* {{{ OceanMoon\Math\Complex::tan(): Complex
  *
- * Matches the PHP package's Complex::tan(): tan(z) = sin(z) / cos(z).
+ * Matches the PHP package's Complex::tan(): tan(z) = -i*tanh(iz), where iz = -y + ix. If tanh(iz) = u + iv, then
+ * tan(z) = v - iu.
  */
 PHP_METHOD(OceanMoon_Math_Complex, tan)
 {
@@ -96,28 +97,10 @@ PHP_METHOD(OceanMoon_Math_Complex, tan)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	/* sin(z)/cos(z), checking each is representable, as the package's sin() and cos() calls do. An overflow at any
-	 * step is reported as an overflow of tan() itself. */
-	double sin_re = sin(x) * cosh(y), sin_im = cos(x) * sinh(y);
-	if (complex_parts_overflow(sin_re, sin_im)) {
-		math_throw_overflow("compute sine of Complex");
-		math_rethrow_overflow("compute tangent of Complex");
-		RETURN_THROWS();
-	}
-	double cos_re = cos(x) * cosh(y), cos_im = -sin(x) * sinh(y);
-	if (complex_parts_overflow(cos_re, cos_im)) {
-		math_throw_overflow("compute cosine of Complex");
-		math_rethrow_overflow("compute tangent of Complex");
-		RETURN_THROWS();
-	}
+	double u, v;
+	complex_calc_tanh(-y, x, &u, &v);
 
-	double out_re, out_im;
-	if (complex_calc_div(sin_re, sin_im, cos_re, cos_im, &out_re, &out_im) == FAILURE) {
-		math_rethrow_overflow("compute tangent of Complex");
-		RETURN_THROWS();
-	}
-
-	if (complex_create(return_value, out_re, out_im) == FAILURE) {
+	if (complex_create(return_value, v, -u) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

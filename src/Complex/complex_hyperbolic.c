@@ -76,9 +76,38 @@ PHP_METHOD(OceanMoon_Math_Complex, cosh)
 }
 /* }}} */
 
+/* {{{ complex_calc_tanh
+ *
+ * Matches the PHP package's Complex::calcTanh(): the hyperbolic tangent of x + iy, by Kahan's algorithm, which is
+ * accurate and can't overflow, unlike sinh(z) / cosh(z). Declared in complex_internal.h, as tan()
+ * (complex_trigonometric.c) uses it too.
+ */
+void complex_calc_tanh(double x, double y, double *out_re, double *out_im)
+{
+	/* For a large real part, tanh(z) = +-1 + i*4*sin(y)*cos(y)*e^(-2|x|), to within rounding. Multiplying by e^(-|x|)
+	 * twice lets the imaginary part underflow gradually, instead of e^(-2|x|) underflowing to 0 first. */
+	if (fabs(x) >= 22) {
+		double exp_minus_x = exp(-fabs(x));
+		*out_re = x > 0 ? 1.0 : -1.0;
+		*out_im = 4 * sin(y) * cos(y) * exp_minus_x * exp_minus_x;
+		return;
+	}
+
+	/* Otherwise, with t = tan(y), beta = 1 + t^2, s = sinh(x) and rho = sqrt(1 + s^2) = cosh(x):
+	 * tanh(z) = (beta*rho*s + i*t) / (1 + beta*s^2). */
+	double t = tan(y);
+	double beta = 1 + t * t;
+	double s = sinh(x);
+	double rho = sqrt(1 + s * s);
+	double denom = 1 + beta * s * s;
+	*out_re = beta * rho * s / denom;
+	*out_im = t / denom;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Complex::tanh(): Complex
  *
- * Matches the PHP package's Complex::tanh(): tanh(z) = sinh(z) / cosh(z).
+ * Matches the PHP package's Complex::tanh(), via complex_calc_tanh().
  */
 PHP_METHOD(OceanMoon_Math_Complex, tanh)
 {
@@ -87,26 +116,8 @@ PHP_METHOD(OceanMoon_Math_Complex, tanh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	/* sinh(z)/cosh(z), checking each is representable, as the package's sinh() and cosh() calls do. An overflow at
-	 * any step is reported as an overflow of tanh() itself. */
-	double sinh_re = sinh(x) * cos(y), sinh_im = cosh(x) * sin(y);
-	if (complex_parts_overflow(sinh_re, sinh_im)) {
-		math_throw_overflow("compute hyperbolic sine of Complex");
-		math_rethrow_overflow("compute hyperbolic tangent of Complex");
-		RETURN_THROWS();
-	}
-	double cosh_re = cosh(x) * cos(y), cosh_im = sinh(x) * sin(y);
-	if (complex_parts_overflow(cosh_re, cosh_im)) {
-		math_throw_overflow("compute hyperbolic cosine of Complex");
-		math_rethrow_overflow("compute hyperbolic tangent of Complex");
-		RETURN_THROWS();
-	}
-
 	double out_re, out_im;
-	if (complex_calc_div(sinh_re, sinh_im, cosh_re, cosh_im, &out_re, &out_im) == FAILURE) {
-		math_rethrow_overflow("compute hyperbolic tangent of Complex");
-		RETURN_THROWS();
-	}
+	complex_calc_tanh(x, y, &out_re, &out_im);
 
 	if (complex_create(return_value, out_re, out_im) == FAILURE) {
 		RETURN_THROWS();

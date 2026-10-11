@@ -50,6 +50,10 @@ static inline bool complex_parts_overflow(double real, double imag)
  * complex_power.c; also used by the inverse trigonometric and hyperbolic methods. */
 void complex_calc_sqrt(double real, double imag, double *out_real, double *out_imag);
 
+/* Hyperbolic tangent of a (real, imaginary) pair, matching the PHP package's Complex::calcTanh(). Defined in
+ * complex_hyperbolic.c; also used by tan(). */
+void complex_calc_tanh(double x, double y, double *out_re, double *out_im);
+
 /* Installs the custom object handlers (do_operation, compare, create_object) shared by every
  * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */
 zend_result complex_properties_minit(void);
