@@ -33,7 +33,7 @@ PHP_METHOD(OceanMoon_Math_Vector, sum)
 	}
 
 	if (!zend_finite(sum)) {
-		math_throw_overflow("compute sum of Vector");
+		math_throw_overflow("compute sum of the given Vector");
 		RETURN_THROWS();
 	}
 
@@ -60,7 +60,7 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 	}
 
 	if (!zend_finite(prod)) {
-		math_throw_overflow("compute product of Vector");
+		math_throw_overflow("compute product of the given Vector");
 		RETURN_THROWS();
 	}
 

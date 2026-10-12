@@ -88,7 +88,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z = new Complex(1e308);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot add Complex numbers. The result would overflow.');
+        $this->expectExceptionMessage('Cannot add the given Complex numbers. The result would overflow.');
         $result = $z + 1e308;
     }
 
@@ -216,7 +216,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z = new Complex(1e200, 1);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot multiply Complex numbers. The result would overflow.');
+        $this->expectExceptionMessage('Cannot multiply the given Complex numbers. The result would overflow.');
         $result = $z * $z;
     }
 
@@ -306,7 +306,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     public function testDivOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot divide Complex numbers. The result would overflow.');
+        $this->expectExceptionMessage('Cannot divide the given Complex numbers. The result would overflow.');
         new Complex(1e300) / new Complex(1e-300);
     }
 
@@ -393,7 +393,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z = new Complex(10, 1);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot raise Complex to a power. The result would overflow.');
+        $this->expectExceptionMessage('Cannot raise the given Complex to the given power. The result would overflow.');
         $result = $z ** 1000;
     }
 

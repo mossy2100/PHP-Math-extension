@@ -267,6 +267,7 @@ PHP_METHOD(OceanMoon_Math_Rational, add)
 	}
 
 	if (rational_calc_add_sub(a, b, c, d, false, return_value) == FAILURE) {
+		math_rethrow_overflow("add the given Rational numbers");
 		RETURN_THROWS();
 	}
 }
@@ -290,6 +291,7 @@ PHP_METHOD(OceanMoon_Math_Rational, sub)
 	}
 
 	if (rational_calc_add_sub(a, b, c, d, true, return_value) == FAILURE) {
+		math_rethrow_overflow("subtract the given Rational numbers");
 		RETURN_THROWS();
 	}
 }
@@ -314,6 +316,7 @@ PHP_METHOD(OceanMoon_Math_Rational, mul)
 	}
 
 	if (rational_calc_mul(a, b, c, d, return_value) == FAILURE) {
+		math_rethrow_overflow("multiply the given Rational numbers");
 		RETURN_THROWS();
 	}
 }
@@ -363,6 +366,7 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
 
 	/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
 	if (rational_calc_mul(a, b, d, c, return_value) == FAILURE) {
+		math_rethrow_overflow("divide the given Rational numbers");
 		RETURN_THROWS();
 	}
 }

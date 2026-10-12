@@ -43,7 +43,7 @@ static zval *vector_read_property(zend_object *object, zend_string *member, int 
 	if (zend_string_equals_literal(member, "magnitude")) {
 		double magnitude = vector_compute_magnitude(object);
 		if (!zend_finite(magnitude)) {
-			math_throw_overflow("compute magnitude of Vector");
+			math_throw_overflow("compute magnitude of the given Vector");
 			return &EG(uninitialized_zval);
 		}
 		ZVAL_DOUBLE(rv, magnitude);

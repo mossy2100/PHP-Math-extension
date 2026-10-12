@@ -50,10 +50,13 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`Rational` operators with a `float` operand (breaking)** never accept or return `±INF` or `NAN`, like the rest of
   the library:
   - A non-finite `float` operand throws `DomainException`, e.g. "Invalid operand: NAN. Must be finite."
-  - A result too large to represent throws `OverflowException`, e.g. "Cannot multiply Rational and float. The result
-    would overflow."
+  - A result too large to represent throws `OverflowException`, e.g. "Cannot multiply the given Rational and float. The
+    result would overflow."
   - Where PHP's `**` would give `NAN` from finite operands, an even root of a negative base throws `DomainException`,
     and zero to a negative power throws `ArithmeticException`.
+- **`Rational` overflow messages name the operation,** for the methods and the operators, matching the package, e.g.
+  "Cannot add the given Rational numbers. The result would overflow." Previously they were Core's, e.g. "Overflow in
+  integer addition." The exception class (`OverflowException`) is unchanged.
 - **`Complex::fromString()` and `Rational::fromString()`** include the string in an invalid-format message, quoted and
   abbreviated to 32 characters, matching the package. `Complex` previously showed it in full, and `Rational` not at all.
 - **`scripts/enable` and `scripts/disable`** default to the PHP on `PATH`, rather than 8.4.

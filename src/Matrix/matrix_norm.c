@@ -58,7 +58,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 
 	double norm = scale * sqrt(sum);
 	if (!zend_finite(norm)) {
-		math_throw_overflow("compute norm of Matrix");
+		math_throw_overflow("compute norm of the given Matrix");
 		RETURN_THROWS();
 	}
 
@@ -92,7 +92,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, p1Norm)
 	}
 
 	if (!zend_finite(max)) {
-		math_throw_overflow("compute P1 norm of Matrix");
+		math_throw_overflow("compute P1 norm of the given Matrix");
 		RETURN_THROWS();
 	}
 
@@ -126,7 +126,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, pInfNorm)
 	}
 
 	if (!zend_finite(max)) {
-		math_throw_overflow("compute P-infinity norm of Matrix");
+		math_throw_overflow("compute P-infinity norm of the given Matrix");
 		RETURN_THROWS();
 	}
 

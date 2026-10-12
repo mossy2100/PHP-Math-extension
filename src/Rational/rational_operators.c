@@ -159,17 +159,17 @@ static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zva
 
 	switch (opcode) {
 		case ZEND_ADD:
-			return rational_float_result(result, a + b, "add Rational and float");
+			return rational_float_result(result, a + b, "add the given Rational and float");
 		case ZEND_SUB:
-			return rational_float_result(result, a - b, "subtract Rational and float");
+			return rational_float_result(result, a - b, "subtract the given Rational and float");
 		case ZEND_MUL:
-			return rational_float_result(result, a * b, "multiply Rational and float");
+			return rational_float_result(result, a * b, "multiply the given Rational and float");
 		case ZEND_DIV:
 			if (b == 0.0) {
 				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 				return FAILURE;
 			}
-			return rational_float_result(result, a / b, "divide Rational and float");
+			return rational_float_result(result, a / b, "divide the given Rational and float");
 		default:
 			return FAILURE;
 	}
@@ -197,7 +197,7 @@ static zend_result rational_calc_pow_float(zend_long num, zend_long den, double 
 		return FAILURE;
 	}
 
-	return rational_float_result(return_value, result, "raise Rational to a float power");
+	return rational_float_result(return_value, result, "raise the given Rational to the given float power");
 }
 /* }}} */
 
@@ -239,7 +239,7 @@ static zend_result rational_calc_float_pow_rational(double base, zend_long p, ze
 		result = pow(base, exponent);
 	}
 
-	return rational_float_result(return_value, result, "raise float to a Rational power");
+	return rational_float_result(return_value, result, "raise the given float to the given Rational power");
 }
 /* }}} */
 
@@ -270,7 +270,11 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 		rational_read_parts(Z_OBJ_P(op1), &num, &den);
 
 		if (Z_TYPE_P(op2) == IS_LONG) {
-			return rational_calc_pow(num, den, Z_LVAL_P(op2), result);
+			if (rational_calc_pow(num, den, Z_LVAL_P(op2), result) == FAILURE) {
+				math_rethrow_overflow("raise the given Rational to the given power");
+				return FAILURE;
+			}
+			return SUCCESS;
 		}
 		if (Z_TYPE_P(op2) == IS_DOUBLE) {
 			if (rational_check_float_operand(op2) == FAILURE) {
@@ -281,7 +285,11 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 		if (op2_is_rational) {
 			zend_long p, q;
 			rational_read_parts(Z_OBJ_P(op2), &p, &q);
-			return rational_calc_pow_rational(num, den, p, q, result);
+			if (rational_calc_pow_rational(num, den, p, q, result) == FAILURE) {
+				math_rethrow_overflow("raise the given Rational to the given power");
+				return FAILURE;
+			}
+			return SUCCESS;
 		}
 		return FAILURE;
 	}
@@ -291,7 +299,11 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 		rational_read_parts(Z_OBJ_P(op2), &p, &q);
 
 		if (Z_TYPE_P(op1) == IS_LONG) {
-			return rational_calc_int_pow_rational(Z_LVAL_P(op1), p, q, result);
+			if (rational_calc_int_pow_rational(Z_LVAL_P(op1), p, q, result) == FAILURE) {
+				math_rethrow_overflow("raise the given int to the given Rational power");
+				return FAILURE;
+			}
+			return SUCCESS;
 		}
 		if (Z_TYPE_P(op1) == IS_DOUBLE) {
 			if (rational_check_float_operand(op1) == FAILURE) {
@@ -342,24 +354,39 @@ zend_result rational_do_operation(uint8_t opcode, zval *result, zval *op1, zval 
 		return FAILURE;
 	}
 
+	/* An overflow is reported with the same message as add()/sub()/mul()/div(). */
+	zend_result status;
+	const char *operation;
 	switch (opcode) {
 		case ZEND_ADD:
-			return rational_calc_add_sub(a, b, c, d, false, result);
+			status = rational_calc_add_sub(a, b, c, d, false, result);
+			operation = "add the given Rational numbers";
+			break;
 		case ZEND_SUB:
-			return rational_calc_add_sub(a, b, c, d, true, result);
+			status = rational_calc_add_sub(a, b, c, d, true, result);
+			operation = "subtract the given Rational numbers";
+			break;
 		case ZEND_MUL:
-			return rational_calc_mul(a, b, c, d, result);
-		case ZEND_DIV: {
+			status = rational_calc_mul(a, b, c, d, result);
+			operation = "multiply the given Rational numbers";
+			break;
+		case ZEND_DIV:
 			if (c == 0) {
 				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 				return FAILURE;
 			}
 			/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
-			return rational_calc_mul(a, b, d, c, result);
-		}
+			status = rational_calc_mul(a, b, d, c, result);
+			operation = "divide the given Rational numbers";
+			break;
 		default:
 			return FAILURE;
 	}
+
+	if (status == FAILURE) {
+		math_rethrow_overflow(operation);
+	}
+	return status;
 }
 /* }}} */
 

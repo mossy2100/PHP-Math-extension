@@ -74,7 +74,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1e308]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot add Vectors. The result would overflow.');
+        $this->expectExceptionMessage('Cannot add the given Vectors. The result would overflow.');
         $result = $v + $v;
     }
 
@@ -225,7 +225,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1e200]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot multiply Vector by 1.0E+200. The result would overflow.');
+        $this->expectExceptionMessage('Cannot multiply the given Vector by 1.0E+200. The result would overflow.');
         $result = 1e200 * $v;
     }
 
@@ -378,7 +378,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1e-300]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot divide 1.0E+300 by Vector. The result would overflow.');
+        $this->expectExceptionMessage('Cannot divide 1.0E+300 by the given Vector. The result would overflow.');
         $result = 1e300 / $v;
     }
 

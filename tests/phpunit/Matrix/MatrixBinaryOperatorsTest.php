@@ -299,7 +299,7 @@ class MatrixBinaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot multiply Matrices. The result would overflow.');
+        $this->expectExceptionMessage('Cannot multiply the given Matrices. The result would overflow.');
         $result = $m * $m;
     }
 
@@ -448,7 +448,7 @@ class MatrixBinaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot divide 1.0E+300 by Matrix. The result would overflow.');
+        $this->expectExceptionMessage('Cannot divide 1.0E+300 by the given Matrix. The result would overflow.');
         $result = 1e300 / $m;
     }
 
@@ -549,7 +549,7 @@ class MatrixBinaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot raise Matrix to a power. The result would overflow.');
+        $this->expectExceptionMessage('Cannot raise the given Matrix to the given power. The result would overflow.');
         $result = $m ** 3;
     }
 

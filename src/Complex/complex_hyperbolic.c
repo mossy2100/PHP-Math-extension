@@ -51,8 +51,9 @@ PHP_METHOD(OceanMoon_Math_Complex, sinh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create_result(return_value, sinh(x) * cos(y), cosh(x) * sin(y), "compute hyperbolic sine of Complex")
-		== FAILURE) {
+	if (complex_create_result(
+		return_value, sinh(x) * cos(y), cosh(x) * sin(y), "compute hyperbolic sine of the given Complex"
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -69,8 +70,9 @@ PHP_METHOD(OceanMoon_Math_Complex, cosh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create_result(return_value, cosh(x) * cos(y), sinh(x) * sin(y), "compute hyperbolic cosine of Complex")
-		== FAILURE) {
+	if (complex_create_result(
+		return_value, cosh(x) * cos(y), sinh(x) * sin(y), "compute hyperbolic cosine of the given Complex"
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -138,8 +140,8 @@ PHP_METHOD(OceanMoon_Math_Complex, asinh)
 
 	/* z^2 + 1, checking z^2 is representable, as the package's mul() does. */
 	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
-		math_throw_overflow("multiply Complex numbers");
-		math_rethrow_overflow("compute inverse hyperbolic sine of Complex");
+		math_throw_overflow("multiply the given Complex numbers");
+		math_rethrow_overflow("compute inverse hyperbolic sine of the given Complex");
 		RETURN_THROWS();
 	}
 	double z2_plus_1_re = (x * x - y * y) + 1.0;
@@ -174,8 +176,8 @@ PHP_METHOD(OceanMoon_Math_Complex, acosh)
 
 	/* z^2 - 1, checking z^2 is representable, as the package's mul() does. */
 	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
-		math_throw_overflow("multiply Complex numbers");
-		math_rethrow_overflow("compute inverse hyperbolic cosine of Complex");
+		math_throw_overflow("multiply the given Complex numbers");
+		math_rethrow_overflow("compute inverse hyperbolic cosine of the given Complex");
 		RETURN_THROWS();
 	}
 	double z2_minus_1_re = (x * x - y * y) - 1.0;
@@ -224,7 +226,7 @@ PHP_METHOD(OceanMoon_Math_Complex, atanh)
 
 	double div_re, div_im;
 	if (complex_calc_div(one_plus_z_re, one_plus_z_im, one_minus_z_re, one_minus_z_im, &div_re, &div_im) == FAILURE) {
-		math_rethrow_overflow("compute inverse hyperbolic tangent of Complex");
+		math_rethrow_overflow("compute inverse hyperbolic tangent of the given Complex");
 		RETURN_THROWS();
 	}
 

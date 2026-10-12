@@ -126,7 +126,7 @@ zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_
 
 	/* As in the package, an overflow at any later step is reported as an overflow of pow() itself. */
 	if (matrix_calc_pow_general(self, exponent, return_value) == FAILURE) {
-		math_rethrow_overflow("raise Matrix to a power");
+		math_rethrow_overflow("raise the given Matrix to the given power");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -215,7 +215,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, sqr)
 	}
 
 	if (matrix_calc_mul_matrix(self, self, return_value) == FAILURE) {
-		math_rethrow_overflow("square Matrix");
+		math_rethrow_overflow("square the given Matrix");
 		RETURN_THROWS();
 	}
 }

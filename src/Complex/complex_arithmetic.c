@@ -87,7 +87,7 @@ PHP_METHOD(OceanMoon_Math_Complex, inv)
 
 	double out_real, out_imag;
 	if (complex_calc_div(1.0, 0.0, real, imag, &out_real, &out_imag) == FAILURE) {
-		math_rethrow_overflow("invert Complex");
+		math_rethrow_overflow("invert the given Complex");
 		RETURN_THROWS();
 	}
 	if (complex_create(return_value, out_real, out_imag) == FAILURE) {
@@ -133,7 +133,9 @@ PHP_METHOD(OceanMoon_Math_Complex, add)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create_result(return_value, real + other_real, imag + other_imag, "add Complex numbers") == FAILURE) {
+	if (complex_create_result(
+		return_value, real + other_real, imag + other_imag, "add the given Complex numbers"
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -159,7 +161,7 @@ PHP_METHOD(OceanMoon_Math_Complex, sub)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	if (complex_create_result(return_value, real - other_real, imag - other_imag, "subtract Complex numbers")
+	if (complex_create_result(return_value, real - other_real, imag - other_imag, "subtract the given Complex numbers")
 		== FAILURE) {
 		RETURN_THROWS();
 	}
@@ -186,7 +188,9 @@ PHP_METHOD(OceanMoon_Math_Complex, mul)
 	double a, b;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &a, &b);
 
-	if (complex_create_result(return_value, a * c - b * d, a * d + b * c, "multiply Complex numbers") == FAILURE) {
+	if (complex_create_result(
+		return_value, a * c - b * d, a * d + b * c, "multiply the given Complex numbers"
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -219,7 +223,7 @@ zend_result complex_calc_div(double a, double b, double c, double d, double *out
 	}
 
 	if (complex_parts_overflow(real, imag)) {
-		math_throw_overflow("divide Complex numbers");
+		math_throw_overflow("divide the given Complex numbers");
 		return FAILURE;
 	}
 

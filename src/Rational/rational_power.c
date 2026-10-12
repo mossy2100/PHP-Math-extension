@@ -360,6 +360,7 @@ PHP_METHOD(OceanMoon_Math_Rational, pow)
 	}
 
 	if (result == FAILURE) {
+		math_rethrow_overflow("raise the given Rational to the given power");
 		RETURN_THROWS();
 	}
 }
@@ -379,6 +380,7 @@ PHP_METHOD(OceanMoon_Math_Rational, sqr)
 	rational_read_parts(Z_OBJ_P(ZEND_THIS), &num, &den);
 
 	if (rational_calc_mul(num, den, num, den, return_value) == FAILURE) {
+		math_rethrow_overflow("square the given Rational");
 		RETURN_THROWS();
 	}
 }

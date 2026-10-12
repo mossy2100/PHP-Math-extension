@@ -76,7 +76,7 @@ zend_result complex_calc_exp(double real, double imag, double *out_real, double 
 	/* General solution: Euler's formula. */
 	double mag = exp(real);
 	if (!zend_finite(mag)) {
-		math_throw_overflow("compute exponential of Complex");
+		math_throw_overflow("compute exponential of the given Complex");
 		return FAILURE;
 	}
 	*out_real = mag * cos(imag);
@@ -282,7 +282,7 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		if (result == SUCCESS) {
 			result = complex_calc_div(lnz_real, lnz_imag, lnb_real, lnb_imag, &out_real, &out_imag);
 			if (result == FAILURE) {
-				math_rethrow_overflow("compute logarithm of Complex");
+				math_rethrow_overflow("compute logarithm of the given Complex");
 			}
 		}
 		if (result == SUCCESS) {

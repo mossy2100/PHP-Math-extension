@@ -61,7 +61,9 @@ PHP_METHOD(OceanMoon_Math_Complex, sin)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create_result(return_value, sin(x) * cosh(y), cos(x) * sinh(y), "compute sine of Complex") == FAILURE) {
+	if (complex_create_result(
+		return_value, sin(x) * cosh(y), cos(x) * sinh(y), "compute sine of the given Complex"
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -78,7 +80,7 @@ PHP_METHOD(OceanMoon_Math_Complex, cos)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	if (complex_create_result(return_value, cos(x) * cosh(y), -sin(x) * sinh(y), "compute cosine of Complex")
+	if (complex_create_result(return_value, cos(x) * cosh(y), -sin(x) * sinh(y), "compute cosine of the given Complex")
 		== FAILURE) {
 		RETURN_THROWS();
 	}
@@ -122,8 +124,8 @@ PHP_METHOD(OceanMoon_Math_Complex, asin)
 
 	/* 1 - z^2, checking z^2 is representable, as the package's mul() does. */
 	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
-		math_throw_overflow("multiply Complex numbers");
-		math_rethrow_overflow("compute inverse sine of Complex");
+		math_throw_overflow("multiply the given Complex numbers");
+		math_rethrow_overflow("compute inverse sine of the given Complex");
 		RETURN_THROWS();
 	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
@@ -160,8 +162,8 @@ PHP_METHOD(OceanMoon_Math_Complex, acos)
 
 	/* 1 - z^2, checking z^2 is representable, as the package's mul() does. */
 	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
-		math_throw_overflow("multiply Complex numbers");
-		math_rethrow_overflow("compute inverse cosine of Complex");
+		math_throw_overflow("multiply the given Complex numbers");
+		math_rethrow_overflow("compute inverse cosine of the given Complex");
 		RETURN_THROWS();
 	}
 	double one_minus_z2_re = 1.0 - (x * x - y * y);
@@ -215,7 +217,7 @@ PHP_METHOD(OceanMoon_Math_Complex, atan)
 
 	double div_re, div_im;
 	if (complex_calc_div(i_minus_z_re, i_minus_z_im, i_plus_z_re, i_plus_z_im, &div_re, &div_im) == FAILURE) {
-		math_rethrow_overflow("compute inverse tangent of Complex");
+		math_rethrow_overflow("compute inverse tangent of the given Complex");
 		RETURN_THROWS();
 	}
 

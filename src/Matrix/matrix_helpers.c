@@ -246,7 +246,9 @@ zend_result matrix_inv_from_lu(const matrix_lu *lu, zval *return_value)
 
 		/* Store the column. Normalize, as the substitutions can give -0.0. */
 		for (zend_long i = 0; i < n; i++) {
-			if (matrix_write_result(inverse, i, col, math_floats_normalize_zero(x[i]), "invert Matrix") == FAILURE) {
+			if (matrix_write_result(
+				inverse, i, col, math_floats_normalize_zero(x[i]), "invert the given Matrix"
+			) == FAILURE) {
 				efree(y);
 				efree(x);
 				zval_ptr_dtor(return_value);

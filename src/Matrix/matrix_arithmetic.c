@@ -41,8 +41,8 @@ static zend_result matrix_check_scalar(double scalar)
 
 /* {{{ matrix_scalar_operation
  *
- * Formats an overflow message's operation for a scalar operand, e.g. "multiply Matrix by 1.0E+200". The format
- * has one %s, for the scalar. The caller releases the result.
+ * Formats an overflow message's operation for a scalar operand, e.g. "multiply the given Matrix by 1.0E+200". The
+ * format has one %s, for the scalar. The caller releases the result.
  */
 static zend_string *matrix_scalar_operation(const char *format, double scalar)
 {
@@ -142,7 +142,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, reciprocal)
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
 			}
-			if (matrix_write_result(result, i, j, 1.0 / value, "compute reciprocal of Matrix") == FAILURE) {
+			if (matrix_write_result(result, i, j, 1.0 / value, "compute reciprocal of the given Matrix") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
@@ -272,7 +272,7 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 			/* Note: transposed. */
 			/* Normalize, as negating a zero cofactor gives -0.0. */
 			double element = math_floats_normalize_zero(cofactor / det / scale);
-			if (matrix_write_result(adjugate, j, i, element, "invert Matrix") == FAILURE) {
+			if (matrix_write_result(adjugate, j, i, element, "invert the given Matrix") == FAILURE) {
 				zval_ptr_dtor(&scaled_zv);
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
@@ -319,7 +319,7 @@ zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_
 			double a, b;
 			matrix_read_element(self, i, j, &a);
 			matrix_read_element(other, i, j, &b);
-			if (matrix_write_result(result, i, j, a + b, "add Matrices") == FAILURE) {
+			if (matrix_write_result(result, i, j, a + b, "add the given Matrices") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				return FAILURE;
@@ -382,7 +382,7 @@ zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_
 			double a, b;
 			matrix_read_element(self, i, j, &a);
 			matrix_read_element(other, i, j, &b);
-			if (matrix_write_result(result, i, j, a - b, "subtract Matrices") == FAILURE) {
+			if (matrix_write_result(result, i, j, a - b, "subtract the given Matrices") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				return FAILURE;
@@ -431,7 +431,7 @@ zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	zend_string *operation = matrix_scalar_operation("multiply Matrix by %s", scalar);
+	zend_string *operation = matrix_scalar_operation("multiply the given Matrix by %s", scalar);
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
 			double value;
@@ -485,7 +485,7 @@ zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval 
 			vector_read_element(vector, k, &b);
 			sum += a * b;
 		}
-		if (vector_write_result(result, i, sum, "multiply Matrix by Vector") == FAILURE) {
+		if (vector_write_result(result, i, sum, "multiply the given Matrix and Vector") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -573,7 +573,7 @@ zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 				matrix_read_element(other, k, j, &b);
 				sum += a * b;
 			}
-			if (matrix_write_result(result, i, j, sum, "multiply Matrices") == FAILURE) {
+			if (matrix_write_result(result, i, j, sum, "multiply the given Matrices") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				return FAILURE;
@@ -609,7 +609,7 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	zend_string *operation = matrix_scalar_operation("divide Matrix by %s", scalar);
+	zend_string *operation = matrix_scalar_operation("divide the given Matrix by %s", scalar);
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
 			double value;
@@ -645,7 +645,7 @@ zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *retur
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
-	zend_string *operation = matrix_scalar_operation("divide %s by Matrix", scalar);
+	zend_string *operation = matrix_scalar_operation("divide %s by the given Matrix", scalar);
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
 			double value;
@@ -734,7 +734,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardMul)
 			double a, b;
 			matrix_read_element(self, i, j, &a);
 			matrix_read_element(other_obj, i, j, &b);
-			if (matrix_write_result(result, i, j, a * b, "multiply Matrices element-wise") == FAILURE) {
+			if (matrix_write_result(result, i, j, a * b, "multiply the given Matrices element-wise") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
@@ -795,7 +795,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardDiv)
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
 			}
-			if (matrix_write_result(result, i, j, a / divisor, "divide Matrices element-wise") == FAILURE) {
+			if (matrix_write_result(result, i, j, a / divisor, "divide the given Matrices element-wise") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();

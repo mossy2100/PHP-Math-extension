@@ -148,12 +148,15 @@ zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *
 
 	switch (opcode) {
 		case ZEND_ADD:
-			return complex_create_result(result, a_real + b_real, a_imag + b_imag, "add Complex numbers");
+			return complex_create_result(result, a_real + b_real, a_imag + b_imag, "add the given Complex numbers");
 		case ZEND_SUB:
-			return complex_create_result(result, a_real - b_real, a_imag - b_imag, "subtract Complex numbers");
+			return complex_create_result(
+				result, a_real - b_real, a_imag - b_imag, "subtract the given Complex numbers"
+			);
 		case ZEND_MUL:
 			return complex_create_result(
-				result, a_real * b_real - a_imag * b_imag, a_real * b_imag + a_imag * b_real, "multiply Complex numbers"
+				result, a_real * b_real - a_imag * b_imag, a_real * b_imag + a_imag * b_real,
+				"multiply the given Complex numbers"
 			);
 		case ZEND_DIV: {
 			double real, imag;

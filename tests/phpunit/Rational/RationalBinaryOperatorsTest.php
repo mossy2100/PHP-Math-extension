@@ -105,6 +105,16 @@ class RationalBinaryOperatorsTest extends TestCase
         $result = new Rational(1, 2) + NAN;
     }
 
+    /**
+     * Test an exact result that overflows throws, with the same message as add().
+     */
+    public function testAddOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot add the given Rational numbers. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) + 1;
+    }
+
     #endregion
 
     #region Operator - (subtract) tests.
@@ -197,6 +207,16 @@ class RationalBinaryOperatorsTest extends TestCase
         $result = NAN - new Rational(1, 2);
     }
 
+    /**
+     * Test an exact result that overflows throws, with the same message as sub().
+     */
+    public function testSubOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot subtract the given Rational numbers. The result would overflow.');
+        $result = -2 - new Rational(PHP_INT_MAX);
+    }
+
     #endregion
 
     #region Operator * (multiply) tests.
@@ -282,8 +302,18 @@ class RationalBinaryOperatorsTest extends TestCase
     public function testMulFloatOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot multiply Rational and float. The result would overflow.');
+        $this->expectExceptionMessage('Cannot multiply the given Rational and float. The result would overflow.');
         $result = new Rational(PHP_INT_MAX) * 1e300;
+    }
+
+    /**
+     * Test an exact result that overflows throws, with the same message as mul().
+     */
+    public function testMulOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot multiply the given Rational numbers. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) * 2;
     }
 
     #endregion
@@ -418,8 +448,18 @@ class RationalBinaryOperatorsTest extends TestCase
     public function testDivFloatOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot divide Rational and float. The result would overflow.');
+        $this->expectExceptionMessage('Cannot divide the given Rational and float. The result would overflow.');
         $result = new Rational(PHP_INT_MAX) / 1e-300;
+    }
+
+    /**
+     * Test an exact result that overflows throws, with the same message as div().
+     */
+    public function testDivOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot divide the given Rational numbers. The result would overflow.');
+        $result = new Rational(PHP_INT_MAX) / new Rational(1, 2);
     }
 
     #endregion
@@ -495,7 +535,9 @@ class RationalBinaryOperatorsTest extends TestCase
     public function testPowRationalToFloatOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot raise Rational to a float power. The result would overflow.');
+        $this->expectExceptionMessage(
+            'Cannot raise the given Rational to the given float power. The result would overflow.'
+        );
         $result = new Rational(PHP_INT_MAX) ** 100.0;
     }
 
@@ -629,7 +671,9 @@ class RationalBinaryOperatorsTest extends TestCase
     public function testPowFloatToRationalOverflowThrows(): void
     {
         $this->expectException(OverflowException::class);
-        $this->expectExceptionMessage('Cannot raise float to a Rational power. The result would overflow.');
+        $this->expectExceptionMessage(
+            'Cannot raise the given float to the given Rational power. The result would overflow.'
+        );
         $result = (-1e300) ** new Rational(3);
     }
 
@@ -784,6 +828,9 @@ class RationalBinaryOperatorsTest extends TestCase
     {
         // 4^(127/2) = 2^127, which doesn't fit in an int.
         $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage(
+            'Cannot raise the given int to the given Rational power. The result would overflow.'
+        );
         $result = 4 ** new Rational(127, 2);
     }
 
@@ -805,6 +852,9 @@ class RationalBinaryOperatorsTest extends TestCase
     {
         // (-2)^-63 = 1/-2^63, and 2^63 doesn't fit in an int.
         $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage(
+            'Cannot raise the given int to the given Rational power. The result would overflow.'
+        );
         $result = (-2) ** new Rational(-63);
     }
 
@@ -819,6 +869,16 @@ class RationalBinaryOperatorsTest extends TestCase
 
         $this->assertSame(2, $r1->numerator);
         $this->assertSame(3, $r1->denominator);
+    }
+
+    /**
+     * Test an exact result that overflows throws, with the same message as pow().
+     */
+    public function testPowOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage('Cannot raise the given Rational to the given power. The result would overflow.');
+        $result = new Rational(3) ** 50;
     }
 
     #endregion

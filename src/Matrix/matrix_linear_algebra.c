@@ -84,7 +84,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 	zval_ptr_dtor(&data_array);
 
 	if (!zend_finite(det)) {
-		math_throw_overflow("compute determinant of Matrix");
+		math_throw_overflow("compute determinant of the given Matrix");
 		RETURN_THROWS();
 	}
 
@@ -117,7 +117,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, trace)
 	}
 
 	if (!zend_finite(sum)) {
-		math_throw_overflow("compute trace of Matrix");
+		math_throw_overflow("compute trace of the given Matrix");
 		RETURN_THROWS();
 	}
 

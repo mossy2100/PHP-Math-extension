@@ -128,7 +128,7 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 	}
 
 	if (!zend_finite(sum)) {
-		math_throw_overflow("compute dot product");
+		math_throw_overflow("compute dot product of the given Vectors");
 		RETURN_THROWS();
 	}
 
@@ -198,7 +198,7 @@ PHP_METHOD(OceanMoon_Math_Vector, cross)
 			cross[i] = cross[i] * min_scale * max_scale;
 		}
 		if (!vector_all_finite(cross)) {
-			math_throw_overflow("compute cross product");
+			math_throw_overflow("compute cross product of the given Vectors");
 			RETURN_THROWS();
 		}
 	}
@@ -245,7 +245,7 @@ PHP_METHOD(OceanMoon_Math_Vector, outer)
 	zval_ptr_dtor(&column_matrix);
 	zval_ptr_dtor(&row_matrix);
 	if (result == FAILURE) {
-		math_rethrow_overflow("compute outer product");
+		math_rethrow_overflow("compute outer product of the given Vectors");
 		RETURN_THROWS();
 	}
 }

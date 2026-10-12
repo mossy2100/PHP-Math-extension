@@ -77,11 +77,11 @@ zend_result complex_calc_pow(zend_object *base_obj, double other_real, double ot
 
 	/* As in the package, an overflow at any later step is reported as an overflow of pow() itself. */
 	if (complex_calc_pow_general(base_obj, real, imag, other_real, other_imag, out_real, out_imag) == FAILURE) {
-		math_rethrow_overflow("raise Complex to a power");
+		math_rethrow_overflow("raise the given Complex to the given power");
 		return FAILURE;
 	}
 	if (complex_parts_overflow(*out_real, *out_imag)) {
-		math_throw_overflow("raise Complex to a power");
+		math_throw_overflow("raise the given Complex to the given power");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -137,7 +137,7 @@ static zend_result complex_calc_pow_general(
 				double r = result_real * x_real - result_imag * x_imag;
 				double i = result_real * x_imag + result_imag * x_real;
 				if (complex_parts_overflow(r, i)) {
-					math_throw_overflow("multiply Complex numbers");
+					math_throw_overflow("multiply the given Complex numbers");
 					return FAILURE;
 				}
 				result_real = r;
@@ -148,7 +148,7 @@ static zend_result complex_calc_pow_general(
 				double r = x_real * x_real - x_imag * x_imag;
 				double i = x_real * x_imag + x_imag * x_real;
 				if (complex_parts_overflow(r, i)) {
-					math_throw_overflow("multiply Complex numbers");
+					math_throw_overflow("multiply the given Complex numbers");
 					return FAILURE;
 				}
 				x_real = r;
@@ -170,7 +170,7 @@ static zend_result complex_calc_pow_general(
 	double mul_real = other_real * ln_real - other_imag * ln_imag;
 	double mul_imag = other_real * ln_imag + other_imag * ln_real;
 	if (complex_parts_overflow(mul_real, mul_imag)) {
-		math_throw_overflow("multiply Complex numbers");
+		math_throw_overflow("multiply the given Complex numbers");
 		return FAILURE;
 	}
 
@@ -217,7 +217,7 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
 
 	double out_real = real * real - imag * imag;
 	double out_imag = real * imag + imag * real;
-	if (complex_create_result(return_value, out_real, out_imag, "square Complex") == FAILURE) {
+	if (complex_create_result(return_value, out_real, out_imag, "square the given Complex") == FAILURE) {
 		RETURN_THROWS();
 	}
 }
