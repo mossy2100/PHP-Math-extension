@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Rational's unary operator overloads (+, -), only available in the extension - see
+ * Tests for Rational's unary operator overloads (+, -, ++, --), only available in the extension - see
  * docs/Rational.md in this repo. Mirrors the structure of the package's own
  * RationalUnaryArithmeticTest, whose neg() tests the - operator is equivalent to.
  */
@@ -106,6 +106,100 @@ class RationalUnaryOperatorsTest extends TestCase
 
         $this->assertSame(2, $result->numerator);
         $this->assertSame(3, $result->denominator);
+    }
+
+    #endregion
+
+    #region Operator ++ (increment) tests.
+
+    /**
+     * Test that ++ adds 1.
+     */
+    public function testIncrement(): void
+    {
+        $r = new Rational(1, 2);
+        $r++;
+
+        $this->assertSame(3, $r->numerator);
+        $this->assertSame(2, $r->denominator);
+    }
+
+    /**
+     * Test that ++ replaces the variable's Rational with a new one, leaving other references to the original
+     * unchanged (immutability).
+     */
+    public function testIncrementDoesNotMutate(): void
+    {
+        $r = new Rational(1, 2);
+        $original = $r;
+        $r++;
+
+        $this->assertNotSame($original, $r);
+        $this->assertSame(1, $original->numerator);
+        $this->assertSame(2, $original->denominator);
+    }
+
+    /**
+     * Test that post-increment returns the original value, and pre-increment the new one.
+     */
+    public function testPreAndPostIncrement(): void
+    {
+        $r = new Rational(1, 2);
+
+        $post = $r++;
+        $this->assertSame(1, $post->numerator);
+        $this->assertSame(3, $r->numerator);
+
+        $pre = ++$r;
+        $this->assertSame(5, $pre->numerator);
+        $this->assertSame($r, $pre);
+    }
+
+    #endregion
+
+    #region Operator -- (decrement) tests.
+
+    /**
+     * Test that -- subtracts 1.
+     */
+    public function testDecrement(): void
+    {
+        $r = new Rational(1, 2);
+        $r--;
+
+        $this->assertSame(-1, $r->numerator);
+        $this->assertSame(2, $r->denominator);
+    }
+
+    /**
+     * Test that -- replaces the variable's Rational with a new one, leaving other references to the original
+     * unchanged (immutability).
+     */
+    public function testDecrementDoesNotMutate(): void
+    {
+        $r = new Rational(1, 2);
+        $original = $r;
+        $r--;
+
+        $this->assertNotSame($original, $r);
+        $this->assertSame(1, $original->numerator);
+        $this->assertSame(2, $original->denominator);
+    }
+
+    /**
+     * Test that post-decrement returns the original value, and pre-decrement the new one.
+     */
+    public function testPreAndPostDecrement(): void
+    {
+        $r = new Rational(1, 2);
+
+        $post = $r--;
+        $this->assertSame(1, $post->numerator);
+        $this->assertSame(-1, $r->numerator);
+
+        $pre = --$r;
+        $this->assertSame(-3, $pre->numerator);
+        $this->assertSame($r, $pre);
     }
 
     #endregion

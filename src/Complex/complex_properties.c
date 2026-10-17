@@ -50,7 +50,8 @@ double complex_compute_phase(double real, double imag)
 /* }}} */
 
 /* The custom object handlers for Complex, installed by complex_create_object(). A copy of the
- * standard handlers with `do_operation`/`compare` overridden for operator support. */
+ * standard handlers with `do_operation`/`compare` overridden for operator support, and `clone_obj`
+ * so a clone keeps them. */
 static zend_object_handlers complex_object_handlers;
 
 /* {{{ complex_create_object
@@ -75,6 +76,7 @@ static zend_object *complex_create_object(zend_class_entry *ce)
 zend_result complex_properties_minit(void)
 {
 	memcpy(&complex_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	complex_object_handlers.clone_obj = math_types_clone_obj;
 	complex_object_handlers.do_operation = complex_do_operation;
 	complex_object_handlers.compare = complex_do_compare;
 	complex_ce_Complex->create_object = complex_create_object;

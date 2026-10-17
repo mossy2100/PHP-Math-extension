@@ -121,8 +121,18 @@ static zend_result complex_operator_pow(zval *result, zval *op1, zval *op2)
  *
  * Returning FAILURE without throwing (for an operand of any type other than Complex/int/float)
  * lets the engine fall through to its own standard "Unsupported operand types" TypeError.
+ *
+ * The calculation itself is complex_calculate_operation(), run through math_types_do_operation()
+ * so that compound assignment (`$z += $w`) and `$z++`/`$z--` release the Complex they replace.
  */
+static zend_result complex_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	return math_types_do_operation(complex_calculate_operation, opcode, result, op1, op2);
+}
+
+static zend_result complex_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
 	if (opcode == ZEND_BW_NOT) {
 		double real, imag;

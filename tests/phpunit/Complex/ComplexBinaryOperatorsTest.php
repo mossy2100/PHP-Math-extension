@@ -430,4 +430,133 @@ class ComplexBinaryOperatorsTest extends TestCase
     }
 
     #endregion
+
+    #region Compound assignment tests.
+
+    /**
+     * Test that += gives the same result as +, leaving other references to the original unchanged (immutability).
+     */
+    public function testCompoundAdd(): void
+    {
+        $z = new Complex(1, 2);
+        $original = $z;
+        $z += new Complex(3, 4);
+
+        $this->assertSame(4.0, $z->real);
+        $this->assertSame(6.0, $z->imaginary);
+        $this->assertSame(1.0, $original->real);
+        $this->assertSame(2.0, $original->imaginary);
+    }
+
+    /**
+     * Test that -= gives the same result as -.
+     */
+    public function testCompoundSubtract(): void
+    {
+        $z = new Complex(1, 2);
+        $z -= new Complex(3, 4);
+
+        $this->assertSame(-2.0, $z->real);
+        $this->assertSame(-2.0, $z->imaginary);
+    }
+
+    /**
+     * Test that *= gives the same result as *.
+     */
+    public function testCompoundMultiply(): void
+    {
+        $z = new Complex(1, 2);
+        $z *= new Complex(3, 4);
+
+        $this->assertSame(-5.0, $z->real);
+        $this->assertSame(10.0, $z->imaginary);
+    }
+
+    /**
+     * Test that /= gives the same result as /.
+     */
+    public function testCompoundDivide(): void
+    {
+        $z = new Complex(1, 2);
+        $z /= 2;
+
+        $this->assertSame(0.5, $z->real);
+        $this->assertSame(1.0, $z->imaginary);
+    }
+
+    /**
+     * Test that **= gives the same result as **.
+     */
+    public function testCompoundPower(): void
+    {
+        $z = new Complex(1, 2);
+        $z **= 2;
+
+        $this->assertSame(-3.0, $z->real);
+        $this->assertSame(4.0, $z->imaginary);
+    }
+
+    /**
+     * Test compound assignment with the Complex on the right, which turns a scalar variable into a Complex.
+     */
+    public function testCompoundScalarTimesComplex(): void
+    {
+        $x = 2;
+        $x *= new Complex(1, 2);
+
+        $this->assertInstanceOf(Complex::class, $x);
+        $this->assertSame(2.0, $x->real);
+        $this->assertSame(4.0, $x->imaginary);
+    }
+
+    /**
+     * Test compound assignment with the same variable on both sides.
+     */
+    public function testCompoundAddSelf(): void
+    {
+        $z = new Complex(1, 2);
+        $z += $z;
+
+        $this->assertSame(2.0, $z->real);
+        $this->assertSame(4.0, $z->imaginary);
+    }
+
+    /**
+     * Test that a compound assignment that throws leaves the variable holding its original Complex.
+     */
+    public function testCompoundDivideByZeroLeavesVariableUnchanged(): void
+    {
+        $z = new Complex(1, 2);
+        $original = $z;
+
+        try {
+            $z /= 0;
+            $this->fail('Expected ArithmeticException.');
+        } catch (ArithmeticException) {
+            $this->assertSame($original, $z);
+        }
+    }
+
+    #endregion
+
+    #region Operators on clones tests.
+
+    /**
+     * Test that a cloned Complex keeps its operators.
+     */
+    public function testOperatorsOnClone(): void
+    {
+        $z = clone new Complex(1, 2);
+
+        $product = $z * 3;
+        $this->assertSame(3.0, $product->real);
+        $this->assertSame(6.0, $product->imaginary);
+
+        $conjugate = ~$z;
+        $this->assertSame(-2.0, $conjugate->imaginary);
+
+        $this->assertTrue($z == new Complex(1, 2));
+    }
+
+    #endregion
 }

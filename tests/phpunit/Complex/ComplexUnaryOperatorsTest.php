@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Complex's unary operator overloads (+, -, ~), only available in the extension - see
+ * Tests for Complex's unary operator overloads (+, -, ~, ++, --), only available in the extension - see
  * docs/Complex.md in this repo. Mirrors the structure of the package's own
  * ComplexUnaryArithmeticTest, whose neg()/conj() tests the - and ~ operators are equivalent to.
  */
@@ -159,6 +159,100 @@ class ComplexUnaryOperatorsTest extends TestCase
 
         $this->assertSame(3.0, $result->real);
         $this->assertSame(4.0, $result->imaginary);
+    }
+
+    #endregion
+
+    #region Operator ++ (increment) tests.
+
+    /**
+     * Test that ++ adds 1 to the real part.
+     */
+    public function testIncrement(): void
+    {
+        $z = new Complex(3, 4);
+        $z++;
+
+        $this->assertSame(4.0, $z->real);
+        $this->assertSame(4.0, $z->imaginary);
+    }
+
+    /**
+     * Test that ++ replaces the variable's Complex with a new one, leaving other references to the original unchanged
+     * (immutability).
+     */
+    public function testIncrementDoesNotMutate(): void
+    {
+        $z = new Complex(3, 4);
+        $original = $z;
+        $z++;
+
+        $this->assertNotSame($original, $z);
+        $this->assertSame(3.0, $original->real);
+        $this->assertSame(4.0, $original->imaginary);
+    }
+
+    /**
+     * Test that post-increment returns the original value, and pre-increment the new one.
+     */
+    public function testPreAndPostIncrement(): void
+    {
+        $z = new Complex(3, 4);
+
+        $post = $z++;
+        $this->assertSame(3.0, $post->real);
+        $this->assertSame(4.0, $z->real);
+
+        $pre = ++$z;
+        $this->assertSame(5.0, $pre->real);
+        $this->assertSame($z, $pre);
+    }
+
+    #endregion
+
+    #region Operator -- (decrement) tests.
+
+    /**
+     * Test that -- subtracts 1 from the real part.
+     */
+    public function testDecrement(): void
+    {
+        $z = new Complex(3, 4);
+        $z--;
+
+        $this->assertSame(2.0, $z->real);
+        $this->assertSame(4.0, $z->imaginary);
+    }
+
+    /**
+     * Test that -- replaces the variable's Complex with a new one, leaving other references to the original unchanged
+     * (immutability).
+     */
+    public function testDecrementDoesNotMutate(): void
+    {
+        $z = new Complex(3, 4);
+        $original = $z;
+        $z--;
+
+        $this->assertNotSame($original, $z);
+        $this->assertSame(3.0, $original->real);
+        $this->assertSame(4.0, $original->imaginary);
+    }
+
+    /**
+     * Test that post-decrement returns the original value, and pre-decrement the new one.
+     */
+    public function testPreAndPostDecrement(): void
+    {
+        $z = new Complex(3, 4);
+
+        $post = $z--;
+        $this->assertSame(3.0, $post->real);
+        $this->assertSame(2.0, $z->real);
+
+        $pre = --$z;
+        $this->assertSame(1.0, $pre->real);
+        $this->assertSame($z, $pre);
     }
 
     #endregion

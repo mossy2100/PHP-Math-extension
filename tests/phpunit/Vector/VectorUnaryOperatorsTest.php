@@ -7,11 +7,13 @@ namespace OceanMoon\Math\Tests\Vector;
 use OceanMoon\Math\Vector;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * Tests for Vector's unary operator overloads (+, -), only available in the extension - see
  * docs/Vector.md in this repo. PHP has no dedicated opcode for unary +/-; both lower to `$v * 1`/
- * `$v * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly.
+ * `$v * -1`, so these exercise the ZEND_MUL case of the do_operation handler indirectly. Also checks
+ * that ~, ++ and -- are unsupported, throwing TypeError.
  */
 #[CoversClass(Vector::class)]
 class VectorUnaryOperatorsTest extends TestCase
@@ -91,6 +93,53 @@ class VectorUnaryOperatorsTest extends TestCase
         $result = -(-$v);
 
         $this->assertSame([1.0, -2.0, 3.0], $result->toArray());
+    }
+
+    #endregion
+
+    #region Operator ~ tests.
+
+    /**
+     * Test that ~ is unsupported for Vector, and throws rather than crashing.
+     */
+    public function testBitwiseNotThrows(): void
+    {
+        $v = Vector::fromArray([1, 2, 3]);
+
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Cannot perform bitwise not on OceanMoon\Math\Vector');
+
+        $result = ~$v;
+    }
+
+    #endregion
+
+    #region Operator ++ and -- tests.
+
+    /**
+     * Test that ++ is unsupported for Vector, since Vector + int is.
+     */
+    public function testIncrementThrows(): void
+    {
+        $v = Vector::fromArray([1, 2, 3]);
+
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Cannot increment OceanMoon\Math\Vector');
+
+        $v++;
+    }
+
+    /**
+     * Test that -- is unsupported for Vector, since Vector - int is.
+     */
+    public function testDecrementThrows(): void
+    {
+        $v = Vector::fromArray([1, 2, 3]);
+
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Cannot decrement OceanMoon\Math\Vector');
+
+        $v--;
     }
 
     #endregion

@@ -217,6 +217,17 @@ class RationalBinaryOperatorsTest extends TestCase
         $result = -2 - new Rational(PHP_INT_MAX);
     }
 
+    /**
+     * Test that a result of PHP_INT_MIN, which a Rational can't hold, throws DomainException.
+     */
+    public function testSubtractResultPhpIntMinThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Cannot express ratio -9223372036854775808/1 as Rational.');
+
+        $result = new Rational(PHP_INT_MIN + 1) - 1;
+    }
+
     #endregion
 
     #region Operator * (multiply) tests.
@@ -922,6 +933,144 @@ class RationalBinaryOperatorsTest extends TestCase
 
         $this->expectException(ArithmeticException::class);
         $r = $zero ** -1;
+    }
+
+    #endregion
+
+    #region Compound assignment tests.
+
+    /**
+     * Test that += gives the same result as +, leaving other references to the original unchanged (immutability).
+     */
+    public function testCompoundAdd(): void
+    {
+        $r = new Rational(1, 2);
+        $original = $r;
+        $r += new Rational(1, 3);
+
+        $this->assertSame(5, $r->numerator);
+        $this->assertSame(6, $r->denominator);
+        $this->assertSame(1, $original->numerator);
+        $this->assertSame(2, $original->denominator);
+    }
+
+    /**
+     * Test that -= gives the same result as -.
+     */
+    public function testCompoundSubtract(): void
+    {
+        $r = new Rational(1, 2);
+        $r -= new Rational(1, 3);
+
+        $this->assertSame(1, $r->numerator);
+        $this->assertSame(6, $r->denominator);
+    }
+
+    /**
+     * Test that *= gives the same result as *.
+     */
+    public function testCompoundMultiply(): void
+    {
+        $r = new Rational(1, 2);
+        $r *= new Rational(2, 3);
+
+        $this->assertSame(1, $r->numerator);
+        $this->assertSame(3, $r->denominator);
+    }
+
+    /**
+     * Test that /= gives the same result as /.
+     */
+    public function testCompoundDivide(): void
+    {
+        $r = new Rational(1, 2);
+        $r /= new Rational(1, 4);
+
+        $this->assertSame(2, $r->numerator);
+        $this->assertSame(1, $r->denominator);
+    }
+
+    /**
+     * Test that **= gives the same result as **.
+     */
+    public function testCompoundPower(): void
+    {
+        $r = new Rational(1, 2);
+        $r **= 2;
+
+        $this->assertSame(1, $r->numerator);
+        $this->assertSame(4, $r->denominator);
+    }
+
+    /**
+     * Test that a float operand widens the result to float, as with +.
+     */
+    public function testCompoundAddFloat(): void
+    {
+        $r = new Rational(1, 2);
+        $r += 0.25;
+
+        $this->assertSame(0.75, $r);
+    }
+
+    /**
+     * Test compound assignment with the Rational on the right, which turns an int variable into a Rational.
+     */
+    public function testCompoundIntTimesRational(): void
+    {
+        $x = 2;
+        $x *= new Rational(1, 3);
+
+        $this->assertInstanceOf(Rational::class, $x);
+        $this->assertSame(2, $x->numerator);
+        $this->assertSame(3, $x->denominator);
+    }
+
+    /**
+     * Test compound assignment with the same variable on both sides.
+     */
+    public function testCompoundAddSelf(): void
+    {
+        $r = new Rational(1, 2);
+        $r += $r;
+
+        $this->assertSame(1, $r->numerator);
+        $this->assertSame(1, $r->denominator);
+    }
+
+    /**
+     * Test that a compound assignment that throws leaves the variable holding its original Rational.
+     */
+    public function testCompoundDivideByZeroLeavesVariableUnchanged(): void
+    {
+        $r = new Rational(1, 2);
+        $original = $r;
+
+        try {
+            $r /= 0;
+            $this->fail('Expected ArithmeticException.');
+        } catch (ArithmeticException) {
+            $this->assertSame($original, $r);
+        }
+    }
+
+    #endregion
+
+    #region Operators on clones tests.
+
+    /**
+     * Test that a cloned Rational keeps its operators.
+     */
+    public function testOperatorsOnClone(): void
+    {
+        $r = clone new Rational(1, 2);
+
+        $product = $r * 3;
+        $this->assertSame(3, $product->numerator);
+        $this->assertSame(2, $product->denominator);
+
+        $this->assertTrue($r < 1);
+        $this->assertTrue($r == new Rational(1, 2));
     }
 
     #endregion

@@ -383,4 +383,137 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     #endregion
+
+    #region Compound assignment tests.
+
+    /**
+     * Test that += gives the same result as +, replacing the variable's Vector rather than modifying it.
+     */
+    public function testCompoundAdd(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $original = $v;
+        $v += Vector::fromArray([3, 4]);
+
+        $this->assertSame([4.0, 6.0], $v->toArray());
+        $this->assertSame([1.0, 2.0], $original->toArray());
+    }
+
+    /**
+     * Test that -= gives the same result as -.
+     */
+    public function testCompoundSubtract(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $v -= Vector::fromArray([3, 4]);
+
+        $this->assertSame([-2.0, -2.0], $v->toArray());
+    }
+
+    /**
+     * Test that *= with a scalar gives the same result as *.
+     */
+    public function testCompoundMultiplyScalar(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $v *= 2;
+
+        $this->assertSame([2.0, 4.0], $v->toArray());
+    }
+
+    /**
+     * Test that *= with a Matrix gives the same result as *.
+     */
+    public function testCompoundMultiplyMatrix(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $v *= Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertSame([7.0, 10.0], $v->toArray());
+    }
+
+    /**
+     * Test that /= gives the same result as /.
+     */
+    public function testCompoundDivide(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $v /= 2;
+
+        $this->assertSame([0.5, 1.0], $v->toArray());
+    }
+
+    /**
+     * Test compound assignment with the Vector on the right, which turns a scalar variable into a Vector.
+     */
+    public function testCompoundScalarTimesVector(): void
+    {
+        $x = 2.0;
+        $x *= Vector::fromArray([1, 2]);
+
+        $this->assertInstanceOf(Vector::class, $x);
+        $this->assertSame([2.0, 4.0], $x->toArray());
+    }
+
+    /**
+     * Test compound assignment with the same variable on both sides.
+     */
+    public function testCompoundAddSelf(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $v += $v;
+
+        $this->assertSame([2.0, 4.0], $v->toArray());
+    }
+
+    /**
+     * Test that an unsupported compound assignment leaves the variable holding its original Vector.
+     */
+    public function testCompoundUnsupportedLeavesVariableUnchanged(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $original = $v;
+
+        try {
+            $v += 1;
+            $this->fail('Expected TypeError.');
+        } catch (TypeError) {
+            $this->assertSame($original, $v);
+            $this->assertSame([1.0, 2.0], $v->toArray());
+        }
+    }
+
+    #endregion
+
+    #region Operators on clones tests.
+
+    /**
+     * Test that a cloned Vector keeps its operators and its magnitude property.
+     */
+    public function testOperatorsOnClone(): void
+    {
+        $v = clone Vector::fromArray([3, 4]);
+
+        $this->assertSame([6.0, 8.0], ($v * 2)->toArray());
+        $this->assertSame(5.0, $v->magnitude);
+    }
+
+    /**
+     * Test that the Vector from Vector * Matrix, built from a clone internally, keeps its operators.
+     */
+    public function testOperatorsOnVectorTimesMatrixResult(): void
+    {
+        $v = Vector::fromArray([1, 2]);
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertSame([21.0, 30.0], (($v * $m) * 3)->toArray());
+    }
+
+    #endregion
 }

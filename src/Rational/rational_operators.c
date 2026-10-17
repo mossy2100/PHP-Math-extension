@@ -331,8 +331,18 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
  * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric Type Widening"
  * section); otherwise an int operand widens to Rational and the exact-Rational path below
  * applies, matching add()/sub()/mul()/div().
+ *
+ * The calculation itself is rational_calculate_operation(), run through math_types_do_operation()
+ * so that compound assignment (`$r += $s`) and `$r++`/`$r--` release the Rational they replace.
  */
+static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 zend_result rational_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	return math_types_do_operation(rational_calculate_operation, opcode, result, op1, op2);
+}
+
+static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
 	if (opcode == ZEND_POW) {
 		return rational_do_pow(result, op1, op2);
@@ -435,7 +445,8 @@ int rational_do_compare(zval *op1, zval *op2)
 /* }}} */
 
 /* The custom object handlers for Rational, installed by rational_create_object(). A copy of the
- * standard handlers with `do_operation`/`compare` overridden, matching how
+ * standard handlers with `do_operation`/`compare` overridden (and `clone_obj`, so a clone keeps
+ * them), matching how
  * Complex/complex_properties.c installs Complex's (which also overrides `read_property`, for its
  * lazy computed properties - Rational has none, so this is the only override it needs). */
 static zend_object_handlers rational_object_handlers;
@@ -462,6 +473,7 @@ static zend_object *rational_create_object(zend_class_entry *ce)
 zend_result rational_operators_minit(void)
 {
 	memcpy(&rational_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	rational_object_handlers.clone_obj = math_types_clone_obj;
 	rational_object_handlers.do_operation = rational_do_operation;
 	rational_object_handlers.compare = rational_do_compare;
 	rational_object_handlers.cast_object = rational_cast_object;

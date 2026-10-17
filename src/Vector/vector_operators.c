@@ -63,8 +63,23 @@ static zend_result vector_operand_scalar(zval *zv, double *out)
  * deliberately unsupported per docs/Vector.md - lets the engine fall
  * through to its own standard "Unsupported operand types" TypeError, or try the other operand's
  * handler if it has one (e.g. `Matrix * Vector`, handled by matrix_do_operation instead).
+ *
+ * Any other opcode is rejected before op2 is read, since for a unary opcode (`~`) op2 is NULL.
+ * The calculation itself is vector_calculate_operation(), run through math_types_do_operation()
+ * so that compound assignment (`$v += $w`) releases the Vector it replaces.
  */
+static zend_result vector_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	if (opcode != ZEND_ADD && opcode != ZEND_SUB && opcode != ZEND_MUL && opcode != ZEND_DIV) {
+		return FAILURE;
+	}
+
+	return math_types_do_operation(vector_calculate_operation, opcode, result, op1, op2);
+}
+
+static zend_result vector_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
 	bool op1_is_vector = Z_TYPE_P(op1) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op1), vector_ce_Vector);
 	bool op2_is_vector = Z_TYPE_P(op2) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op2), vector_ce_Vector);

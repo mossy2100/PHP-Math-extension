@@ -53,6 +53,28 @@ uint32_t math_types_property_offset(zend_class_entry *ce, const char *name);
 zend_result math_types_array_iterator(zval *return_value, zval *array);
 /* }}} */
 
+/* {{{ math_types_clone_obj
+ *
+ * A `clone_obj` handler that keeps the original's object handlers. PHP's default,
+ * zend_objects_clone_obj(), builds the copy with zend_objects_new(), which installs the standard
+ * handlers, so a clone would lose the extension's operators, comparison and property handlers.
+ */
+zend_object *math_types_clone_obj(zend_object *object);
+/* }}} */
+
+/* {{{ math_types_do_operation
+ *
+ * Runs calculate() as a do_operation handler, safely for compound assignment. For `$a += $b` (and the other compound
+ * operators) and for `$a++`/`$a--`, the engine passes result and op1 as the same zval, so writing the new value
+ * straight into result would overwrite op1's object without releasing it. calculate() writes into a temporary
+ * instead, and the old value is released only once it has succeeded, so a failure leaves op1 untouched. This is the
+ * same problem ext/gmp's gmp_do_operation() solves.
+ */
+typedef zend_result (*math_types_operation)(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
+zend_result math_types_do_operation(math_types_operation calculate, uint8_t opcode, zval *result, zval *op1, zval *op2);
+/* }}} */
+
 /* {{{ math_types_read_property
  *
  * Returns the zval in a declared property's slot. The caller must already know the object is an

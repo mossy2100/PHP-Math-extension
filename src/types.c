@@ -59,3 +59,29 @@ zend_result math_types_array_iterator(zval *return_value, zval *array)
 	}
 	return SUCCESS;
 }
+
+zend_object *math_types_clone_obj(zend_object *object)
+{
+	zend_object *new_obj = zend_objects_clone_obj(object);
+
+	new_obj->handlers = object->handlers;
+	return new_obj;
+}
+
+zend_result math_types_do_operation(math_types_operation calculate, uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	zval value;
+
+	ZVAL_UNDEF(&value);
+	if (calculate(opcode, &value, op1, op2) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* For compound assignment, result still holds op1's old value, which is released here. Otherwise result is a
+	 * fresh temporary, with nothing to release. */
+	if (result == op1) {
+		zval_ptr_dtor(result);
+	}
+	ZVAL_COPY_VALUE(result, &value);
+	return SUCCESS;
+}

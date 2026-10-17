@@ -122,12 +122,19 @@ zend_result rational_init(zend_object *obj, zend_long num, zend_long den)
 /* {{{ rational_create
  *
  * Allocate a new Rational object into return_value and initialize it via rational_init(). Used by
- * all the from*() factory paths (once they exist).
+ * all the from*() factory paths (once they exist). If rational_init() throws, the object is freed
+ * and return_value left undefined, since an operator's result, unlike a method's return value, is
+ * not cleaned up by the engine.
  */
 zend_result rational_create(zval *return_value, zend_long num, zend_long den)
 {
 	object_init_ex(return_value, rational_ce_Rational);
-	return rational_init(Z_OBJ_P(return_value), num, den);
+	if (rational_init(Z_OBJ_P(return_value), num, den) == FAILURE) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 /* }}} */
 

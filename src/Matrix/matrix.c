@@ -46,7 +46,7 @@ uint32_t matrix_offset_data;
 
 /* The custom object handlers for Matrix, installed by matrix_create_object(). A copy of the
  * standard handlers with `clone_obj` overridden so cloning deep-clones row Vectors, matching the
- * PHP package's __clone(). */
+ * PHP package's __clone(), and keeps these handlers. */
 static zend_object_handlers matrix_object_handlers;
 
 /* {{{ matrix_init
@@ -261,7 +261,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, __construct)
  */
 static zend_object *matrix_clone_obj(zend_object *object)
 {
-	zend_object *new_obj = zend_objects_clone_obj(object);
+	zend_object *new_obj = math_types_clone_obj(object);
 
 	zend_long row_count = matrix_read_row_count(new_obj);
 

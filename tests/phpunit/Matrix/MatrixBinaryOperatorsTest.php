@@ -604,4 +604,227 @@ class MatrixBinaryOperatorsTest extends TestCase
     }
 
     #endregion
+
+    #region Compound assignment tests.
+
+    /**
+     * Test that += gives the same result as +, replacing the variable's Matrix rather than modifying it.
+     */
+    public function testCompoundAdd(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $original = $m;
+        $m += Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertSame([
+            [2.0, 4.0],
+            [6.0, 8.0],
+        ], $m->toArray());
+        $this->assertSame([
+            [1.0, 2.0],
+            [3.0, 4.0],
+        ], $original->toArray());
+    }
+
+    /**
+     * Test that -= gives the same result as -.
+     */
+    public function testCompoundSubtract(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m -= Matrix::fromArray([
+            [1, 1],
+            [1, 1],
+        ]);
+
+        $this->assertSame([
+            [0.0, 1.0],
+            [2.0, 3.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test that *= with a scalar gives the same result as *.
+     */
+    public function testCompoundMultiplyScalar(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m *= 2;
+
+        $this->assertSame([
+            [2.0, 4.0],
+            [6.0, 8.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test that *= with a Matrix gives the same result as *.
+     */
+    public function testCompoundMultiplyMatrix(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m *= Matrix::fromArray([
+            [0, 1],
+            [1, 0],
+        ]);
+
+        $this->assertSame([
+            [2.0, 1.0],
+            [4.0, 3.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test that /= gives the same result as /.
+     */
+    public function testCompoundDivide(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m /= 2;
+
+        $this->assertSame([
+            [0.5, 1.0],
+            [1.5, 2.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test that **= gives the same result as **.
+     */
+    public function testCompoundPower(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m **= 2;
+
+        $this->assertSame([
+            [7.0, 10.0],
+            [15.0, 22.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test compound assignment with the Matrix on the right, which turns a scalar variable into a Matrix.
+     */
+    public function testCompoundScalarTimesMatrix(): void
+    {
+        $x = 2;
+        $x *= Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertInstanceOf(Matrix::class, $x);
+        $this->assertSame([
+            [2.0, 4.0],
+            [6.0, 8.0],
+        ], $x->toArray());
+    }
+
+    /**
+     * Test compound assignment with the same variable on both sides.
+     */
+    public function testCompoundMultiplySelf(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $m *= $m;
+
+        $this->assertSame([
+            [7.0, 10.0],
+            [15.0, 22.0],
+        ], $m->toArray());
+    }
+
+    /**
+     * Test that an unsupported compound assignment leaves the variable holding its original Matrix.
+     */
+    public function testCompoundUnsupportedLeavesVariableUnchanged(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $original = $m;
+
+        try {
+            $m += 1;
+            $this->fail('Expected TypeError.');
+        } catch (TypeError) {
+            $this->assertSame($original, $m);
+        }
+    }
+
+    #endregion
+
+    #region Operators on clones tests.
+
+    /**
+     * Test that a cloned Matrix keeps its operators.
+     */
+    public function testOperatorsOnClone(): void
+    {
+        $m = clone Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertSame([
+            [7.0, 10.0],
+            [15.0, 22.0],
+        ], ($m ** 2)->toArray());
+    }
+
+    /**
+     * Test that a row Vector from getRow(), a clone internally, keeps its operators.
+     */
+    public function testOperatorsOnRow(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+
+        $this->assertSame([3.0, 6.0], ($m->getRow(0) * 3)->toArray());
+    }
+
+    /**
+     * Test that cloning a clone still deep-clones the rows.
+     */
+    public function testCloneOfCloneIsDeep(): void
+    {
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
+        $copy = clone $m;
+        $copyOfCopy = clone $copy;
+        $copyOfCopy[0][0] = 99;
+
+        $this->assertSame(1.0, $copy[0][0]);
+    }
+
+    #endregion
 }

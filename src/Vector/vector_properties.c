@@ -79,7 +79,7 @@ static zval *vector_write_property(zend_object *object, zend_string *member, zva
  * standard handlers with `do_operation`, `read_property`, and `write_property` overridden - the
  * first for operator support, the other two so `magnitude` behaves like the package's read-only
  * property hook: computed fresh on every read, and rejecting writes, instead of silently
- * accepting them into an ignored backing slot. */
+ * accepting them into an ignored backing slot. `clone_obj` is overridden too, so a clone keeps them. */
 static zend_object_handlers vector_object_handlers;
 
 /* {{{ vector_create_object
@@ -104,6 +104,7 @@ static zend_object *vector_create_object(zend_class_entry *ce)
 zend_result vector_properties_minit(void)
 {
 	memcpy(&vector_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	vector_object_handlers.clone_obj = math_types_clone_obj;
 	vector_object_handlers.do_operation = vector_do_operation;
 	vector_object_handlers.read_property = vector_read_property;
 	vector_object_handlers.write_property = vector_write_property;

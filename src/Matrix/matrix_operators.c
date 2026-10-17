@@ -61,8 +61,24 @@ static zend_result matrix_operand_scalar(zval *zv, double *out)
  * "Unsupported operand types" TypeError, or try the other operand's handler if it has one (e.g.
  * `Vector * Matrix`, handled by vector_do_operation instead, since Vector is always op1 in that
  * expression and so is tried first).
+ *
+ * Any other opcode is rejected before op2 is read, since for a unary opcode (`~`) op2 is NULL.
+ * The calculation itself is matrix_calculate_operation(), run through math_types_do_operation()
+ * so that compound assignment (`$A *= 2`) releases the Matrix it replaces.
  */
+static zend_result matrix_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 zend_result matrix_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	if (opcode != ZEND_ADD && opcode != ZEND_SUB && opcode != ZEND_MUL && opcode != ZEND_DIV
+		&& opcode != ZEND_POW) {
+		return FAILURE;
+	}
+
+	return math_types_do_operation(matrix_calculate_operation, opcode, result, op1, op2);
+}
+
+static zend_result matrix_calculate_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
 	bool op1_is_matrix = Z_TYPE_P(op1) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op1), matrix_ce_Matrix);
 	bool op2_is_matrix = Z_TYPE_P(op2) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op2), matrix_ce_Matrix);
