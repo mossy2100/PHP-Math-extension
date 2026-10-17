@@ -129,7 +129,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   for an argument of the wrong type, like the package.
 - **The extension couldn't be built on Windows.** `config.w32` was missing a source file and called a function the
   Windows build system doesn't have, and the integer overflow checks used GCC/Clang builtins that MSVC lacks. It now
-  builds with MSVC for PHP 8.4 and 8.5, thread-safe or not.
+  builds with MSVC for PHP 8.4 and 8.5, thread-safe or not, and passes the full test suite.
+- **A thread-safe Windows build crashed** on its first access to an engine global, such as when throwing an exception.
+  The module never filled its per-thread cache, which Windows builds use.
 - **`Vector::$magnitude` behaves like the package's property.** `isset()` and `empty()` compute it, and
   `json_encode()`, `get_object_vars()` and `var_export()` include it. Previously `isset()` was `false`, those functions
   left it out, and `var_dump()` showed it as uninitialized.
