@@ -9,6 +9,10 @@
  * Complex is immutable), Vector is mutable, so caching would need every mutating method (set(),
  * and anything built on it) to remember to invalidate it - simpler to just never cache.
  *
+ * The has_property and get_properties_for handlers make `magnitude` visible where the package's
+ * hook is: isset(), empty(), json_encode(), get_object_vars() and var_export() compute it, while
+ * var_dump(), print_r(), (array) and serialize() leave it out.
+ *
  * Also installs the custom object handlers (do_operation, create_object) shared by every Vector
  * instance.
  */
@@ -21,6 +25,22 @@
 #include "vector_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
+
+/* {{{ vector_read_magnitude
+ *
+ * Computes the magnitude for the property handlers below, throwing OverflowException, as the package's hook does, if
+ * it's too large to represent.
+ */
+static zend_result vector_read_magnitude(zend_object *object, double *out)
+{
+	*out = vector_compute_magnitude(object);
+	if (!zend_finite(*out)) {
+		math_throw_overflow("compute magnitude of the given Vector");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
 
 /* {{{ vector_read_property
  *
@@ -41,9 +61,8 @@
 static zval *vector_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	if (zend_string_equals_literal(member, "magnitude")) {
-		double magnitude = vector_compute_magnitude(object);
-		if (!zend_finite(magnitude)) {
-			math_throw_overflow("compute magnitude of the given Vector");
+		double magnitude;
+		if (vector_read_magnitude(object, &magnitude) == FAILURE) {
 			return &EG(uninitialized_zval);
 		}
 		ZVAL_DOUBLE(rv, magnitude);
@@ -51,6 +70,79 @@ static zval *vector_read_property(zend_object *object, zend_string *member, int 
 	}
 
 	return zend_std_read_property(object, member, type, cache_slot, rv);
+}
+/* }}} */
+
+/* {{{ vector_has_property
+ *
+ * Custom `has_property` handler: for "magnitude", isset() is true and empty() is true only for a zero magnitude, as
+ * with the package's hook, instead of reading the unset backing slot. Like read_property(), it never reaches
+ * zend_std_has_property() for "magnitude", so no cache slot is filled for it.
+ */
+static int vector_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot)
+{
+	if (zend_string_equals_literal(member, "magnitude")) {
+		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
+			return 1;
+		}
+		double magnitude;
+		if (vector_read_magnitude(object, &magnitude) == FAILURE) {
+			return 0;
+		}
+		return has_set_exists == ZEND_PROPERTY_NOT_EMPTY ? magnitude != 0.0 : 1;
+	}
+
+	return zend_std_has_property(object, member, has_set_exists, cache_slot);
+}
+/* }}} */
+
+/* {{{ vector_get_properties_for
+ *
+ * Custom `get_properties_for` handler: returns the standard property table, with "magnitude" computed for
+ * json_encode(), get_object_vars() and var_export(), and left out for every other purpose, matching what the package's
+ * hook gives. Without this, those functions skipped "magnitude", and var_dump() showed it as uninitialized.
+ */
+static HashTable *vector_get_properties_for(zend_object *object, zend_prop_purpose purpose)
+{
+	bool include = purpose == ZEND_PROP_PURPOSE_JSON || purpose == ZEND_PROP_PURPOSE_GET_OBJECT_VARS
+		|| purpose == ZEND_PROP_PURPOSE_VAR_EXPORT;
+
+	double magnitude = 0.0;
+	if (include && vector_read_magnitude(object, &magnitude) == FAILURE) {
+		return NULL;
+	}
+
+	HashTable *props = zend_std_get_properties_for(object, purpose);
+	if (props == NULL) {
+		return NULL;
+	}
+
+	HashTable *result = zend_new_array(zend_hash_num_elements(props));
+	zend_ulong index;
+	zend_string *key;
+	zval *value;
+	ZEND_HASH_FOREACH_KEY_VAL(props, index, key, value) {
+		if (key != NULL && zend_string_equals_literal(key, "magnitude")) {
+			if (include) {
+				zval magnitude_zv;
+				ZVAL_DOUBLE(&magnitude_zv, magnitude);
+				zend_hash_add_new(result, key, &magnitude_zv);
+			}
+			continue;
+		}
+		/* A declared property's entry points to its slot (IS_INDIRECT). It's copied as is, rather than dereferenced,
+		 * because callers such as get_object_vars() treat a direct value as a dynamic property and skip the
+		 * visibility check, which would expose the private $data. */
+		Z_TRY_ADDREF_P(value);
+		if (key != NULL) {
+			zend_hash_add_new(result, key, value);
+		} else {
+			zend_hash_index_add_new(result, index, value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_release_properties(props);
+	return result;
 }
 /* }}} */
 
@@ -76,10 +168,10 @@ static zval *vector_write_property(zend_object *object, zend_string *member, zva
 /* }}} */
 
 /* The custom object handlers for Vector, installed by vector_create_object(). A copy of the
- * standard handlers with `do_operation`, `read_property`, and `write_property` overridden - the
- * first for operator support, the other two so `magnitude` behaves like the package's read-only
- * property hook: computed fresh on every read, and rejecting writes, instead of silently
- * accepting them into an ignored backing slot. `clone_obj` is overridden too, so a clone keeps them. */
+ * standard handlers with `do_operation` overridden for operator support, and `read_property`,
+ * `write_property`, `has_property` and `get_properties_for` overridden so `magnitude` behaves like
+ * the package's read-only property hook: computed fresh on every read, rejecting writes, and
+ * visible to the same functions. `clone_obj` is overridden too, so a clone keeps them. */
 static zend_object_handlers vector_object_handlers;
 
 /* {{{ vector_create_object
@@ -108,6 +200,8 @@ zend_result vector_properties_minit(void)
 	vector_object_handlers.do_operation = vector_do_operation;
 	vector_object_handlers.read_property = vector_read_property;
 	vector_object_handlers.write_property = vector_write_property;
+	vector_object_handlers.has_property = vector_has_property;
+	vector_object_handlers.get_properties_for = vector_get_properties_for;
 	vector_ce_Vector->create_object = vector_create_object;
 
 	return SUCCESS;

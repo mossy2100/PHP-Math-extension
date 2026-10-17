@@ -263,6 +263,19 @@ zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *retur
  */
 zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value)
 {
+	/* Checked here, rather than left to matrix_calc_mul_matrix(), so the message names this Vector's count, as the
+	 * package's does. */
+	zend_long count = vector_read_count(self);
+	zend_long row_count = matrix_read_row_count(other);
+	if (count != row_count) {
+		zend_string *msg = strpprintf(
+			0, "Invalid Matrix row count: " ZEND_LONG_FMT ". Must equal this Vector's count: " ZEND_LONG_FMT ".",
+			row_count, count);
+		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
 	zval row_matrix;
 	if (vector_to_row_matrix(self, &row_matrix) == FAILURE) {
 		return FAILURE;
@@ -317,7 +330,9 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 	}
 
 	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), matrix_ce_Matrix)) {
-		zend_argument_type_error(1, "must be of type float|Vector|Matrix, %s given", zend_zval_type_name(other));
+		zend_argument_type_error(
+			1, "must be of type OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(other)
+		);
 		RETURN_THROWS();
 	}
 
@@ -443,7 +458,9 @@ PHP_METHOD(OceanMoon_Math_Vector, div)
 	}
 
 	if (Z_TYPE_P(other) != IS_DOUBLE && Z_TYPE_P(other) != IS_LONG) {
-		zend_argument_type_error(1, "must be of type float|Vector, %s given", zend_zval_type_name(other));
+		zend_argument_type_error(
+			1, "must be of type OceanMoon\\Math\\Vector|float, %s given", zend_zval_value_name(other)
+		);
 		RETURN_THROWS();
 	}
 

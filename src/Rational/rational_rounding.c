@@ -33,7 +33,7 @@ PHP_METHOD(OceanMoon_Math_Rational, round)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(mode_obj, rounding_mode_ce)
+		Z_PARAM_OBJ_OF_CLASS(mode_obj, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	int mode = mode_obj ? php_math_round_mode_from_enum(mode_obj) : PHP_ROUND_HALF_UP;

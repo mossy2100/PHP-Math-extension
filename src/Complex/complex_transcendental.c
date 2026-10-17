@@ -205,7 +205,9 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		} else if (Z_TYPE_P(base_arg) == IS_DOUBLE) {
 			d = Z_DVAL_P(base_arg);
 		} else {
-			zend_argument_type_error(1, "must be of type Complex|float, %s given", zend_zval_type_name(base_arg));
+			zend_argument_type_error(
+				1, "must be of type OceanMoon\\Math\\Complex|float, %s given", zend_zval_value_name(base_arg)
+			);
 			RETURN_THROWS();
 		}
 		if (!zend_finite(d)) {

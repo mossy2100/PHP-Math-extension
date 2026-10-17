@@ -190,7 +190,7 @@ static zend_result rational_operand_components(
 		return SUCCESS;
 	}
 
-	zend_argument_type_error(1, "must be of type Rational|int, %s given", zend_zval_type_name(other));
+	zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Rational|int, %s given", zend_zval_value_name(other));
 	return FAILURE;
 }
 /* }}} */

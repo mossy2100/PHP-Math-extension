@@ -527,7 +527,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, mul)
 	}
 
 	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), matrix_ce_Matrix)) {
-		zend_argument_type_error(1, "must be of type float|Vector|Matrix, %s given", zend_zval_type_name(other));
+		zend_argument_type_error(
+			1, "must be of type OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(other)
+		);
 		RETURN_THROWS();
 	}
 

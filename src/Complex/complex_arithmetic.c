@@ -43,7 +43,7 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
 		complex_read_parts(Z_OBJ_P(other), out_real, out_imag);
 		return SUCCESS;
 	} else {
-		zend_argument_type_error(1, "must be of type Complex|float, %s given", zend_zval_type_name(other));
+		zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Complex|float, %s given", zend_zval_value_name(other));
 		return FAILURE;
 	}
 

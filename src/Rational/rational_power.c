@@ -355,7 +355,7 @@ PHP_METHOD(OceanMoon_Math_Rational, pow)
 		rational_read_parts(Z_OBJ_P(exp), &p, &q);
 		result = rational_calc_pow_rational(num, den, p, q, return_value);
 	} else {
-		zend_argument_type_error(1, "must be of type Rational|int, %s given", zend_zval_type_name(exp));
+		zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Rational|int, %s given", zend_zval_value_name(exp));
 		RETURN_THROWS();
 	}
 

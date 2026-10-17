@@ -128,6 +128,16 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`new Rational(0)->div()` returned zero for any argument**, including a string or `NAN`. It now throws `TypeError`
   for an argument of the wrong type, like the package.
 - **The Windows build's source list was missing a file**, so it couldn't link.
+- **`Vector::$magnitude` behaves like the package's property.** `isset()` and `empty()` compute it, and
+  `json_encode()`, `get_object_vars()` and `var_export()` include it. Previously `isset()` was `false`, those functions
+  left it out, and `var_dump()` showed it as uninitialized.
+- **`TypeError` messages match the package** for parameters taking an object or a number, e.g. "must be of type
+  OceanMoon\Math\Vector|OceanMoon\Math\Matrix|float, true given". Previously they used short class names, a different
+  order, and the type rather than the value ("bool given").
+- **`Complex::round()` and `Rational::round()` accepted `null` for `$mode`**, using the default. They now throw
+  `TypeError`, like the package.
+- **`Vector::mul()` and `*` with a Matrix of the wrong height** said "Must equal this Matrix's column count". The
+  message now names the Vector's count, like the package.
 
 ### Documentation
 
