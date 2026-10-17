@@ -23,11 +23,19 @@
  *    against abs_tol (useful near zero); if that fails, it's checked against
  *    rel_tol * max(|a|, |b|) (scales with magnitude).
  *
- * Deliberately does NOT validate rel_tol/abs_tol for negativity itself (the PHP method does, and
- * throws DomainException) - like the rest of this file, it's pure math with no PHP/exception
- * awareness. Callers with negative tolerances to reject should check before calling this.
+ * Deliberately does NOT validate rel_tol/abs_tol itself (the PHP method does, and throws
+ * DomainException), so it stays pure math. Callers check with math_floats_validate_tolerances()
+ * first, at the point where the PHP package first calls Floats::approxEqual().
  */
 bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol);
+/* }}} */
+
+/* {{{ math_floats_validate_tolerances
+ *
+ * Ports OceanMoon\Core\Floats::validateTolerances(): throws DomainException, with the same
+ * message, and returns FAILURE if either tolerance is negative or not finite.
+ */
+zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol);
 /* }}} */
 
 /* {{{ math_floats_normalize_zero

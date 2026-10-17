@@ -10,6 +10,8 @@
 
 #include <math.h>
 
+#include "ext/spl/spl_exceptions.h"
+#include "Zend/zend_exceptions.h"
 #include "floats.h"
 
 bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol)
@@ -38,6 +40,30 @@ bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol
 
 	/* Relative tolerance otherwise. */
 	return diff <= rel_tol * fmax(fabs(a), fabs(b));
+}
+
+/* Throws DomainException for an invalid tolerance, naming it in the message. */
+static zend_result math_floats_validate_tolerance(const char *name, double tol)
+{
+	if (zend_finite(tol) && tol >= 0.0) {
+		return SUCCESS;
+	}
+
+	zend_string *tol_str = math_floats_to_str(tol);
+	zend_string *msg = strpprintf(
+		0, "Invalid %s tolerance: %s. Must be finite and non-negative.", name, ZSTR_VAL(tol_str));
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+	zend_string_release(tol_str);
+	return FAILURE;
+}
+
+zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol)
+{
+	if (math_floats_validate_tolerance("relative", rel_tol) == FAILURE) {
+		return FAILURE;
+	}
+	return math_floats_validate_tolerance("absolute", abs_tol);
 }
 
 double math_floats_normalize_zero(double value)

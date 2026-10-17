@@ -268,6 +268,10 @@ static zend_result rational_calc_approx_equal(zend_object *self_obj, zval *other
 	rational_read_parts(self_obj, &self_num, &self_den);
 	double self_float = (double) self_num / (double) self_den;
 
+	if (math_floats_validate_tolerances(rel_tol, abs_tol) == FAILURE) {
+		return FAILURE;
+	}
+
 	*out = math_floats_approx_equal(self_float, other_dbl, rel_tol, abs_tol);
 	return SUCCESS;
 }

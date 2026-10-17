@@ -108,6 +108,11 @@ PHP_METHOD(OceanMoon_Math_Vector, approxEqual)
 		RETURN_FALSE;
 	}
 
+	/* Like the package, the tolerances are only checked once there's an element to compare. */
+	if (count > 0 && math_floats_validate_tolerances(rel_tol, abs_tol) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	for (zend_long i = 0; i < count; i++) {
 		double a, b;
 		vector_read_element(self_obj, i, &a);

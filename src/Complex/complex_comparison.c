@@ -134,6 +134,10 @@ PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
 		RETURN_FALSE;
 	}
 
+	if (math_floats_validate_tolerances(rel_tol, abs_tol) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
