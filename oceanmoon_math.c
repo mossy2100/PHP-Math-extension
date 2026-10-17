@@ -32,6 +32,12 @@
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(oceanmoon_math)
 {
+#if defined(ZTS) && defined(COMPILE_DL_OCEANMOON_MATH)
+	/* With ZEND_ENABLE_STATIC_TSRMLS_CACHE, engine globals such as EG() are read through this module's own per-thread
+	 * cache, which must be filled before first use, here and in RINIT, or a thread-safe build crashes. */
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
 	/* Exception classes are registered first, before any class that might throw them. */
 	if (math_exceptions_minit() == FAILURE) {
 		return FAILURE;
@@ -73,6 +79,10 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(oceanmoon_math)
 {
+#if defined(ZTS) && defined(COMPILE_DL_OCEANMOON_MATH)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
 	if (complex_rinit(module_number) == FAILURE) {
 		return FAILURE;
 	}

@@ -165,12 +165,6 @@ jobs:
       run:
         working-directory: extensions/Math
     steps:
-      # Git for Windows checks symlinks out as plain files unless told otherwise, which would break the shared/ test
-      # symlinks.
-      - name: Enable symlinks
-        working-directory: .
-        run: git config --global core.symlinks true
-
       - uses: actions/checkout@v4
         with:
           path: extensions/Math
@@ -179,6 +173,16 @@ jobs:
         with:
           repository: mossy2100/PHP-Math
           path: packages/Math
+
+      # Git for Windows checks the tests/phpunit/*/shared symlinks out as plain files, so replace each with a copy of
+      # the package's directory it points to.
+      - name: Copy in the shared tests
+        shell: pwsh
+        run: |
+          foreach ($class in 'Complex', 'Rational', 'Vector', 'Matrix') {
+            Remove-Item "tests\phpunit\$class\shared" -Force
+            Copy-Item -Recurse "..\..\packages\Math\tests\$class\shared" "tests\phpunit\$class\shared"
+          }
 
       - id: setup-php
         uses: php/setup-php-sdk@v0.12
