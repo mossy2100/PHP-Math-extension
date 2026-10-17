@@ -335,33 +335,24 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
 		Z_PARAM_ZVAL(other)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Check the type first, as the package's `self|int` parameter type does. */
+	zend_long a, b, c, d;
+	if (rational_operand_components(Z_OBJ_P(ZEND_THIS), other, &a, &b, &c, &d) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	/* Check for divide by 0. */
-	if (Z_TYPE_P(other) == IS_LONG && Z_LVAL_P(other) == 0) {
+	if (c == 0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
 		RETURN_THROWS();
 	}
-	if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), rational_ce_Rational)) {
-		zend_long other_num, other_den;
-		rational_read_parts(Z_OBJ_P(other), &other_num, &other_den);
-		if (other_num == 0) {
-			zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-			RETURN_THROWS();
-		}
-	}
 
 	/* Check for 0 divide by something. */
-	zend_long self_num, self_den;
-	rational_read_parts(Z_OBJ_P(ZEND_THIS), &self_num, &self_den);
-	if (self_num == 0) {
+	if (a == 0) {
 		if (rational_create(return_value, 0, 1) == FAILURE) {
 			RETURN_THROWS();
 		}
 		return;
-	}
-
-	zend_long a, b, c, d;
-	if (rational_operand_components(Z_OBJ_P(ZEND_THIS), other, &a, &b, &c, &d) == FAILURE) {
-		RETURN_THROWS();
 	}
 
 	/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
