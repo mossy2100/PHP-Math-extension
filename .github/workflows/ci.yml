@@ -188,9 +188,12 @@ jobs:
         shell: cmd
         run: phpize
 
+      # configure reports success even when its script fails, so check it wrote a Makefile.
       - name: Configure
         shell: cmd
-        run: configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
+        run: |
+          call configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
+          if not exist Makefile exit /b 1
 
       - name: Build
         shell: cmd

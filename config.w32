@@ -1,9 +1,36 @@
 // Windows build configuration for the math extension.
+//
+// The source files must match config.m4's. Those outside the top-level directory go through ADD_SOURCES(), one
+// call per directory, as in PHP's own extensions.
 
 ARG_ENABLE("oceanmoon_math", "enable OceanMoon math support", "no");
 
 if (PHP_OCEANMOON_MATH != "no") {
-  ADD_INCLUDE(configure_module_dirname + "/src");
-  EXTENSION("oceanmoon_math", "oceanmoon_math.c src/floats.c src/integers.c src/types.c src/exceptions.c src/Complex/complex.c src/Complex/complex_conversion.c src/Complex/complex_inspection.c src/Complex/complex_comparison.c src/Complex/complex_properties.c src/Complex/complex_arithmetic.c src/Complex/complex_transcendental.c src/Complex/complex_power.c src/Complex/complex_operators.c src/Complex/complex_rounding.c src/Complex/complex_trigonometric.c src/Complex/complex_hyperbolic.c src/Complex/complex_arrayaccess.c src/Rational/rational.c src/Rational/rational_factory.c src/Rational/rational_conversion.c src/Rational/rational_inspection.c src/Rational/rational_comparison.c src/Rational/rational_arithmetic.c src/Rational/rational_power.c src/Rational/rational_rounding.c src/Rational/rational_operators.c src/Vector/vector.c src/Vector/vector_factory.c src/Vector/vector_properties.c src/Vector/vector_conversion.c src/Vector/vector_inspection.c src/Vector/vector_modification.c src/Vector/vector_comparison.c src/Vector/vector_arithmetic.c src/Vector/vector_linear_algebra.c src/Vector/vector_aggregation.c src/Vector/vector_arrayaccess.c src/Vector/vector_operators.c src/Matrix/matrix.c src/Matrix/matrix_factory.c src/Matrix/matrix_conversion.c src/Matrix/matrix_inspection.c src/Matrix/matrix_modification.c src/Matrix/matrix_comparison.c src/Matrix/matrix_transformation.c src/Matrix/matrix_arithmetic.c src/Matrix/matrix_power.c src/Matrix/matrix_linear_algebra.c src/Matrix/matrix_norm.c src/Matrix/matrix_aggregation.c src/Matrix/matrix_arrayaccess.c src/Matrix/matrix_helpers.c src/Matrix/matrix_operators.c");
+  EXTENSION("oceanmoon_math", "oceanmoon_math.c", PHP_OCEANMOON_MATH_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+  ADD_FLAG("CFLAGS_OCEANMOON_MATH", "/I " + configure_module_dirname + "\\src");
+
+  ADD_SOURCES(configure_module_dirname + "\\src",
+    "floats.c integers.c types.c exceptions.c",
+    "oceanmoon_math");
+  ADD_SOURCES(configure_module_dirname + "\\src\\Complex",
+    "complex.c complex_conversion.c complex_inspection.c complex_comparison.c complex_properties.c " +
+    "complex_arithmetic.c complex_transcendental.c complex_power.c complex_operators.c complex_rounding.c " +
+    "complex_trigonometric.c complex_hyperbolic.c complex_arrayaccess.c",
+    "oceanmoon_math");
+  ADD_SOURCES(configure_module_dirname + "\\src\\Rational",
+    "rational.c rational_factory.c rational_conversion.c rational_inspection.c rational_comparison.c " +
+    "rational_arithmetic.c rational_power.c rational_rounding.c rational_operators.c",
+    "oceanmoon_math");
+  ADD_SOURCES(configure_module_dirname + "\\src\\Vector",
+    "vector.c vector_factory.c vector_properties.c vector_conversion.c vector_inspection.c " +
+    "vector_modification.c vector_comparison.c vector_arithmetic.c vector_linear_algebra.c vector_aggregation.c " +
+    "vector_arrayaccess.c vector_operators.c",
+    "oceanmoon_math");
+  ADD_SOURCES(configure_module_dirname + "\\src\\Matrix",
+    "matrix.c matrix_factory.c matrix_conversion.c matrix_inspection.c matrix_modification.c " +
+    "matrix_comparison.c matrix_transformation.c matrix_arithmetic.c matrix_power.c matrix_linear_algebra.c " +
+    "matrix_norm.c matrix_aggregation.c matrix_arrayaccess.c matrix_helpers.c matrix_operators.c",
+    "oceanmoon_math");
+
   AC_DEFINE("HAVE_OCEANMOON_MATH", 1, "OceanMoon math support");
 }
