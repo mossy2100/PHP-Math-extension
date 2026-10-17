@@ -22,8 +22,8 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 - **Drop-in replacement** - same class names, methods and behaviour as `oceanmoon/math`.
 - **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable) and their compound assignment forms (`+=`
-  etc.), and `~` (conjugate) for `Complex`. `Complex` and `Rational` also get `++`, `--` and the full comparison
-  operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
+  etc.), `~` (conjugate) for `Complex`, and `%` for `Rational`. `Complex` and `Rational` also get `++`, `--` and the
+  full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
 - **Behavioural parity** - a PHPUnit conformance suite runs the package's own tests against the extension's classes, so
   the two stay identical in behaviour, not just API shape.
 - **Standalone** - no runtime dependency on `oceanmoon/core`, `oceanmoon/math` or any other package, despite sharing
@@ -143,7 +143,7 @@ adds (operator overloading) and links to both sets of docs for each class.
 | Class      | Arithmetic operators                      | Comparison operators                    | Class reference                                                              | Operator docs                                    |
 | ---------- | ----------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
 | `Complex`  | `+`, `-`, `*`, `/`, `**`, `++`, `--`, `~` | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)   | [Complex operators](docs/Reference/Complex.md)   |
-| `Rational` | `+`, `-`, `*`, `/`, `**`, `++`, `--`      | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) | [Rational operators](docs/Reference/Rational.md) |
+| `Rational` | `+`, `-`, `*`, `/`, `%`, `**`, `++`, `--` | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) | [Rational operators](docs/Reference/Rational.md) |
 | `Vector`   | `+`, `-`, `*`, `/`                        | None added                              | [Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)     | [Vector operators](docs/Reference/Vector.md)     |
 | `Matrix`   | `+`, `-`, `*`, `/`, `**`                  | None added                              | [Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)     | [Matrix operators](docs/Reference/Matrix.md)     |
 

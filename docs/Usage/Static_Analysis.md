@@ -54,7 +54,7 @@ a distinct `compare` object handler, not `do_operation`:
 | `phpstan/ComplexBinaryOperatorExtension.php`      | `+`, `-`, `*`, `/`, `**`                |
 | `phpstan/ComplexUnaryOperatorExtension.php`       | unary `+`, `-`, `~`                     |
 | `phpstan/ComplexComparisonOperatorExtension.php`  | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
-| `phpstan/RationalBinaryOperatorExtension.php`     | `+`, `-`, `*`, `/`, `**`                |
+| `phpstan/RationalBinaryOperatorExtension.php`     | `+`, `-`, `*`, `/`, `%`, `**`           |
 | `phpstan/RationalUnaryOperatorExtension.php`      | unary `+`, `-`                          |
 | `phpstan/RationalComparisonOperatorExtension.php` | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
 | `phpstan/VectorBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`                      |
@@ -172,6 +172,18 @@ Ignore the error where you use the cast, or call `$r->toFloat()` or `$r->trunc()
 ```php
 $f = (float) $r; // @phpstan-ignore cast.double
 $i = (int) $r;   // @phpstan-ignore cast.int
+```
+
+## Known limitation: `++` and `--`
+
+`$z++`, `++$r` and the other increment and decrement forms work at runtime on a `Complex` or `Rational` (see
+[Rational Operators](../Reference/Rational.md#-increment)), but PHPStan reports them as `postInc.type`, `preInc.type`,
+`postDec.type` or `preDec.type`. Like casts, increment and decrement have no extension point.
+
+Ignore the error where you use the operator, or write `$r += 1` instead, which the binary operator extensions cover:
+
+```php
+$r++; // @phpstan-ignore postInc.type
 ```
 
 ## Known limitation: not yet usable from a consuming project

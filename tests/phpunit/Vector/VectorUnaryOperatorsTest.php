@@ -109,7 +109,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot perform bitwise not on OceanMoon\Math\Vector');
 
-        $result = ~$v;
+        $result = ~$v; // @phpstan-ignore unaryOp.invalid
     }
 
     #endregion
@@ -126,7 +126,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot increment OceanMoon\Math\Vector');
 
-        $v++;
+        $v++; // @phpstan-ignore postInc.type
     }
 
     /**
@@ -139,7 +139,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot decrement OceanMoon\Math\Vector');
 
-        $v--;
+        $v--; // @phpstan-ignore postDec.type
     }
 
     #endregion

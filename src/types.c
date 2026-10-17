@@ -68,6 +68,12 @@ zend_object *math_types_clone_obj(zend_object *object)
 	return new_obj;
 }
 
+zend_result math_types_throw_unsupported_mod(zval *op1, zval *op2)
+{
+	zend_type_error("Unsupported operand types: %s %% %s", zend_zval_value_name(op1), zend_zval_value_name(op2));
+	return FAILURE;
+}
+
 zend_result math_types_do_operation(math_types_operation calculate, uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
 	zval value;

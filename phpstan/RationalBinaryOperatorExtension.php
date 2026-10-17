@@ -13,7 +13,7 @@ use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
 
 /**
- * Teaches PHPStan about Rational's binary operator overloading (+, -, *, /, **), which only
+ * Teaches PHPStan about Rational's binary operator overloading (+, -, *, /, %, **), which only
  * exists at the C level (the `do_operation` object handler in
  * Rational/rational_operators.c) and so is otherwise entirely invisible to static analysis - see
  * docs/Rational.md for the runtime behavior this mirrors. Same approach as
@@ -35,7 +35,7 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
      * PHPStan treats as distinct AST nodes from their binary counterparts - see
      * RationalUnaryOperatorExtension.
      */
-    private const OPERATORS = ['+', '-', '*', '/', '**'];
+    private const OPERATORS = ['+', '-', '*', '/', '%', '**'];
 
     public function isOperatorSupported(string $operatorSigil, Type $leftSide, Type $rightSide): bool
     {

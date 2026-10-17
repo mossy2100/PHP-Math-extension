@@ -9,6 +9,7 @@ use OceanMoon\Math\Complex;
 use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * Tests for Complex's binary operator overloads (+, -, *, /, **), only available in the
@@ -328,6 +329,32 @@ class ComplexBinaryOperatorsTest extends TestCase
 
     #endregion
 
+    #region Operator % (modulo) tests.
+
+    /**
+     * Test that Complex % int is unsupported.
+     */
+    public function testModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\\Math\\Complex % int');
+
+        $result = new Complex(1, 2) % 2; // @phpstan-ignore binaryOp.invalid
+    }
+
+    /**
+     * Test that int % Complex is unsupported.
+     */
+    public function testScalarModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: int % OceanMoon\\Math\\Complex');
+
+        $result = 2 % new Complex(1, 2); // @phpstan-ignore binaryOp.invalid
+    }
+
+    #endregion
+
     #region Operator ** (power) tests.
 
     /**
@@ -530,9 +557,9 @@ class ComplexBinaryOperatorsTest extends TestCase
         $original = $z;
 
         try {
-            $z /= 0;
+            $z /= 0; // @phpstan-ignore assignOp.invalid
             $this->fail('Expected ArithmeticException.');
-        } catch (ArithmeticException) {
+        } catch (ArithmeticException) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $z);
         }
     }

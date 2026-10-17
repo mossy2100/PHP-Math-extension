@@ -129,6 +129,10 @@ static zend_result complex_calculate_operation(uint8_t opcode, zval *result, zva
 
 zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
+	if (opcode == ZEND_MOD) {
+		return math_types_throw_unsupported_mod(op1, op2);
+	}
+
 	return math_types_do_operation(complex_calculate_operation, opcode, result, op1, op2);
 }
 

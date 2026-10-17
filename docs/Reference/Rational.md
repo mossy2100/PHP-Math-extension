@@ -145,9 +145,10 @@ $s = --$r;  // $s and $r are both -5/2
 
 ## Binary Arithmetic Operators
 
-`+`, `-`, `*`, `/` and `**` each accept a `Rational`, `int`, or `float` operand on either side, widened as described in
-[Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching method. A form with a `float` operand
-has none, since the methods accept only a `Rational` or `int`.
+`+`, `-`, `*`, `/`, `%` and `**` each accept a `Rational`, `int`, or `float` operand on either side, widened as
+described in [Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching
+method. Apart from `%`, whose method `mod()` accepts a `float`, a form with a `float` operand has none, since the
+methods accept only a `Rational` or `int`.
 
 Unlike PHP's own `float` arithmetic, a form with a `float` operand never accepts or returns `±INF` or `NAN`. A
 non-finite operand throws `DomainException`, and a result too large to represent throws `OverflowException`.
@@ -329,6 +330,56 @@ $r1 / 0.75;   // 0.8888...
 
 ---
 
+### % (modulo)
+
+```php
+$remainder = $r1 % $r2;  // Rational % Rational → Rational
+$remainder = $r % $i;    // Rational % int → Rational
+$remainder = $i % $r;    // int % Rational → Rational
+$remainder = $r % $f;    // Rational % float → float
+$remainder = $f % $r;    // float % Rational → float
+```
+
+The remainder of dividing the left operand by the right, matching `mod()`. The result has the sign of the dividend,
+like PHP's own `%`.
+
+Unlike PHP's own `%`, which converts both operands to ints, the result is exact: `new Rational(7, 2) % 2` is 3/2, not 1.
+
+> [!WARNING]
+> `$f % $r` with a non-integral `float` gives the right result, but PHP also emits its "Implicit conversion from float
+> to int loses precision" deprecation. The engine converts a non-object left operand of `%` to an int before passing
+> the operation to the `Rational`. `fmod($f, $r->toFloat())` gives the same result without it.
+
+**Throws:**
+
+- `ArithmeticException` if dividing by zero, including `0.0`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
+- `OverflowException` if an intermediate value overflows an `int`.
+- `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
+
+**Examples:**
+
+```php
+$r = new Rational(-7, 2);
+$r % 2;                     // -3/2
+$r % new Rational(2, 3);    // -1/6
+7 % new Rational(2, 3);     // 1/3
+$r % 1.5;                   // -0.5
+7.0 % new Rational(2);      // 1.0
+```
+
+**Equivalence table:**
+
+| Operation   | Equivalent to               |
+| ----------- | --------------------------- |
+| `$r1 % $r2` | `$r1->mod($r2)`             |
+| `$r % $i`   | `$r->mod($i)`               |
+| `$i % $r`   | `new Rational($i)->mod($r)` |
+| `$r % $f`   | `$r->mod($f)`               |
+| `$f % $r`   | `fmod($f, $r->toFloat())`   |
+
+---
+
 ### \*\* (power)
 
 ```php
@@ -385,8 +436,8 @@ $r ** 0.5;                                   // 0.816497
 
 ## Compound Assignment Operators
 
-`+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.
-That includes [numeric type widening](#numeric-type-widening), so a `float` operand leaves the variable holding a
+`+=`, `-=`, `*=`, `/=`, `%=` and `**=` accept the same operands as the matching binary operator, and give the same
+result. That includes [numeric type widening](#numeric-type-widening), so a `float` operand leaves the variable holding a
 `float`.
 
 The variable is assigned a new value. The object it held isn't modified, so any other variable referring to that object
@@ -414,6 +465,7 @@ $i *= new Rational(1, 3);   // $i is now the Rational 2/3
 | `$r1 -= $r2`  | `$r1 = $r1 - $r2`  |
 | `$r1 *= $r2`  | `$r1 = $r1 * $r2`  |
 | `$r1 /= $r2`  | `$r1 = $r1 / $r2`  |
+| `$r1 %= $r2`  | `$r1 = $r1 % $r2`  |
 | `$r1 **= $r2` | `$r1 = $r1 ** $r2` |
 
 ---
@@ -741,7 +793,8 @@ A `Rational` can be cast to either PHP number type:
 The cast is exact, so unlike `(int) $r->toFloat()`, `(int) $r` is right even when the numerator is beyond a float's
 53-bit precision. It can't overflow, since the result is never larger in magnitude than the numerator.
 
-`floatval()`, `intval()` and `settype()` use the same casts.
+`floatval()`, `intval()` and `settype()` use the same casts. So do the bitwise operators `&`, `|`, `^`, `<<` and `>>`,
+which convert a `Rational` operand with `(int)`, so `new Rational(7, 2) & 3` is `3 & 3`.
 
 Other casts behave as for any object:
 

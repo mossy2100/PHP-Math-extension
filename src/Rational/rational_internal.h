@@ -35,6 +35,10 @@ zend_result rational_calc_add_sub(
 );
 zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value);
 
+/* The computational core of mod() for an int or Rational divisor, defined in rational_arithmetic.c. Shared with the %
+ * operator (rational_operators.c). */
+zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value);
+
 /* The computational cores of pow() for each exponent type, and of the `int ** Rational`
  * operator, defined in rational_power.c. Shared with the ** operator (rational_operators.c). */
 zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, zval *return_value);

@@ -238,6 +238,14 @@ $v1 / $v2;  // [2, 3, 1.5]
 
 ---
 
+### % (unsupported)
+
+`%` isn't supported, with a `Vector` on either side. It throws `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Vector % int`, where PHP would otherwise convert the `Vector` to an int, with
+only a warning.
+
+---
+
 ## Compound Assignment Operators
 
 `+=`, `-=`, `*=` and `/=` accept the same operands as the matching binary operator, and give the same result.

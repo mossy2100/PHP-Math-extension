@@ -337,6 +337,14 @@ $z1 ** 0.5;   // 2 + i           (the principal square root)
 
 ---
 
+### % (unsupported)
+
+`%` isn't supported, with a `Complex` on either side. It throws `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Complex % int`, where PHP would otherwise convert the `Complex` to an int,
+with only a warning.
+
+---
+
 ## Compound Assignment Operators
 
 `+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.

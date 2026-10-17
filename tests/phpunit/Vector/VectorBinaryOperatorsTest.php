@@ -384,6 +384,32 @@ class VectorBinaryOperatorsTest extends TestCase
 
     #endregion
 
+    #region Operator % (modulo) tests.
+
+    /**
+     * Test that Vector % int is unsupported.
+     */
+    public function testModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\\Math\\Vector % int');
+
+        $result = Vector::fromArray([1, 2]) % 2; // @phpstan-ignore binaryOp.invalid
+    }
+
+    /**
+     * Test that int % Vector is unsupported.
+     */
+    public function testScalarModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: int % OceanMoon\\Math\\Vector');
+
+        $result = 2 % Vector::fromArray([1, 2]); // @phpstan-ignore binaryOp.invalid
+    }
+
+    #endregion
+
     #region Compound assignment tests.
 
     /**
@@ -478,9 +504,9 @@ class VectorBinaryOperatorsTest extends TestCase
         $original = $v;
 
         try {
-            $v += 1;
+            $v += 1; // @phpstan-ignore assignOp.invalid
             $this->fail('Expected TypeError.');
-        } catch (TypeError) {
+        } catch (TypeError) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $v);
             $this->assertSame([1.0, 2.0], $v->toArray());
         }

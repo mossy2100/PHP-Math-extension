@@ -171,7 +171,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     public function testIncrement(): void
     {
         $z = new Complex(3, 4);
-        $z++;
+        $z++; // @phpstan-ignore postInc.type
 
         $this->assertSame(4.0, $z->real);
         $this->assertSame(4.0, $z->imaginary);
@@ -185,7 +185,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
         $original = $z;
-        $z++;
+        $z++; // @phpstan-ignore postInc.type
 
         $this->assertNotSame($original, $z);
         $this->assertSame(3.0, $original->real);
@@ -199,11 +199,13 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
 
-        $post = $z++;
+        // phpcs:ignore SlevomatCodingStandard.Operators.RequireOnlyStandaloneIncrementAndDecrementOperators
+        $post = $z++; // @phpstan-ignore postInc.type
         $this->assertSame(3.0, $post->real);
         $this->assertSame(4.0, $z->real);
 
-        $pre = ++$z;
+        // phpcs:ignore SlevomatCodingStandard.Operators.RequireOnlyStandaloneIncrementAndDecrementOperators
+        $pre = ++$z; // @phpstan-ignore preInc.type
         $this->assertSame(5.0, $pre->real);
         $this->assertSame($z, $pre);
     }
@@ -218,7 +220,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     public function testDecrement(): void
     {
         $z = new Complex(3, 4);
-        $z--;
+        $z--; // @phpstan-ignore postDec.type
 
         $this->assertSame(2.0, $z->real);
         $this->assertSame(4.0, $z->imaginary);
@@ -232,7 +234,7 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
         $original = $z;
-        $z--;
+        $z--; // @phpstan-ignore postDec.type
 
         $this->assertNotSame($original, $z);
         $this->assertSame(3.0, $original->real);
@@ -246,11 +248,13 @@ class ComplexUnaryOperatorsTest extends TestCase
     {
         $z = new Complex(3, 4);
 
-        $post = $z--;
+        // phpcs:ignore SlevomatCodingStandard.Operators.RequireOnlyStandaloneIncrementAndDecrementOperators
+        $post = $z--; // @phpstan-ignore postDec.type
         $this->assertSame(3.0, $post->real);
         $this->assertSame(2.0, $z->real);
 
-        $pre = --$z;
+        // phpcs:ignore SlevomatCodingStandard.Operators.RequireOnlyStandaloneIncrementAndDecrementOperators
+        $pre = --$z; // @phpstan-ignore preDec.type
         $this->assertSame(1.0, $pre->real);
         $this->assertSame($z, $pre);
     }

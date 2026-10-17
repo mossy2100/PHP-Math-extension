@@ -454,6 +454,36 @@ class MatrixBinaryOperatorsTest extends TestCase
 
     #endregion
 
+    #region Operator % (modulo) tests.
+
+    /**
+     * Test that Matrix % int is unsupported.
+     */
+    public function testModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\\Math\\Matrix % int');
+
+        $result = Matrix::fromArray([ // @phpstan-ignore binaryOp.invalid
+            [1, 2],
+        ]) % 2;
+    }
+
+    /**
+     * Test that int % Matrix is unsupported.
+     */
+    public function testScalarModThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: int % OceanMoon\\Math\\Matrix');
+
+        $result = 2 % Matrix::fromArray([ // @phpstan-ignore binaryOp.invalid
+            [1, 2],
+        ]);
+    }
+
+    #endregion
+
     #region Operator ** (power) tests.
 
     /**
@@ -770,9 +800,9 @@ class MatrixBinaryOperatorsTest extends TestCase
         $original = $m;
 
         try {
-            $m += 1;
+            $m += 1; // @phpstan-ignore assignOp.invalid
             $this->fail('Expected TypeError.');
-        } catch (TypeError) {
+        } catch (TypeError) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $m);
         }
     }

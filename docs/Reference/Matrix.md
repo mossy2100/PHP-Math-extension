@@ -260,6 +260,14 @@ $m ** -1;   // [[1, -1], [0, 1]]  (the inverse)
 
 ---
 
+### % (unsupported)
+
+`%` isn't supported, with a `Matrix` on either side. It throws `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Matrix % int`, where PHP would otherwise convert the `Matrix` to an int, with
+only a warning.
+
+---
+
 ## Compound Assignment Operators
 
 `+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.

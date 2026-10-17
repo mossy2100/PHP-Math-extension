@@ -17,6 +17,8 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
 #include "integers.h"
+#include "floats.h"
+#include <math.h>
 
 /* {{{ rational_add_checked/rational_sub_checked/rational_mul_checked
  *
@@ -358,6 +360,89 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
 	/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
 	if (rational_calc_mul(a, b, d, c, return_value) == FAILURE) {
 		math_rethrow_overflow("divide the given Rational numbers");
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ rational_calc_mod
+ *
+ * The computational core of mod() for an int or Rational divisor c/d, which isn't zero. Shared with the % operator
+ * (rational_operators.c). Throws OverflowException with the generic integer message, for the caller to replace via
+ * math_rethrow_overflow(), if an intermediate value overflows.
+ */
+zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value)
+{
+	/* Over the common denominator lcm(b, d), this Rational is A/lcm and the divisor is C/lcm, so the remainder is
+	 * (A % C)/lcm. */
+	zend_long gcd = rational_gcd2(b, d);
+	zend_long b_over_gcd = b / gcd;
+	zend_long big_a, big_c, lcm;
+	if (rational_mul_checked(a, d / gcd, &big_a) == FAILURE
+		|| rational_mul_checked(c, b_over_gcd, &big_c) == FAILURE
+		|| rational_mul_checked(b_over_gcd, d, &lcm) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* C's % truncates, giving the remainder the sign of the dividend, as PHP's % does. ZEND_LONG_MIN % -1 overflows
+	 * in C, though the remainder is 0, so a divisor of -1 is handled first. */
+	return rational_create(return_value, big_c == -1 ? 0 : big_a % big_c, lcm);
+}
+/* }}} */
+
+/* {{{ OceanMoon\Math\Rational::mod(Rational|int|float $other): Rational|float
+ *
+ * Matches the PHP package's Rational::mod(): an exact Rational for an int or Rational divisor, or a float for a float
+ * divisor. The result has the sign of the dividend, as with PHP's % and fmod().
+ */
+PHP_METHOD(OceanMoon_Math_Rational, mod)
+{
+	zval *other;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(other)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_long a, b, c, d;
+	rational_read_parts(Z_OBJ_P(ZEND_THIS), &a, &b);
+
+	/* Handle a float divisor. */
+	if (Z_TYPE_P(other) == IS_DOUBLE) {
+		double divisor = Z_DVAL_P(other);
+		if (!zend_finite(divisor)) {
+			zend_string *divisor_str = math_floats_to_str(divisor);
+			zend_string *msg = strpprintf(0, "Invalid operand: %s. Must be finite.", ZSTR_VAL(divisor_str));
+			zend_string_release(divisor_str);
+			zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			RETURN_THROWS();
+		}
+		if (divisor == 0.0) {
+			zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+			RETURN_THROWS();
+		}
+		RETURN_DOUBLE(fmod((double) a / (double) b, divisor));
+	}
+
+	if (Z_TYPE_P(other) == IS_LONG) {
+		c = Z_LVAL_P(other);
+		d = 1;
+	} else if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), rational_ce_Rational)) {
+		rational_read_parts(Z_OBJ_P(other), &c, &d);
+	} else {
+		zend_argument_type_error(
+			1, "must be of type OceanMoon\\Math\\Rational|int|float, %s given", zend_zval_value_name(other));
+		RETURN_THROWS();
+	}
+
+	/* Check for divide by 0. */
+	if (c == 0) {
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+		RETURN_THROWS();
+	}
+
+	if (rational_calc_mod(a, b, c, d, return_value) == FAILURE) {
+		math_rethrow_overflow("find the remainder of the given Rational numbers");
 		RETURN_THROWS();
 	}
 }

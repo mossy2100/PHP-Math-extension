@@ -11,19 +11,18 @@ use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
- * Tests for Rational's binary arithmetic operator overloads (+, -, *, /, **), only available in
- * the extension - see docs/Rational.md in this repo. +, -, *, / each accept a Rational, int, or
- * float operand on either side. When no float is involved, an int operand widens to Rational and
- * the result is an exact Rational, equivalent to calling the same-named method
- * (add()/sub()/mul()/div()) and throwing the same exceptions under the same conditions. When
- * either operand is a genuine float, both widen to float and the result is an ordinary float -
- * something none of the equivalent methods support. ** follows the same rule: `Rational ** int`,
- * `Rational ** Rational` and `int ** Rational` are exact, and throw if the result is irrational;
- * `Rational ** float` and `float ** Rational` are floats. `Rational ** int` and
- * `Rational ** Rational` are equivalent to pow(). Unlike PHP's own float arithmetic, every float form throws
- * DomainException for a non-finite operand and OverflowException for an overflowing result, and never gives NAN.
+ * Tests for Rational's binary arithmetic operator overloads (+, -, *, /, %, **), only available in the extension - see
+ * docs/Rational.md in this repo. +, -, *, /, % each accept a Rational, int, or float operand on either side. When no
+ * float is involved, an int operand widens to Rational and the result is an exact Rational, equivalent to calling the
+ * same-named method (add()/sub()/mul()/div()/mod()) and throwing the same exceptions under the same conditions. When
+ * either operand is a genuine float, both widen to float and the result is an ordinary float. ** follows the same rule:
+ * `Rational ** int`, `Rational ** Rational` and `int ** Rational` are exact, and throw if the result is irrational;
+ * `Rational ** float` and `float ** Rational` are floats. `Rational ** int` and `Rational ** Rational` are equivalent
+ * to pow(). Unlike PHP's own float arithmetic, every float form throws DomainException for a non-finite operand and
+ * OverflowException for an overflowing result, and never gives NAN.
  */
 #[CoversClass(Rational::class)]
 class RationalBinaryOperatorsTest extends TestCase
@@ -471,6 +470,127 @@ class RationalBinaryOperatorsTest extends TestCase
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage('Cannot divide the given Rational numbers. The result would overflow.');
         $result = new Rational(PHP_INT_MAX) / new Rational(1, 2);
+    }
+
+    #endregion
+
+    #region Operator % (modulo) tests.
+
+    /**
+     * Test Rational % Rational, equivalent to mod().
+     */
+    public function testModRationalModRational(): void
+    {
+        $r1 = new Rational(-7, 2);
+        $r2 = new Rational(2, 3);
+        $result = $r1 % $r2;
+
+        $this->assertSame(-1, $result->numerator);
+        $this->assertSame(6, $result->denominator);
+        $this->assertEquals($r1->mod($r2), $result);
+    }
+
+    /**
+     * Test Rational % int and int % Rational: the int widens to a Rational.
+     */
+    public function testModWithInt(): void
+    {
+        $result = new Rational(-7, 2) % 2;
+        $this->assertSame(-3, $result->numerator);
+        $this->assertSame(2, $result->denominator);
+
+        $result = 7 % new Rational(2, 3);
+        $this->assertSame(1, $result->numerator);
+        $this->assertSame(3, $result->denominator);
+    }
+
+    /**
+     * Test Rational % float and float % Rational: both widen to float, so the result is a float.
+     */
+    public function testModWithFloat(): void
+    {
+        $this->assertSame(-0.5, new Rational(-7, 2) % 1.5);
+        $this->assertSame(1.0, 7.0 % new Rational(2));
+    }
+
+    /**
+     * Test that the result has the sign of the dividend, like PHP's own %.
+     */
+    public function testModSignFollowsDividend(): void
+    {
+        $this->assertEquals(new Rational(3, 2), new Rational(7, 2) % -2);
+        $this->assertEquals(new Rational(-3, 2), new Rational(-7, 2) % -2);
+    }
+
+    /**
+     * Test % by zero throws ArithmeticException, for an int, a float and a Rational.
+     */
+    public function testModByZeroThrows(): void
+    {
+        $r = new Rational(3, 4);
+
+        foreach (
+            [
+                0,
+                0.0,
+                new Rational(0),
+            ] as $zero
+        ) {
+            try {
+                $result = $r % $zero;
+                $this->fail('Expected ArithmeticException.');
+            } catch (ArithmeticException $e) { // @phpstan-ignore catch.neverThrown
+                $this->assertSame('Cannot divide by zero.', $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Test % with a non-finite float throws DomainException.
+     */
+    public function testModNonFiniteFloatThrows(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid operand: NAN. Must be finite.');
+
+        $result = new Rational(3, 4) % NAN;
+    }
+
+    /**
+     * Test % throws OverflowException, with mod()'s message, when the common denominator is too large.
+     */
+    public function testModOverflowThrows(): void
+    {
+        $this->expectException(OverflowException::class);
+        $this->expectExceptionMessage(
+            'Cannot find the remainder of the given Rational numbers. The result would overflow.'
+        );
+
+        $result = new Rational(PHP_INT_MAX, 3) % new Rational(1, PHP_INT_MAX - 1);
+    }
+
+    /**
+     * Test %= gives the same result as %.
+     */
+    public function testCompoundMod(): void
+    {
+        $r = new Rational(-7, 2);
+        $original = $r;
+        $r %= 2;
+
+        $this->assertEquals(new Rational(-3, 2), $r);
+        $this->assertEquals(new Rational(-7, 2), $original);
+    }
+
+    /**
+     * Test % with an unsupported operand throws TypeError.
+     */
+    public function testModUnsupportedOperandThrows(): void
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\Math\Rational % string');
+
+        $result = new Rational(3, 4) % 'x'; // @phpstan-ignore binaryOp.invalid
     }
 
     #endregion
@@ -1047,9 +1167,9 @@ class RationalBinaryOperatorsTest extends TestCase
         $original = $r;
 
         try {
-            $r /= 0;
+            $r /= 0; // @phpstan-ignore assignOp.invalid
             $this->fail('Expected ArithmeticException.');
-        } catch (ArithmeticException) {
+        } catch (ArithmeticException) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $r);
         }
     }

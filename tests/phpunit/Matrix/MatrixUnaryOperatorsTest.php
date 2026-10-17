@@ -139,12 +139,15 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testBitwiseNotThrows(): void
     {
-        $m = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot perform bitwise not on OceanMoon\Math\Matrix');
 
-        $result = ~$m;
+        $result = ~$m; // @phpstan-ignore unaryOp.invalid
     }
 
     #endregion
@@ -156,12 +159,15 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testIncrementThrows(): void
     {
-        $m = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot increment OceanMoon\Math\Matrix');
 
-        $m++;
+        $m++; // @phpstan-ignore postInc.type
     }
 
     /**
@@ -169,12 +175,15 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testDecrementThrows(): void
     {
-        $m = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m = Matrix::fromArray([
+            [1, 2],
+            [3, 4],
+        ]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot decrement OceanMoon\Math\Matrix');
 
-        $m--;
+        $m--; // @phpstan-ignore postDec.type
     }
 
     #endregion

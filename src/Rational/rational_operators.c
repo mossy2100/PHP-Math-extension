@@ -139,7 +139,7 @@ static zend_result rational_float_result(zval *result, double value, const char 
 
 /* {{{ rational_do_float_operation
  *
- * The float-widened path of +, -, *, / for when either operand is a genuine float (see
+ * The float-widened path of +, -, *, /, % for when either operand is a genuine float (see
  * rational_do_operation()'s doc comment). Unlike ordinary float arithmetic, a non-finite operand throws
  * DomainException, an overflowing result throws OverflowException, and division by zero - including float 0.0 -
  * throws ArithmeticException (see docs/Reference/Rational.md).
@@ -170,6 +170,14 @@ static zend_result rational_do_float_operation(uint8_t opcode, zval *result, zva
 				return FAILURE;
 			}
 			return rational_float_result(result, a / b, "divide the given Rational and float");
+		case ZEND_MOD:
+			if (b == 0.0) {
+				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+				return FAILURE;
+			}
+			/* With a finite, non-zero divisor, the remainder is always finite. */
+			ZVAL_DOUBLE(result, fmod(a, b));
+			return SUCCESS;
 		default:
 			return FAILURE;
 	}
@@ -320,17 +328,17 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 /* {{{ rational_do_operation
  *
  * The `do_operation` object handler backing Rational's arithmetic operator overloads: +, -, *, /
- * for Rational|int|float on either side, and ** (see rational_do_pow()'s doc comment for its
- * five supported forms). Unary - needs no special-casing here: PHP has no dedicated opcode for
- * it, and the compiler lowers `-$r` to `$r * -1` (see zend_compile_unary_pm() in
- * Zend/zend_compile.c and complex_do_operation()'s doc comment in Complex/complex_operators.c
- * for the fuller explanation), so it's already covered by the ZEND_MUL case. (Unary + similarly
- * lowers to `$r * 1`.)
+ * and % for Rational|int|float on either side, and ** (see rational_do_pow()'s doc comment for its
+ * five supported forms). % is mod(), whose result has the sign of the dividend, as with PHP's own
+ * %. Unary - needs no special-casing here: PHP has no dedicated opcode for it, and the compiler
+ * lowers `-$r` to `$r * -1` (see zend_compile_unary_pm() in Zend/zend_compile.c and
+ * complex_do_operation()'s doc comment in Complex/complex_operators.c for the fuller explanation),
+ * so it's already covered by the ZEND_MUL case. (Unary + similarly lowers to `$r * 1`.)
  *
- * For +, -, *, /: if either operand is a genuine float, both widen to float and
+ * For +, -, *, /, %: if either operand is a genuine float, both widen to float and
  * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric Type Widening"
  * section); otherwise an int operand widens to Rational and the exact-Rational path below
- * applies, matching add()/sub()/mul()/div().
+ * applies, matching add()/sub()/mul()/div()/mod().
  *
  * The calculation itself is rational_calculate_operation(), run through math_types_do_operation()
  * so that compound assignment (`$r += $s`) and `$r++`/`$r--` release the Rational they replace.
@@ -348,7 +356,7 @@ static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zv
 		return rational_do_pow(result, op1, op2);
 	}
 
-	if (opcode != ZEND_ADD && opcode != ZEND_SUB && opcode != ZEND_MUL && opcode != ZEND_DIV) {
+	if (opcode != ZEND_ADD && opcode != ZEND_SUB && opcode != ZEND_MUL && opcode != ZEND_DIV && opcode != ZEND_MOD) {
 		return FAILURE;
 	}
 
@@ -364,7 +372,7 @@ static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zv
 		return FAILURE;
 	}
 
-	/* An overflow is reported with the same message as add()/sub()/mul()/div(). */
+	/* An overflow is reported with the same message as add()/sub()/mul()/div()/mod(). */
 	zend_result status;
 	const char *operation;
 	switch (opcode) {
@@ -388,6 +396,14 @@ static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zv
 			/* (a/b) / (c/d) = (a/b) * (d/c) - reuse rational_calc_mul() with c/d swapped. */
 			status = rational_calc_mul(a, b, d, c, result);
 			operation = "divide the given Rational numbers";
+			break;
+		case ZEND_MOD:
+			if (c == 0) {
+				zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
+				return FAILURE;
+			}
+			status = rational_calc_mod(a, b, c, d, result);
+			operation = "find the remainder of the given Rational numbers";
 			break;
 		default:
 			return FAILURE;

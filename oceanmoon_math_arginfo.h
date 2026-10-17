@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2dbf908373efc0c163e27fb7a2ededadbb468167 */
+ * Stub hash: d15030efcd8a98be96c8a168ec1170a4140c625a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -179,6 +179,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OceanMoon_Math_Rational_mul arginfo_class_OceanMoon_Math_Rational_add
 
 #define arginfo_class_OceanMoon_Math_Rational_div arginfo_class_OceanMoon_Math_Rational_add
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_OceanMoon_Math_Rational_mod, 0, 1, OceanMoon\\Math\\Rational, MAY_BE_DOUBLE)
+	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Rational, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Rational_pow, 0, 1, OceanMoon\\Math\\Rational, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, exp, OceanMoon\\Math\\Rational, MAY_BE_LONG, NULL)
@@ -464,6 +468,7 @@ ZEND_METHOD(OceanMoon_Math_Rational, add);
 ZEND_METHOD(OceanMoon_Math_Rational, sub);
 ZEND_METHOD(OceanMoon_Math_Rational, mul);
 ZEND_METHOD(OceanMoon_Math_Rational, div);
+ZEND_METHOD(OceanMoon_Math_Rational, mod);
 ZEND_METHOD(OceanMoon_Math_Rational, pow);
 ZEND_METHOD(OceanMoon_Math_Rational, sqr);
 ZEND_METHOD(OceanMoon_Math_Rational, round);
@@ -605,6 +610,7 @@ static const zend_function_entry class_OceanMoon_Math_Rational_methods[] = {
 	ZEND_ME(OceanMoon_Math_Rational, sub, arginfo_class_OceanMoon_Math_Rational_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, mul, arginfo_class_OceanMoon_Math_Rational_mul, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, div, arginfo_class_OceanMoon_Math_Rational_div, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Rational, mod, arginfo_class_OceanMoon_Math_Rational_mod, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, pow, arginfo_class_OceanMoon_Math_Rational_pow, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, sqr, arginfo_class_OceanMoon_Math_Rational_sqr, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, round, arginfo_class_OceanMoon_Math_Rational_round, ZEND_ACC_PUBLIC)
