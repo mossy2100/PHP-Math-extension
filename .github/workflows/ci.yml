@@ -165,9 +165,20 @@ jobs:
       run:
         working-directory: extensions/Math
     steps:
+      # Git for Windows checks symlinks out as plain files unless told otherwise, which would break the shared/ test
+      # symlinks.
+      - name: Enable symlinks
+        working-directory: .
+        run: git config --global core.symlinks true
+
       - uses: actions/checkout@v4
         with:
           path: extensions/Math
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mossy2100/PHP-Math
+          path: packages/Math
 
       - id: setup-php
         uses: php/setup-php-sdk@v0.12
@@ -181,9 +192,8 @@ jobs:
           arch: x64
           toolset: ${{ steps.setup-php.outputs.toolset }}
 
-      # Git for Windows checks the shared/ symlinks out as plain files, so the PHPUnit suite can't run here. The
-      # phpt test still confirms the extension builds, links and loads. phpize and configure are batch files, and a
-      # cmd script ends when a batch file it runs without `call` finishes, so each command gets its own step.
+      # phpize and configure are batch files, and a cmd script ends when a batch file it runs without `call` finishes,
+      # so each command gets its own step.
       - name: phpize
         shell: cmd
         run: phpize
@@ -202,3 +212,27 @@ jobs:
       - name: Run phpt tests
         shell: cmd
         run: nmake test TESTS=tests\phpt
+
+      # The SDK's PHP is the official Windows build, with no php.ini. Composer needs openssl, and PHPUnit mbstring.
+      - name: Configure PHP for Composer and PHPUnit
+        shell: pwsh
+        run: |
+          $prefix = '${{ steps.setup-php.outputs.prefix }}'
+          Set-Content -Path "$prefix\php.ini" -Value @(
+            "extension_dir = `"$prefix\ext`"",
+            'extension = openssl',
+            'extension = mbstring',
+            'memory_limit = -1'
+          )
+          php -v
+          php -m
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run PHPUnit
+        shell: pwsh
+        run: |
+          $dir = if ('${{ matrix.ts }}' -eq 'ts') { 'Release_TS' } else { 'Release' }
+          php -d "extension=$PWD\x64\$dir\php_oceanmoon_math.dll" vendor/bin/phpunit
+          exit $LASTEXITCODE
