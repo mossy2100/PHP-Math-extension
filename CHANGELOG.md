@@ -127,7 +127,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   `DomainException`, with the package's message.
 - **`new Rational(0)->div()` returned zero for any argument**, including a string or `NAN`. It now throws `TypeError`
   for an argument of the wrong type, like the package.
-- **The Windows build's source list was missing a file**, so it couldn't link.
+- **The extension couldn't be built on Windows.** `config.w32` was missing a source file and called a function the
+  Windows build system doesn't have, and the integer overflow checks used GCC/Clang builtins that MSVC lacks. It now
+  builds with MSVC for PHP 8.4 and 8.5, thread-safe or not.
 - **`Vector::$magnitude` behaves like the package's property.** `isset()` and `empty()` compute it, and
   `json_encode()`, `get_object_vars()` and `var_export()` include it. Previously `isset()` was `false`, those functions
   left it out, and `var_dump()` showed it as uninitialized.
