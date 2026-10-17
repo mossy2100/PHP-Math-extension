@@ -1,0 +1,195 @@
+# Builds and tests the extension on every push to main and every pull request.
+#
+# The PHPUnit suite includes the Math package's shared tests through symlinks (tests/phpunit/*/shared) that point at
+# ../../../../../packages/Math/tests, so each job checks out this repo at extensions/Math and the package at
+# packages/Math, matching the PhpPackages layout.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux, PHP ${{ matrix.php }} ${{ matrix.ts }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        ts: [nts, ts]
+    defaults:
+      run:
+        working-directory: extensions/Math
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: extensions/Math
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mossy2100/PHP-Math
+          path: packages/Math
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer, phpize, php-config
+          coverage: none
+        env:
+          phpts: ${{ matrix.ts }}
+
+      - name: Build
+        run: |
+          phpize
+          ./configure --enable-oceanmoon_math
+          make -j"$(nproc)"
+
+      - name: Run phpt tests
+        run: make test TESTS=tests/phpt NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run PHPUnit
+        run: php -d extension="$PWD/modules/oceanmoon_math.so" vendor/bin/phpunit
+
+  debug:
+    name: Debug and sanitizers, PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    env:
+      PHP_DEBUG_PREFIX: ${{ github.workspace }}/php-debug
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: extensions/Math
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mossy2100/PHP-Math
+          path: packages/Math
+
+      - name: Find the latest PHP ${{ matrix.php }} release
+        id: release
+        run: |
+          version=$(curl -fsSL "https://www.php.net/releases/index.php?json&version=${{ matrix.php }}" | jq -r .version)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the debug PHP build
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PHP_DEBUG_PREFIX }}
+          key: php-debug-asan-ubsan-${{ steps.release.outputs.version }}-v1
+
+      - name: Build a debug PHP with ASan and UBSan
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-dev
+          curl -fsSL "https://www.php.net/distributions/php-${{ steps.release.outputs.version }}.tar.xz" | tar -xJ
+          cd "php-${{ steps.release.outputs.version }}"
+          # Only the extensions PHPUnit needs. Composer runs on the regular PHP below, so this build doesn't need
+          # openssl, zlib or curl.
+          ./configure --prefix="$PHP_DEBUG_PREFIX" --enable-debug \
+            --enable-address-sanitizer --enable-undefined-sanitizer \
+            --disable-all --disable-cgi --disable-phpdbg \
+            --with-libxml --enable-dom --enable-xml --enable-xmlwriter --enable-simplexml \
+            --enable-mbstring --disable-mbregex --enable-tokenizer --enable-ctype --enable-filter --enable-phar
+          make -j"$(nproc)"
+          make install
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: extensions/Math
+        run: composer install --no-interaction --no-progress
+
+      - name: Build the extension against the debug PHP
+        working-directory: extensions/Math
+        run: |
+          "$PHP_DEBUG_PREFIX/bin/phpize"
+          ./configure --with-php-config="$PHP_DEBUG_PREFIX/bin/php-config" --enable-oceanmoon_math \
+            CFLAGS="-g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined" \
+            LDFLAGS="-fsanitize=address,undefined"
+          make -j"$(nproc)"
+
+      # PHP's debug allocator reports every leaked allocation at shutdown. PHPUnit still exits 0 when that happens,
+      # so the job checks the output for the report. LeakSanitizer is off because PHP itself isn't LSan-clean.
+      - name: Run PHPUnit, checking for leaks
+        working-directory: extensions/Math
+        env:
+          ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          set -o pipefail
+          "$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/oceanmoon_math.so" -d report_memleaks=1 \
+            vendor/bin/phpunit 2>&1 | tee phpunit.log
+          if grep -q "memory leaks detected" phpunit.log; then
+            echo "::error::The debug build reported leaked memory."
+            exit 1
+          fi
+
+      # With PHP's allocator off, every allocation goes through malloc, so ASan sees use-after-free and overflows.
+      - name: Run PHPUnit under ASan, without PHP's allocator
+        working-directory: extensions/Math
+        env:
+          USE_ZEND_ALLOC: '0'
+          ASAN_OPTIONS: detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: '"$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/oceanmoon_math.so" vendor/bin/phpunit'
+
+  windows:
+    name: Windows, PHP ${{ matrix.php }} ${{ matrix.ts }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        ts: [nts, ts]
+    defaults:
+      run:
+        working-directory: extensions/Math
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: extensions/Math
+
+      - id: setup-php
+        uses: php/setup-php-sdk@v0.10
+        with:
+          version: ${{ matrix.php }}
+          arch: x64
+          ts: ${{ matrix.ts }}
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: ${{ steps.setup-php.outputs.toolset }}
+
+      # Git for Windows checks the shared/ symlinks out as plain files, so the PHPUnit suite can't run here. The
+      # phpt test still confirms the extension builds, links and loads.
+      - name: Build
+        shell: cmd
+        run: |
+          phpize
+          configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
+          nmake
+
+      - name: Run phpt tests
+        shell: cmd
+        run: nmake test TESTS=tests\phpt
