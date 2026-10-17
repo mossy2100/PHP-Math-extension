@@ -7,7 +7,7 @@ ARG_ENABLE("oceanmoon_math", "enable OceanMoon math support", "no");
 
 if (PHP_OCEANMOON_MATH != "no") {
   EXTENSION("oceanmoon_math", "oceanmoon_math.c", PHP_OCEANMOON_MATH_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-  ADD_FLAG("CFLAGS_OCEANMOON_MATH", "/I " + configure_module_dirname + "\\src");
+  ADD_FLAG("CFLAGS_OCEANMOON_MATH", "/I " + configure_module_dirname + " /I " + configure_module_dirname + "\\src");
 
   ADD_SOURCES(configure_module_dirname + "\\src",
     "floats.c integers.c types.c exceptions.c",
