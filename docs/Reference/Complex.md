@@ -9,7 +9,7 @@ On this page, `$z`, `$z1` and `$z2` are `Complex` values, and `$x` is an `int` o
 
 ## Unary Arithmetic Operators
 
-### + (clone)
+### \+ (clone)
 
 ```php
 $copy = +$z;  // +Complex → Complex
@@ -32,7 +32,7 @@ $copy = +$z;  // 3 + 4i
 
 ---
 
-### - (negate)
+### \- (negate)
 
 ```php
 $negated = -$z;  // -Complex → Complex
@@ -50,6 +50,64 @@ $negated = -$z;  // -3 - 4i
 | Operation | Equivalent to |
 | --------- | ------------- |
 | `-$z`     | `$z->neg()`   |
+
+---
+
+### ++ (increment)
+
+```php
+++$z;  // Complex + 1 → Complex
+$z++;
+```
+
+Adds 1 to the real part. The prefix form returns the new value and the postfix form the old one, as with `int` and
+`float`.
+
+The variable is assigned a new `Complex`, and the object it held isn't modified, as with
+[compound assignment](#compound-assignment-operators).
+
+**Examples:**
+
+```php
+$z = new Complex(3, 4);
+$z++;       // $z is 4 + 4i
+$w = $z++;  // $w is 4 + 4i, $z is 5 + 4i
+$w = ++$z;  // $w and $z are both 6 + 4i
+```
+
+**Equivalence table:**
+
+| Operation | Equivalent to                                   |
+| --------- | ----------------------------------------------- |
+| `++$z`    | `$z = $z->add(1)` or `$z += 1` or `$z = $z + 1` |
+| `$z++`    | As above, but returning the original value.     |
+
+---
+
+### -- (decrement)
+
+```php
+--$z;  // Complex - 1 → Complex
+$z--;
+```
+
+Subtracts 1 from the real part. Otherwise the same as [`++`](#-increment).
+
+**Examples:**
+
+```php
+$z = new Complex(3, 4);
+$z--;       // $z is 2 + 4i
+$w = $z--;  // $w is 2 + 4i, $z is 1 + 4i
+$w = --$z;  // $w and $z are both 4i
+```
+
+**Equivalence table:**
+
+| Operation | Equivalent to                                   |
+| --------- | ----------------------------------------------- |
+| `--$z`    | `$z = $z->sub(1)` or `$z -= 1` or `$z = $z - 1` |
+| `$z--`    | As above, but returning the original value.     |
 
 ---
 
@@ -80,13 +138,13 @@ $conjugate = ~$z;  // 3 - 4i
 
 ## Binary Arithmetic Operators
 
-Each operator accepts a `Complex` or `int|float` operand on either side. An `int|float` operand is promoted to a
+Each operator accepts a `Complex`, `int`, or `float` operand on either side. An `int` or `float` operand is promoted to a
 `Complex`, so `$x - $z` gives what `new Complex($x)->sub($z)` would. The equivalence table in each section gives the
 matching method.
 
 ---
 
-### + (add)
+### \+ (add)
 
 ```php
 $sum = $z1 + $z2;  // Complex + Complex → Complex
@@ -98,7 +156,7 @@ Addition is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
@@ -124,7 +182,7 @@ $z1 + 2.5;   // 5.5 + 4i
 
 ---
 
-### - (subtract)
+### \- (subtract)
 
 ```php
 $diff = $z1 - $z2;  // Complex - Complex → Complex
@@ -132,11 +190,11 @@ $diff = $z - $x;    // Complex - int|float → Complex
 $diff = $x - $z;    // int|float - Complex → Complex
 ```
 
-Subtraction isn't commutative, so `int|float - Complex` is a distinct case from `Complex - int|float`.
+Subtraction isn't commutative, so `$x - $z` is a distinct case from `$z - $x`.
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
@@ -174,7 +232,7 @@ Multiplication is commutative, so reversing the operands gives the same result.
 
 **Throws:**
 
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
@@ -208,13 +266,13 @@ $quotient = $z / $x;    // Complex / int|float → Complex
 $quotient = $x / $z;    // int|float / Complex → Complex
 ```
 
-Division isn't commutative, so `int|float / Complex` is a distinct case from `Complex / int|float`. It also gives a way
-to compute a multiplicative inverse. See "Inverting with `1 / z` or `z ** -1`" below.
+Division isn't commutative, so `$x / $z` is a distinct case from `$z / $x`. It also gives a way to compute a
+multiplicative inverse. See "Inverting with `1 / z` or `z ** -1`" below.
 
 **Throws:**
 
 - `ArithmeticException` if dividing by zero.
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
@@ -248,12 +306,12 @@ $result = $z ** $x;    // Complex ** int|float → Complex
 $result = $x ** $z;    // int|float ** Complex → Complex
 ```
 
-Exponentiation isn't commutative, so `int|float ** Complex` is a distinct case from `Complex ** int|float`.
+Exponentiation isn't commutative, so `$x ** $z` is a distinct case from `$z ** $x`.
 
 **Throws:**
 
 - `ArithmeticException` if raising zero to a negative or non-real power.
-- `DomainException` if an `int` or `float` operand is `±INF` or `NAN`.
+- `DomainException` if a `float` operand is `±INF` or `NAN`.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Complex`, `int` or `float`.
 
@@ -279,12 +337,42 @@ $z1 ** 0.5;   // 2 + i           (the principal square root)
 
 ---
 
+## Compound Assignment Operators
+
+`+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.
+
+The variable is assigned a new `Complex`. The object it held isn't modified, so any other variable referring to that
+object keeps its value. If the operation throws, the variable is left unchanged.
+
+**Examples:**
+
+```php
+$z1 = new Complex(1, 2);
+$z2 = $z1;
+$z1 += new Complex(3, 4);  // $z1 is 4 + 6i, $z2 is still 1 + 2i
+
+$x = 2;
+$x *= new Complex(1, 2);   // $x is now the Complex 2 + 4i
+```
+
+**Equivalence table:**
+
+| Operation     | Equivalent to      |
+| ------------- | ------------------ |
+| `$z1 += $z2`  | `$z1 = $z1 + $z2`  |
+| `$z1 -= $z2`  | `$z1 = $z1 - $z2`  |
+| `$z1 *= $z2`  | `$z1 = $z1 * $z2`  |
+| `$z1 /= $z2`  | `$z1 = $z1 / $z2`  |
+| `$z1 **= $z2` | `$z1 = $z1 ** $z2` |
+
+---
+
 ## Inverting with `1 / z` or `z ** -1`
 
 The fluent API provided by the package includes an `inv()` method, which inverts a `Complex`. The operators give you a
 couple of alternative ways to achieve the same thing.
 
-Since `int|float / Complex` is supported (see `/` above), `1 / $z` computes the same multiplicative inverse as
+Since `$x / $z` is supported (see `/` above), `1 / $z` computes the same multiplicative inverse as
 [`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via `pow()` too, since raising to the power -1 is the mathematical
 definition of a multiplicative inverse. All three throw `ArithmeticException` if `$z` is zero, matching `inv()`.
 

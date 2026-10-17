@@ -16,7 +16,7 @@ On this page, `$m`, `$m1` and `$m2` are `Matrix` values, `$v` is a `Vector`, `$i
 
 ## Unary Arithmetic Operators
 
-### + (clone)
+### \+ (clone)
 
 ```php
 $copy = +$m;  // +Matrix → Matrix
@@ -41,7 +41,7 @@ $copy = +$m;  // [[1, 2], [3, 4]]
 
 ---
 
-### - (negate)
+### \- (negate)
 
 ```php
 $negated = -$m;  // -Matrix → Matrix
@@ -70,7 +70,7 @@ The equivalence table in each section gives the matching method.
 
 ---
 
-### + (add)
+### \+ (add)
 
 ```php
 $sum = $m1 + $m2;  // Matrix + Matrix → Matrix
@@ -100,7 +100,7 @@ $m1 + $m2;  // [[6, 8], [10, 12]]
 
 ---
 
-### - (subtract)
+### \- (subtract)
 
 ```php
 $diff = $m1 - $m2;  // Matrix - Matrix → Matrix
@@ -186,7 +186,7 @@ $result = $m / $x;  // Matrix / int|float → Matrix
 $result = $x / $m;  // int|float / Matrix → Matrix
 ```
 
-Both forms are element-wise, and not commutative. `int|float / Matrix` divides the scalar by each element of the
+Both forms are element-wise, and not commutative. `$x / $m` divides the scalar by each element of the
 `Matrix` in turn. There's no equivalent named method for this direction. `Matrix::div()` only ever divides the `Matrix`
 by a scalar, never the reverse. It throws `ArithmeticException` for a zero element, matching `reciprocal()`. This is
 distinct from `x * A⁻¹` (inverse scaling). Use `$x * $m ** -1` (or `$x * $m->inv()`) for that instead.
@@ -257,6 +257,38 @@ $m ** -1;   // [[1, -1], [0, 1]]  (the inverse)
 | Operation  | Equivalent to |
 | ---------- | ------------- |
 | `$m ** $i` | `$m->pow($i)` |
+
+---
+
+## Compound Assignment Operators
+
+`+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.
+
+The variable is assigned a new `Matrix`. The object it held isn't modified, so any other variable referring to that
+object keeps its value. Since `Matrix` is mutable, this matters: `$m *= 2` is not an in-place update. If the operation
+throws, the variable is left unchanged.
+
+**Examples:**
+
+```php
+$m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+$m2 = $m1;
+$m1 **= 2;                                  // $m1 is [[7, 10], [15, 22]], $m2 is still [[1, 2], [3, 4]]
+
+$x = 2;
+$x *= Matrix::fromArray([[1, 2], [3, 4]]);  // $x is now the Matrix [[2, 4], [6, 8]]
+```
+
+**Equivalence table:**
+
+| Operation    | Equivalent to     |
+| ------------ | ----------------- |
+| `$m1 += $m2` | `$m1 = $m1 + $m2` |
+| `$m1 -= $m2` | `$m1 = $m1 - $m2` |
+| `$m *= $x`   | `$m = $m * $x`    |
+| `$m1 *= $m2` | `$m1 = $m1 * $m2` |
+| `$m /= $x`   | `$m = $m / $x`    |
+| `$m **= $i`  | `$m = $m ** $i`   |
 
 ---
 

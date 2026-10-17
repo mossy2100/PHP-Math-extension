@@ -20,9 +20,9 @@ A PHP extension can't override a subset of the loose operators independently: a 
 `<=>`, and PHP derives the other six (`==`, `!=`, `<`, `<=`, `>`, `>=`) from its result. There's no way to implement
 some of the seven and fall back to PHP's default for the rest.
 
-`Complex` and `Rational` provide `compare` handlers, so their comparison operators accept `int`/`float` operands as well
-as their own type. Without one - as when using the package alone - comparing with an `int`/`float` instead emits a
-notice and reads the object as `1`, so `Complex(5, 0) == 5` and `Rational(1, 2) == 0.5` are both `false`.
+`Complex` and `Rational` provide `compare` handlers, so their comparison operators accept `int` and `float` operands as
+well as their own type. Without one - as when using the package alone - comparing with an `int` or `float` instead
+emits a notice and reads the object as `1`, so `Complex(5, 0) == 5` and `Rational(1, 2) == 0.5` are both `false`.
 
 With the extension, both handlers:
 

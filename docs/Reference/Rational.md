@@ -32,11 +32,12 @@ Unlike PHP, a `Rational` result is never widened to a `float` when it gets too b
 
 ## Unary Arithmetic Operators
 
-These are all prefix operators, and work the same way as for `int`/`float`.
+`+` and `-` are prefix operators, and `++` and `--` have prefix and postfix forms. All work the same way as for
+`int` and `float`.
 
 ---
 
-### + (clone)
+### \+ (clone)
 
 ```php
 $copy = +$r;  // +Rational → Rational
@@ -59,7 +60,7 @@ $copy = +$r;  // 2/3
 
 ---
 
-### - (negate)
+### \- (negate)
 
 ```php
 $negated = -$r;  // -Rational → Rational
@@ -80,18 +81,80 @@ $negated = -$r;  // -2/3
 
 ---
 
+### ++ (increment)
+
+```php
+++$r;  // Rational + 1 → Rational
+$r++;
+```
+
+Adds 1. The prefix form returns the new value and the postfix form the old one.
+
+The variable is assigned a new `Rational`, and the object it held isn't modified, as with
+[compound assignment](#compound-assignment-operators).
+
+> [!WARNING]
+> If the result overflows, PHP throws `TypeError` "Cannot increment OceanMoon\Math\Rational", with the
+> `OverflowException` as its previous exception. This is the engine's handling of `++` and `--` on objects, and can't be
+> changed. Use `$r += 1` to get the `OverflowException` directly.
+
+**Examples:**
+
+```php
+$r = new Rational(1, 2);
+$r++;       // $r is 3/2
+$s = $r++;  // $s is 3/2, $r is 5/2
+$s = ++$r;  // $s and $r are both 7/2
+```
+
+**Equivalence table:**
+
+| Operation | Equivalent to                                   |
+| --------- | ----------------------------------------------- |
+| `++$r`    | `$r = $r->add(1)` or `$r += 1` or `$r = $r + 1` |
+| `$r++`    | As above, but returning the original value.     |
+
+---
+
+### -- (decrement)
+
+```php
+--$r;  // Rational - 1 → Rational
+$r--;
+```
+
+Subtracts 1. Otherwise the same as [`++`](#-increment), with "Cannot decrement" on overflow.
+
+**Examples:**
+
+```php
+$r = new Rational(1, 2);
+$r--;       // $r is -1/2
+$s = $r--;  // $s is -1/2, $r is -3/2
+$s = --$r;  // $s and $r are both -5/2
+```
+
+**Equivalence table:**
+
+| Operation | Equivalent to                                   |
+| --------- | ----------------------------------------------- |
+| `--$r`    | `$r = $r->sub(1)` or `$r -= 1` or `$r = $r - 1` |
+| `$r--`    | As above, but returning the original value.     |
+
+---
+
 ## Binary Arithmetic Operators
 
 `+`, `-`, `*`, `/` and `**` each accept a `Rational`, `int`, or `float` operand on either side, widened as described in
 [Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching method. A form with a `float` operand
-has none, since the methods accept only `Rational|int`.
+has none, since the methods accept only a `Rational` or `int`.
 
 Unlike PHP's own `float` arithmetic, a form with a `float` operand never accepts or returns `±INF` or `NAN`. A
 non-finite operand throws `DomainException`, and a result too large to represent throws `OverflowException`.
 
 ---
 
-### + (add)
+### \+ (add)
 
 ```php
 $sum = $r1 + $r2;  // Rational + Rational → Rational
@@ -133,7 +196,7 @@ $r1 + 1.23;   // 1.73
 
 ---
 
-### - (subtract)
+### \- (subtract)
 
 ```php
 $diff = $r1 - $r2;  // Rational - Rational → Rational
@@ -143,7 +206,7 @@ $diff = $r - $f;    // Rational - float → float
 $diff = $f - $r;    // float - Rational → float
 ```
 
-Subtraction isn't commutative, so `int|float - Rational` is a distinct case from `Rational - int|float`.
+Subtraction isn't commutative, so `$x - $r` is a distinct case from `$r - $x`.
 
 **Throws:**
 
@@ -228,8 +291,8 @@ $quotient = $r / $f;    // Rational / float → float
 $quotient = $f / $r;    // float / Rational → float
 ```
 
-Division isn't commutative, so `int|float / Rational` is a distinct case from `Rational / int|float`. It also gives a
-way to compute a multiplicative inverse. See "Inverting with `1 / r` or `r ** -1`" below.
+Division isn't commutative, so `$x / $r` is a distinct case from `$r / $x`. It also gives a way to compute a
+multiplicative inverse. See "Inverting with `1 / r` or `r ** -1`" below.
 
 Dividing by zero throws `ArithmeticException`, matching `div()`, even when the divisor is a `float` (`$r / 0.0`). PHP's
 own `/` also throws for a zero divisor, but a `DivisionByZeroError`, so catch `ArithmeticException` here instead.
@@ -320,9 +383,44 @@ $r ** 0.5;                                   // 0.816497
 
 ---
 
+## Compound Assignment Operators
+
+`+=`, `-=`, `*=`, `/=` and `**=` accept the same operands as the matching binary operator, and give the same result.
+That includes [numeric type widening](#numeric-type-widening), so a `float` operand leaves the variable holding a
+`float`.
+
+The variable is assigned a new value. The object it held isn't modified, so any other variable referring to that object
+keeps its value. If the operation throws, the variable is left unchanged.
+
+**Examples:**
+
+```php
+$r1 = new Rational(1, 2);
+$r2 = $r1;
+$r1 += new Rational(1, 3);  // $r1 is 5/6, $r2 is still 1/2
+
+$r = new Rational(1, 2);
+$r += 0.25;                 // $r is now the float 0.75
+
+$i = 2;
+$i *= new Rational(1, 3);   // $i is now the Rational 2/3
+```
+
+**Equivalence table:**
+
+| Operation     | Equivalent to      |
+| ------------- | ------------------ |
+| `$r1 += $r2`  | `$r1 = $r1 + $r2`  |
+| `$r1 -= $r2`  | `$r1 = $r1 - $r2`  |
+| `$r1 *= $r2`  | `$r1 = $r1 * $r2`  |
+| `$r1 /= $r2`  | `$r1 = $r1 / $r2`  |
+| `$r1 **= $r2` | `$r1 = $r1 ** $r2` |
+
+---
+
 ## Inverting with `1 / r` or `r ** -1`
 
-Since `int|float / Rational` is supported (see `/` above), `1 / $r` computes the same multiplicative inverse as
+Since `$x / $r` is supported (see `/` above), `1 / $r` computes the same multiplicative inverse as
 [`$r->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#inv).
 
 `$r ** -1` gives the same result, since raising to the power -1 is the mathematical definition of a multiplicative

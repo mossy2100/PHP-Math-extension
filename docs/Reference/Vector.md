@@ -16,7 +16,7 @@ On this page, `$v`, `$v1` and `$v2` are `Vector` values, `$m` is a `Matrix`, and
 
 ## Unary Arithmetic Operators
 
-### + (clone)
+### \+ (clone)
 
 ```php
 $copy = +$v;  // +Vector → Vector
@@ -40,7 +40,7 @@ $copy = +$v;  // [1, 2, 3]
 
 ---
 
-### - (negate)
+### \- (negate)
 
 ```php
 $negated = -$v;  // -Vector → Vector
@@ -69,7 +69,7 @@ The equivalence table in each section gives the matching method.
 
 ---
 
-### + (add)
+### \+ (add)
 
 ```php
 $sum = $v1 + $v2;  // Vector + Vector → Vector
@@ -99,7 +99,7 @@ $v1 + $v2;  // [5, 7, 9]
 
 ---
 
-### - (subtract)
+### \- (subtract)
 
 ```php
 $diff = $v1 - $v2;  // Vector - Vector → Vector
@@ -191,7 +191,7 @@ $result = $x / $v;    // int|float / Vector → Vector
 $result = $v1 / $v2;  // Vector / Vector → Vector (Hadamard division)
 ```
 
-All three forms are element-wise, and not commutative. `int|float / Vector` divides the scalar by each element of the
+All three forms are element-wise, and not commutative. `$x / $v` divides the scalar by each element of the
 `Vector` in turn. There's no equivalent method for it, but the equivalence table shows how to get the same result. It
 throws `ArithmeticException` if any of the vector's elements equal zero, matching `reciprocal()`.
 
@@ -235,6 +235,39 @@ $v1 / $v2;  // [2, 3, 1.5]
 | `$v / $x`   | `$v->div($x)`                                          |
 | `$x / $v`   | `$x * $v->reciprocal()` or `$v->reciprocal()->mul($x)` |
 | `$v1 / $v2` | `$v1->div($v2)`                                        |
+
+---
+
+## Compound Assignment Operators
+
+`+=`, `-=`, `*=` and `/=` accept the same operands as the matching binary operator, and give the same result.
+
+The variable is assigned a new `Vector`. The object it held isn't modified, so any other variable referring to that
+object keeps its value. Since `Vector` is mutable, this matters: `$v *= 2` is not an in-place update. If the operation
+throws, the variable is left unchanged.
+
+**Examples:**
+
+```php
+$v1 = Vector::fromArray([1, 2]);
+$v2 = $v1;
+$v1 *= 2;                         // $v1 is [2, 4], $v2 is still [1, 2]
+
+$x = 2;
+$x *= Vector::fromArray([1, 2]);  // $x is now the Vector [2, 4]
+```
+
+**Equivalence table:**
+
+| Operation    | Equivalent to     |
+| ------------ | ----------------- |
+| `$v1 += $v2` | `$v1 = $v1 + $v2` |
+| `$v1 -= $v2` | `$v1 = $v1 - $v2` |
+| `$v *= $x`   | `$v = $v * $x`    |
+| `$v1 *= $v2` | `$v1 = $v1 * $v2` |
+| `$v *= $m`   | `$v = $v * $m`    |
+| `$v /= $x`   | `$v = $v / $x`    |
+| `$v1 /= $v2` | `$v1 = $v1 / $v2` |
 
 ---
 

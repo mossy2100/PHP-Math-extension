@@ -21,8 +21,9 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 **Key Features:**
 
 - **Drop-in replacement** - same class names, methods and behaviour as `oceanmoon/math`.
-- **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable), and `~` (conjugate) for `Complex`. `Complex`
-  and `Rational` also get the full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
+- **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable) and their compound assignment forms (`+=`
+  etc.), and `~` (conjugate) for `Complex`. `Complex` and `Rational` also get `++`, `--` and the full comparison
+  operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
 - **Behavioural parity** - a PHPUnit conformance suite runs the package's own tests against the extension's classes, so
   the two stay identical in behaviour, not just API shape.
 - **Standalone** - no runtime dependency on `oceanmoon/core`, `oceanmoon/math` or any other package, despite sharing
@@ -44,16 +45,17 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 - **Operator precedence** - PHP applies the usual precedence rules automatically. With the fluent method API, the
   programmer must get the order of operations right by hand. See [Operator Precedence](#operator-precedence).
 - **Operations with no method equivalent** - some operator forms have no matching method. For example,
-  `Rational + float` widens to a `float` result, but `add()` only accepts `Rational|int`. See the equivalence table on
-  each class's operator page.
+  `Rational + float` widens to a `float` result, but `add()` only accepts a `Rational` or `int`. See the equivalence
+  table on each class's operator page.
 - **Performance** - all four classes run faster than the package. In a simple benchmark:
 
-  | Operation             | PHP 8.4         | PHP 8.5        |
-  | --------------------- | --------------- | -------------- |
-  | `Complex::mul()`      | 5 times faster  | 3 times faster |
-  | `Rational::add()`     | 9 times faster  | 7 times faster |
-  | `Vector::dot()` (3D)  | 3 times faster  | 2 times faster |
-  | `Matrix::mul()` (4×4) | 15 times faster | 7 times faster |
+| Operation             | PHP 8.4         | PHP 8.5        |
+| --------------------- | --------------- | -------------- |
+| `Complex::mul()`      | 5 times faster  | 3 times faster |
+| `Rational::add()`     | 9 times faster  | 7 times faster |
+| `Vector::dot()` (3D)  | 3 times faster  | 2 times faster |
+| `Matrix::mul()` (4×4) | 15 times faster | 7 times faster |
+#claude I would have expected PHP 8.5 to be faster.
 
 ### Disadvantages
 
@@ -140,12 +142,12 @@ adds (operator overloading) and links to both sets of docs for each class.
 
 | Class      | Arithmetic operators                      | Comparison operators                    | Class reference                                                              | Operator docs                                    |
 | ---------- | ----------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
-| `Complex`  | `+`, `-`, `*`, `/`, `**`, `~` (conjugate) | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)   | [Complex operators](docs/Reference/Complex.md)   |
-| `Rational` | `+`, `-`, `*`, `/`, `**`                  | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) | [Rational operators](docs/Reference/Rational.md) |
+| `Complex`  | `+`, `-`, `*`, `/`, `**`, `++`, `--`, `~` | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Complex](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md)   | [Complex operators](docs/Reference/Complex.md)   |
+| `Rational` | `+`, `-`, `*`, `/`, `**`, `++`, `--`      | `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` | [Rational](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md) | [Rational operators](docs/Reference/Rational.md) |
 | `Vector`   | `+`, `-`, `*`, `/`                        | None added                              | [Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)     | [Vector operators](docs/Reference/Vector.md)     |
 | `Matrix`   | `+`, `-`, `*`, `/`, `**`                  | None added                              | [Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)     | [Matrix operators](docs/Reference/Matrix.md)     |
 
-`Vector` and `Matrix` get no extension-provided comparison operators: `None added` above means no `compare` handler is
+`Vector` and `Matrix` get no extension-provided comparison operators: "None added" above means no `compare` handler is
 installed for them, so PHP's own default object comparison still applies, as it does to any plain PHP object (see
 [Comparison Operators](#comparison-operators) below).
 
@@ -169,21 +171,21 @@ That precedence isn't something any of these classes control, though. A PHP exte
 _does_ (via the `do_operation`/`compare` object handlers, which is how every operator on this page exists at all) but
 not how tightly it binds relative to other operators. Precedence and associativity are fixed by the language grammar
 itself, entirely outside any extension's control. So none of `Complex`/`Rational`/`Vector`/`Matrix` get their own
-precedence rules; they all just inherit PHP's, same as `int`/`float`.
+precedence rules; they all just inherit PHP's, same as `int` and `float`.
 
 This is actually a blessing. Most PHP developers already know the most important precedence rules (multiplication before
 addition, etc.), so keeping them fixed should reduce bugs. Refer to the [full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
 
 The table below shows just the rules relevant to this extension, tightest-binding first:
 
-| Precedence  | Operators                  | Associativity | Used by                                 | Notes                                                                                                                 |
-| ----------- | -------------------------- | ------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 1 (highest) | `**`                       | Right         | `Complex`, `Rational`, `Matrix`         | Binds _tighter_ than unary `-`/`+`/`~` on its left operand - see below.                                               |
-| 2           | `-` `+` `~` (unary prefix) | Right         | `-` `+` All four; `~` is `Complex`-only | `-$z ** 2` is `-($z ** 2)`, not `(-$z) ** 2` - PHP's well-known `**` special case, not specific to this extension.    |
-| 3           | `*` `/`                    | Left          | All four                                |                                                                                                                       |
-| 4           | `-` `+` (binary)           | Left          | All four                                |                                                                                                                       |
-| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Complex`, `Rational`                   | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                  |
-| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Complex`, `Rational`                   | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here. |
+| Precedence  | Operators                  | Associativity | Used by                                 | Notes                                                                                                                                         |
+| ----------- | -------------------------- | ------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 (highest) | `**`                       | Right         | `Complex`, `Rational`, `Matrix`         | Binds _tighter_ than unary `-`/`+`/`~` on its left operand - see below.                                                                       |
+| 2           | `-` `+` `~` (unary prefix) | Right         | `-` `+` All four; `~` is `Complex`-only | `-$z ** 2` is `-($z ** 2)`, not `(-$z) ** 2`. This behaviour for the  `**` operator is a special case in PHP, not specific to this extension. |
+| 3           | `*` `/`                    | Left          | All four                                |                                                                                                                                               |
+| 4           | `-` `+` (binary)           | Left          | All four                                |                                                                                                                                               |
+| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Complex`, `Rational`                   | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                                          |
+| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Complex`, `Rational`                   | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here.                         |
 
 The most tricky thing to remember is that the exponentiation operator `**` has the highest precedence of all, which
 means, for example, `-$z ** 2` is evaluated as `-($z ** 2)` rather than `(-$z) ** 2`. That precedence can be unobvious
