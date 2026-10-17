@@ -7,9 +7,9 @@
  * Unlike the PHP source (which detects overflow for free, by checking whether the engine silently
  * promoted an int expression to float), C has no such promotion: signed integer overflow is
  * undefined behavior, not a value you can observe after the fact. Every function here checks for
- * overflow *before* it can happen, using compiler overflow-checking builtins
- * (__builtin_add_overflow/__builtin_mul_overflow), rather than attempting the operation and
- * inspecting the result.
+ * overflow *before* it can happen, using portable range checks and the engine's own
+ * ZEND_SIGNED_MULTIPLY_LONG, rather than attempting the operation and inspecting the result. (Not
+ * GCC/Clang's __builtin_*_overflow(), which MSVC doesn't have.)
  */
 
 #ifndef PHP_MATH_INTEGERS_H

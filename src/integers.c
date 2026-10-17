@@ -10,35 +10,40 @@
 
 #include "integers.h"
 
+/* The checks below are portable, rather than GCC/Clang's __builtin_*_overflow(), which MSVC doesn't have. Each
+ * checks the operands before the operation, so no signed overflow ever happens. */
+
 math_integers_result math_integers_add(zend_long a, zend_long b, zend_long *out)
 {
-	zend_long c;
-
-	if (__builtin_add_overflow(a, b, &c)) {
+	if ((b > 0 && a > ZEND_LONG_MAX - b) || (b < 0 && a < ZEND_LONG_MIN - b)) {
 		return MATH_INTEGERS_OVERFLOW;
 	}
 
-	*out = c;
+	*out = a + b;
 	return MATH_INTEGERS_OK;
 }
 
 math_integers_result math_integers_sub(zend_long a, zend_long b, zend_long *out)
 {
-	zend_long c;
-
-	if (__builtin_sub_overflow(a, b, &c)) {
+	if ((b < 0 && a > ZEND_LONG_MAX + b) || (b > 0 && a < ZEND_LONG_MIN + b)) {
 		return MATH_INTEGERS_OVERFLOW;
 	}
 
-	*out = c;
+	*out = a - b;
 	return MATH_INTEGERS_OK;
 }
 
 math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out)
 {
+	/* The engine's own overflow-checked multiply, as used by PHP's *, which picks the best method for the compiler
+	 * and platform. */
 	zend_long c;
+	double unused;
+	int overflowed;
+	ZEND_SIGNED_MULTIPLY_LONG(a, b, c, unused, overflowed);
+	(void) unused;
 
-	if (__builtin_mul_overflow(a, b, &c)) {
+	if (overflowed) {
 		return MATH_INTEGERS_OVERFLOW;
 	}
 
