@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d15030efcd8a98be96c8a168ec1170a4140c625a */
+ * Stub hash: de22ba39e72613745f12048b604d675339e05f49 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -180,9 +180,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Rational_div arginfo_class_OceanMoon_Math_Rational_add
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_OceanMoon_Math_Rational_mod, 0, 1, OceanMoon\\Math\\Rational, MAY_BE_DOUBLE)
-	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Rational, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
-ZEND_END_ARG_INFO()
+#define arginfo_class_OceanMoon_Math_Rational_mod arginfo_class_OceanMoon_Math_Rational_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Rational_pow, 0, 1, OceanMoon\\Math\\Rational, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, exp, OceanMoon\\Math\\Rational, MAY_BE_LONG, NULL)

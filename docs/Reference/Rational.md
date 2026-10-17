@@ -147,8 +147,7 @@ $s = --$r;  // $s and $r are both -5/2
 
 `+`, `-`, `*`, `/`, `%` and `**` each accept a `Rational`, `int`, or `float` operand on either side, widened as
 described in [Numeric Type Widening](#numeric-type-widening). The equivalence table in each section gives the matching
-method. Apart from `%`, whose method `mod()` accepts a `float`, a form with a `float` operand has none, since the
-methods accept only a `Rational` or `int`.
+method. A form with a `float` operand has none, since the methods accept only a `Rational` or `int`.
 
 Unlike PHP's own `float` arithmetic, a form with a `float` operand never accepts or returns `±INF` or `NAN`. A
 non-finite operand throws `DomainException`, and a result too large to represent throws `OverflowException`.
@@ -375,7 +374,7 @@ $r % 1.5;                   // -0.5
 | `$r1 % $r2` | `$r1->mod($r2)`             |
 | `$r % $i`   | `$r->mod($i)`               |
 | `$i % $r`   | `new Rational($i)->mod($r)` |
-| `$r % $f`   | `$r->mod($f)`               |
+| `$r % $f`   | `fmod($r->toFloat(), $f)`   |
 | `$f % $r`   | `fmod($f, $r->toFloat())`   |
 
 ---

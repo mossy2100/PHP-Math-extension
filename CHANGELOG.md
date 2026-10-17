@@ -26,6 +26,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   PHPStan reports them as errors, since casts have no extension point.
 - **`Vector` and `Matrix` implement `IteratorAggregate`**, matching the package, so `foreach` yields a Vector's
   elements and a Matrix's live rows, instead of their public properties.
+- **`Rational::mod()` and `%`.** `mod()` matches the package. `%` on a `Rational` is `mod()`, with a `Rational`, `int`
+  or `float` on either side, widening to `float` like the other operators. `%=` works too.
 
 ### Changed
 
@@ -68,6 +70,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   Matrix." if a pivot is negligible relative to its row, instead of only for an exactly zero determinant. Previously, a
   matrix such as `[[0.1, 0.3], [0.7, 2.1]]`, singular but with a determinant of about 3e-17 due to rounding, gave an
   inverse with elements around 1e16. The message was "Cannot invert Matrix with zero determinant."
+- **`%` on `Complex`, `Vector` and `Matrix` throws `TypeError`** "Unsupported operand types", instead of converting
+  the object to an int with a warning.
 
 ### Fixed
 
@@ -112,12 +116,27 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **Builds with `-fno-builtin-sin -fno-builtin-cos`.** The compiler combined `sin(x)` and `cos(x)` into one `sincos`
   call, which on macOS can round differently from PHP's `sin()`. That broke exact parity in every method that uses
   both, e.g. `fromPolar()`, `exp()`, `sin()` and `cos()`.
+- **`~` on a `Vector` or `Matrix` crashed PHP.** It now throws `TypeError`, as for `Rational`.
+- **Compound assignment (`+=`, `-=`, `*=`, `/=`, `**=`) and `++`/`--` leaked memory**, in all four classes. Each one
+  leaked the object it replaced, so an accumulating loop grew without bound.
+- **A clone lost the extension's behaviour.** `clone` on any of the four classes gave an object without its operators,
+  comparison or `Vector::$magnitude`, and a clone of a cloned `Matrix` shared its rows. This also affected results built
+  from a clone, such as `$v * $m`, `$v->mul($m)` and `$m->getRow()`.
+- **An operator leaked a `Rational` when the result couldn't be represented**, e.g. `new Rational(PHP_INT_MIN + 1) - 1`.
+- **`approxEqual()` and `approxCompare()` accepted invalid tolerances.** A negative or non-finite tolerance now throws
+  `DomainException`, with the package's message.
+- **`new Rational(0)->div()` returned zero for any argument**, including a string or `NAN`. It now throws `TypeError`
+  for an argument of the wrong type, like the package.
+- **The Windows build's source list was missing a file**, so it couldn't link.
 
 ### Documentation
 
 - `docs/Reference/Rational.md` documents `**` with a `Rational` exponent, and has a **Throws:** block for each operator.
 
 ---
+- Each operator page documents compound assignment, and `Complex` and `Rational` document `++` and `--`.
+- The README's new "Argument Types" section explains that parameters taking an object or a number, such as `add()`'s,
+  are always strict in the extension.
 
 ## [4.0.1] - 2026-10-10
 

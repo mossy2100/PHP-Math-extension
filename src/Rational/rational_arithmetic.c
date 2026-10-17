@@ -17,8 +17,6 @@
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
 #include "integers.h"
-#include "floats.h"
-#include <math.h>
 
 /* {{{ rational_add_checked/rational_sub_checked/rational_mul_checked
  *
@@ -390,10 +388,9 @@ zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::mod(Rational|int|float $other): Rational|float
+/* {{{ OceanMoon\Math\Rational::mod(Rational|int $other): Rational
  *
- * Matches the PHP package's Rational::mod(): an exact Rational for an int or Rational divisor, or a float for a float
- * divisor. The result has the sign of the dividend, as with PHP's % and fmod().
+ * Matches the PHP package's Rational::mod(). The result has the sign of the dividend, as with PHP's % and fmod().
  */
 PHP_METHOD(OceanMoon_Math_Rational, mod)
 {
@@ -404,34 +401,7 @@ PHP_METHOD(OceanMoon_Math_Rational, mod)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_long a, b, c, d;
-	rational_read_parts(Z_OBJ_P(ZEND_THIS), &a, &b);
-
-	/* Handle a float divisor. */
-	if (Z_TYPE_P(other) == IS_DOUBLE) {
-		double divisor = Z_DVAL_P(other);
-		if (!zend_finite(divisor)) {
-			zend_string *divisor_str = math_floats_to_str(divisor);
-			zend_string *msg = strpprintf(0, "Invalid operand: %s. Must be finite.", ZSTR_VAL(divisor_str));
-			zend_string_release(divisor_str);
-			zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
-			RETURN_THROWS();
-		}
-		if (divisor == 0.0) {
-			zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
-			RETURN_THROWS();
-		}
-		RETURN_DOUBLE(fmod((double) a / (double) b, divisor));
-	}
-
-	if (Z_TYPE_P(other) == IS_LONG) {
-		c = Z_LVAL_P(other);
-		d = 1;
-	} else if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), rational_ce_Rational)) {
-		rational_read_parts(Z_OBJ_P(other), &c, &d);
-	} else {
-		zend_argument_type_error(
-			1, "must be of type OceanMoon\\Math\\Rational|int|float, %s given", zend_zval_value_name(other));
+	if (rational_operand_components(Z_OBJ_P(ZEND_THIS), other, &a, &b, &c, &d) == FAILURE) {
 		RETURN_THROWS();
 	}
 

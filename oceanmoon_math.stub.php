@@ -158,7 +158,7 @@ final class Rational implements \Stringable
 
     public function div(Rational|int $other): Rational {}
 
-    public function mod(Rational|int|float $other): Rational|float {}
+    public function mod(Rational|int $other): Rational {}
 
     public function pow(int|Rational $exp): Rational {}
 

@@ -73,6 +73,20 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 - **Debugging** - stepping through C needs `gdb`/`lldb` and a debug PHP build, whereas Xdebug works with the package out
   of the box.
 
+### Argument Types
+
+A parameter that takes either an object or a number, such as `add()`'s, is always strict in the extension, as if
+`strict_types=1` were on. Without `strict_types`, the package follows PHP's usual coercion rules for these parameters:
+
+| Call             | Package    | Extension   |
+| ---------------- | ---------- | ----------- |
+| `$z->add(' 2 ')` | Adds 2     | `TypeError` |
+| `$r->add(2.0)`   | Adds 2     | `TypeError` |
+| `$v->mul('2')`   | Multiplies | `TypeError` |
+
+Other `int` and `float` parameters, such as the constructors', are coerced as usual by both. With `strict_types=1`, the
+two behave identically.
+
 ---
 
 ## Development and Quality Assurance
