@@ -182,13 +182,19 @@ jobs:
           toolset: ${{ steps.setup-php.outputs.toolset }}
 
       # Git for Windows checks the shared/ symlinks out as plain files, so the PHPUnit suite can't run here. The
-      # phpt test still confirms the extension builds, links and loads.
+      # phpt test still confirms the extension builds, links and loads. phpize and configure are batch files, and a
+      # cmd script ends when a batch file it runs without `call` finishes, so each command gets its own step.
+      - name: phpize
+        shell: cmd
+        run: phpize
+
+      - name: Configure
+        shell: cmd
+        run: configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
+
       - name: Build
         shell: cmd
-        run: |
-          phpize
-          configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
-          nmake
+        run: nmake
 
       - name: Run phpt tests
         shell: cmd
