@@ -1,44 +1,57 @@
 # Installation: Windows
 
-**There is no working installation path for Windows yet.** This is a known gap, tracked as a TODO for this project
-(setting up CI to build and publish a Windows DLL on every release). Until that's done, Windows support is
-build-it-yourself only, and even that requires a real Windows machine.
+## Installation via PIE (recommended)
 
-## Why PIE doesn't help here (yet)
+[PIE](https://github.com/php/pie) installs extensions on Windows too. Unlike on Mac and Linux, it doesn't build from
+source there: it downloads a prebuilt DLL from the extension's GitHub release, matching your PHP's version, thread
+safety and architecture.
 
-[PIE](https://github.com/php/pie) is the recommended installation method on Mac/Linux (see the Mac/Linux installation doc), where it builds the
-extension from source itself. Windows is different: per [PIE's own documentation for extension maintainers](https://github.com/php/pie/blob/1.4.x/docs/extension-maintainers.md), **"For
-Windows systems, extension maintainers must provide pre-built binaries."** PIE has no fallback that builds from source
-on Windows. If no prebuilt `.dll` has been published for this package, `pie install` simply won't work on Windows at
-all, regardless of whether the package itself is published to Packagist.
-
-No prebuilt Windows binary exists for this extension yet.
-
-## Building it yourself
-
-PHP's Windows build tooling ([PHP SDK Binary Tools](https://github.com/php/php-sdk-binary-tools)) requires an actual Windows host with Visual Studio (VC++ 2017/2019 or
-later) installed. It's driven by batch scripts and `nmake`, not `phpize`/`configure`/`make`, and it can't be
-cross-compiled from Mac or Linux. If you want to build the extension yourself today:
-
-1. Set up the PHP SDK Binary Tools on a Windows machine, following [PHP's own Windows build documentation](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2) (the PHP 7.2+
-   version of the guide; this extension targets PHP 8.4+).
-2. This repository already includes `config.w32`, the Windows equivalent of `config.m4`, describing how to build this
-   extension. Point the SDK's build process at this repository as you would any other PHP extension source.
-3. The build produces `php_oceanmoon_math.dll`.
-
-## Enabling the extension
-
-Once you have `php_oceanmoon_math.dll`, place it in PHP's extension directory (check `php_ini`/`extension_dir` under
-`phpinfo()` or `php -i`), then add this line to `php.ini`:
-
-```ini
-extension=php_oceanmoon_math.dll
+```bash
+pie install oceanmoon/math-ext
 ```
 
-As with any platform, if PHP is running as a persistent process (e.g. under IIS via FastCGI, rather than invoked fresh
-from the command line each time), that process needs restarting before it picks up the change.
+Each release includes DLLs for PHP 8.4 and 8.5, thread-safe (TS) or not (NTS), for 64-bit Windows. They're built by
+this repository's release workflow (`.github/workflows/release.yml`), using PHP's own
+[php-windows-builder](https://github.com/php/php-windows-builder) actions.
 
-Confirm it loaded:
+> [!NOTE]
+> The extension hasn't been released yet, so there are no DLLs to download. Until there are, build it yourself (below).
+
+---
+
+## Manual installation
+
+### Get the DLL
+
+Either download the zip matching your PHP from a [release](https://github.com/mossy2100/PHP-Math-extension/releases),
+or build it yourself.
+
+Building needs a Windows machine with Visual Studio 2022 (MSVC), PHP's
+[SDK binary tools](https://github.com/php/php-sdk-binary-tools) and the PHP development pack for your PHP version.
+[PHP's Windows build guide](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2) covers the setup. Then, from
+this repository:
+
+```bash
+phpize
+configure --enable-oceanmoon_math --with-prefix=<path to your PHP>
+nmake
+```
+
+The build produces `php_oceanmoon_math.dll`, in `x64\Release` (NTS) or `x64\Release_TS` (TS). The CI workflow
+(`.github/workflows/ci.yml`) runs exactly these steps, and the full test suite, on every push.
+
+### Enable the extension
+
+Place `php_oceanmoon_math.dll` in PHP's extension directory (`extension_dir` in `php -i`), then add this line to
+`php.ini`:
+
+```ini
+extension=oceanmoon_math
+```
+
+If PHP is running as a persistent process, e.g. under IIS via FastCGI, restart it to pick up the change.
+
+### Confirm it loaded
 
 ```bash
 php -m

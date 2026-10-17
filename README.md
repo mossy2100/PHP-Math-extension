@@ -69,7 +69,7 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 - **Hosting** - shared hosting and many managed platforms don't allow custom PHP extensions. The package works
   everywhere.
 - **Version-locked builds** - a compiled extension only loads in the PHP minor version it was built for. See
-  [Why PHP 8.4?](#why-php-84).
+  [Supported PHP Versions](#supported-php-versions).
 - **Debugging** - stepping through C needs `gdb`/`lldb` and a debug PHP build, whereas Xdebug works with the package out
   of the box.
 
@@ -108,33 +108,26 @@ All code was reviewed by the author. Correctness is validated by:
 
 ## Requirements
 
-- **PHP 8.4.x or 8.5.x** (NTS or ZTS). The published build targets 8.4, matching the rest of the OceanMoon PHP package
-  family; see "Why PHP 8.4?" below for how to build for 8.5 (or another version) yourself instead.
-- To build from source: a C compiler and the PHP development headers (`phpize`, `php-config`). See Installation, below.
+- **PHP 8.4.x or 8.5.x**, thread-safe (ZTS) or not (NTS).
+- On Mac and Linux: a C compiler and the PHP development headers (`phpize`, `php-config`), since the extension is built
+  from source for the PHP you have installed. On Windows, PIE downloads a prebuilt DLL instead. See
+  [Installation](docs/Usage/Installation.md).
 
-#### Why PHP 8.4?
+#### Supported PHP Versions
 
-A compiled PHP extension is ABI-locked to the exact PHP minor version it was built against (its Zend Extension API
-number). The same `.so` can't just be loaded into a different version, and in the worst case a mismatched build can
-compile "successfully" against the wrong version's headers while silently reading/writing the wrong struct layout at
-runtime.
+A compiled PHP extension only loads in the PHP minor version it was built for, since each has its own Zend Extension API
+number. This affects how you install it:
 
-The published, prebuilt module is compiled against PHP 8.4, to match the minimum PHP version required by
-`oceanmoon/core`, `oceanmoon/math`, and the other OceanMoon PHP packages. It's still ABI-locked to 8.4 specifically,
-though: it won't load under 8.5 or any other version.
+- **Mac and Linux:** [PIE](https://github.com/php/pie) builds the extension from source for the PHP it runs under, so
+  you get a matching build automatically. After upgrading to a new PHP minor version, run `pie install` again.
+- **Windows:** each GitHub release includes a prebuilt DLL for PHP 8.4 and 8.5, NTS and TS (64-bit), and PIE picks the
+  one matching your PHP.
+- **Building it yourself:** `composer build 8.4` or `composer build 8.5` builds into `build/8.4/` or `build/8.5/`, so
+  both can sit side by side. See [Development](docs/Usage/Development.md#building).
 
-**If you're on PHP 8.5, or want a build for some other reason,** you can easily [build it yourself](docs/Usage/Development.md#building):
-
-- `composer build 8.5` builds against 8.5, and `composer build` defaults to 8.4.
-- The C source supports both, so you just build against the PHP version you have installed.
-- Each version builds into its own tree (`build/8.4/`, `build/8.5/`, each with its module in `modules/`), so you can
-  keep both side by side.
-
-**If you're on another version of PHP,** in all likelihood the extension won't build due to changes in the internal Zend
-engine APIs and structures that PHP's C extension interface depends on. These aren't part of PHP's stable,
-backward-compatible userland API, and can change from one minor version to the next without notice. You can use
-`#if PHP_VERSION_ID...` macros to make version-specific changes (see `complex.c` for an example), or perhaps get an AI
-to help you.
+Other PHP versions aren't supported. The extension uses the Zend engine's internal C APIs, which can change between
+minor versions, so it likely won't build. `#if PHP_VERSION_ID` checks can adapt the code to another version (see
+`complex.c` for an example).
 
 ---
 

@@ -22,7 +22,7 @@ service that actually serves your requests - is the same everywhere.
 php -i | grep extension_dir
 ```
 
-Expected output looks like: `extension_dir => /usr/lib/php/20230831 => /usr/lib/php/20230831`
+Expected output looks like: `extension_dir => /usr/lib/php/20240924 => /usr/lib/php/20240924`
 
 ## Step 2: Upload or move the `.so` file
 
@@ -30,17 +30,17 @@ Move your built extension file into the exact folder discovered in Step 1.
 
 - **From your local machine** (using `scp`):
   ```bash
-  scp build/8.4/modules/oceanmoon_math.so root@your_server_ip:/usr/lib/php/20230831/
+  scp build/8.4/modules/oceanmoon_math.so root@your_server_ip:/usr/lib/php/20240924/
   ```
 - **If the file is already on the server** (e.g. you built it there):
   ```bash
-  sudo mv oceanmoon_math.so /usr/lib/php/20230831/
+  sudo mv oceanmoon_math.so /usr/lib/php/20240924/
   ```
 
 Set the correct file permissions so PHP has read access:
 
 ```bash
-sudo chmod 644 /usr/lib/php/20230831/oceanmoon_math.so
+sudo chmod 644 /usr/lib/php/20240924/oceanmoon_math.so
 ```
 
 ## Step 3: Find your PHP configuration folder
@@ -49,7 +49,7 @@ sudo chmod 644 /usr/lib/php/20230831/oceanmoon_math.so
 php -i | grep "Scan this dir for additional .ini files"
 ```
 
-Expected output looks like: `Scan this dir for additional .ini files => /etc/php/8.3/cli/conf.d`
+Expected output looks like: `Scan this dir for additional .ini files => /etc/php/8.4/cli/conf.d`
 
 ## Step 4: Create the `.ini` configuration file
 
@@ -58,10 +58,10 @@ directly in the scan directory. This is what lets a single `.ini` be shared betw
 symlinks, rather than needing a separate copy configured per SAPI:
 
 ```bash
-sudo nano /etc/php/8.3/mods-available/oceanmoon_math.ini
+sudo nano /etc/php/8.4/mods-available/oceanmoon_math.ini
 ```
 
-(Replace `8.3` with your active PHP version.)
+(Replace `8.4` with your active PHP version.)
 
 Paste the following line into the file, save, and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
 
@@ -85,7 +85,7 @@ process until it's restarted. Only the next fresh CLI invocation picks it up aut
 
 - **Nginx (LEMP)**:
   ```bash
-  sudo systemctl restart php8.3-fpm
+  sudo systemctl restart php8.4-fpm
   ```
 - **Apache (LAMP)**:
   ```bash
@@ -103,5 +103,5 @@ own independently-loaded extension list. To actually confirm the SAPI serving yo
 
 - Check via a script executed through the web server itself, e.g. a route/page that runs
   `var_dump(extension_loaded('oceanmoon_math'));`, or
-- For FPM specifically: `sudo php-fpm8.3 -m | grep oceanmoon_math` (running the FPM binary's own `-m` flag, not the CLI
+- For FPM specifically: `sudo php-fpm8.4 -m | grep oceanmoon_math` (running the FPM binary's own `-m` flag, not the CLI
   binary's), or check its status page if you have one configured.

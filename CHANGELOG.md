@@ -28,6 +28,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   elements and a Matrix's live rows, instead of their public properties.
 - **`Rational::mod()` and `%`.** `mod()` matches the package. `%` on a `Rational` is `mod()`, with a `Rational`, `int`
   or `float` on either side, widening to `float` like the other operators. `%=` works too.
+- **Windows DLLs for PIE.** Each GitHub release gets prebuilt DLLs for PHP 8.4 and 8.5, NTS and TS (64-bit), built by
+  PHP's own php-windows-builder actions, so `pie install` works on Windows.
 
 ### Changed
 
@@ -146,11 +148,13 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 ### Documentation
 
 - `docs/Reference/Rational.md` documents `**` with a `Rational` exponent, and has a **Throws:** block for each operator.
-
----
+- The installation docs describe PIE on Windows and the manual Windows build, and the README's "Supported PHP Versions"
+  section replaces "Why PHP 8.4?", which described a prebuilt 8.4 module that doesn't exist.
 - Each operator page documents compound assignment, and `Complex` and `Rational` document `++` and `--`.
 - The README's new "Argument Types" section explains that parameters taking an object or a number, such as `add()`'s,
   are always strict in the extension.
+
+---
 
 ## [4.0.1] - 2026-10-10
 
