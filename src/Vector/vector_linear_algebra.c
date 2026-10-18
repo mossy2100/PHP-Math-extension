@@ -22,7 +22,7 @@
 
 /* {{{ vector_scale
  *
- * Ports the PHP package's Vector::powerOfTwoScale() for a Vector's elements: the power of 2 that scales the
+ * Ports the PHP package's Vector::powerOf2Scale() for a Vector's elements: the power of 2 that scales the
  * largest absolute element into the range [1, 2), or 0.0 for a zero or empty vector.
  */
 static double vector_scale(zend_object *obj)
@@ -36,7 +36,7 @@ static double vector_scale(zend_object *obj)
 		max = fmax(max, fabs(element));
 	}
 
-	return math_floats_power_of_two_scale(max);
+	return math_floats_power_of_2_scale(max);
 }
 /* }}} */
 

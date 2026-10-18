@@ -98,13 +98,13 @@ bool math_floats_to_int(double f, zend_long *out);
 zend_string *math_floats_to_str(double value);
 /* }}} */
 
-/* {{{ math_floats_power_of_two_scale
+/* {{{ math_floats_power_of_2_scale
  *
- * Ports the PHP package's Vector::powerOfTwoScale(), given the largest absolute value: the power of 2 that scales
+ * Ports the PHP package's Vector::powerOf2Scale(), given the largest absolute value: the power of 2 that scales
  * it into the range [1, 2), or 0.0 if it's zero. Dividing by a power of 2 is exact, so it can be used to keep
  * intermediate values (e.g. squares) in range without changing the result. PHP's log($x, 2) calls log2().
  */
-double math_floats_power_of_two_scale(double max_abs);
+double math_floats_power_of_2_scale(double max_abs);
 /* }}} */
 
 #endif /* PHP_MATH_FLOATS_H */

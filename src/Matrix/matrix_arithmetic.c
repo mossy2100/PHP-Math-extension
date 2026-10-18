@@ -235,7 +235,7 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 			}
 		}
 		if (max != 0.0) {
-			scale = math_floats_power_of_two_scale(max);
+			scale = math_floats_power_of_2_scale(max);
 			if (matrix_calc_div_scalar(self, scale, &scaled_zv) == FAILURE) {
 				matrix_lu_free(&lu);
 				return FAILURE;

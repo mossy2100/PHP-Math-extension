@@ -40,7 +40,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 			max = fmax(max, fabs(value));
 		}
 	}
-	double scale = math_floats_power_of_two_scale(max);
+	double scale = math_floats_power_of_2_scale(max);
 	if (scale == 0.0) {
 		RETURN_DOUBLE(0.0);
 	}

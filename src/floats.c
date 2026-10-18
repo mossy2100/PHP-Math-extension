@@ -141,7 +141,17 @@ zend_string *math_floats_to_str(double value)
 	return str;
 }
 
-double math_floats_power_of_two_scale(double max_abs)
+double math_floats_power_of_2_scale(double max_abs)
 {
-	return max_abs == 0.0 ? 0.0 : exp2(floor(log2(max_abs)));
+	if (max_abs == 0.0) {
+		return 0.0;
+	}
+
+	/* log2() can round up to the next power of 2, e.g. to 1024 near DBL_MAX, where exp2(1024) is INF. If so, use the
+	 * power below. */
+	double exponent = floor(log2(max_abs));
+	if (exp2(exponent) > max_abs) {
+		exponent -= 1;
+	}
+	return exp2(exponent);
 }
