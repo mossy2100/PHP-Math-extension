@@ -143,8 +143,9 @@ static int rational_compare_exact(
  * Three-way comparison of two already-canonical (numerator, denominator) pairs. Never fails
  * (always SUCCESS): a Rational is always finite by construction, so there's no NAN-style
  * "no meaningful result" case to report once both sides are already resolved to a pair of longs.
+ * Also used by rational_calc_mod() (rational_arithmetic.c).
  */
-static void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b_num, zend_long b_den, int *out)
+void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b_num, zend_long b_den, int *out)
 {
 	/* If the denominators are equal, we only need to compare numerators. */
 	if (a_den == b_den) {

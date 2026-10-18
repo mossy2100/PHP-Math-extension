@@ -371,20 +371,36 @@ PHP_METHOD(OceanMoon_Math_Rational, div)
  */
 zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value)
 {
-	/* Over the common denominator lcm(b, d), this Rational is A/lcm and the divisor is C/lcm, so the remainder is
-	 * (A % C)/lcm. */
-	zend_long gcd = rational_gcd2(b, d);
-	zend_long b_over_gcd = b / gcd;
-	zend_long big_a, big_c, lcm;
-	if (rational_mul_checked(a, d / gcd, &big_a) == FAILURE
-		|| rational_mul_checked(c, b_over_gcd, &big_c) == FAILURE
-		|| rational_mul_checked(b_over_gcd, d, &lcm) == FAILURE) {
+	/* If |this| < |divisor|, the remainder is this Rational. A divisor of ZEND_LONG_MIN is larger in magnitude than
+	 * any Rational, and can't be negated, so it's handled first. a is a numerator, so never ZEND_LONG_MIN. */
+	int cmp = -1;
+	if (c != ZEND_LONG_MIN) {
+		rational_compare_parts(a < 0 ? -a : a, b, c < 0 ? -c : c, d, &cmp);
+	}
+	if (cmp < 0) {
+		return rational_create(return_value, a, b);
+	}
+
+	/* Over the common denominator lcm(b, d), this Rational is h/lcm and the divisor is k/lcm, where h = a·(d/g) and
+	 * k = c·(b/g), so the remainder is (h % k)/lcm. h can overflow even when the remainder is small, so reduce a
+	 * first: h % k = ((a % k)·(d/g)) % k. */
+	zend_long g = rational_gcd2(b, d);
+	zend_long b_over_g = b / g;
+	zend_long k, reduced_h, lcm;
+	if (rational_mul_checked(c, b_over_g, &k) == FAILURE) {
 		return FAILURE;
 	}
 
 	/* C's % truncates, giving the remainder the sign of the dividend, as PHP's % does. ZEND_LONG_MIN % -1 overflows
 	 * in C, though the remainder is 0, so a divisor of -1 is handled first. */
-	return rational_create(return_value, big_c == -1 ? 0 : big_a % big_c, lcm);
+	if (k == -1) {
+		return rational_create(return_value, 0, 1);
+	}
+	if (rational_mul_checked(a % k, d / g, &reduced_h) == FAILURE
+		|| rational_mul_checked(b_over_g, d, &lcm) == FAILURE) {
+		return FAILURE;
+	}
+	return rational_create(return_value, reduced_h % k, lcm);
 }
 /* }}} */
 

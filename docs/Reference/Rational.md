@@ -353,7 +353,8 @@ Unlike PHP's own `%`, which converts both operands to ints, the result is exact:
 
 - `ArithmeticException` if dividing by zero, including `0.0`.
 - `DomainException` if a `float` operand is `±INF` or `NAN`.
-- `OverflowException` if an intermediate value overflows an `int`.
+- `OverflowException` if the remainder, in lowest terms, has a denominator too large for an `int`. In rare cases, it
+  also throws when an intermediate value overflows, though the remainder would fit.
 - `TypeError` if the other operand isn't a `Rational`, `int` or `float`.
 
 **Examples:**

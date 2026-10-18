@@ -60,6 +60,10 @@ zend_result rational_calc_from_float(double value, zval *return_value);
  * lessThan()/etc. (same file) and the `compare` operator handler (rational_operators.c). */
 zend_result rational_calc_compare(zend_object *self_obj, zval *other, int *out);
 
+/* Exact three-way comparison of two canonical (numerator, denominator) pairs, without overflow. Defined in
+ * rational_comparison.c. Shared with rational_calc_mod() (rational_arithmetic.c). */
+void rational_compare_parts(zend_long a_num, zend_long a_den, zend_long b_num, zend_long b_den, int *out);
+
 /* The `do_operation`/`compare` object handlers backing Rational's operator overloads, and the
  * minit hook that installs them as Rational's custom object handlers table. All defined in
  * rational_operators.c - called from rational_minit() (rational.c), after

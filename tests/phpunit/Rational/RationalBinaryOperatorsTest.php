@@ -557,7 +557,16 @@ class RationalBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test % throws OverflowException, with mod()'s message, when the common denominator is too large.
+     * Test % with large operands, where the remainder is representable, though the dividend over the common
+     * denominator isn't. PHP_INT_MAX - 1 is divisible by 3, so 1/(PHP_INT_MAX - 1) divides PHP_INT_MAX/3 exactly.
+     */
+    public function testModLargeOperands(): void
+    {
+        $this->assertEquals(new Rational(0), new Rational(PHP_INT_MAX, 3) % new Rational(1, PHP_INT_MAX - 1));
+    }
+
+    /**
+     * Test % throws OverflowException, with mod()'s message, when the remainder's denominator is too large.
      */
     public function testModOverflowThrows(): void
     {
@@ -566,7 +575,9 @@ class RationalBinaryOperatorsTest extends TestCase
             'Cannot find the remainder of the given Rational numbers. The result would overflow.'
         );
 
-        $result = new Rational(PHP_INT_MAX, 3) % new Rational(1, PHP_INT_MAX - 1);
+        // 4000000007 and 4000000009 are prime, so the remainder, 2/(4000000007 × 4000000009), is in lowest terms, and
+        // its denominator is about 1.6e19.
+        $result = new Rational(1, 4000000007) % new Rational(1, 4000000009);
     }
 
     /**
