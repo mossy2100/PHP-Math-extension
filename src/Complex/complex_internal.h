@@ -54,6 +54,13 @@ void complex_calc_sqrt(double real, double imag, double *out_real, double *out_i
  * complex_hyperbolic.c; also used by tan(). */
 void complex_calc_tanh(double x, double y, double *out_re, double *out_im);
 
+/* The inverse trigonometric and hyperbolic functions of a (real, imaginary) pair, matching the PHP package's
+ * Complex::calcAsinh(), calcAcos() and calcAtanh(). Defined in complex_catrig.c. asin(), atan() and acosh() are
+ * derived from them. For complex_calc_atanh(), if y is 0, x must not be ±1. */
+void complex_calc_asinh(double x, double y, double *out_re, double *out_im);
+void complex_calc_acos(double x, double y, double *out_re, double *out_im);
+void complex_calc_atanh(double x, double y, double *out_re, double *out_im);
+
 /* Installs the custom object handlers (do_operation, compare, create_object) shared by every
  * Complex instance. Defined in complex_properties.c; called from complex_minit() (complex.c). */
 zend_result complex_properties_minit(void);

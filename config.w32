@@ -15,7 +15,7 @@ if (PHP_OCEANMOON_MATH != "no") {
   ADD_SOURCES(configure_module_dirname + "\\src\\Complex",
     "complex.c complex_conversion.c complex_inspection.c complex_comparison.c complex_properties.c " +
     "complex_arithmetic.c complex_transcendental.c complex_power.c complex_operators.c complex_rounding.c " +
-    "complex_trigonometric.c complex_hyperbolic.c complex_arrayaccess.c",
+    "complex_trigonometric.c complex_hyperbolic.c complex_catrig.c complex_arrayaccess.c",
     "oceanmoon_math");
   ADD_SOURCES(configure_module_dirname + "\\src\\Rational",
     "rational.c rational_factory.c rational_conversion.c rational_inspection.c rational_comparison.c " +
