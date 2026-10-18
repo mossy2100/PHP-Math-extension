@@ -99,10 +99,10 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
     `inv()`.
   - `asin()`, `acos()`, `atan()` and `atanh()` give the same sign for a zero part, and `log()` with base 2 or 10 uses
     `log2()` or `log10()`, as PHP's `log()` does.
-- **`Matrix::inv()` and `**` with a negative exponent** work for a matrix of uniformly tiny or huge elements, matching
-  the package.
+- **`Matrix::inv()` and `**` with a negative exponent** work for a matrix of uniformly tiny or huge elements, or whose
+  determinant underflows because its elements span a wide range, matching the package.
 - **`Complex::sqrt()` and `roots()` are exact on the axes**, matching the package. `pow(0.5)` and `** 0.5` use
-  `sqrt()`, as do `asin()`, `acos()`, `asinh()` and `acosh()`. `roots()` refines the root magnitude, like the package.
+  `sqrt()`. `roots()` refines the root magnitude, like the package.
 - **`Matrix::inv()` and `**` with a negative exponent give no negative zeros**, matching the package.
 - **`Complex::tan()`/`tanh()` never overflow**, matching the package's new algorithm.
 - **`Rational` comparison is exact**, matching the package, for the comparison methods and operators. Comparing with a

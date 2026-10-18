@@ -212,9 +212,9 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 		zval_ptr_dtor(&data_array);
 		return result;
 	}
-	matrix_lu_free(&lu);
 
-	/* Invert a matrix up to 3x3 with the adjugate formula. Try without scaling first. */
+	/* Invert a matrix up to 3x3 with the adjugate formula. Try without scaling first. The LU decomposition is kept,
+	 * in case the determinant underflows. */
 	double scale = 1.0;
 	zend_object *scaled = self;
 	zval scaled_zv;
@@ -237,6 +237,7 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 		if (max != 0.0) {
 			scale = math_floats_power_of_two_scale(max);
 			if (matrix_calc_div_scalar(self, scale, &scaled_zv) == FAILURE) {
+				matrix_lu_free(&lu);
 				return FAILURE;
 			}
 			scaled = Z_OBJ(scaled_zv);
@@ -247,13 +248,16 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 	}
 
 	/* The determinant is finite here: either it was already, or the matrix was scaled so every element is less
-	 * than 2. It's non-zero unless it underflowed even after scaling, which the singularity check above makes
-	 * unlikely. */
+	 * than 2. It can still be 0 if it underflowed even after scaling, which happens when the elements span a wide
+	 * range, e.g. diag(1, 1e-200, 1e-200). The singularity check above has passed, so use the LU decomposition
+	 * instead. */
 	if (det == 0.0) {
 		zval_ptr_dtor(&scaled_zv);
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot invert singular Matrix.", 0);
-		return FAILURE;
+		zend_result result = matrix_inv_from_lu(&lu, return_value);
+		matrix_lu_free(&lu);
+		return result;
 	}
+	matrix_lu_free(&lu);
 
 	if (matrix_create(return_value, n, n) == FAILURE) {
 		zval_ptr_dtor(&scaled_zv);
