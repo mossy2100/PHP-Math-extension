@@ -228,13 +228,13 @@ $r1 - 0.25;   // 0.5
 
 **Equivalence table:**
 
-| Operation   | Equivalent to                                 |
-| ----------- | --------------------------------------------- |
-| `$r1 - $r2` | `$r1->sub($r2)`                               |
-| `$r - $i`   | `$r->sub($i)`                                 |
-| `$i - $r`   | `new Rational($i)->sub($r)` or `-$r->sub($i)` |
-| `$r - $f`   | `$r->toFloat() - $f`                          |
-| `$f - $r`   | `$f - $r->toFloat()`                          |
+| Operation   | Equivalent to                                       |
+| ----------- | --------------------------------------------------- |
+| `$r1 - $r2` | `$r1->sub($r2)`                                     |
+| `$r - $i`   | `$r->sub($i)`                                       |
+| `$i - $r`   | `new Rational($i)->sub($r)` or `$r->sub($i)->neg()` |
+| `$r - $f`   | `$r->toFloat() - $f`                                |
+| `$f - $r`   | `$f - $r->toFloat()`                                |
 
 ---
 

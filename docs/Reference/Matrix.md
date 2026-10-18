@@ -218,10 +218,10 @@ $m = Matrix::fromArray([[1, 2], [4, 8]]);
 
 **Equivalence table:**
 
-| Operation | Equivalent to           |
-| --------- | ----------------------- |
-| `$m / $x` | `$m->div($x)`           |
-| `$x / $m` | `$x * $m->reciprocal()` |
+| Operation | Equivalent to               |
+| --------- | --------------------------- |
+| `$m / $x` | `$m->div($x)`               |
+| `$x / $m` | `$m->reciprocal()->mul($x)` |
 
 ---
 

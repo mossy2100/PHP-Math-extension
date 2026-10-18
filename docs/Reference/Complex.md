@@ -144,6 +144,29 @@ matching method.
 
 ---
 
+### Writing Complex Numbers Naturally
+
+One of the best uses for these operators is writing complex numbers the way they look on paper. Combine real numbers
+with `M_I`, the imaginary unit constant (see the package's
+[Globals documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Globals.md)):
+
+```php
+use const OceanMoon\Math\M_I;
+
+$z = 3 + 4 * M_I;                    // 3 + 4i, same as new Complex(3, 4)
+$z = 3 - 4 * M_I;                    // 3 - 4i
+$z = 1.5 * M_I;                      // 1.5i
+$z = 2 - M_I;                        // 2 - i
+$z = (3 + 4 * M_I) * (1 - 2 * M_I);  // 11 - 2i
+```
+
+`*` binds more tightly than `+` and `-`, so `3 + 4 * M_I` needs no parentheses.
+
+Each operator creates a new `Complex`, so `3 + 4 * M_I` builds two objects where `new Complex(3, 4)` builds one. In hot
+loops, prefer the constructor.
+
+---
+
 ### \+ (add)
 
 ```php
@@ -212,11 +235,11 @@ $z1 - 2.5;   // 2.5 + 7i
 
 **Equivalence table:**
 
-| Operation   | Equivalent to                                |
-| ----------- | -------------------------------------------- |
-| `$z1 - $z2` | `$z1->sub($z2)`                              |
-| `$z - $x`   | `$z->sub($x)`                                |
-| `$x - $z`   | `new Complex($x)->sub($z)` or `-$z->sub($x)` |
+| Operation   | Equivalent to                                      |
+| ----------- | -------------------------------------------------- |
+| `$z1 - $z2` | `$z1->sub($z2)`                                    |
+| `$z - $x`   | `$z->sub($x)`                                      |
+| `$x - $z`   | `new Complex($x)->sub($z)` or `$z->sub($x)->neg()` |
 
 ---
 
@@ -451,7 +474,7 @@ $z <=> NAN;    // throws DomainException
 
 ---
 
-### < (less than)
+### \< (less than)
 
 ```php
 $result = $z1 < $z2;  // Complex < Complex → bool
@@ -501,7 +524,7 @@ $z2 <= $z1;                // false
 
 ---
 
-### > (greater than)
+### \> (greater than)
 
 ```php
 $result = $z1 > $z2;  // Complex > Complex → bool

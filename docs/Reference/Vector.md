@@ -230,11 +230,11 @@ $v1 / $v2;  // [2, 3, 1.5]
 
 **Equivalence table:**
 
-| Operation   | Equivalent to                                          |
-| ----------- | ------------------------------------------------------ |
-| `$v / $x`   | `$v->div($x)`                                          |
-| `$x / $v`   | `$x * $v->reciprocal()` or `$v->reciprocal()->mul($x)` |
-| `$v1 / $v2` | `$v1->div($v2)`                                        |
+| Operation   | Equivalent to               |
+| ----------- | --------------------------- |
+| `$v / $x`   | `$v->div($x)`               |
+| `$x / $v`   | `$v->reciprocal()->mul($x)` |
+| `$v1 / $v2` | `$v1->div($v2)`             |
 
 ---
 
