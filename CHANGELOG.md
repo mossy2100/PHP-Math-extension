@@ -159,6 +159,10 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   FreeBSD's `catrig.c`, and are accurate to within a few ulps for any argument. Matches the package bit for bit.
 - **The inverse trigonometric and hyperbolic methods threw `OverflowException` where the result is finite**, e.g.
   `asin(1e200)` and `atanh(1 + 1e-320i)`. They never overflow now.
+- **`Rational::fromString()` silently clamped an integer string beyond the int range to `PHP_INT_MAX`**, e.g.
+  `"9223372036854775808"`, as it went through a float. It also called a number too large for a float, e.g. `"1e400"`,
+  an invalid format. Both now throw `DomainException` "Cannot convert string '...' to Rational. Outside valid range."
+  A zero with an exponent, e.g. `"0e9"`, is now accepted. Fixed in the package too.
 
 ### Documentation
 

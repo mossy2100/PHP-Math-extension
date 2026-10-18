@@ -172,9 +172,8 @@ PHP_METHOD(OceanMoon_Math_Rational, fromFloat)
 /* {{{ rational_filter_var
  *
  * Calls the real userland filter_var($str, $filter) - rather than reimplementing
- * FILTER_VALIDATE_INT/FILTER_VALIDATE_FLOAT's parsing rules in C - so fromString()'s int/float
- * detection is guaranteed byte-for-byte identical to the PHP package's, which uses the same
- * function. $filter is looked up by its constant name each call rather than hard-coded, in case
+ * FILTER_VALIDATE_INT's parsing rules in C - so fromString()'s int detection is guaranteed
+ * byte-for-byte identical to the PHP package's, which uses the same function. $filter is looked up by its constant name each call rather than hard-coded, in case
  * its integer value ever changes (unlikely, but free to guard against).
  *
  * Returns FAILURE only if the FILTER_VALIDATE_* constant itself can't be found (ext/filter not
@@ -222,11 +221,63 @@ static zend_string *rational_trim(const char *str, size_t len)
 }
 /* }}} */
 
+/* {{{ rational_int_string_out_of_range
+ *
+ * Whether str is an integer, e.g. "-0042", too large in magnitude for a zend_long. Matches the package's check, which
+ * uses the regex /^[+-]?0*(\d+)$/, then compares the digits with PHP_INT_MAX's, ignoring leading zeros.
+ */
+static bool rational_int_string_out_of_range(const char *str, size_t len)
+{
+	size_t start = 0;
+	if (start < len && (str[start] == '+' || str[start] == '-')) {
+		start++;
+	}
+	if (start == len) {
+		return false;
+	}
+	for (size_t i = start; i < len; i++) {
+		if (str[i] < '0' || str[i] > '9') {
+			return false;
+		}
+	}
+
+	/* Skip leading zeros, keeping at least one digit. */
+	while (start < len - 1 && str[start] == '0') {
+		start++;
+	}
+
+	char max[32];
+	size_t max_len = (size_t) snprintf(max, sizeof(max), ZEND_LONG_FMT, ZEND_LONG_MAX);
+	size_t digits = len - start;
+	return digits > max_len || (digits == max_len && memcmp(str + start, max, max_len) > 0);
+}
+/* }}} */
+
+/* {{{ rational_throw_string_out_of_range
+ *
+ * Throws DomainException "Cannot convert string '...' to Rational. Outside valid range.", with the string quoted and
+ * abbreviated as the package's Stringify::prepEx() does. Any exception already thrown becomes its previous one.
+ */
+static void rational_throw_string_out_of_range(zend_string *str)
+{
+	zend_string *abbrev = math_abbrev_string(ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string *msg = abbrev
+		? strpprintf(0, "Cannot convert string %s to Rational. Outside valid range.", ZSTR_VAL(abbrev))
+		: zend_string_init(ZEND_STRL("Cannot convert string to Rational. Outside valid range."), 0);
+	if (abbrev) {
+		zend_string_release(abbrev);
+	}
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Rational::fromString(string $str): Rational
  *
  * Matches the PHP package's Rational::fromString(): accepts an int ("123"), a float ("123.456",
- * converted via fromFloat()), or a fraction ("1/2"). Delegates the actual int/float recognition
- * to the real filter_var() (see rational_filter_var()'s doc comment for why).
+ * converted via fromFloat()), or a fraction ("1/2"). Delegates int recognition to the real
+ * filter_var() (see rational_filter_var()'s doc comment for why), and float recognition to
+ * is_numeric_string(), which backs the package's is_numeric().
  */
 PHP_METHOD(OceanMoon_Math_Rational, fromString)
 {
@@ -256,14 +307,29 @@ PHP_METHOD(OceanMoon_Math_Rational, fromString)
 		return;
 	}
 
-	/* Check for a string that looks like a float. */
-	if (rational_filter_var(trimmed, ZEND_STRL("FILTER_VALIDATE_FLOAT"), &filter_result) == SUCCESS
-		&& Z_TYPE(filter_result) == IS_DOUBLE) {
-		double n = Z_DVAL(filter_result);
+	/* Check for an integer too large for a zend_long. FILTER_VALIDATE_INT rejects it, and as a float it would round,
+	 * then be clamped to ZEND_LONG_MAX. */
+	if (rational_int_string_out_of_range(ZSTR_VAL(trimmed), ZSTR_LEN(trimmed))) {
+		rational_throw_string_out_of_range(trimmed);
 		zend_string_release(trimmed);
-		if (rational_calc_from_float(n, return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Check for a string that looks like a float. Like the package's is_numeric(), is_numeric_string() accepts a
+	 * number too large for a float, e.g. "1e400", which converts to INF, so it's reported as out of range, not as
+	 * invalid. */
+	zend_long lval;
+	double dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(trimmed), ZSTR_LEN(trimmed), &lval, &dval, false);
+	if (type == IS_LONG || type == IS_DOUBLE) {
+		if (rational_calc_from_float(type == IS_LONG ? (double) lval : dval, return_value) == FAILURE) {
+			if (EG(exception) && instanceof_function(EG(exception)->ce, spl_ce_DomainException)) {
+				rational_throw_string_out_of_range(trimmed);
+			}
+			zend_string_release(trimmed);
 			RETURN_THROWS();
 		}
+		zend_string_release(trimmed);
 		return;
 	}
 
