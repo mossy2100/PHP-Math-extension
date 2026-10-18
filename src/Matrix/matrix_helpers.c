@@ -121,7 +121,9 @@ void matrix_get_minor(zend_object *obj, zend_long exclude_row, zend_long exclude
  * Decomposes a square list<list<float>> zval into PA = LU by Gaussian elimination with partial pivoting. Mirrors
  * Matrix::luDecompose() exactly, in the same operation order, so the results are bit-identical. Each step swaps in the
  * row with the largest pivot candidate. The matrix is singular if a pivot is at most n × DBL_EPSILON times the largest
- * absolute element of its original row. The caller frees the result with matrix_lu_free().
+ * absolute element of its original row, once each column is divided by its largest absolute element. Dividing a
+ * column doesn't change the pivot choices or multipliers, so the columns are only scaled in that comparison. The caller
+ * frees the result with matrix_lu_free().
  */
 void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 {
@@ -134,19 +136,32 @@ void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 	out->sign = 1;
 	out->singular = false;
 	double *row_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
+	double *col_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
 	double *a = out->lu;
 
-	/* Copy the matrix, and get the scale of each original row: its largest absolute element. */
+	/* Copy the matrix, and get the scale of each column: its largest absolute element. */
+	for (zend_long j = 0; j < n; j++) {
+		col_scales[j] = 0.0;
+	}
 	for (zend_long i = 0; i < n; i++) {
 		zval *row = zend_hash_index_find(ht, (zend_ulong) i);
-		double row_scale = 0.0;
 		for (zend_long j = 0; j < n; j++) {
 			double value = Z_DVAL_P(zend_hash_index_find(Z_ARRVAL_P(row), (zend_ulong) j));
 			a[i * n + j] = value;
-			row_scale = fmax(row_scale, fabs(value));
+			col_scales[j] = fmax(col_scales[j], fabs(value));
+		}
+		out->perm[i] = i;
+	}
+
+	/* Get the scale of each original row: its largest absolute element, with each divided by its column's scale. */
+	for (zend_long i = 0; i < n; i++) {
+		double row_scale = 0.0;
+		for (zend_long j = 0; j < n; j++) {
+			if (col_scales[j] != 0.0) {
+				row_scale = fmax(row_scale, fabs(a[i * n + j]) / col_scales[j]);
+			}
 		}
 		row_scales[i] = row_scale;
-		out->perm[i] = i;
 	}
 
 	for (zend_long k = 0; k < n; k++) {
@@ -173,9 +188,11 @@ void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 			out->sign = -out->sign;
 		}
 
-		/* Check for a negligible pivot. */
+		/* Check for a negligible pivot, divided by its column's scale like the row's elements. A zero column makes the
+		 * matrix singular. */
 		double pivot = a[k * n + k];
-		if (fabs(pivot) <= (double) n * DBL_EPSILON * row_scales[out->perm[k]]) {
+		if (col_scales[k] == 0.0
+			|| fabs(pivot) / col_scales[k] <= (double) n * DBL_EPSILON * row_scales[out->perm[k]]) {
 			out->singular = true;
 		}
 
@@ -195,6 +212,7 @@ void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 	}
 
 	efree(row_scales);
+	efree(col_scales);
 }
 /* }}} */
 
