@@ -65,12 +65,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetGet)
 	zend_long row = Z_LVAL_P(offset);
 	zend_long row_count = matrix_read_row_count(self);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		RETURN_THROWS();
 	}
 
@@ -113,12 +108,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetSet)
 	zend_long row = Z_LVAL_P(offset);
 	zend_long row_count = matrix_read_row_count(self);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		RETURN_THROWS();
 	}
 

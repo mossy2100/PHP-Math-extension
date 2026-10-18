@@ -97,6 +97,23 @@ zend_long vector_read_count(zend_object *obj)
 }
 /* }}} */
 
+/* {{{ vector_throw_index_error
+ *
+ * Throws OutOfRangeException for an index outside 0 to count - 1, matching the package's Vector::indexException():
+ * "Invalid index: 3. Must be in the range 0-2.", or "Invalid index: 0. The Vector is empty." if count is 0.
+ */
+void vector_throw_index_error(zend_long index, zend_long count)
+{
+	zend_string *msg = count == 0
+		? strpprintf(0, "Invalid index: " ZEND_LONG_FMT ". The Vector is empty.", index)
+		: strpprintf(
+			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, count - 1
+		);
+	zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+}
+/* }}} */
+
 /* {{{ vector_read_element
  *
  * Bounds-checked read of $data[$index] off a zend_object already known to be a Vector instance.
@@ -110,11 +127,7 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
 	zend_long count = vector_read_count(obj);
 
 	if (index < 0 || index >= count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		vector_throw_index_error(index, count);
 		return FAILURE;
 	}
 
@@ -142,11 +155,7 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 	zend_long count = vector_read_count(obj);
 
 	if (index < 0 || index >= count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", index, count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		vector_throw_index_error(index, count);
 		return FAILURE;
 	}
 

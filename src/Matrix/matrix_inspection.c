@@ -75,12 +75,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, getRow)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long row_count = matrix_read_row_count(self);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		RETURN_THROWS();
 	}
 
@@ -106,12 +101,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, getColumn)
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
 	if (col < 0 || col >= column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			col, column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("column", col, column_count);
 		RETURN_THROWS();
 	}
 
@@ -151,23 +141,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, copy)
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
 
-	if (row < 0 || sub_row_count < 0 || row + sub_row_count > row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
-			row, row + sub_row_count, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
-		RETURN_THROWS();
-	}
-
-	if (col < 0 || sub_col_count < 0 || col + sub_col_count > column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
-			col, col + sub_col_count, column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (matrix_check_range("row", row, sub_row_count, row_count) == FAILURE
+		|| matrix_check_range("column", col, sub_col_count, column_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 

@@ -151,23 +151,13 @@ zend_result matrix_read_element(zend_object *obj, zend_long row, zend_long col, 
 {
 	zend_long row_count = matrix_read_row_count(obj);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		return FAILURE;
 	}
 
 	zend_long column_count = matrix_read_column_count(obj);
 	if (col < 0 || col >= column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			col, column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("column", col, column_count);
 		return FAILURE;
 	}
 
@@ -188,23 +178,13 @@ zend_result matrix_write_element(zend_object *obj, zend_long row, zend_long col,
 {
 	zend_long row_count = matrix_read_row_count(obj);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		return FAILURE;
 	}
 
 	zend_long column_count = matrix_read_column_count(obj);
 	if (col < 0 || col >= column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			col, column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("column", col, column_count);
 		return FAILURE;
 	}
 

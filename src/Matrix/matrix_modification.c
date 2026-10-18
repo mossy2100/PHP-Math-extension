@@ -54,12 +54,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, setRow)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long row_count = matrix_read_row_count(self);
 	if (row < 0 || row >= row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			row, row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("row", row, row_count);
 		RETURN_THROWS();
 	}
 
@@ -103,12 +98,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, setColumn)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long column_count = matrix_read_column_count(self);
 	if (col < 0 || col >= column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".",
-			col, column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+		matrix_throw_index_error("column", col, column_count);
 		RETURN_THROWS();
 	}
 
@@ -156,25 +146,13 @@ PHP_METHOD(OceanMoon_Math_Matrix, paste)
 
 	zend_long self_row_count = matrix_read_row_count(self);
 	zend_long other_row_count = matrix_read_row_count(other_obj);
-	if (row < 0 || row + other_row_count > self_row_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid row range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
-			row, row + other_row_count, self_row_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (matrix_check_range("row", row, other_row_count, self_row_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	zend_long self_column_count = matrix_read_column_count(self);
 	zend_long other_column_count = matrix_read_column_count(other_obj);
-	if (col < 0 || col + other_column_count > self_column_count) {
-		zend_string *msg = strpprintf(
-			0, "Invalid column range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
-			col, col + other_column_count, self_column_count - 1
-		);
-		zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (matrix_check_range("column", col, other_column_count, self_column_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 

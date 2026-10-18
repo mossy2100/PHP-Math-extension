@@ -4,7 +4,8 @@
  * Private helpers for OceanMoon\Math\Matrix, not PHP-visible: matrix_calc_det() (mirrors
  * Matrix::calcDet()), matrix_get_minor() (mirrors Matrix::getMinor()), and the LU decomposition helpers
  * matrix_lu_decompose() and matrix_inv_from_lu() (mirroring Matrix::luDecompose() and Matrix::invFromLu()). Used by
- * det() and inv() in matrix_linear_algebra.c and matrix_arithmetic.c.
+ * det() and inv() in matrix_linear_algebra.c and matrix_arithmetic.c. Also matrix_throw_index_error() and
+ * matrix_check_range() (mirroring Matrix::indexMessage() and Matrix::checkRange()), for the index and range checks.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,12 +13,66 @@
 #endif
 
 #include "php.h"
+#include "ext/spl/spl_exceptions.h"
+#include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
 #include "exceptions.h"
 #include "floats.h"
 
 #include <float.h>
 #include <math.h>
+
+/* {{{ matrix_throw_index_error
+ *
+ * Throws OutOfRangeException for a row or column index outside 0 to size - 1, matching the package's
+ * Matrix::indexMessage(): "Invalid row index: 3. Must be in the range 0-2.", or "Invalid row index: 0. The Matrix has
+ * no rows." if size is 0. axis is "row" or "column".
+ */
+void matrix_throw_index_error(const char *axis, zend_long index, zend_long size)
+{
+	zend_string *msg = size == 0
+		? strpprintf(0, "Invalid %s index: " ZEND_LONG_FMT ". The Matrix has no %ss.", axis, index, axis)
+		: strpprintf(
+			0, "Invalid %s index: " ZEND_LONG_FMT ". Must be in the range 0-" ZEND_LONG_FMT ".", axis, index, size - 1
+		);
+	zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+}
+/* }}} */
+
+/* {{{ matrix_check_range
+ *
+ * Checks a range of rows or columns, given by its start and length, lies within 0 to size - 1, matching the package's
+ * Matrix::checkRange(). Returns FAILURE, with OutOfRangeException thrown, if count is negative ("Invalid row count:
+ * -1. Must not be negative."), or the range extends beyond the Matrix ("Invalid row range: 3 rows from row 1. Must be
+ * within rows 0-2.", or "... The Matrix has no rows." if size is 0). axis is "row" or "column".
+ */
+zend_result matrix_check_range(const char *axis, zend_long start, zend_long count, zend_long size)
+{
+	zend_string *msg;
+	if (count < 0) {
+		msg = strpprintf(0, "Invalid %s count: " ZEND_LONG_FMT ". Must not be negative.", axis, count);
+	} else if (start < 0 || start > size - count) {
+		const char *plural = count == 1 ? "" : "s";
+		msg = size == 0
+			? strpprintf(
+				0, "Invalid %s range: " ZEND_LONG_FMT " %s%s from %s " ZEND_LONG_FMT ". The Matrix has no %ss.",
+				axis, count, axis, plural, axis, start, axis
+			)
+			: strpprintf(
+				0,
+				"Invalid %s range: " ZEND_LONG_FMT " %s%s from %s " ZEND_LONG_FMT ". Must be within %ss 0-"
+				ZEND_LONG_FMT ".",
+				axis, count, axis, plural, axis, start, axis, size - 1
+			);
+	} else {
+		return SUCCESS;
+	}
+	zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ matrix_calc_det
  *
