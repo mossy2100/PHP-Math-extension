@@ -42,36 +42,32 @@ void matrix_throw_index_error(const char *axis, zend_long index, zend_long size)
 
 /* {{{ matrix_check_range
  *
- * Checks a range of rows or columns, given by its start and length, lies within 0 to size - 1, matching the package's
- * Matrix::checkRange(). Returns FAILURE, with OutOfRangeException thrown, if count is negative ("Invalid row count:
- * -1. Must not be negative."), or the range extends beyond the Matrix ("Invalid row range: 1-3. Must be within 0-2.",
- * or "... The Matrix has no rows." if size is 0). An empty range has no last row or column, so for that only the
- * start is shown ("Invalid row: 4. Must be within 0-3."). axis is "row" or "column".
+ * Checks a range of rows or columns, given by its start and length, lies within the Matrix, matching the package's
+ * Matrix::checkRange(). The start must be a valid index, even for an empty range, so a Matrix with no rows or columns
+ * has no valid range. Returns FAILURE, with OutOfRangeException thrown, if the start isn't a valid index (the
+ * matrix_throw_index_error() message), the count is negative ("Invalid row count: -1. Must not be negative."), or the
+ * range extends beyond the Matrix ("Invalid row range: 1-3. Must be within 0-2."). axis is "row" or "column".
  */
 zend_result matrix_check_range(const char *axis, zend_long start, zend_long count, zend_long size)
 {
+	if (start < 0 || start >= size) {
+		matrix_throw_index_error(axis, start, size);
+		return FAILURE;
+	}
+
 	zend_string *msg;
 	if (count < 0) {
 		msg = strpprintf(0, "Invalid %s count: " ZEND_LONG_FMT ". Must not be negative.", axis, count);
-	} else if (start >= 0 && start <= size - count) {
-		return SUCCESS;
-	} else if (count == 0) {
-		msg = size == 0
-			? strpprintf(0, "Invalid %s: " ZEND_LONG_FMT ". Must be 0.", axis, start)
-			: strpprintf(0, "Invalid %s: " ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".", axis, start, size);
-	} else {
+	} else if (count > size - start) {
 		/* Add as unsigned, so a sum beyond ZEND_LONG_MAX wraps rather than being undefined behaviour. (The package
-		 * shows it as a float, so the two differ only for an absurdly large start.) */
+		 * shows it as a float, so the two differ only for an absurdly large count.) */
 		zend_long end = (zend_long) ((zend_ulong) start + (zend_ulong) (count - 1));
-		msg = size == 0
-			? strpprintf(
-				0, "Invalid %s range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". The Matrix has no %ss.",
-				axis, start, end, axis
-			)
-			: strpprintf(
-				0, "Invalid %s range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
-				axis, start, end, size - 1
-			);
+		msg = strpprintf(
+			0, "Invalid %s range: " ZEND_LONG_FMT "-" ZEND_LONG_FMT ". Must be within 0-" ZEND_LONG_FMT ".",
+			axis, start, end, size - 1
+		);
+	} else {
+		return SUCCESS;
 	}
 	zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
 	zend_string_release(msg);

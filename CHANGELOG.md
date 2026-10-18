@@ -82,6 +82,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   Vector is empty." instead of "Must be in the range 0--1.". `copy()` and `paste()` show a range's last row or column,
   e.g. "Invalid row range: 1-3. Must be within 0-2.", instead of "1-4", which showed the one after it, and a negative
   count gets its own message. The exception class (`OutOfRangeException`) is unchanged.
+- **`Matrix::copy()` and `paste()` require a valid start row and column, even for an empty region (breaking).**
+  Previously a start equal to the row or column count was accepted when nothing was copied, e.g. `copy(3, 0, 0, 0)` on
+  a 3×3 matrix. So they now always throw for a matrix with no rows or columns. `resize()` is unaffected.
 
 ### Fixed
 
