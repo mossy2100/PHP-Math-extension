@@ -51,6 +51,61 @@ math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out)
 	return MATH_INTEGERS_OK;
 }
 
+/* Ports OceanMoon\Core\Integers::addModNegative(): (x + y) reduced into (neg_m, 0], for x and y in (neg_m, 0],
+ * without overflowing. Used by math_integers_mul_mod(). */
+static zend_long math_integers_add_mod_negative(zend_long x, zend_long y, zend_long neg_m)
+{
+	/* If x + y would reach neg_m or below, subtract neg_m. Checking against neg_m - y, which is in [neg_m, 0), means
+	 * x + y is never calculated when it could overflow. */
+	return x <= neg_m - y ? x - (neg_m - y) : x + y;
+}
+
+math_integers_result math_integers_mul_mod(zend_long a, zend_long b, zend_long m, zend_long *out)
+{
+	if (m == 0) {
+		return MATH_INTEGERS_DIVISION_BY_ZERO;
+	}
+
+	/* Any integer is a multiple of 1 and -1. Handled first, since ZEND_LONG_MIN % -1 overflows in C, though PHP gives
+	 * 0. */
+	if (m == 1 || m == -1) {
+		*out = 0;
+		return MATH_INTEGERS_OK;
+	}
+
+	/* If the product fits in a zend_long, use it directly. */
+	zend_long product;
+	if (math_integers_mul(a, b, &product) == MATH_INTEGERS_OK) {
+		*out = product % m;
+		return MATH_INTEGERS_OK;
+	}
+
+	/* Work with non-positive values, which can represent every magnitude up to |ZEND_LONG_MIN| = 2^63, so m can be
+	 * ZEND_LONG_MIN. Each value is the negative of a magnitude in [0, |m|). */
+	zend_long neg_m = m > 0 ? -m : m;
+	zend_long x = a % m;
+	x = x > 0 ? -x : x;
+
+	/* |b % m| is less than |m|, so at most 2^63 - 1, and can be made positive. */
+	zend_long y = b % m;
+	y = y < 0 ? -y : y;
+
+	/* Add up x times each set bit of y, doubling x at each step. */
+	zend_long result = 0;
+	while (y > 0) {
+		if ((y & 1) == 1) {
+			result = math_integers_add_mod_negative(result, x, neg_m);
+		}
+		x = math_integers_add_mod_negative(x, x, neg_m);
+		y >>= 1;
+	}
+
+	/* The result is -(|a * b| % |m|). Give it the sign of the product. It's greater than -2^63, so negating it can't
+	 * overflow. */
+	*out = (a < 0) == (b < 0) ? -result : result;
+	return MATH_INTEGERS_OK;
+}
+
 math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
 {
 	if (b < 0) {

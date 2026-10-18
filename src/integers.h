@@ -34,6 +34,8 @@ typedef enum {
 	MATH_INTEGERS_NEGATIVE_EXPONENT,
 	/* gcd() only: zero arguments were given. */
 	MATH_INTEGERS_EMPTY,
+	/* mul_mod() only: the modulus was zero. */
+	MATH_INTEGERS_DIVISION_BY_ZERO,
 } math_integers_result;
 
 /* {{{ math_integers_add
@@ -55,6 +57,14 @@ math_integers_result math_integers_sub(zend_long a, zend_long b, zend_long *out)
  * Ports OceanMoon\Core\Integers::mul(): a * b, with overflow detection.
  */
 math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out);
+/* }}} */
+
+/* {{{ math_integers_mul_mod
+ *
+ * Ports OceanMoon\Core\Integers::mulMod(): (a * b) % m, without overflowing, even when a * b would. The result has
+ * the sign of the product, and its magnitude is less than |m|. MATH_INTEGERS_DIVISION_BY_ZERO if m is 0.
+ */
+math_integers_result math_integers_mul_mod(zend_long a, zend_long b, zend_long m, zend_long *out);
 /* }}} */
 
 /* {{{ math_integers_pow

@@ -382,25 +382,26 @@ zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d
 	}
 
 	/* Over the common denominator lcm(b, d), this Rational is h/lcm and the divisor is k/lcm, where h = a·(d/g) and
-	 * k = c·(b/g), so the remainder is (h % k)/lcm. h can overflow even when the remainder is small, so reduce a
-	 * first: h % k = ((a % k)·(d/g)) % k. */
+	 * k = c·(b/g), so the remainder is (h % k)/lcm. h can overflow even when the remainder is small, so h % k is
+	 * calculated with math_integers_mul_mod(), which never overflows. */
 	zend_long g = rational_gcd2(b, d);
 	zend_long b_over_g = b / g;
-	zend_long k, reduced_h, lcm;
+	zend_long k, rem, lcm;
 	if (rational_mul_checked(c, b_over_g, &k) == FAILURE) {
 		return FAILURE;
 	}
+	/* k isn't 0, as c isn't, so this can't fail. */
+	math_integers_mul_mod(a, d / g, k, &rem);
 
-	/* C's % truncates, giving the remainder the sign of the dividend, as PHP's % does. ZEND_LONG_MIN % -1 overflows
-	 * in C, though the remainder is 0, so a divisor of -1 is handled first. */
-	if (k == -1) {
-		return rational_create(return_value, 0, 1);
-	}
-	if (rational_mul_checked(a % k, d / g, &reduced_h) == FAILURE
-		|| rational_mul_checked(b_over_g, d, &lcm) == FAILURE) {
+	/* The lcm, (b/g)·d, can overflow when the remainder in lowest terms wouldn't, so cancel common factors from each
+	 * part of it first. */
+	zend_long g1 = rational_gcd2(rem, b_over_g);
+	rem /= g1;
+	zend_long g2 = rational_gcd2(rem, d);
+	if (rational_mul_checked(b_over_g / g1, d / g2, &lcm) == FAILURE) {
 		return FAILURE;
 	}
-	return rational_create(return_value, reduced_h % k, lcm);
+	return rational_create(return_value, rem / g2, lcm);
 }
 /* }}} */
 
