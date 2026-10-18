@@ -165,7 +165,9 @@ PHP_METHOD(OceanMoon_Math_Complex, asinh)
 
 /* {{{ OceanMoon\Math\Complex::acosh(): Complex
  *
- * Matches the PHP package's Complex::acosh(): acosh(z) = ln(z + √(z²-1)).
+ * Matches the PHP package's Complex::acosh(): acosh(z) = ln(z + √(z+1)·√(z-1)). Taking the two square roots
+ * separately gives the principal value, whose real part is never negative. √(z²-1) would give its negative whenever
+ * the real part of z is negative.
  */
 PHP_METHOD(OceanMoon_Math_Complex, acosh)
 {
@@ -174,19 +176,22 @@ PHP_METHOD(OceanMoon_Math_Complex, acosh)
 	double x, y;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &x, &y);
 
-	/* z^2 - 1, checking z^2 is representable, as the package's mul() does. */
-	if (complex_parts_overflow(x * x - y * y, x * y + y * x)) {
-		math_throw_overflow("multiply the given Complex numbers");
+	/* √(z+1) and √(z-1), with the same zero handling as the package's add(1.0) and sub(1.0). */
+	double sqrt_plus_re, sqrt_plus_im, sqrt_minus_re, sqrt_minus_im;
+	complex_calc_sqrt(x + 1.0, y + 0.0, &sqrt_plus_re, &sqrt_plus_im);
+	complex_calc_sqrt(x - 1.0, y - 0.0, &sqrt_minus_re, &sqrt_minus_im);
+
+	/* Their product, as the package's mul() calculates it. Its magnitude is about |z|, so it can't overflow. */
+	double root_re = sqrt_plus_re * sqrt_minus_re - sqrt_plus_im * sqrt_minus_im;
+	double root_im = sqrt_plus_re * sqrt_minus_im + sqrt_plus_im * sqrt_minus_re;
+
+	/* z + √(z+1)·√(z-1), checking it's representable, as the package's add() does. */
+	double sum_re = x + root_re, sum_im = y + root_im;
+	if (complex_parts_overflow(sum_re, sum_im)) {
+		math_throw_overflow("add the given Complex numbers");
 		math_rethrow_overflow("compute inverse hyperbolic cosine of the given Complex");
 		RETURN_THROWS();
 	}
-	double z2_minus_1_re = (x * x - y * y) - 1.0;
-	double z2_minus_1_im = x * y + y * x;
-
-	double sqrt_re, sqrt_im;
-	complex_calc_sqrt(z2_minus_1_re, z2_minus_1_im, &sqrt_re, &sqrt_im);
-
-	double sum_re = x + sqrt_re, sum_im = y + sqrt_im;
 
 	double out_re, out_im;
 	if (c_ln(sum_re, sum_im, &out_re, &out_im) == FAILURE) {

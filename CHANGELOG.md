@@ -144,6 +144,10 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   `TypeError`, like the package.
 - **`Vector::mul()` and `*` with a Matrix of the wrong height** said "Must equal this Matrix's column count". The
   message now names the Vector's count, like the package.
+- **`Complex::acosh()` gave the wrong result for any number with a negative real part.** It returned the negative of
+  the principal value, e.g. `acosh(-2)` was `-1.317 + πi` instead of `1.317 + πi`. It also threw "Cannot compute
+  logarithm of zero." for a large negative real number, e.g. `-1e10`, and `OverflowException` for numbers above about
+  1e154, e.g. `1e200 + 1e200i`, though the result is finite. Fixed in the package too.
 
 ### Documentation
 
