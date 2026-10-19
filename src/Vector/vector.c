@@ -145,7 +145,7 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
  * be a Vector instance. Used by set()/offsetSet() and, for the same correctness-by-construction
  * reason as vector_read_element(), by every other method that builds a new Vector result
  * element-by-element - this is also where a non-finite result (e.g. a scalar multiplication
- * overflowing to INF) gets caught.
+ * overflowing to INF) gets caught, and where a negative zero is stored as a positive zero.
  *
  * Returns FAILURE (with an exception already thrown) for an out-of-range index or a non-finite
  * value.
@@ -171,7 +171,7 @@ zend_result vector_write_element(zend_object *obj, zend_long index, double value
 	zval *data = math_types_read_property(obj, vector_offset_data);
 	SEPARATE_ARRAY(data);
 	zval new_value;
-	ZVAL_DOUBLE(&new_value, value);
+	ZVAL_DOUBLE(&new_value, math_floats_normalize_zero(value));
 	zend_hash_index_update(Z_ARRVAL_P(data), (zend_ulong) index, &new_value);
 
 	return SUCCESS;

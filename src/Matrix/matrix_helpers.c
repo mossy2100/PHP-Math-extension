@@ -318,11 +318,9 @@ zend_result matrix_inv_from_lu(const matrix_lu *lu, zval *return_value)
 			x[i] = sum / a[i * n + i];
 		}
 
-		/* Store the column. Normalize, as the substitutions can give -0.0. */
+		/* Store the column. */
 		for (zend_long i = 0; i < n; i++) {
-			if (matrix_write_result(
-				inverse, i, col, math_floats_normalize_zero(x[i]), "invert the given Matrix"
-			) == FAILURE) {
+			if (matrix_write_result(inverse, i, col, x[i], "invert the given Matrix") == FAILURE) {
 				efree(y);
 				efree(x);
 				zval_ptr_dtor(return_value);

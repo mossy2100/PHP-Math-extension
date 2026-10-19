@@ -261,8 +261,7 @@ PHP_METHOD(OceanMoon_Math_Complex, roots)
 		return;
 	}
 
-	/* Degree 2: sqrt() and its negative, so the results agree. Adding 0.0 turns a negative zero into a positive
-	 * zero. */
+	/* Degree 2: sqrt() and its negative, so the results agree. */
 	if (degree == 2) {
 		double root_real, root_imag;
 		complex_calc_sqrt(real, imag, &root_real, &root_imag);
@@ -272,7 +271,7 @@ PHP_METHOD(OceanMoon_Math_Complex, roots)
 			RETURN_THROWS();
 		}
 		add_next_index_zval(return_value, &root);
-		if (complex_create(&neg_root, -root_real + 0.0, -root_imag + 0.0) == FAILURE) {
+		if (complex_create(&neg_root, -root_real, -root_imag) == FAILURE) {
 			zval_ptr_dtor(return_value);
 			RETURN_THROWS();
 		}

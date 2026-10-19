@@ -100,8 +100,9 @@ zend_result complex_init(zend_object *obj, double real, double imag)
 		return FAILURE;
 	}
 
-	complex_write_double(obj, complex_offset_real, real);
-	complex_write_double(obj, complex_offset_imaginary, imag);
+	/* Store negative zeros as positive zeros, so values that are equal always give the same results. */
+	complex_write_double(obj, complex_offset_real, math_floats_normalize_zero(real));
+	complex_write_double(obj, complex_offset_imaginary, math_floats_normalize_zero(imag));
 	complex_write_double(obj, complex_offset_magnitude, magnitude);
 	complex_write_double(obj, complex_offset_phase, complex_compute_phase(real, imag));
 
