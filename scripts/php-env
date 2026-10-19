@@ -45,7 +45,7 @@ for tool in php phpize php-config; do
     fi
 done
 
-PHP_VERSION_FULL="$("$PHP_BIN/php" -r 'echo PHP_VERSION;')"
+PHP_VERSION_FULL="$("$PHP_BIN/php" -n -r 'echo PHP_VERSION;')"
 if [[ "$PHP_VERSION_FULL" != "$target_version".* ]]; then
     echo "PHP $target_version.x requested, but $PHP_BIN is PHP $PHP_VERSION_FULL." >&2
     return 1
