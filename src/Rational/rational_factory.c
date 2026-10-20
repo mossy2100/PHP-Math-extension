@@ -21,24 +21,207 @@
 #include "floats.h"
 #include "integers.h"
 
+/* {{{ rational_cf_terms
+ *
+ * Matches the PHP package's Rational::cfTerms(): the terms of the continued fraction of x's exact value, using integer
+ * arithmetic only. x is M / 2^s, with M odd and less than 2^53, so the terms come from Euclid's algorithm. 2^s is too
+ * large for a zend_long when s > 62, which only happens when x is less than 2^-9. Its first term is then 0, and the
+ * second, floor(2^s / M), is found one bit at a time, with the remainder. The rest only involve values below 2^53.
+ *
+ * x must be positive, finite, not an integer, and at least 2^-63. Returns the number of terms written to terms, which
+ * has room for RATIONAL_CF_MAX_TERMS: Euclid's algorithm on values below 2^63 takes at most 92 steps.
+ */
+#define RATIONAL_CF_MAX_TERMS 128
+
+static zend_long rational_cf_terms(double x, zend_long *terms)
+{
+	/* Get M and s, with x = M / 2^s. A double in range is normal, so its significand has the implicit leading 1. */
+	uint64_t bits;
+	memcpy(&bits, &x, sizeof bits);
+	zend_long m = (zend_long) ((bits & 0xFFFFFFFFFFFFFULL) | (1ULL << 52));
+	zend_long s = 1075 - (zend_long) ((bits >> 52) & 0x7FF);
+	while ((m & 1) == 0) {
+		m >>= 1;
+		s--;
+	}
+
+	zend_long count = 0;
+	zend_long p, q;
+	if (s <= 62) {
+		p = m;
+		q = (zend_long) 1 << s;
+	} else {
+		zend_long a = 0, r = 1;
+		for (zend_long i = 0; i < s; i++) {
+			a += a;
+			r += r;
+			if (r >= m) {
+				r -= m;
+				a++;
+			}
+		}
+		terms[count++] = 0;
+		terms[count++] = a;
+		p = m;
+		q = r;
+	}
+
+	/* Euclid's algorithm. */
+	while (q != 0 && count < RATIONAL_CF_MAX_TERMS) {
+		zend_long a = p / q;
+		terms[count++] = a;
+		zend_long rem = p - a * q;
+		p = q;
+		q = rem;
+	}
+
+	return count;
+}
+/* }}} */
+
+/* {{{ rational_float_value_is
+ *
+ * Matches the PHP package's Rational::floatValueIs(): whether num/den converts to x, as toFloat() would convert it.
+ */
+static bool rational_float_value_is(zend_long num, zend_long den, double x)
+{
+	return (double) num / (double) den == x;
+}
+/* }}} */
+
+/* {{{ rational_simplest_semiconvergent
+ *
+ * Matches the PHP package's Rational::simplestSemiconvergent(): the semiconvergent with the smallest t from 1 to
+ * t_max, (h1 + t * h0) / (k1 + t * k0), whose float value is x. The one with t_max must be. As t increases, the
+ * semiconvergents approach x from one side, so a binary search finds the first.
+ */
+static void rational_simplest_semiconvergent(
+	zend_long h0, zend_long k0, zend_long h1, zend_long k1, zend_long t_max, double x, zend_long *num, zend_long *den
+)
+{
+	zend_long low = 1, high = t_max;
+	while (low < high) {
+		zend_long mid = low + (high - low) / 2;
+		if (rational_float_value_is(h1 + mid * h0, k1 + mid * k0, x)) {
+			high = mid;
+		} else {
+			low = mid + 1;
+		}
+	}
+	*num = h1 + high * h0;
+	*den = k1 + high * k0;
+}
+/* }}} */
+
+/* {{{ rational_semiconvergent_is_closer
+ *
+ * Matches the PHP package's Rational::semiconvergentIsCloser(): whether the semiconvergent with t is closer to x than
+ * the convergent before term n. With a the nth term, it is if t > a/2, and isn't if t < a/2. If t = a/2, it is if
+ * [a(n+1); a(n+2), ...] > [a(n-1); a(n-2), ..., a(1)], compared by Rational::compareContinuedFractions()'s rule: the
+ * first differing term decides it, with a term past the end being infinity, and the order reversing at odd positions.
+ * A trailing term of 1 in the second is folded into the one before, so equal values compare as equal.
+ */
+static bool rational_semiconvergent_is_closer(const zend_long *terms, zend_long count, zend_long n, zend_long t)
+{
+	zend_long a = terms[n];
+	if (t != a - t) {
+		return t > a - t;
+	}
+
+	/* rest[i] is terms[n + 1 + i]. ratio[i] is terms[n - 1 - i], for i up to n - 2, with the fold applied. */
+	zend_long rest_len = count - n - 1;
+	zend_long ratio_len = n - 1;
+	bool folded = ratio_len > 1 && terms[1] == 1;
+	if (folded) {
+		ratio_len--;
+	}
+
+	zend_long len = rest_len > ratio_len ? rest_len : ratio_len;
+	for (zend_long i = 0; i < len; i++) {
+		bool rest_inf = i >= rest_len;
+		bool ratio_inf = i >= ratio_len;
+		zend_long rest_term = rest_inf ? 0 : terms[n + 1 + i];
+		zend_long ratio_term = ratio_inf ? 0 : (folded && i == ratio_len - 1 ? terms[2] + 1 : terms[n - 1 - i]);
+		if (rest_inf != ratio_inf || rest_term != ratio_term) {
+			int cmp = rest_inf ? 1 : (ratio_inf ? -1 : (rest_term > ratio_term ? 1 : -1));
+			return (i % 2 == 0 ? cmp : -cmp) > 0;
+		}
+	}
+	return false;
+}
+/* }}} */
+
+/* {{{ rational_approximate_float
+ *
+ * Matches the PHP package's Rational::approximateFloat(): the simplest fraction num/den, with both in the zend_long
+ * range, whose float value is x, or the closest if there's none. See its doc comment for the algorithm.
+ */
+static void rational_approximate_float(double x, zend_long *num, zend_long *den)
+{
+	zend_long terms[RATIONAL_CF_MAX_TERMS];
+	zend_long count = rational_cf_terms(x, terms);
+
+	/* The two most recent convergents, h0/k0 and h1/k1. Initially, the convergents before the first: 1/0 and 0/1. */
+	zend_long h0 = 1, k0 = 0, h1 = 0, k1 = 1;
+
+	for (zend_long n = 0; n < count; n++) {
+		zend_long a = terms[n];
+		zend_long h, k, tmp;
+		bool overflow = math_integers_mul(a, h0, &tmp) != MATH_INTEGERS_OK
+			|| math_integers_add(tmp, h1, &h) != MATH_INTEGERS_OK
+			|| math_integers_mul(a, k0, &tmp) != MATH_INTEGERS_OK
+			|| math_integers_add(tmp, k1, &k) != MATH_INTEGERS_OK;
+
+		/* If the next convergent overflows, try the best semiconvergent that fits: the largest t such that
+		 * (h1 + t * h0) / (k1 + t * k0) is in range. It's less than a, as t = a gives the convergent. */
+		if (overflow) {
+			zend_long t = a - 1;
+			if (k0 != 0 && (ZEND_LONG_MAX - k1) / k0 < t) {
+				t = (ZEND_LONG_MAX - k1) / k0;
+			}
+			if (h0 != 0 && (ZEND_LONG_MAX - h1) / h0 < t) {
+				t = (ZEND_LONG_MAX - h1) / h0;
+			}
+			if (t >= 1) {
+				if (rational_float_value_is(h1 + t * h0, k1 + t * k0, x)) {
+					rational_simplest_semiconvergent(h0, k0, h1, k1, t, x, num, den);
+					return;
+				}
+				if (rational_semiconvergent_is_closer(terms, count, n, t)) {
+					*num = h1 + t * h0;
+					*den = k1 + t * k0;
+					return;
+				}
+			}
+			*num = h0;
+			*den = k0;
+			return;
+		}
+
+		if (rational_float_value_is(h, k, x)) {
+			rational_simplest_semiconvergent(h0, k0, h1, k1, a, x, num, den);
+			return;
+		}
+
+		h1 = h0;
+		k1 = k0;
+		h0 = h;
+		k0 = k;
+	}
+
+	/* Not reached: the last convergent is x exactly, and so converts back to it. */
+	*num = h0;
+	*den = k0;
+}
+/* }}} */
+
 /* {{{ rational_calc_from_float
  *
  * The computational core of fromFloat(), factored out so fromString() (below) can call it
  * directly for its "looks like a float" branch, without going through a full PHP method dispatch.
  *
- * Matches the PHP package's Rational::fromFloat() exactly, including its continued-fractions
- * approximation for non-whole-number values - see the PHP source's own doc comment for the
- * algorithm reference. The accumulated numerator/denominator (h/k) are tracked via
- * math_integers_mul()/math_integers_add() instead of PHP's "let it silently promote to float and
- * check is_float()" overflow detection, since C has no such promotion (signed overflow is
- * undefined behavior, not an observable value) - see integers.h.
- *
- * One additional guard has no PHP equivalent: if the working value `x` ever grows too large to
- * safely truncate to a zend_long, this bails out to the best approximation found so far, same as
- * the accumulator-overflow path. PHP's bare `(int) $x` cast has no such safeguard, but every
- * double has an exact, bounded-length continued-fraction expansion, so this is only a defensive
- * backstop against a case the algorithm's own real-world behavior never actually reaches (matched
- * by every input this package's test suite exercises, including its extreme-magnitude cases).
+ * Matches the PHP package's Rational::fromFloat() exactly: a whole number converts directly, and anything else goes
+ * through rational_approximate_float().
  */
 zend_result rational_calc_from_float(double value, zval *return_value)
 {
@@ -87,69 +270,10 @@ zend_result rational_calc_from_float(double value, zval *return_value)
 		return rational_create(return_value, (zend_long) sign_val * ZEND_LONG_MAX, 1);
 	}
 
-	/* Use the continued fractions algorithm to convert the float to the closest possible
-	 * Rational. Track the best approximation found so far, initialized to the nearest integer. */
-	zend_long h_best = (zend_long) round(abs_value);
-	zend_long k_best = 1;
-
-	/* Initialize convergents. */
-	zend_long h0 = 1, h1 = 0, k0 = 0, k1 = 1;
-
-	double x = abs_value;
-	double min_err = fabs((double) h_best - abs_value);
-
-	while (true) {
-		/* Defensive backstop: see doc comment above. */
-		if (x >= (double) ZEND_LONG_MAX || x < (double) ZEND_LONG_MIN) {
-			return rational_create(return_value, sign_val * h_best, k_best);
-		}
-
-		/* Extract integer part. */
-		zend_long a = (zend_long) x;
-
-		/* Calculate next convergent, with overflow detection. */
-		zend_long h_new, k_new, tmp;
-		bool overflow = math_integers_mul(a, h0, &tmp) != MATH_INTEGERS_OK
-			|| math_integers_add(tmp, h1, &h_new) != MATH_INTEGERS_OK;
-		if (!overflow) {
-			overflow = math_integers_mul(a, k0, &tmp) != MATH_INTEGERS_OK
-				|| math_integers_add(tmp, k1, &k_new) != MATH_INTEGERS_OK;
-		}
-
-		/* If the numerator or the denominator overflows the range for integers, cease the loop
-		 * and return the best approximation found so far. */
-		if (overflow) {
-			return rational_create(return_value, sign_val * h_best, k_best);
-		}
-
-		/* Check if we've found an exact representation. */
-		double err = fabs((double) h_new / (double) k_new - abs_value);
-		if (err == 0.0) {
-			return rational_create(return_value, sign_val * h_new, k_new);
-		}
-
-		/* Check if this convergent is better than the best so far. */
-		if (err < min_err) {
-			h_best = h_new;
-			k_best = k_new;
-			min_err = err;
-		}
-
-		/* Update convergents. */
-		h1 = h0;
-		h0 = h_new;
-		k1 = k0;
-		k0 = k_new;
-
-		/* Calculate remainder. If it's 0, we're done. */
-		double rem = x - (double) a;
-		if (rem == 0.0) {
-			return rational_create(return_value, sign_val * h0, k0);
-		}
-
-		/* Calculate next approximation. */
-		x = 1.0 / rem;
-	}
+	/* Find the simplest Rational that converts back to the float, or failing that, the closest. */
+	zend_long num, den;
+	rational_approximate_float(abs_value, &num, &den);
+	return rational_create(return_value, sign_val * num, den);
 }
 /* }}} */
 

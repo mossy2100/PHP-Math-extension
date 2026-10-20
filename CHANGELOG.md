@@ -34,6 +34,13 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Changed
 
+- **`Rational::fromFloat()` gives the simplest `Rational` whose `toFloat()` is the float (breaking).** It's found from
+  the exact continued fraction of the float, using integer arithmetic only, and tries semiconvergents as well as
+  convergents. Previously, the floating-point continued fraction drifted, and about 3% of random floats didn't
+  round-trip, e.g. `fromFloat(6.619e-18)` was `1/151080223598730912`, which converts back to `6.6190000000000008e-18`.
+  It's now `3/453240670796192779`. Some other results change to a simpler fraction, e.g.
+  `fromFloat(0.019470818223376714)` is `13725930/704948803`, not `16852717/865537175`. If no `Rational` in range
+  round-trips, which only happens for some floats below about 1e-16, the result is the closest one. Matches the package.
 - **`Complex::atan()`/`atanh()`** name the function in their singularity messages, matching the package.
 - **Comparison operators treat an unsupported operand as uncomparable (breaking),** instead of throwing. For a
   `Complex` or `Rational` with a string, array, other object or `NAN`, `==` is `false`, so `in_array()` works on mixed
