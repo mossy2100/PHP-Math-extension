@@ -191,12 +191,14 @@ class RationalComparisonOperatorsTest extends TestCase
     {
         $r = new Rational(1, 2);
 
+        // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
         $this->assertTrue(in_array($r, [
             null,
             'a',
             [1],
             new Rational(1, 2),
         ], false));
+        // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
         $this->assertFalse(in_array($r, [
             null,
             'a',

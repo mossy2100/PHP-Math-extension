@@ -232,12 +232,14 @@ class ComplexComparisonOperatorsTest extends TestCase
     {
         $z = new Complex(1, 2);
 
+        // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
         $this->assertTrue(in_array($z, [
             null,
             'a',
             [1],
             new Complex(1, 2),
         ], false));
+        // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
         $this->assertFalse(in_array($z, [
             null,
             'a',
