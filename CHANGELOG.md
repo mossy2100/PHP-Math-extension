@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex::fromString()` depended on the C locale,** so under e.g. `de_DE`, `'1.5'` parsed as `1`. It also rejected
+  a number over 63 characters long. It now parses numbers the same way as the package, whatever the locale.
 - **`Complex::round()` with a precision beyond the `int` range gave garbage,** e.g. `round(PHP_INT_MAX)` on
   `1.234 + 5.678i` gave `10i`. The precision is clamped, as PHP's `round()` does, matching the package.
 - **`Complex` gave a phase of π just below the negative real axis (breaking),** e.g. for `new Complex(-1, -1e-17)`,

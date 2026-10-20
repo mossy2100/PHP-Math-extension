@@ -34,6 +34,7 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
+#include "Zend/zend_strtod.h"
 #include "php_oceanmoon_math.h"
 #include "complex_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
@@ -276,16 +277,12 @@ static bool complex_match_number(const char *str, size_t len, size_t pos, double
 		}
 	}
 
-	size_t match_len = i - start;
-	char buf[64];
-	if (match_len == 0 || match_len >= sizeof(buf)) {
-		return false;
-	}
-	memcpy(buf, str + start, match_len);
-	buf[match_len] = '\0';
-
-	*out_value = strtod(buf, NULL);
-	*out_consumed = match_len;
+	/* zend_strtod() is locale-independent, unlike strtod(), which honours LC_NUMERIC. The span is already validated, so
+	 * it stops exactly at i. */
+	const char *end;
+	*out_value = zend_strtod(str + start, &end);
+	ZEND_ASSERT(end == str + i);
+	*out_consumed = i - start;
 	return true;
 }
 /* }}} */
