@@ -70,6 +70,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetGet)
 	}
 
 	zend_object *row_obj = matrix_read_row(self, row);
+	if (row_obj == NULL) {
+		RETURN_THROWS();
+	}
 	GC_ADDREF(row_obj);
 	RETVAL_OBJ(row_obj);
 }

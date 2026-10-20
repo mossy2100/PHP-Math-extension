@@ -98,6 +98,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A
+  missing or wrong-typed element or row now throws `Error`: "Vector data is invalid." or "Matrix data is invalid.". This
+  also covers objects built by `unserialize()`.
 - **PHPStan typed `Rational + int|float` as `Rational`,** but it's a `float` at runtime when the operand is a float. An
   operand that may be a float now gives `Rational|float`, for all the arithmetic operators.
 - **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They stripped

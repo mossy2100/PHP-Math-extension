@@ -80,6 +80,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, getRow)
 	}
 
 	zend_object *row_obj = matrix_read_row(self, row);
+	if (row_obj == NULL) {
+		RETURN_THROWS();
+	}
 	zend_object *cloned = row_obj->handlers->clone_obj(row_obj);
 	RETVAL_OBJ(cloned);
 }

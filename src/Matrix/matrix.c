@@ -131,11 +131,21 @@ zend_long matrix_read_column_count(zend_object *obj)
  * Returns the zend_object* for the live row Vector at $data[$row], without bounds checking -
  * callers that accept caller-supplied row indexes must bounds-check first (matching
  * vector_read_element()'s convention).
+ *
+ * Returns NULL, with Error thrown, if $data doesn't hold a Vector of $columnCount elements at the index. That can
+ * only happen if the properties were changed through Reflection, or by unserialize(), but the callers would otherwise
+ * read a NULL pointer, or treat another object as a Vector.
  */
 zend_object *matrix_read_row(zend_object *obj, zend_long row)
 {
 	zval *data = math_types_read_property(obj, matrix_offset_data);
 	zval *row_zval = zend_hash_index_find(Z_ARRVAL_P(data), (zend_ulong) row);
+	if (UNEXPECTED(row_zval == NULL || Z_TYPE_P(row_zval) != IS_OBJECT
+		|| Z_OBJCE_P(row_zval) != vector_ce_Vector
+		|| vector_read_count(Z_OBJ_P(row_zval)) != matrix_read_column_count(obj))) {
+		zend_throw_error(NULL, "Matrix data is invalid.");
+		return NULL;
+	}
 	return Z_OBJ_P(row_zval);
 }
 /* }}} */
@@ -145,7 +155,8 @@ zend_object *matrix_read_row(zend_object *obj, zend_long row)
  * Bounds-checked read of $data[$row][$col] off a zend_object already known to be a Matrix
  * instance. Mirrors Matrix::get().
  *
- * Returns FAILURE (with OutOfRangeException already thrown) if either index is out of range.
+ * Returns FAILURE (with OutOfRangeException already thrown) if either index is out of range, or with Error thrown if
+ * $data is invalid (see matrix_read_row()).
  */
 zend_result matrix_read_element(zend_object *obj, zend_long row, zend_long col, double *out_value)
 {
@@ -161,7 +172,12 @@ zend_result matrix_read_element(zend_object *obj, zend_long row, zend_long col, 
 		return FAILURE;
 	}
 
-	return vector_read_element(matrix_read_row(obj, row), col, out_value);
+	zend_object *row_obj = matrix_read_row(obj, row);
+	if (row_obj == NULL) {
+		return FAILURE;
+	}
+
+	return vector_read_element(row_obj, col, out_value);
 }
 /* }}} */
 
@@ -197,7 +213,12 @@ zend_result matrix_write_element(zend_object *obj, zend_long row, zend_long col,
 		return FAILURE;
 	}
 
-	return vector_write_element(matrix_read_row(obj, row), col, value);
+	zend_object *row_obj = matrix_read_row(obj, row);
+	if (row_obj == NULL) {
+		return FAILURE;
+	}
+
+	return vector_write_element(row_obj, col, value);
 }
 /* }}} */
 
@@ -251,6 +272,11 @@ static zend_object *matrix_clone_obj(zend_object *object)
 
 	for (zend_long i = 0; i < row_count; i++) {
 		zval *row = zend_hash_index_find(ht, (zend_ulong) i);
+		/* Only possible if $data was changed through Reflection, or by unserialize(). The clone keeps it, and
+		 * throws on first use, as the original does. */
+		if (UNEXPECTED(row == NULL || Z_TYPE_P(row) != IS_OBJECT)) {
+			continue;
+		}
 		zend_object *row_obj = Z_OBJ_P(row);
 		zend_object *cloned_row = row_obj->handlers->clone_obj(row_obj);
 		zval cloned_zval;

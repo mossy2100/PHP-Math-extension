@@ -120,7 +120,9 @@ void vector_throw_index_error(zend_long index, zend_long count)
  * Used by get()/offsetGet() and, since it's cheap and correctness-by-construction is worth more
  * than a redundant check in the rare hot path, by every other method that reads elements too.
  *
- * Returns FAILURE (with OutOfRangeException already thrown) if the index is out of range.
+ * Returns FAILURE (with OutOfRangeException already thrown) if the index is out of range, or with Error thrown if
+ * $data doesn't hold a float at the index. That can only happen if $data or $count were changed through Reflection,
+ * or by unserialize(), but it would otherwise read a NULL pointer, or a pointer's bits as a double.
  */
 zend_result vector_read_element(zend_object *obj, zend_long index, double *out_value)
 {
@@ -133,6 +135,10 @@ zend_result vector_read_element(zend_object *obj, zend_long index, double *out_v
 
 	zval *data = math_types_read_property(obj, vector_offset_data);
 	zval *element = zend_hash_index_find(Z_ARRVAL_P(data), (zend_ulong) index);
+	if (UNEXPECTED(element == NULL || Z_TYPE_P(element) != IS_DOUBLE)) {
+		zend_throw_error(NULL, "Vector data is invalid.");
+		return FAILURE;
+	}
 	*out_value = Z_DVAL_P(element);
 
 	return SUCCESS;

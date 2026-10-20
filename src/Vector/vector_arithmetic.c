@@ -286,6 +286,10 @@ zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 	}
 
 	zend_object *row0 = matrix_read_row(Z_OBJ(product), 0);
+	if (row0 == NULL) {
+		zval_ptr_dtor(&product);
+		return FAILURE;
+	}
 	zend_object *cloned = row0->handlers->clone_obj(row0);
 	zval_ptr_dtor(&product);
 
