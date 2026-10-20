@@ -350,6 +350,15 @@ void complex_calc_sqrt(double real, double imag, double *out_real, double *out_i
 		return;
 	}
 
+	/* If both parts are subnormal, |z| has lost bits that scaling sum can't recover. Scale z up by 2^106 instead,
+	 * exactly, and the root back down by 2^53. */
+	if (fabs(real) < DBL_MIN && fabs(imag) < DBL_MIN) {
+		complex_calc_sqrt(ldexp(real, 106), ldexp(imag, 106), out_real, out_imag);
+		*out_real = ldexp(*out_real, -53);
+		*out_imag = ldexp(*out_imag, -53);
+		return;
+	}
+
 	double magnitude = complex_compute_magnitude(real, imag);
 	double abs_real = fabs(real);
 	double sum = magnitude + abs_real;

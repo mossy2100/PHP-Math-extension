@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex::sqrt()` was inaccurate when both parts are subnormal,** by up to about 4e10 ulps, e.g. for
+  `new Complex(3.4e-314, -1.5e-315)`. It's now within 2 ulps, matching the package.
 - **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.
   `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A
