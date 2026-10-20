@@ -46,17 +46,6 @@ zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol);
 double math_floats_normalize_zero(double value);
 /* }}} */
 
-/* {{{ math_floats_wrap
- *
- * Ports OceanMoon\Core\Floats::wrap(): reduces value modulo units_per_turn, then shifts it into
- * range - either the signed range (-units_per_turn/2, units_per_turn/2] if `signed_range` is
- * true, or the unsigned range [0, units_per_turn) if false. The result is passed through
- * math_floats_normalize_zero() before returning, so -0.0 never comes out even if it would
- * otherwise (e.g. wrapping a value that lands exactly on 0 from the negative side).
- */
-double math_floats_wrap(double value, double units_per_turn, bool signed_range);
-/* }}} */
-
 /* {{{ math_floats_is_int
  *
  * Ports OceanMoon\Core\Floats::isInt(): true if value is finite and has no fractional part (i.e.

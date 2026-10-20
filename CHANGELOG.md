@@ -98,6 +98,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex` gave a phase of π just below the negative real axis (breaking),** e.g. for `new Complex(-1, -1e-17)`,
+  matching the package. It's now -π, as in C99, so `ln()`, `log()`, `pow()` and `roots()` give the principal value
+  from the correct side. The phase range is now [-π, π], not (-π, π].
 - **`pow()` parameter names** didn't match the package, which broke named arguments. `Complex::pow()`, `Rational::pow()`
   and `Matrix::pow()` now all take `$exp`.
 - **Ported the package's float range fixes:**

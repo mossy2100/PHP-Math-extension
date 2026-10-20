@@ -36,8 +36,9 @@ double complex_compute_magnitude(double real, double imag)
 /* {{{ complex_compute_phase
  *
  * Matches the PHP package's phase computation: for a real number (imaginary exactly 0), PI if
- * negative else 0; otherwise atan2(imaginary, real) wrapped into (-PI, PI] via math_floats_wrap()
- * (mainly to normalize -0.0, since atan2() already returns values in that range).
+ * negative else 0; otherwise atan2(imaginary, real), the principal value. With a tiny imaginary
+ * part, atan2() rounds to +-PI, keeping the sign of the imaginary part, which is correct, so -PI
+ * isn't wrapped to PI. Only -0.0, from an underflowing result, is normalized.
  */
 double complex_compute_phase(double real, double imag)
 {
@@ -45,7 +46,7 @@ double complex_compute_phase(double real, double imag)
 		return real < 0 ? M_PI : 0.0;
 	}
 
-	return math_floats_wrap(atan2(imag, real), 2 * M_PI, true);
+	return math_floats_normalize_zero(atan2(imag, real));
 }
 /* }}} */
 
