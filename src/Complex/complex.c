@@ -35,6 +35,7 @@
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
 #include "Zend/zend_strtod.h"
+#include "ext/standard/php_string.h"
 #include "php_oceanmoon_math.h"
 #include "complex_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
@@ -440,43 +441,31 @@ static bool complex_try_parse(const char *str, size_t len, double *out_real, dou
 
 /* {{{ complex_from_string
  *
- * Backs fromString(). Matches the PHP package's Complex::fromString(): trims leading/trailing
- * whitespace only (internal whitespace is tolerated solely around the +/- separator between real
- * and imaginary parts, handled by complex_try_parse()/complex_skip_spaces() to match the
- * package's regex \s* placement exactly).
+ * Backs fromString(). Matches the PHP package's Complex::fromString(): trims both ends with php_trim(), the
+ * engine's own trim(), so exactly the same characters are stripped. Internal whitespace is tolerated solely
+ * around the +/- separator between real and imaginary parts, handled by complex_try_parse()/
+ * complex_skip_spaces() to match the package's regex \s* placement exactly.
  */
 static zend_result complex_from_string(zval *return_value, zend_string *str)
 {
-	size_t start = 0;
-	while (start < ZSTR_LEN(str) && isspace((unsigned char) ZSTR_VAL(str)[start])) {
-		start++;
-	}
-	size_t end = ZSTR_LEN(str);
-	while (end > start && isspace((unsigned char) ZSTR_VAL(str)[end - 1])) {
-		end--;
-	}
-	size_t trimmed_len = end - start;
+	zend_string *trimmed = php_trim(str, NULL, 0, 3);
 
-	char *trimmed = emalloc(trimmed_len + 1);
-	memcpy(trimmed, ZSTR_VAL(str) + start, trimmed_len);
-	trimmed[trimmed_len] = '\0';
-
-	if (trimmed_len == 0) {
-		efree(trimmed);
+	if (ZSTR_LEN(trimmed) == 0) {
+		zend_string_release(trimmed);
 		zend_throw_exception(math_ce_FormatException, "Cannot convert empty string to Complex.", 0);
 		return FAILURE;
 	}
 
 	double real, imag;
-	bool ok = complex_try_parse(trimmed, trimmed_len, &real, &imag);
+	bool ok = complex_try_parse(ZSTR_VAL(trimmed), ZSTR_LEN(trimmed), &real, &imag);
 
 	if (!ok) {
-		math_throw_invalid_format(trimmed, trimmed_len, "Complex");
-		efree(trimmed);
+		math_throw_invalid_format(ZSTR_VAL(trimmed), ZSTR_LEN(trimmed), "Complex");
+		zend_string_release(trimmed);
 		return FAILURE;
 	}
 
-	efree(trimmed);
+	zend_string_release(trimmed);
 
 	return complex_create(return_value, real, imag);
 }

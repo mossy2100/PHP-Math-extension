@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They stripped
+  `\f` but not NUL, so e.g. `Complex::fromString("3\0")` threw `FormatException`. They now strip what `trim()` does.
 - **`INF / $v` and `NAN / $m` threw `OverflowException`,** and `INF / new Vector(0)` returned an empty Vector. A
   non-finite scalar on the left of `/` now throws `DomainException`, as on the right and with `*`.
 - **`Matrix::inv()` inverted some exactly singular matrices (breaking),** matching the package, e.g. a 4×4 or larger one

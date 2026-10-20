@@ -9,13 +9,13 @@
 # include "config.h"
 #endif
 
-#include <ctype.h>
 #include <math.h>
 #include <string.h>
 
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
+#include "ext/standard/php_string.h"
 #include "rational_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
@@ -203,21 +203,15 @@ static zend_result rational_filter_var(zend_string *str, const char *filter_cons
 
 /* {{{ rational_trim
  *
- * Trims ASCII whitespace from both ends of str, matching trim()'s default character set closely
- * enough for this file's purposes (fromString() only ever trims around digits/signs/slashes).
- * Returns a new zend_string the caller owns.
+ * Trims both ends of str with php_trim(), the engine's own trim(), so exactly the same characters are stripped as in
+ * the package. Returns a new zend_string the caller owns.
  */
 static zend_string *rational_trim(const char *str, size_t len)
 {
-	size_t start = 0;
-	while (start < len && isspace((unsigned char) str[start])) {
-		start++;
-	}
-	size_t end = len;
-	while (end > start && isspace((unsigned char) str[end - 1])) {
-		end--;
-	}
-	return zend_string_init(str + start, end - start, 0);
+	zend_string *untrimmed = zend_string_init(str, len, 0);
+	zend_string *trimmed = php_trim(untrimmed, NULL, 0, 3);
+	zend_string_release(untrimmed);
+	return trimmed;
 }
 /* }}} */
 
