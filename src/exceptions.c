@@ -135,38 +135,40 @@ zend_string *math_abbrev_string(const char *str, size_t len)
 		return quoted.s;
 	}
 
-	/* Keep the first max_len - 2 characters, then add "…'". */
-	zend_string *result = strpprintf(0, "%.*s\xE2\x80\xA6'", (int) starts[max_len - 2], ZSTR_VAL(quoted.s));
+	/* Keep the first max_len - 2 characters, then add "…'". Concatenated, as printf's %.*s would stop at a NUL. */
+	zend_string *result = zend_string_concat2(ZSTR_VAL(quoted.s), starts[max_len - 2], "\xE2\x80\xA6'", 4);
 	smart_str_free(&quoted);
 	efree(starts);
 	return result;
 }
 
-void math_throw_invalid_format(const char *str, size_t len, const char *class_name)
+void math_throw_string_error(
+	zend_class_entry *ce, const char *str, size_t len, const char *class_name, const char *reason
+)
 {
 	zend_string *abbrev = math_abbrev_string(str, len);
 	zend_string *msg;
 	if (abbrev) {
-		msg = strpprintf(0, "Cannot convert string %s to %s. Invalid format.", ZSTR_VAL(abbrev), class_name);
-		/* strpprintf() stops at a NUL byte, which a string may contain, so rebuild the message around it. */
-		if (strlen(ZSTR_VAL(abbrev)) != ZSTR_LEN(abbrev)) {
-			zend_string_release(msg);
-			zend_string *prefix = zend_string_init("Cannot convert string ", sizeof("Cannot convert string ") - 1, 0);
-			zend_string *suffix = strpprintf(0, " to %s. Invalid format.", class_name);
-			msg = zend_string_concat3(
-				ZSTR_VAL(prefix), ZSTR_LEN(prefix), ZSTR_VAL(abbrev), ZSTR_LEN(abbrev), ZSTR_VAL(suffix), ZSTR_LEN(suffix)
-			);
-			zend_string_release(prefix);
-			zend_string_release(suffix);
-		}
+		/* Concatenated, as printf's %s would stop at a NUL, which the string may contain. */
+		zend_string *suffix = strpprintf(0, " to %s. %s", class_name, reason);
+		msg = zend_string_concat3(
+			ZEND_STRL("Cannot convert string "), ZSTR_VAL(abbrev), ZSTR_LEN(abbrev), ZSTR_VAL(suffix), ZSTR_LEN(suffix)
+		);
+		zend_string_release(suffix);
 		zend_string_release(abbrev);
 	} else {
-		msg = strpprintf(0, "Cannot convert string to %s. Invalid format.", class_name);
+		msg = strpprintf(0, "Cannot convert string to %s. %s", class_name, reason);
 	}
 
-	zend_object *ex = zend_throw_exception(math_ce_FormatException, "", 0);
+	/* zend_throw_exception() takes a C string, which would also stop at a NUL, so set the message afterwards. */
+	zend_object *ex = zend_throw_exception(ce, "", 0);
 	zval message;
 	ZVAL_STR(&message, msg);
 	zend_update_property_ex(zend_ce_exception, ex, ZSTR_KNOWN(ZEND_STR_MESSAGE), &message);
 	zend_string_release(msg);
+}
+
+void math_throw_invalid_format(const char *str, size_t len, const char *class_name)
+{
+	math_throw_string_error(math_ce_FormatException, str, len, class_name, "Invalid format.");
 }

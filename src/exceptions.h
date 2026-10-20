@@ -55,11 +55,21 @@ void math_rethrow_overflow(const char *operation);
 zend_string *math_abbrev_string(const char *str, size_t len);
 /* }}} */
 
+/* {{{ math_throw_string_error
+ *
+ * Throws ce with the PHP package's message for a string that can't be converted, e.g. "Cannot convert string '1e400'
+ * to Rational. Outside valid range.", with the string abbreviated by math_abbrev_string(). A string that isn't valid
+ * UTF-8 is left out of the message. A NUL in the string is kept, as in the package.
+ */
+void math_throw_string_error(
+	zend_class_entry *ce, const char *str, size_t len, const char *class_name, const char *reason
+);
+/* }}} */
+
 /* {{{ math_throw_invalid_format
  *
  * Throws the PHP package's fromString() FormatException for an unparseable string, e.g. "Cannot convert string
- * '3+4x' to Complex. Invalid format.", with the string abbreviated by math_abbrev_string(). A string that isn't
- * valid UTF-8 is left out of the message.
+ * '3+4x' to Complex. Invalid format.", via math_throw_string_error().
  */
 void math_throw_invalid_format(const char *str, size_t len, const char *class_name);
 /* }}} */

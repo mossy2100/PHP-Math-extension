@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.
+  `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A
   missing or wrong-typed element or row now throws `Error`: "Vector data is invalid." or "Matrix data is invalid.". This
   also covers objects built by `unserialize()`.

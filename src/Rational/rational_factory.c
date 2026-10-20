@@ -253,15 +253,7 @@ static bool rational_int_string_out_of_range(const char *str, size_t len)
  */
 static void rational_throw_string_out_of_range(zend_string *str)
 {
-	zend_string *abbrev = math_abbrev_string(ZSTR_VAL(str), ZSTR_LEN(str));
-	zend_string *msg = abbrev
-		? strpprintf(0, "Cannot convert string %s to Rational. Outside valid range.", ZSTR_VAL(abbrev))
-		: zend_string_init(ZEND_STRL("Cannot convert string to Rational. Outside valid range."), 0);
-	if (abbrev) {
-		zend_string_release(abbrev);
-	}
-	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-	zend_string_release(msg);
+	math_throw_string_error(spl_ce_DomainException, ZSTR_VAL(str), ZSTR_LEN(str), "Rational", "Outside valid range.");
 }
 /* }}} */
 
