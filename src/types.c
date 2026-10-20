@@ -9,6 +9,7 @@
 #endif
 
 #include "ext/spl/spl_array.h"
+#include "ext/standard/php_string.h"
 #include "types.h"
 
 const char *math_types_debug_type_name(zval *value)
@@ -84,4 +85,9 @@ zend_result math_types_do_operation(math_types_operation calculate, uint8_t opco
 	}
 	ZVAL_COPY_VALUE(result, &value);
 	return SUCCESS;
+}
+
+zend_string *math_types_trim(zend_string *str)
+{
+	return php_trim(str, " \t\n\r\v\0\f", 7, 3);
 }

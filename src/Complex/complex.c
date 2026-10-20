@@ -35,7 +35,6 @@
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
 #include "Zend/zend_strtod.h"
-#include "ext/standard/php_string.h"
 #include "php_oceanmoon_math.h"
 #include "complex_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
@@ -441,14 +440,14 @@ static bool complex_try_parse(const char *str, size_t len, double *out_real, dou
 
 /* {{{ complex_from_string
  *
- * Backs fromString(). Matches the PHP package's Complex::fromString(): trims both ends with php_trim(), the
- * engine's own trim(), so exactly the same characters are stripped. Internal whitespace is tolerated solely
- * around the +/- separator between real and imaginary parts, handled by complex_try_parse()/
- * complex_skip_spaces() to match the package's regex \s* placement exactly.
+ * Backs fromString(). Matches the PHP package's Complex::fromString(): trims the same characters from both ends,
+ * with math_types_trim(). Internal whitespace is tolerated solely around the +/- separator between real and
+ * imaginary parts, handled by complex_try_parse()/complex_skip_spaces() to match the package's regex \s*
+ * placement exactly.
  */
 static zend_result complex_from_string(zval *return_value, zend_string *str)
 {
-	zend_string *trimmed = php_trim(str, NULL, 0, 3);
+	zend_string *trimmed = math_types_trim(str);
 
 	if (ZSTR_LEN(trimmed) == 0) {
 		zend_string_release(trimmed);

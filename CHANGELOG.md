@@ -103,8 +103,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   also covers objects built by `unserialize()`.
 - **PHPStan typed `Rational + int|float` as `Rational`,** but it's a `float` at runtime when the operand is a float. An
   operand that may be a float now gives `Rational|float`, for all the arithmetic operators.
-- **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They stripped
-  `\f` but not NUL, so e.g. `Complex::fromString("3\0")` threw `FormatException`. They now strip what `trim()` does.
+- **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They didn't
+  strip NUL, so e.g. `Complex::fromString("3\0")` threw `FormatException`. They now strip what PHP 8.6's `trim()`
+  does, matching the package: space, `\t`, `\n`, `\r`, `\v`, `\f` and NUL.
 - **`INF / $v` and `NAN / $m` threw `OverflowException`,** and `INF / new Vector(0)` returned an empty Vector. A
   non-finite scalar on the left of `/` now throws `DomainException`, as on the right and with `*`.
 - **`Matrix::inv()` inverted some exactly singular matrices (breaking),** matching the package, e.g. a 4×4 or larger one

@@ -75,6 +75,15 @@ typedef zend_result (*math_types_operation)(uint8_t opcode, zval *result, zval *
 zend_result math_types_do_operation(math_types_operation calculate, uint8_t opcode, zval *result, zval *op1, zval *op2);
 /* }}} */
 
+/* {{{ math_types_trim
+ *
+ * Trims both ends of str like PHP 8.6's trim(): space, \t, \n, \r, \v, NUL and \f. Earlier versions' trim() doesn't
+ * strip \f by default, so the package passes the same characters explicitly. Returns a new zend_string the caller
+ * owns.
+ */
+zend_string *math_types_trim(zend_string *str);
+/* }}} */
+
 /* {{{ math_types_read_property
  *
  * Returns the zval in a declared property's slot. The caller must already know the object is an

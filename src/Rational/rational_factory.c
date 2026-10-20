@@ -15,7 +15,6 @@
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
-#include "ext/standard/php_string.h"
 #include "rational_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 #include "exceptions.h"
@@ -203,13 +202,13 @@ static zend_result rational_filter_var(zend_string *str, const char *filter_cons
 
 /* {{{ rational_trim
  *
- * Trims both ends of str with php_trim(), the engine's own trim(), so exactly the same characters are stripped as in
- * the package. Returns a new zend_string the caller owns.
+ * Trims both ends of str with math_types_trim(), so the same characters are stripped as in the package. Returns a new
+ * zend_string the caller owns.
  */
 static zend_string *rational_trim(const char *str, size_t len)
 {
 	zend_string *untrimmed = zend_string_init(str, len, 0);
-	zend_string *trimmed = php_trim(untrimmed, NULL, 0, 3);
+	zend_string *trimmed = math_types_trim(untrimmed);
 	zend_string_release(untrimmed);
 	return trimmed;
 }
