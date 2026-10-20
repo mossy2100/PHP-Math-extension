@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex::round()` with a precision beyond the `int` range gave garbage,** e.g. `round(PHP_INT_MAX)` on
+  `1.234 + 5.678i` gave `10i`. The precision is clamped, as PHP's `round()` does, matching the package.
 - **`Complex` gave a phase of π just below the negative real axis (breaking),** e.g. for `new Complex(-1, -1e-17)`,
   matching the package. It's now -π, as in C99, so `ln()`, `log()`, `pow()` and `roots()` give the principal value
   from the correct side. The phase range is now [-π, π], not (-π, π].

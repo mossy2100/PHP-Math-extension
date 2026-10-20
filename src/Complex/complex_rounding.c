@@ -41,8 +41,16 @@ PHP_METHOD(OceanMoon_Math_Complex, round)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	double rounded_real = _php_math_round(real, (int) precision, mode);
-	double rounded_imag = _php_math_round(imag, (int) precision, mode);
+	/* Clamp the precision to the int range, as PHP's round() does, rather than truncating it. */
+	int places;
+	if (precision >= 0) {
+		places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int) precision;
+	} else {
+		places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int) precision;
+	}
+
+	double rounded_real = _php_math_round(real, places, mode);
+	double rounded_imag = _php_math_round(imag, places, mode);
 
 	if (complex_create(return_value, rounded_real, rounded_imag) == FAILURE) {
 		RETURN_THROWS();
