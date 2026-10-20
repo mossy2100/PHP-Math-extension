@@ -44,8 +44,8 @@ final class ComplexComparisonOperatorExtension implements OperatorTypeSpecifying
         }
 
         // Both sides must be Complex|int|float, matching what complex_calc_compare() actually
-        // accepts at runtime (a string/array/etc. operand throws InvalidArgumentException instead
-        // of comparing, so that case should fall through to PHPStan's own handling).
+        // compares at runtime. Any other operand is uncomparable (complex_do_compare() returns
+        // ZEND_UNCOMPARABLE), which PHPStan's own handling already types correctly.
         return $this->isComplexOrScalar($leftSide) && $this->isComplexOrScalar($rightSide);
     }
 

@@ -70,10 +70,6 @@ static zend_result matrix_calculate_operation(uint8_t opcode, zval *result, zval
 
 zend_result matrix_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
-	if (opcode == ZEND_MOD) {
-		return math_types_throw_unsupported_mod(op1, op2);
-	}
-
 	if (opcode != ZEND_ADD && opcode != ZEND_SUB && opcode != ZEND_MUL && opcode != ZEND_DIV
 		&& opcode != ZEND_POW) {
 		return FAILURE;

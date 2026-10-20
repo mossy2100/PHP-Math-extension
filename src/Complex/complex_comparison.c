@@ -203,9 +203,12 @@ zend_result complex_calc_compare(zend_object *self_obj, zval *other, int *out)
  * `self` and, if it's op2 (e.g. `5 <=> $z`), negates the result to correct for comparing in the
  * opposite direction from what complex_calc_compare() (self vs. other) computes.
  *
- * Delegates entirely to complex_calc_compare() above. If it fails, an exception is already
- * pending; the returned int value is irrelevant once that's true (the engine checks for a pending
- * exception after calling this handler and aborts before using the result).
+ * Any operand other than a Complex, int or non-NAN float is uncomparable: the handler returns
+ * ZEND_UNCOMPARABLE rather than throwing, so `==` is false, as PHP gives for uncomparable values, and
+ * generic code such as in_array() works on mixed arrays. NAN is uncomparable too, as it is for a
+ * float. The ordering operators then give PHP's meaningless uncomparable results.
+ *
+ * Otherwise, delegates to complex_calc_compare() above.
  */
 int complex_do_compare(zval *op1, zval *op2)
 {
@@ -220,6 +223,13 @@ int complex_do_compare(zval *op1, zval *op2)
 		self_zv = op2;
 		other = op1;
 		self_is_op1 = false;
+	}
+
+	bool comparable = Z_TYPE_P(other) == IS_LONG
+		|| (Z_TYPE_P(other) == IS_DOUBLE && !zend_isnan(Z_DVAL_P(other)))
+		|| (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), complex_ce_Complex));
+	if (!comparable) {
+		return ZEND_UNCOMPARABLE;
 	}
 
 	int cmp;

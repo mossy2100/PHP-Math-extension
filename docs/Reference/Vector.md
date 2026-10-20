@@ -240,9 +240,8 @@ $v1 / $v2;  // [2, 3, 1.5]
 
 ### % (unsupported)
 
-`%` isn't supported, with a `Vector` on either side. It throws `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Vector % int`, where PHP would otherwise convert the `Vector` to an int, with
-only a warning.
+`%` isn't supported, with a `Vector` on either side. PHP throws its usual `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Vector % int`.
 
 ---
 

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace OceanMoon\Math\Tests\Complex;
 
-use DomainException;
-use InvalidArgumentException;
 use OceanMoon\Math\Complex;
+use OceanMoon\Math\Rational;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * Tests for Complex's comparison operator overloads (<, <=, >, >=, <=>, ==, !=), only available in
@@ -92,25 +92,38 @@ class ComplexComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test <=> with NAN throws DomainException, matching equal().
+     * Test <=> and == with NAN treat it as uncomparable, as PHP does for a float.
      */
-    public function testSpaceshipWithNanThrows(): void
+    public function testSpaceshipWithNanIsUncomparable(): void
     {
         $z = new Complex(1, 2);
 
-        $this->expectException(DomainException::class);
-        $cmp = $z <=> NAN;
+        $this->assertSame(1, $z <=> NAN);
+        $this->assertFalse($z == NAN);
+        $this->assertFalse(NAN == $z);
+        $this->assertFalse($z < NAN);
     }
 
     /**
-     * Test <=> with an invalid type throws InvalidArgumentException, matching equal().
+     * Test <=> and == with an unsupported operand treat it as uncomparable rather than throwing, in either order.
      */
-    public function testSpaceshipInvalidTypeThrows(): void
+    public function testSpaceshipUnsupportedOperandIsUncomparable(): void
     {
         $z = new Complex(1, 2);
+        $operands = [
+            'string',
+            '0.5',
+            [1],
+            new stdClass(),
+            new Rational(1, 2),
+        ];
 
-        $this->expectException(InvalidArgumentException::class);
-        $cmp = $z <=> 'string';
+        foreach ($operands as $operand) {
+            $this->assertSame(1, $z <=> $operand);
+            $this->assertFalse($z == $operand);
+            $this->assertFalse($operand == $z);
+            $this->assertTrue($z != $operand);
+        }
     }
 
     #endregion
@@ -210,6 +223,26 @@ class ComplexComparisonOperatorsTest extends TestCase
 
         $this->assertTrue($z == 5);
         $this->assertFalse($z == 6);
+    }
+
+    /**
+     * Test in_array() on a mixed array, which compares with == and so used to throw for a string element.
+     */
+    public function testEqualInMixedArray(): void
+    {
+        $z = new Complex(1, 2);
+
+        $this->assertTrue(in_array($z, [
+            null,
+            'a',
+            [1],
+            new Complex(1, 2),
+        ], false));
+        $this->assertFalse(in_array($z, [
+            null,
+            'a',
+            [1],
+        ], false));
     }
 
     #endregion

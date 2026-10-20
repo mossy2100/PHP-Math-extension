@@ -493,14 +493,15 @@ $r ** -1;     // 4/3, same result
 
 ## Comparison Operators
 
-The `compare` handler behind all seven operators is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare): it accepts `Rational`, `int`, or `float`
-operands and throws the same exceptions for anything else.
+The `compare` handler behind all seven operators is equivalent to [`compare()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#compare) for `Rational`, `int` and `float`
+operands. Any other operand, including `NAN`, is uncomparable rather than throwing: `==` is `false`, and the ordering
+operators give PHP's meaningless results for uncomparable values. `compare()` itself still throws for those.
 
 The comparison is always exact, including with a `float` operand: the `Rational` isn't converted to a float, which could
 round. For example, `new Rational(1, 3) == 1 / 3` is `false`, since the float is slightly less than 1/3.
 
-See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes, including `null` and `bool` operands, and the
-`equal()`/`approxEqual()` methods recommended over the operators.
+See [Comparison Operators](Comparison_Operators.md) for how comparison works across all four classes, including uncomparable, `null` and `bool`
+operands, and the `equal()`/`approxEqual()` methods recommended over the operators.
 
 ---
 
@@ -515,11 +516,6 @@ $result = $f <=> $r;    // float <=> Rational → int
 ```
 
 Returns `-1` for "less than", `0` for "equal" (that is, _numerically_ equal), and `1` for "greater than".
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -555,11 +551,6 @@ $result = $r < $f;    // Rational < float → bool
 $result = $f < $r;    // float < Rational → bool
 ```
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -593,11 +584,6 @@ $result = $i <= $r;    // int <= Rational → bool
 $result = $r <= $f;    // Rational <= float → bool
 $result = $f <= $r;    // float <= Rational → bool
 ```
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -633,11 +619,6 @@ $result = $r > $f;    // Rational > float → bool
 $result = $f > $r;    // float > Rational → bool
 ```
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -672,11 +653,6 @@ $result = $r >= $f;    // Rational >= float → bool
 $result = $f >= $r;    // float >= Rational → bool
 ```
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -710,11 +686,6 @@ $result = $i == $r;    // int == Rational → bool
 $result = $r == $f;    // Rational == float → bool
 $result = $f == $r;    // float == Rational → bool
 ```
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -751,11 +722,6 @@ $result = $f != $r;    // float != Rational → bool
 ```
 
 There's no `notEqual()` method, so each equivalent negates `equal()`.
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Rational`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 

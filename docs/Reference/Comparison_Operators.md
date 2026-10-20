@@ -27,10 +27,16 @@ emits a notice and reads the object as `1`, so `Complex(5, 0) == 5` and `Rationa
 With the extension, both handlers:
 
 - Accept an `int` or `float` operand on either side, promoted the same way their `equal()` method promotes one.
-- Throw `DomainException` for a `NAN` operand, since there's no meaningful comparison with "not a number".
-- Throw `InvalidArgumentException` for any other type, except `null` and `bool`. PHP compares an object with `null` or a
-  `bool` itself, without calling the handler, by treating the object as `true`. So `$z == null` is `false` and
-  `$z == true` is `true`, rather than throwing.
+- Treat any other operand as uncomparable, including `NAN`, rather than throwing:
+  - `==` is `false` and `!=` is `true`, so generic code such as `in_array()` works on mixed arrays.
+  - The ordering operators give PHP's results for uncomparable values, which mean nothing: `<` and `<=` are `false`,
+    `>` and `>=` are `true`, and `<=>` is `1`, whichever side the object is on. That matches how PHP treats `NAN` for a
+    float.
+- Leave `null` and `bool` to PHP, which compares them with an object itself, without calling the handler, by treating
+  the object as `true`. So `$z == null` is `false` and `$z == true` is `true`.
+
+The methods stay strict: `equal()`, `compare()` and the rest throw `InvalidArgumentException` for an unsupported type
+and `DomainException` for `NAN`.
 
 `Vector` and `Matrix` provide no `compare` handler. There's no natural way to order one list of elements against
 another, as there is for a `(real, imaginary)` pair or a single rational value. So they keep PHP's own default object

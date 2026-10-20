@@ -362,9 +362,8 @@ $z1 ** 0.5;   // 2 + i           (the principal square root)
 
 ### % (unsupported)
 
-`%` isn't supported, with a `Complex` on either side. It throws `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Complex % int`, where PHP would otherwise convert the `Complex` to an int,
-with only a warning.
+`%` isn't supported, with a `Complex` on either side. PHP throws its usual `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Complex % int`.
 
 ---
 
@@ -426,7 +425,9 @@ mathematically meaningful unless both are real.
 
 They exist anyway because letting `==` and `!=` compare a `Complex` with an `int` or `float` needs a `compare` handler,
 and PHP derives all seven comparison operators from that one handler. See [Comparison Operators](Comparison_Operators.md#loose-comparison-operators) for how the handlers work
-across all four classes, including `NAN`, `null` and `bool` operands.
+across all four classes, including `NAN`, `null` and `bool` operands. Any operand other than a `Complex`, `int` or
+`float`, including `NAN`, is uncomparable rather than throwing: `==` is `false`, and the ordering operators give PHP's
+meaningless results for uncomparable values.
 
 The ordering is lexicographic: real parts are compared first, then imaginary parts if the real parts are equal. This is
 what PHP's default object comparison already gives two `Complex` instances, since `$real` is declared before
@@ -449,11 +450,6 @@ $result = $x <=> $z;    // int|float <=> Complex → int
 Returns `-1` for "less than", `0` for "equal", and `1` for "greater than": real parts are compared first, and imaginary
 parts only if the real parts are equal.
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -469,7 +465,7 @@ $z = new Complex(5, 0);
 $z <=> 5;      // 0
 $z <=> 6.0;    // -1
 $z <=> INF;    // -1  (a Complex is always finite, so always less than +INF)
-$z <=> NAN;    // throws DomainException
+$z <=> NAN;    // 1  (NAN is uncomparable)
 ```
 
 ---
@@ -481,11 +477,6 @@ $result = $z1 < $z2;  // Complex < Complex → bool
 $result = $z < $x;    // Complex < int|float → bool
 $result = $x < $z;    // int|float < Complex → bool
 ```
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -507,11 +498,6 @@ $result = $z <= $x;    // Complex <= int|float → bool
 $result = $x <= $z;    // int|float <= Complex → bool
 ```
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -532,11 +518,6 @@ $result = $z > $x;    // Complex > int|float → bool
 $result = $x > $z;    // int|float > Complex → bool
 ```
 
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
-
 **Examples:**
 
 ```php
@@ -555,11 +536,6 @@ $result = $z1 >= $z2;  // Complex >= Complex → bool
 $result = $z >= $x;    // Complex >= int|float → bool
 $result = $x >= $z;    // int|float >= Complex → bool
 ```
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -582,11 +558,6 @@ $result = $x == $z;    // int|float == Complex → bool
 ```
 
 Two distinct instances representing the same value are `==`, matching [`equal()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#equal). This is value equality, not identity.
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 
@@ -616,11 +587,6 @@ $result = $x != $z;    // int|float != Complex → bool
 ```
 
 The negation of `==`.
-
-**Throws:**
-
-- `DomainException` if the other operand is `NAN`.
-- `InvalidArgumentException` if the other operand isn't a `Complex`, `int`, `float`, `bool` or `null`.
 
 **Examples:**
 

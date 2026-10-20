@@ -604,6 +604,29 @@ class RationalBinaryOperatorsTest extends TestCase
         $result = new Rational(3, 4) % 'x'; // @phpstan-ignore binaryOp.invalid
     }
 
+    /**
+     * Test % throws TypeError for an operand PHP could convert to int, on either side, rather than truncating the
+     * Rational to an int through its cast handler.
+     */
+    public function testModConvertibleUnsupportedOperandThrows(): void
+    {
+        $r = new Rational(7, 2);
+        foreach (['2', true, false, null] as $operand) {
+            $mods = [
+                fn () => $r % $operand, // @phpstan-ignore binaryOp.invalid
+                fn () => $operand % $r, // @phpstan-ignore binaryOp.invalid
+            ];
+            foreach ($mods as $mod) {
+                try {
+                    $mod();
+                    $this->fail('Expected TypeError was not thrown for ' . var_export($operand, true) . '.');
+                } catch (TypeError $e) {
+                    $this->assertStringStartsWith('Unsupported operand types: ', $e->getMessage());
+                }
+            }
+        }
+    }
+
     #endregion
 
     #region Operator ** (power) tests.

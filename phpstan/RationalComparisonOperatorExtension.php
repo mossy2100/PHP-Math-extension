@@ -44,8 +44,8 @@ final class RationalComparisonOperatorExtension implements OperatorTypeSpecifyin
         }
 
         // Both sides must be Rational|int|float, matching what rational_calc_compare() actually
-        // accepts at runtime (a string/array/etc. operand throws InvalidArgumentException instead
-        // of comparing, so that case should fall through to PHPStan's own handling).
+        // compares at runtime. Any other operand is uncomparable (rational_do_compare() returns
+        // ZEND_UNCOMPARABLE), which PHPStan's own handling already types correctly.
         return $this->isRationalOrScalar($leftSide) && $this->isRationalOrScalar($rightSide);
     }
 

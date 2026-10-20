@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace OceanMoon\Math\Tests\Rational;
 
-use DomainException;
-use InvalidArgumentException;
+use OceanMoon\Math\Complex;
 use OceanMoon\Math\Rational;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * Tests for Rational's comparison operator overloads (<, <=, >, >=, <=>, ==, !=), only available
@@ -51,25 +51,38 @@ class RationalComparisonOperatorsTest extends TestCase
     }
 
     /**
-     * Test <=> with an invalid type throws InvalidArgumentException, matching compare().
+     * Test <=> and == with NAN treat it as uncomparable, as PHP does for a float.
      */
-    public function testSpaceshipInvalidTypeThrows(): void
+    public function testSpaceshipWithNanIsUncomparable(): void
     {
         $r = new Rational(1, 2);
 
-        $this->expectException(InvalidArgumentException::class);
-        $cmp = $r <=> 'string';
+        $this->assertSame(1, $r <=> NAN);
+        $this->assertFalse($r == NAN);
+        $this->assertFalse(NAN == $r);
+        $this->assertFalse($r < NAN);
     }
 
     /**
-     * Test <=> with NAN throws DomainException, matching compare().
+     * Test <=> and == with an unsupported operand treat it as uncomparable rather than throwing, in either order.
      */
-    public function testSpaceshipWithNanThrows(): void
+    public function testSpaceshipUnsupportedOperandIsUncomparable(): void
     {
         $r = new Rational(1, 2);
+        $operands = [
+            'string',
+            '0.5',
+            [1],
+            new stdClass(),
+            new Complex(1, 2),
+        ];
 
-        $this->expectException(DomainException::class);
-        $cmp = $r <=> NAN;
+        foreach ($operands as $operand) {
+            $this->assertSame(1, $r <=> $operand);
+            $this->assertFalse($r == $operand);
+            $this->assertFalse($operand == $r);
+            $this->assertTrue($r != $operand);
+        }
     }
 
     #endregion
@@ -169,6 +182,26 @@ class RationalComparisonOperatorsTest extends TestCase
 
         $this->assertTrue($r == 0.5);
         $this->assertFalse($r == 0.6);
+    }
+
+    /**
+     * Test in_array() on a mixed array, which compares with == and so used to throw for a string element.
+     */
+    public function testEqualInMixedArray(): void
+    {
+        $r = new Rational(1, 2);
+
+        $this->assertTrue(in_array($r, [
+            null,
+            'a',
+            [1],
+            new Rational(1, 2),
+        ], false));
+        $this->assertFalse(in_array($r, [
+            null,
+            'a',
+            [1],
+        ], false));
     }
 
     #endregion

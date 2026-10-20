@@ -262,9 +262,8 @@ $m ** -1;   // [[1, -1], [0, 1]]  (the inverse)
 
 ### % (unsupported)
 
-`%` isn't supported, with a `Matrix` on either side. It throws `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Matrix % int`, where PHP would otherwise convert the `Matrix` to an int, with
-only a warning.
+`%` isn't supported, with a `Matrix` on either side. PHP throws its usual `TypeError`, e.g.
+`Unsupported operand types: OceanMoon\Math\Matrix % int`.
 
 ---
 

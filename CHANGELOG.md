@@ -27,13 +27,18 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`Vector` and `Matrix` implement `IteratorAggregate`**, matching the package, so `foreach` yields a Vector's
   elements and a Matrix's live rows, instead of their public properties.
 - **`Rational::mod()` and `%`.** `mod()` matches the package. `%` on a `Rational` is `mod()`, with a `Rational`, `int`
-  or `float` on either side, widening to `float` like the other operators. `%=` works too.
+  or `float` on either side, widening to `float` like the other operators. `%=` works too. Any other operand throws
+  `TypeError`, as for the other operators.
 - **Windows DLLs for PIE.** Each GitHub release gets prebuilt DLLs for PHP 8.4 and 8.5, NTS and TS (64-bit), built by
   PHP's own php-windows-builder actions, so `pie install` works on Windows.
 
 ### Changed
 
 - **`Complex::atan()`/`atanh()`** name the function in their singularity messages, matching the package.
+- **Comparison operators treat an unsupported operand as uncomparable (breaking),** instead of throwing. For a
+  `Complex` or `Rational` with a string, array, other object or `NAN`, `==` is `false`, so `in_array()` works on mixed
+  arrays. The ordering operators give PHP's results for uncomparable values. `equal()`, `compare()` and the other
+  methods still throw.
 - **`Matrix::count()` returns the number of rows (breaking)**, matching the package, `$m[$i]` and `foreach`.
 - **`Matrix::mul()` accepts a `Vector`, replacing `Matrix::mulVector()` (breaking).** `$m->mul($v)` is _Ax_ and returns
   a `Vector`. PHPStan infers the return type from the argument type.
@@ -76,8 +81,6 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   zero determinant. Previously, a matrix such as `[[0.1, 0.3], [0.7, 2.1]]`, singular but with a determinant of about
   3e-17 due to rounding, gave an inverse with elements around 1e16. The message was "Cannot invert Matrix with zero
   determinant." A matrix that's merely badly scaled, e.g. `[[1, 1e20], [0, 1]]`, isn't rejected.
-- **`%` on `Complex`, `Vector` and `Matrix` throws `TypeError`** "Unsupported operand types", instead of converting
-  the object to an int with a warning.
 - **The branch cuts of the inverse trigonometric and hyperbolic methods follow C99 (breaking).** On a cut, the sign of
   the zero part chooses the side, as in Python and NumPy. For example, `asin(2)` is now `π/2 + 1.317i`, instead of
   `π/2 - 1.317i`, and `new Complex(2, -0.0)->asin()` gives the other side.

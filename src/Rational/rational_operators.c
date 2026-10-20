@@ -325,6 +325,20 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
 }
 /* }}} */
 
+/* {{{ rational_throw_unsupported_mod
+ *
+ * Throws the engine's own "Unsupported operand types" TypeError for `%` with an unsupported operand, and returns
+ * FAILURE. Returning FAILURE alone isn't enough for `%`, as it is for the other operators: the engine then falls back
+ * to converting both operands to int, and Rational's cast_object handler makes that succeed, so e.g.
+ * `new Rational(7, 2) % '2'` would silently give 1.
+ */
+static zend_result rational_throw_unsupported_mod(zval *op1, zval *op2)
+{
+	zend_type_error("Unsupported operand types: %s %% %s", zend_zval_value_name(op1), zend_zval_value_name(op2));
+	return FAILURE;
+}
+/* }}} */
+
 /* {{{ rational_do_operation
  *
  * The `do_operation` object handler backing Rational's arithmetic operator overloads: +, -, *, /
@@ -339,6 +353,9 @@ static zend_result rational_do_pow(zval *result, zval *op1, zval *op2)
  * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric Type Widening"
  * section); otherwise an int operand widens to Rational and the exact-Rational path below
  * applies, matching add()/sub()/mul()/div()/mod().
+ *
+ * For any other operand, it returns FAILURE, so the engine throws its own "Unsupported operand types" TypeError. `%`
+ * throws that TypeError itself instead - see rational_throw_unsupported_mod().
  *
  * The calculation itself is rational_calculate_operation(), run through math_types_do_operation()
  * so that compound assignment (`$r += $s`) and `$r++`/`$r--` release the Rational they replace.
@@ -365,11 +382,8 @@ static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zv
 	}
 
 	zend_long a, b, c, d;
-	if (rational_operand_to_parts(op1, &a, &b) == FAILURE) {
-		return FAILURE;
-	}
-	if (rational_operand_to_parts(op2, &c, &d) == FAILURE) {
-		return FAILURE;
+	if (rational_operand_to_parts(op1, &a, &b) == FAILURE || rational_operand_to_parts(op2, &c, &d) == FAILURE) {
+		return opcode == ZEND_MOD ? rational_throw_unsupported_mod(op1, op2) : FAILURE;
 	}
 
 	/* An overflow is reported with the same message as add()/sub()/mul()/div()/mod(). */
@@ -429,12 +443,14 @@ static zend_result rational_calculate_operation(uint8_t opcode, zval *result, zv
  * `self` and, if it's op2 (e.g. `5 <=> $r`), negates the result to correct for comparing in the
  * opposite direction from what rational_calc_compare() (self vs. other) computes.
  *
- * Delegates entirely to rational_calc_compare() (rational_comparison.c) - the same core
- * compare()/equal()/etc. use - so operator and method comparisons are guaranteed identical,
- * including exception behavior (InvalidArgumentException for a bad type, DomainException for
- * NAN). If rational_calc_compare() fails, an exception is already pending; the returned int value
- * is irrelevant once that's true (the engine checks for a pending exception after calling this
- * handler and aborts before using the result).
+ * Any operand other than a Rational, int or non-NAN float is uncomparable: the handler returns
+ * ZEND_UNCOMPARABLE rather than throwing, so `==` is false, as PHP gives for uncomparable values, and
+ * generic code such as in_array() works on mixed arrays. NAN is uncomparable too, as it is for a
+ * float. The ordering operators then give PHP's meaningless uncomparable results. The methods
+ * (compare(), equal(), etc.) stay strict, throwing InvalidArgumentException or DomainException.
+ *
+ * Otherwise, delegates to rational_calc_compare() (rational_comparison.c) - the same core the
+ * methods use - so operator and method results are identical.
  */
 int rational_do_compare(zval *op1, zval *op2)
 {
@@ -449,6 +465,13 @@ int rational_do_compare(zval *op1, zval *op2)
 		self_zv = op2;
 		other = op1;
 		self_is_op1 = false;
+	}
+
+	bool comparable = Z_TYPE_P(other) == IS_LONG
+		|| (Z_TYPE_P(other) == IS_DOUBLE && !zend_isnan(Z_DVAL_P(other)))
+		|| (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), rational_ce_Rational));
+	if (!comparable) {
+		return ZEND_UNCOMPARABLE;
 	}
 
 	int cmp;

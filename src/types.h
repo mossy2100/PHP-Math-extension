@@ -62,15 +62,6 @@ zend_result math_types_array_iterator(zval *return_value, zval *array);
 zend_object *math_types_clone_obj(zend_object *object);
 /* }}} */
 
-/* {{{ math_types_throw_unsupported_mod
- *
- * Throws the engine's own "Unsupported operand types" TypeError for `%`, and returns FAILURE. A do_operation handler
- * can't just return FAILURE for `%`, as it does for other unsupported operators: the engine then falls back to
- * converting each object operand to an int, with only a warning.
- */
-zend_result math_types_throw_unsupported_mod(zval *op1, zval *op2);
-/* }}} */
-
 /* {{{ math_types_do_operation
  *
  * Runs calculate() as a do_operation handler, safely for compound assignment. For `$a += $b` (and the other compound
