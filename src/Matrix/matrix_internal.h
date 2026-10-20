@@ -34,11 +34,14 @@ typedef struct {
 	zend_long *perm;  /* Position to original row. */
 	int sign;         /* The permutation's sign, 1 or -1. */
 	bool singular;
+	double *col_scales;  /* Each column's largest absolute element. */
+	double *row_scales;  /* Each original row's largest absolute element, divided by its column's scale. */
 } matrix_lu;
 
 void matrix_lu_decompose(zval *data_array, matrix_lu *out);
 void matrix_lu_free(matrix_lu *lu);
 zend_result matrix_inv_from_lu(const matrix_lu *lu, zval *return_value);
+bool matrix_is_ill_conditioned(zend_object *matrix, zend_object *inverse, const matrix_lu *lu);
 
 zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_value);
 zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_value);

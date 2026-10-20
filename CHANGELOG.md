@@ -98,6 +98,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Matrix::inv()` inverted some exactly singular matrices (breaking),** matching the package, e.g. a 4×4 or larger one
+  with a row that's a combination of two others. The inverse is now also rejected if the condition number shows it has
+  no correct digits, which also rejects e.g. the 12×12 Hilbert matrix.
 - **`Complex::fromString()` depended on the C locale,** so under e.g. `de_DE`, `'1.5'` parsed as `1`. It also rejected
   a number over 63 characters long. It now parses numbers the same way as the package, whatever the locale.
 - **`Complex::round()` with a precision beyond the `int` range gave garbage,** e.g. `round(PHP_INT_MAX)` on

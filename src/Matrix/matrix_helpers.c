@@ -3,8 +3,9 @@
  *
  * Private helpers for OceanMoon\Math\Matrix, not PHP-visible: matrix_calc_det() (mirrors
  * Matrix::calcDet()), matrix_get_minor() (mirrors Matrix::getMinor()), and the LU decomposition helpers
- * matrix_lu_decompose() and matrix_inv_from_lu() (mirroring Matrix::luDecompose() and Matrix::invFromLu()). Used by
- * det() and inv() in matrix_linear_algebra.c and matrix_arithmetic.c. Also matrix_throw_index_error() and
+ * matrix_lu_decompose(), matrix_inv_from_lu() and matrix_is_ill_conditioned() (mirroring Matrix::luDecompose(),
+ * Matrix::invFromLu() and Matrix::isIllConditioned()). Used by det() and inv() in matrix_linear_algebra.c and
+ * matrix_arithmetic.c. Also matrix_throw_index_error() and
  * matrix_check_range() (mirroring Matrix::indexMessage() and Matrix::checkRange()), for the index and range checks.
  */
 
@@ -191,8 +192,8 @@ void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 	out->perm = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(zend_long), 0);
 	out->sign = 1;
 	out->singular = false;
-	double *row_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
-	double *col_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
+	double *row_scales = out->row_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
+	double *col_scales = out->col_scales = safe_emalloc((size_t) (n > 0 ? n : 1), sizeof(double), 0);
 	double *a = out->lu;
 
 	/* Copy the matrix, and get the scale of each column: its largest absolute element. */
@@ -266,9 +267,6 @@ void matrix_lu_decompose(zval *data_array, matrix_lu *out)
 			}
 		}
 	}
-
-	efree(row_scales);
-	efree(col_scales);
 }
 /* }}} */
 
@@ -277,6 +275,40 @@ void matrix_lu_free(matrix_lu *lu)
 {
 	efree(lu->lu);
 	efree(lu->perm);
+	efree(lu->col_scales);
+	efree(lu->row_scales);
+}
+/* }}} */
+
+/* {{{ matrix_is_ill_conditioned
+ *
+ * Mirrors Matrix::isIllConditioned(): true if the matrix is too ill-conditioned for its computed inverse to have any
+ * correct digits. Calculates the 1-norm condition number, ||A||1 x ||A^-1||1, of the matrix with its columns and rows
+ * scaled as in matrix_lu_decompose(), so a matrix that's merely badly scaled isn't penalised. For scaled B = R^-1 A C^-1,
+ * where R and C are the diagonal matrices of row and column scales, B^-1 = C A^-1 R. A condition number of at least
+ * 1 / (n x DBL_EPSILON) means the inverse is meaningless. Same operation order as the package, so bit-identical.
+ */
+bool matrix_is_ill_conditioned(zend_object *matrix, zend_object *inverse, const matrix_lu *lu)
+{
+	zend_long n = lu->n;
+	double norm = 0.0;
+	double inverse_norm = 0.0;
+
+	for (zend_long j = 0; j < n; j++) {
+		double sum = 0.0;
+		double inverse_sum = 0.0;
+		for (zend_long i = 0; i < n; i++) {
+			double value, inverse_value;
+			matrix_read_element(matrix, i, j, &value);
+			matrix_read_element(inverse, i, j, &inverse_value);
+			sum += fabs(value) / (lu->row_scales[i] * lu->col_scales[j]);
+			inverse_sum += fabs(inverse_value) * lu->col_scales[i] * lu->row_scales[j];
+		}
+		norm = fmax(norm, sum);
+		inverse_norm = fmax(inverse_norm, inverse_sum);
+	}
+
+	return norm * inverse_norm * (double) n * DBL_EPSILON >= 1.0;
 }
 /* }}} */
 

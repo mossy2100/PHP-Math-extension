@@ -154,9 +154,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardInv)
 
 /* {{{ OceanMoon\Math\Matrix::inv(): Matrix
  *
- * Matches the PHP package's Matrix::inv(): cofactor expansion via the adjugate matrix. The actual
- * logic lives in matrix_calc_inv() (this file), shared with pow()'s negative-exponent branch
- * (matrix_power.c), matching the "shared calc core" pattern used elsewhere in this extension.
+ * Matches the PHP package's Matrix::inv(). The actual logic lives in matrix_calc_inv() (this file),
+ * shared with pow()'s negative-exponent branch (matrix_power.c), matching the "shared calc core"
+ * pattern used elsewhere in this extension.
  */
 PHP_METHOD(OceanMoon_Math_Matrix, inv)
 {
@@ -168,60 +168,32 @@ PHP_METHOD(OceanMoon_Math_Matrix, inv)
 }
 /* }}} */
 
-/* {{{ matrix_calc_inv
+/* {{{ matrix_invert
  *
- * The shared core behind inv(): cofactor expansion via the adjugate matrix. Used directly by
- * pow()'s negative-exponent branch (matrix_power.c) as well as by inv() itself.
- *
- * Matches the PHP package's Matrix::inv(). It first checks the matrix isn't singular, by LU decomposition. A matrix
- * larger than 3x3 is then inverted from that decomposition. One up to 3x3 is inverted with the adjugate formula,
+ * Inverts a square matrix that has passed the pivot test in matrix_lu_decompose(), mirroring Matrix::calcInv(). A
+ * matrix larger than 3x3 is inverted from the LU decomposition. One up to 3x3 is inverted with the adjugate formula,
  * which gives exact results where the arithmetic allows. That tries without scaling first, so ordinary results are
- * unchanged, and a matrix whose elements span a wide range isn't harmed by scaling its smallest
- * elements down to 0. If the determinant underflows to 0 or overflows, as it can for a matrix of
- * uniformly tiny or huge elements, it scales the matrix so the largest element is in the range
- * [1, 2) and tries again. Scaling by a power of 2 is exact. inv(A) = inv(A / s) / s.
+ * unchanged, and a matrix whose elements span a wide range isn't harmed by scaling its smallest elements down to 0. If
+ * the determinant underflows to 0 or overflows, as it can for a matrix of uniformly tiny or huge elements, it scales
+ * the matrix so the largest element is in the range [1, 2) and tries again. Scaling by a power of 2 is exact.
+ * inv(A) = inv(A / s) / s. The caller still owns data_array and lu.
  */
-zend_result matrix_calc_inv(zend_object *self, zval *return_value)
+static zend_result matrix_invert(zend_object *self, zval *data_array, const matrix_lu *lu, zval *return_value)
 {
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (row_count != column_count) {
-		zend_throw_exception(spl_ce_DomainException, "Cannot invert non-square Matrix.", 0);
-		return FAILURE;
-	}
-
-	zend_long n = row_count;
-
-	/* Check the matrix isn't singular. */
-	zval data_array;
-	matrix_to_data_array(self, &data_array);
-	matrix_lu lu;
-	matrix_lu_decompose(&data_array, &lu);
-	if (lu.singular) {
-		matrix_lu_free(&lu);
-		zval_ptr_dtor(&data_array);
-		zend_throw_exception(math_ce_ArithmeticException, "Cannot invert singular Matrix.", 0);
-		return FAILURE;
-	}
+	zend_long n = lu->n;
 
 	/* Invert a matrix larger than 3x3 by LU decomposition. */
 	if (n > 3) {
-		zend_result result = matrix_inv_from_lu(&lu, return_value);
-		matrix_lu_free(&lu);
-		zval_ptr_dtor(&data_array);
-		return result;
+		return matrix_inv_from_lu(lu, return_value);
 	}
 
-	/* Invert a matrix up to 3x3 with the adjugate formula. Try without scaling first. The LU decomposition is kept,
-	 * in case the determinant underflows. */
+	/* Invert a matrix up to 3x3 with the adjugate formula. Try without scaling first. */
 	double scale = 1.0;
 	zend_object *scaled = self;
 	zval scaled_zv;
 	ZVAL_UNDEF(&scaled_zv);
 
-	double det = matrix_calc_det(&data_array);
-	zval_ptr_dtor(&data_array);
+	double det = matrix_calc_det(data_array);
 
 	/* If the determinant underflowed to 0 or overflowed, scale so the largest element is in the
 	 * range [1, 2), and try again. */
@@ -237,27 +209,23 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 		if (max != 0.0) {
 			scale = math_floats_power_of_2_scale(max);
 			if (matrix_calc_div_scalar(self, scale, &scaled_zv) == FAILURE) {
-				matrix_lu_free(&lu);
 				return FAILURE;
 			}
 			scaled = Z_OBJ(scaled_zv);
-			matrix_to_data_array(scaled, &data_array);
-			det = matrix_calc_det(&data_array);
-			zval_ptr_dtor(&data_array);
+			zval scaled_data;
+			matrix_to_data_array(scaled, &scaled_data);
+			det = matrix_calc_det(&scaled_data);
+			zval_ptr_dtor(&scaled_data);
 		}
 	}
 
 	/* The determinant is finite here: either it was already, or the matrix was scaled so every element is less
 	 * than 2. It can still be 0 if it underflowed even after scaling, which happens when the elements span a wide
-	 * range, e.g. diag(1, 1e-200, 1e-200). The singularity check above has passed, so use the LU decomposition
-	 * instead. */
+	 * range, e.g. diag(1, 1e-200, 1e-200). The singularity check has passed, so use the LU decomposition instead. */
 	if (det == 0.0) {
 		zval_ptr_dtor(&scaled_zv);
-		zend_result result = matrix_inv_from_lu(&lu, return_value);
-		matrix_lu_free(&lu);
-		return result;
+		return matrix_inv_from_lu(lu, return_value);
 	}
-	matrix_lu_free(&lu);
 
 	if (matrix_create(return_value, n, n) == FAILURE) {
 		zval_ptr_dtor(&scaled_zv);
@@ -286,6 +254,50 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 
 	zval_ptr_dtor(&scaled_zv);
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ matrix_calc_inv
+ *
+ * The shared core behind inv(), used directly by pow()'s negative-exponent branch (matrix_power.c) as well as by inv()
+ * itself. Matches the PHP package's Matrix::inv(). It first checks the matrix isn't singular, by LU decomposition,
+ * then inverts it with matrix_invert(). Rounding during elimination can leave a singular matrix with pivots that pass
+ * that test, so the inverse is then checked with matrix_is_ill_conditioned() too.
+ */
+zend_result matrix_calc_inv(zend_object *self, zval *return_value)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+
+	if (row_count != column_count) {
+		zend_throw_exception(spl_ce_DomainException, "Cannot invert non-square Matrix.", 0);
+		return FAILURE;
+	}
+
+	/* Check the matrix isn't singular. */
+	zval data_array;
+	matrix_to_data_array(self, &data_array);
+	matrix_lu lu;
+	matrix_lu_decompose(&data_array, &lu);
+	if (lu.singular) {
+		matrix_lu_free(&lu);
+		zval_ptr_dtor(&data_array);
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot invert singular Matrix.", 0);
+		return FAILURE;
+	}
+
+	/* Invert it, then check it's not too ill-conditioned for the inverse to mean anything. */
+	zend_result result = matrix_invert(self, &data_array, &lu, return_value);
+	zval_ptr_dtor(&data_array);
+	if (result == SUCCESS && matrix_is_ill_conditioned(self, Z_OBJ_P(return_value), &lu)) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		zend_throw_exception(math_ce_ArithmeticException, "Cannot invert singular Matrix.", 0);
+		result = FAILURE;
+	}
+	matrix_lu_free(&lu);
+
+	return result;
 }
 /* }}} */
 
