@@ -473,20 +473,20 @@ $i *= new Rational(1, 3);   // $i is now the Rational 2/3
 ## Inverting with `1 / r` or `r ** -1`
 
 Since `$x / $r` is supported (see `/` above), `1 / $r` computes the same multiplicative inverse as
-[`$r->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#inv).
+[`$r->recip()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md#recip).
 
 `$r ** -1` gives the same result, since raising to the power -1 is the mathematical definition of a multiplicative
 inverse.
 
-All three throw `ArithmeticException` if `$r`'s numerator is zero, matching `inv()`.
+All three throw `ArithmeticException` if `$r`'s numerator is zero, matching `recip()`.
 
 **Example:**
 
 ```php
 $r = new Rational(3, 4);
-$r->inv();  // 4/3
-1 / $r;     // 4/3, same result
-$r ** -1;   // 4/3, same result
+$r->recip();  // 4/3
+1 / $r;       // 4/3, same result
+$r ** -1;     // 4/3, same result
 ```
 
 ---

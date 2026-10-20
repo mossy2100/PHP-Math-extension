@@ -1,7 +1,7 @@
 /*
  * rational_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Rational: abs(), neg(), inv(), add(),
+ * Unary and binary arithmetic methods for OceanMoon\Math\Rational: abs(), neg(), recip(), add(),
  * sub(), mul(), div(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
  * of the PHP package's Rational class.
  */
@@ -148,12 +148,12 @@ zend_result rational_calc_add_sub(zend_long a, zend_long b, zend_long c, zend_lo
 }
 /* }}} */
 
-/* {{{ rational_calc_inv
+/* {{{ rational_calc_recip
  *
- * The computational core of inv(), factored out (declared in rational_internal.h) so pow()'s
+ * The computational core of recip(), factored out (declared in rational_internal.h) so pow()'s
  * exponent-(-1)/exponent-PHP_INT_MIN shortcuts (rational_power.c) can reuse it directly.
  */
-zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value)
+zend_result rational_calc_recip(zend_long num, zend_long den, zval *return_value)
 {
 	if (num == 0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot divide by zero.", 0);
@@ -230,20 +230,20 @@ PHP_METHOD(OceanMoon_Math_Rational, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::inv(): Rational
+/* {{{ OceanMoon\Math\Rational::recip(): Rational
  *
- * Matches the PHP package's Rational::inv(): the reciprocal, preserving sign (numerator/
+ * Matches the PHP package's Rational::recip(): the reciprocal, preserving sign (numerator/
  * denominator swap, negating both if the numerator was negative so the denominator stays
  * positive).
  */
-PHP_METHOD(OceanMoon_Math_Rational, inv)
+PHP_METHOD(OceanMoon_Math_Rational, recip)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_long num, den;
 	rational_read_parts(Z_OBJ_P(ZEND_THIS), &num, &den);
 
-	if (rational_calc_inv(num, den, return_value) == FAILURE) {
+	if (rational_calc_recip(num, den, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

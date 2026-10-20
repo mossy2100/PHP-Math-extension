@@ -26,14 +26,14 @@ zend_result rational_init(zend_object *obj, zend_long num, zend_long den);
 zend_result rational_create(zval *return_value, zend_long num, zend_long den);
 void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_den);
 
-/* The computational cores of add()/sub(), mul() and inv(), defined in rational_arithmetic.c. Shared with div()
+/* The computational cores of add()/sub(), mul() and recip(), defined in rational_arithmetic.c. Shared with div()
  * (same file), pow() (rational_power.c), and the operators (rational_operators.c) - see their
  * doc comments there. */
 zend_result rational_calc_mul(zend_long a, zend_long b, zend_long c, zend_long d, zval *return_value);
 zend_result rational_calc_add_sub(
 	zend_long a, zend_long b, zend_long c, zend_long d, bool subtract, zval *return_value
 );
-zend_result rational_calc_inv(zend_long num, zend_long den, zval *return_value);
+zend_result rational_calc_recip(zend_long num, zend_long den, zval *return_value);
 
 /* The computational core of mod() for an int or Rational divisor, defined in rational_arithmetic.c. Shared with the %
  * operator (rational_operators.c). */

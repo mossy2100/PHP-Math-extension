@@ -1028,24 +1028,24 @@ class RationalBinaryOperatorsTest extends TestCase
     #region Inverting with 1 / r or r ** -1 tests.
 
     /**
-     * Test that 1 / $r, $r ** -1, and $r->inv() all give the same multiplicative inverse.
+     * Test that 1 / $r, $r ** -1, and $r->recip() all give the same multiplicative inverse.
      */
     public function testInvertingEquivalence(): void
     {
         $r = new Rational(3, 4);
 
-        $inv = $r->inv();
+        $recip = $r->recip();
         $viaDivision = 1 / $r;
         $viaPower = $r ** -1;
 
-        $this->assertSame(4, $inv->numerator);
-        $this->assertSame(3, $inv->denominator);
-        $this->assertEquals($inv, $viaDivision);
-        $this->assertEquals($inv, $viaPower);
+        $this->assertSame(4, $recip->numerator);
+        $this->assertSame(3, $recip->denominator);
+        $this->assertEquals($recip, $viaDivision);
+        $this->assertEquals($recip, $viaPower);
     }
 
     /**
-     * Test that inverting by division throws ArithmeticException for a zero-numerator operand, matching inv().
+     * Test that inverting by division throws ArithmeticException for a zero-numerator operand, matching recip().
      */
     public function testInvertingZeroByDivThrows(): void
     {
@@ -1056,7 +1056,7 @@ class RationalBinaryOperatorsTest extends TestCase
     }
 
     /**
-     * Test that inverting via exponentiation throws ArithmeticException for a zero-numerator operand, matching inv().
+     * Test that inverting via exponentiation throws ArithmeticException for a zero-numerator operand, matching recip().
      */
     public function testInvertingZeroByPowThrows(): void
     {

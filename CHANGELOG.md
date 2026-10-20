@@ -18,8 +18,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   - `Rational ** Rational` and `int ** Rational` are exact, like `pow()`. For example, `4 ** new Rational(1, 2)` is `2`.
   - `float ** Rational` gives a float, with a real result for an odd root of a negative base:
     `(-8.0) ** new Rational(1, 3)` is `-2.0`, not `NAN`.
-- **`Vector * Vector` and `Vector / Vector`** are element-wise (Hadamard), matching `mul()` and `div()` with a vector.
-  Both previously threw `TypeError`.
+- **`Vector * Vector` and `Vector / Vector`** are element-wise (Hadamard), matching `hadamardMul()` and
+  `hadamardDiv()`. Both previously threw `TypeError`.
 - **`Rational::trunc()`**, matching the package: the integer part, truncating toward zero.
 - **`(float) $r` and `(int) $r`** give `$r->toFloat()` and `$r->trunc()`, as do `floatval()`, `intval()` and
   `settype()`. `(int)` truncates, as it does for a float. Without the extension, both casts warn and give `1.0` or `1`.
@@ -37,8 +37,11 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`Matrix::count()` returns the number of rows (breaking)**, matching the package, `$m[$i]` and `foreach`.
 - **`Matrix::mul()` accepts a `Vector`, replacing `Matrix::mulVector()` (breaking).** `$m->mul($v)` is _Ax_ and returns
   a `Vector`. PHPStan infers the return type from the argument type.
-- **`Vector::mul()` and `Vector::div()` accept a `Vector`, replacing `hadamardMul()` and `hadamardDiv()` (breaking),**
-  matching the package. `div()`'s parameter is renamed from `$scalar` to `$other`.
+- **`Complex::inv()` and `Rational::inv()` are renamed `recip()` (breaking),** matching the package. `inv()` is now
+  only the matrix inverse, `Matrix::inv()`.
+- **`Vector::reciprocal()` and `Matrix::reciprocal()` are renamed `hadamardInv()` (breaking),** matching the package
+  and `hadamardMul()`/`hadamardDiv()`.
+- **`Vector::mul()`'s parameter is renamed from `$other` to `$multiplier` (breaking),** matching the package.
 - **`Vector::fromArray()`/`Matrix::fromArray()` (breaking):** a non-numeric element, or a `Matrix` row that isn't an
   array, throws `InvalidArgumentException` instead of `DomainException`. A non-finite element, or a row that isn't a
   list, still throws `DomainException`. The messages match the package.
@@ -95,7 +98,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`pow()` parameter names** didn't match the package, which broke named arguments. `Complex::pow()`, `Rational::pow()`
   and `Matrix::pow()` now all take `$exp`.
 - **Ported the package's float range fixes:**
-  - `Complex::div()`, `inv()` and `/` use Smith's algorithm, so a very small or large divisor gives the right result.
+  - `Complex::div()`, `recip()` and `/` use Smith's algorithm, so a very small or large divisor gives the right result.
     They throw `OverflowException` when the result is too large to represent.
   - `Vector::div()`, `Matrix::div()` and `/` throw `DomainException` for a non-finite scalar, instead of silently giving
     zeros.
@@ -108,7 +111,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
     instead of a generic one. `fromPolar()` and `exp()` give the magnitude and phase messages.
   - `tan()`, `tanh()`, `atan()`, `atanh()` and `log()` divide with Smith's algorithm, like `div()`.
   - `pow()` with an integer exponent uses exponentiation by squaring, like the package, and an exponent of -1 uses
-    `inv()`.
+    `recip()`.
   - `asin()`, `acos()`, `atan()` and `atanh()` give the same sign for a zero part, and `log()` with base 2 or 10 uses
     `log2()` or `log10()`, as PHP's `log()` does.
 - **`Matrix::inv()` and `**` with a negative exponent** work for a matrix of uniformly tiny or huge elements, or whose

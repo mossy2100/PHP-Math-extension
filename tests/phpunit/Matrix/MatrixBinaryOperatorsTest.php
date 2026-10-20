@@ -340,7 +340,7 @@ class MatrixBinaryOperatorsTest extends TestCase
 
     /**
      * Test int|float / Matrix: not commutative with Matrix / int|float - element-wise, divides the
-     * scalar by each element in turn, equivalent to $x * $m->reciprocal(). Distinct from x*A⁻¹
+     * scalar by each element in turn, equivalent to $x * $m->hadamardInv(). Distinct from x*A⁻¹
      * (inverse scaling), which is $x * $m->inv() or $x * $m ** -1.
      */
     public function testDivScalarOverMatrix(): void
@@ -355,12 +355,12 @@ class MatrixBinaryOperatorsTest extends TestCase
             [8.0, 4.0],
             [2.0, 1.0],
         ], $result->toArray());
-        $this->assertEquals(8 * $m->reciprocal(), $result);
+        $this->assertEquals(8 * $m->hadamardInv(), $result);
     }
 
     /**
      * Test int|float / Matrix with a zero element throws ArithmeticException, matching
-     * reciprocal().
+     * hadamardInv().
      */
     public function testDivScalarOverMatrixZeroElementThrows(): void
     {

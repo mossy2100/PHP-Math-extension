@@ -112,7 +112,7 @@ static zend_result complex_calc_pow_general(
 		return SUCCESS;
 	}
 
-	/* Exponent -1: delegate to inv(). Safe - base != 0 already established above. */
+	/* Exponent -1: delegate to recip(). Safe - base != 0 already established above. */
 	if (other_real == -1.0 && other_imag == 0.0) {
 		return complex_calc_div(1.0, 0.0, real, imag, out_real, out_imag);
 	}

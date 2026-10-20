@@ -39,20 +39,21 @@ zend_result vector_properties_minit(void);
  */
 double vector_compute_magnitude(zend_object *obj);
 
-/* The computational cores of add()/sub()/mul()/div(), defined in vector_arithmetic.c. Shared with
- * the operator overloads (vector_operators.c) so operator and method results/exceptions are
- * guaranteed identical; vector_calc_div() is also shared with normalize() (vector_linear_algebra.c).
+/* The computational cores of add()/sub()/mul()/div()/hadamardMul()/hadamardDiv(), defined in
+ * vector_arithmetic.c. Shared with the operator overloads (vector_operators.c) so operator and
+ * method results/exceptions are guaranteed identical; vector_calc_div() is also shared with
+ * normalize() (vector_linear_algebra.c).
  * vector_calc_scalar_div() backs only the `/` operator's `float / Vector` form. There's no
- * equivalent named method, since Vector::div() divides the Vector by a scalar or a Vector, never a
- * scalar by the Vector. */
+ * equivalent named method, since Vector::div() divides the Vector by a scalar, never a scalar by
+ * the Vector. */
 zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value);
 zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *return_value);
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value);
 zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value);
-zend_result vector_calc_mul_vector(zend_object *self, zend_object *other, zval *return_value);
-zend_result vector_calc_div_vector(zend_object *self, zend_object *other, zval *return_value);
+zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval *return_value);
+zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval *return_value);
 
 /* Builds a 1xN / Nx1 Matrix from this Vector's elements, defined in vector_conversion.c. Shared
  * between toRowMatrix()/toColumnMatrix() themselves and mul()'s Matrix branch (vector_arithmetic.c)

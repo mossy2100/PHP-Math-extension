@@ -144,7 +144,7 @@ For `Vector * Matrix`, the `Vector` is treated as a 1×n row matrix and multipli
 multiplication. The number of rows in the `Matrix` must equal the `Vector`'s count. The `Matrix * Vector` operation is
 documented in [Matrix Operators](Matrix.md#-multiply).
 
-`Vector * Vector` is the Hadamard (element-wise) product, matching [`mul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#mul) with a vector. The vectors must have the same
+`Vector * Vector` is the Hadamard (element-wise) product, matching [`hadamardMul()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamardmul). The vectors must have the same
 count. For the other ways to multiply two vectors, call the method: [`dot()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#dot), [`cross()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#cross) or [`outer()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#outer).
 
 **Throws:**
@@ -174,12 +174,12 @@ $v * $m;    // [1, 2]  ($v is treated as a 1×2 row matrix)
 
 **Equivalence table:**
 
-| Operation   | Equivalent to   |
-| ----------- | --------------- |
-| `$v * $x`   | `$v->mul($x)`   |
-| `$x * $v`   | `$v->mul($x)`   |
-| `$v1 * $v2` | `$v1->mul($v2)` |
-| `$v * $m`   | `$v->mul($m)`   |
+| Operation   | Equivalent to           |
+| ----------- | ----------------------- |
+| `$v * $x`   | `$v->mul($x)`           |
+| `$x * $v`   | `$v->mul($x)`           |
+| `$v1 * $v2` | `$v1->hadamardMul($v2)` |
+| `$v * $m`   | `$v->mul($m)`           |
 
 ---
 
@@ -193,10 +193,10 @@ $result = $v1 / $v2;  // Vector / Vector → Vector (Hadamard division)
 
 All three forms are element-wise, and not commutative. `$x / $v` divides the scalar by each element of the
 `Vector` in turn. There's no equivalent method for it, but the equivalence table shows how to get the same result. It
-throws `ArithmeticException` if any of the vector's elements equal zero, matching `reciprocal()`.
+throws `ArithmeticException` if any of the vector's elements equal zero, matching `hadamardInv()`.
 
-`Vector / Vector` divides each element of `$v1` by the matching element of `$v2`, matching [`div()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#div) with a vector. The
-vectors must have the same count, and it throws `ArithmeticException` if any element of `$v2` is zero.
+`Vector / Vector` divides each element of `$v1` by the matching element of `$v2`, matching [`hadamardDiv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md#hadamarddiv). The vectors
+must have the same count, and it throws `ArithmeticException` if any element of `$v2` is zero.
 
 Unsupported form:
 
@@ -230,11 +230,11 @@ $v1 / $v2;  // [2, 3, 1.5]
 
 **Equivalence table:**
 
-| Operation   | Equivalent to               |
-| ----------- | --------------------------- |
-| `$v / $x`   | `$v->div($x)`               |
-| `$x / $v`   | `$v->reciprocal()->mul($x)` |
-| `$v1 / $v2` | `$v1->div($v2)`             |
+| Operation   | Equivalent to                |
+| ----------- | ---------------------------- |
+| `$v / $x`   | `$v->div($x)`                |
+| `$x / $v`   | `$v->hadamardInv()->mul($x)` |
+| `$v1 / $v2` | `$v1->hadamardDiv($v2)`      |
 
 ---
 

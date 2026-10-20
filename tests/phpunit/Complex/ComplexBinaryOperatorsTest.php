@@ -429,24 +429,24 @@ class ComplexBinaryOperatorsTest extends TestCase
     #region Inverting with 1 / z or z ** -1 tests.
 
     /**
-     * Test that 1 / $z, $z ** -1, and $z->inv() all give the same multiplicative inverse.
+     * Test that 1 / $z, $z ** -1, and $z->recip() all give the same multiplicative inverse.
      */
     public function testInvertingEquivalence(): void
     {
         $z = new Complex(3, 4);
 
-        $inv = $z->inv();
+        $recip = $z->recip();
         $viaDivision = 1 / $z;
         $viaPower = $z ** -1;
 
-        $this->assertSame(0.12, $inv->real);
-        $this->assertSame(-0.16, $inv->imaginary);
-        $this->assertEquals($inv, $viaDivision);
-        $this->assertEquals($inv, $viaPower);
+        $this->assertSame(0.12, $recip->real);
+        $this->assertSame(-0.16, $recip->imaginary);
+        $this->assertEquals($recip, $viaDivision);
+        $this->assertEquals($recip, $viaPower);
     }
 
     /**
-     * Test that both inverting forms throw ArithmeticException for a zero operand, matching inv().
+     * Test that both inverting forms throw ArithmeticException for a zero operand, matching recip().
      */
     public function testInvertingZeroThrows(): void
     {

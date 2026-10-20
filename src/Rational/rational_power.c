@@ -189,8 +189,8 @@ static bool rational_exact_root(zend_long n, zend_long q, zend_long *out)
  *
  * Matches the PHP package's Rational::pow() exactly, including its shortcuts (exponent 0, base 0,
  * exponent 1/2/-1, exponent ZEND_LONG_MIN) - the exponent-2 and exponent-ZEND_LONG_MIN branches
- * reuse rational_calc_mul()/rational_calc_inv() (rational_arithmetic.c) directly, same as the PHP
- * source's sqr()/mul()/inv() delegations.
+ * reuse rational_calc_mul()/rational_calc_recip() (rational_arithmetic.c) directly, same as the PHP
+ * source's sqr()/mul()/recip() delegations.
  */
 zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, zval *return_value)
 {
@@ -219,13 +219,13 @@ zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, 
 		return rational_calc_mul(num, den, num, den, return_value);
 	}
 
-	/* Exponent -1: delegate to inv(). Safe - base != 0 already established above. */
+	/* Exponent -1: delegate to recip(). Safe - base != 0 already established above. */
 	if (exponent == -1) {
-		return rational_calc_inv(num, den, return_value);
+		return rational_calc_recip(num, den, return_value);
 	}
 
 	/* Exponent ZEND_LONG_MIN: negating it directly (as the general negative-exponent branch
-	 * below does) would overflow, so it's handled via pow(ZEND_LONG_MAX)->mul(this)->inv()
+	 * below does) would overflow, so it's handled via pow(ZEND_LONG_MAX)->mul(this)->recip()
 	 * instead, matching the PHP source's own special case for exactly this reason. */
 	if (exponent == ZEND_LONG_MIN) {
 		zval tmp;
@@ -244,20 +244,20 @@ zend_result rational_calc_pow(zend_long num, zend_long den, zend_long exponent, 
 		rational_read_parts(Z_OBJ(mul_result), &mul_num, &mul_den);
 		zval_ptr_dtor(&mul_result);
 
-		return rational_calc_inv(mul_num, mul_den, return_value);
+		return rational_calc_recip(mul_num, mul_den, return_value);
 	}
 
 	/* Handle negative exponents by taking the reciprocal. -exponent is always safe here:
 	 * exponent < 0 and exponent != ZEND_LONG_MIN (handled above). */
 	if (exponent < 0) {
-		zval inv;
-		if (rational_calc_inv(num, den, &inv) == FAILURE) {
+		zval recip;
+		if (rational_calc_recip(num, den, &recip) == FAILURE) {
 			return FAILURE;
 		}
-		zend_long inv_num, inv_den;
-		rational_read_parts(Z_OBJ(inv), &inv_num, &inv_den);
-		zend_result result = rational_calc_pow(inv_num, inv_den, -exponent, return_value);
-		zval_ptr_dtor(&inv);
+		zend_long recip_num, recip_den;
+		rational_read_parts(Z_OBJ(recip), &recip_num, &recip_den);
+		zend_result result = rational_calc_pow(recip_num, recip_den, -exponent, return_value);
+		zval_ptr_dtor(&recip);
 		return result;
 	}
 

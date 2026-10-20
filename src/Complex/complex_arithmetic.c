@@ -1,7 +1,7 @@
 /*
  * complex_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Complex: neg(), inv(), conj(), add(),
+ * Unary and binary arithmetic methods for OceanMoon\Math\Complex: neg(), recip(), conj(), add(),
  * sub(), mul(), div(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
  * of the PHP package's Complex class.
  */
@@ -74,11 +74,11 @@ PHP_METHOD(OceanMoon_Math_Complex, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::inv(): Complex
+/* {{{ OceanMoon\Math\Complex::recip(): Complex
  *
- * Matches the PHP package's Complex::inv(): `new self(1)->div($this)`.
+ * Matches the PHP package's Complex::recip(): `new self(1)->div($this)`.
  */
-PHP_METHOD(OceanMoon_Math_Complex, inv)
+PHP_METHOD(OceanMoon_Math_Complex, recip)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

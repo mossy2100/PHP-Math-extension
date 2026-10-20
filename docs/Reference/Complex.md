@@ -400,20 +400,20 @@ $x *= new Complex(1, 2);   // $x is now the Complex 2 + 4i
 
 ## Inverting with `1 / z` or `z ** -1`
 
-The fluent API provided by the package includes an `inv()` method, which inverts a `Complex`. The operators give you a
+The fluent API provided by the package includes a `recip()` method, which inverts a `Complex`. The operators give you a
 couple of alternative ways to achieve the same thing.
 
 Since `$x / $z` is supported (see `/` above), `1 / $z` computes the same multiplicative inverse as
-[`$z->inv()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#inv). `$z ** -1` gives the same result via `pow()` too, since raising to the power -1 is the mathematical
-definition of a multiplicative inverse. All three throw `ArithmeticException` if `$z` is zero, matching `inv()`.
+[`$z->recip()`](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md#recip). `$z ** -1` gives the same result via `pow()` too, since raising to the power -1 is the mathematical
+definition of a multiplicative inverse. All three throw `ArithmeticException` if `$z` is zero, matching `recip()`.
 
 **Example:**
 
 ```php
 $z = new Complex(3, 4);
-$z->inv();  // 0.12 - 0.16i
-1 / $z;     // 0.12 - 0.16i, same result
-$z ** -1;   // 0.12 - 0.16i, same result
+$z->recip();  // 0.12 - 0.16i
+1 / $z;       // 0.12 - 0.16i, same result
+$z ** -1;     // 0.12 - 0.16i, same result
 ```
 
 ---

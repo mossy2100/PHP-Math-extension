@@ -1,8 +1,8 @@
 /*
  * vector_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Vector: neg(), reciprocal(), add(),
- * sub(), mul(), div(). Mirrors the "Unary arithmetic methods"/
+ * Unary and binary arithmetic methods for OceanMoon\Math\Vector: neg(), hadamardInv(), add(),
+ * sub(), mul(), div(), hadamardMul(), hadamardDiv(). Mirrors the "Unary arithmetic methods"/
  * "Binary arithmetic methods" regions of the PHP package's Vector class.
  *
  * vector_calc_div() is factored out here (rather than inlined in the div() method body) because
@@ -25,7 +25,7 @@
 
 /* {{{ vector_check_same_count
  *
- * Shared by add()/sub() and mul()/div()'s Vector branches: checks $other has the same count as self,
+ * Shared by add()/sub() and hadamardMul()/hadamardDiv(): checks $other has the same count as self,
  * throwing LengthException with the given operation-specific message otherwise.
  */
 static zend_result vector_check_same_count(zend_object *self, zend_object *other, const char *verb)
@@ -75,11 +75,11 @@ PHP_METHOD(OceanMoon_Math_Vector, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::reciprocal(): Vector
+/* {{{ OceanMoon\Math\Vector::hadamardInv(): Vector
  *
- * Matches the PHP package's Vector::reciprocal(): element-wise reciprocal.
+ * Matches the PHP package's Vector::hadamardInv(): element-wise reciprocal.
  */
-PHP_METHOD(OceanMoon_Math_Vector, reciprocal)
+PHP_METHOD(OceanMoon_Math_Vector, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -298,45 +298,38 @@ zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::mul(float|Vector|Matrix $other): Vector
+/* {{{ OceanMoon\Math\Vector::mul(float|Matrix $multiplier): Vector
  *
- * Matches the PHP package's Vector::mul(): scalar branch scales every element; Vector branch is
- * element-wise (Hadamard); Matrix branch converts this Vector to a row Matrix, multiplies by
- * $other, and extracts the (only) resulting row as a Vector.
+ * Matches the PHP package's Vector::mul(): scalar branch scales every element; Matrix branch
+ * converts this Vector to a row Matrix, multiplies by $multiplier, and extracts the (only)
+ * resulting row as a Vector.
  */
 PHP_METHOD(OceanMoon_Math_Vector, mul)
 {
-	zval *other;
+	zval *multiplier;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(other)
+		Z_PARAM_ZVAL(multiplier)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 
-	if (Z_TYPE_P(other) == IS_DOUBLE || Z_TYPE_P(other) == IS_LONG) {
-		double scalar = Z_TYPE_P(other) == IS_DOUBLE ? Z_DVAL_P(other) : (double) Z_LVAL_P(other);
+	if (Z_TYPE_P(multiplier) == IS_DOUBLE || Z_TYPE_P(multiplier) == IS_LONG) {
+		double scalar = Z_TYPE_P(multiplier) == IS_DOUBLE ? Z_DVAL_P(multiplier) : (double) Z_LVAL_P(multiplier);
 		if (vector_calc_mul_scalar(self, scalar, return_value) == FAILURE) {
 			RETURN_THROWS();
 		}
 		return;
 	}
 
-	if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), vector_ce_Vector)) {
-		if (vector_calc_mul_vector(self, Z_OBJ_P(other), return_value) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), matrix_ce_Matrix)) {
+	if (Z_TYPE_P(multiplier) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(multiplier), matrix_ce_Matrix)) {
 		zend_argument_type_error(
-			1, "must be of type OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(other)
+			1, "must be of type OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(multiplier)
 		);
 		RETURN_THROWS();
 	}
 
-	if (vector_calc_mul_matrix(self, Z_OBJ_P(other), return_value) == FAILURE) {
+	if (vector_calc_mul_matrix(self, Z_OBJ_P(multiplier), return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -394,7 +387,7 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
  * The computational core of the `/` operator's `float / Vector` form (vector_operators.c) -
  * Vector has no named method for this direction, only the operator (`Vector / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
- * $vector->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().
+ * $vector->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv().
  */
 zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value)
 {
@@ -435,50 +428,32 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::div(float|Vector $other): Vector
+/* {{{ OceanMoon\Math\Vector::div(float $scalar): Vector
  *
- * Matches the PHP package's Vector::div(): Vector branch is element-wise (Hadamard); scalar branch
- * divides every element.
+ * Matches the PHP package's Vector::div(): divides every element by the scalar.
  */
 PHP_METHOD(OceanMoon_Math_Vector, div)
 {
-	zval *other;
+	double scalar;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(other)
+		Z_PARAM_DOUBLE(scalar)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-
-	if (Z_TYPE_P(other) == IS_OBJECT && instanceof_function(Z_OBJCE_P(other), vector_ce_Vector)) {
-		if (vector_calc_div_vector(self, Z_OBJ_P(other), return_value) == FAILURE) {
-			RETURN_THROWS();
-		}
-		return;
-	}
-
-	if (Z_TYPE_P(other) != IS_DOUBLE && Z_TYPE_P(other) != IS_LONG) {
-		zend_argument_type_error(
-			1, "must be of type OceanMoon\\Math\\Vector|float, %s given", zend_zval_value_name(other)
-		);
-		RETURN_THROWS();
-	}
-
-	double scalar = Z_TYPE_P(other) == IS_DOUBLE ? Z_DVAL_P(other) : (double) Z_LVAL_P(other);
-	if (vector_calc_div(self, scalar, return_value) == FAILURE) {
+	if (vector_calc_div(Z_OBJ_P(ZEND_THIS), scalar, return_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
 /* }}} */
 
-/* {{{ vector_calc_mul_vector
+/* {{{ vector_calc_hadamard_mul
  *
- * The core of mul()'s Vector branch, shared with the `*` operator's `Vector * Vector` form
- * (vector_operators.c). Matches the PHP package's Vector::mul(): element-wise (Hadamard) product.
+ * The core of hadamardMul(), shared with the `*` operator's `Vector * Vector` form
+ * (vector_operators.c). Matches the PHP package's Vector::hadamardMul(): element-wise product.
  */
-zend_result vector_calc_mul_vector(zend_object *self, zend_object *other, zval *return_value)
+zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval *return_value)
 {
-	if (vector_check_same_count(self, other, "multiply by") == FAILURE) {
+	if (vector_check_same_count(self, other, "compute Hadamard product with") == FAILURE) {
 		return FAILURE;
 	}
 
@@ -492,7 +467,7 @@ zend_result vector_calc_mul_vector(zend_object *self, zend_object *other, zval *
 		double a, b;
 		vector_read_element(self, i, &a);
 		vector_read_element(other, i, &b);
-		if (vector_write_result(result, i, a * b, "multiply the given Vectors") == FAILURE) {
+		if (vector_write_result(result, i, a * b, "compute Hadamard product of the given Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -503,14 +478,32 @@ zend_result vector_calc_mul_vector(zend_object *self, zend_object *other, zval *
 }
 /* }}} */
 
-/* {{{ vector_calc_div_vector
+/* {{ OceanMoon\Math\Vector::hadamardMul(Vector $other): Vector
  *
- * The core of div()'s Vector branch, shared with the `/` operator's `Vector / Vector` form
- * (vector_operators.c). Matches the PHP package's Vector::div(): element-wise (Hadamard) quotient.
+ * Matches the PHP package's Vector::hadamardMul().
  */
-zend_result vector_calc_div_vector(zend_object *self, zend_object *other, zval *return_value)
+PHP_METHOD(OceanMoon_Math_Vector, hadamardMul)
 {
-	if (vector_check_same_count(self, other, "divide by") == FAILURE) {
+	zval *other;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (vector_calc_hadamard_mul(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ vector_calc_hadamard_div
+ *
+ * The core of hadamardDiv(), shared with the `/` operator's `Vector / Vector` form
+ * (vector_operators.c). Matches the PHP package's Vector::hadamardDiv(): element-wise quotient.
+ */
+zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval *return_value)
+{
+	if (vector_check_same_count(self, other, "compute Hadamard quotient with") == FAILURE) {
 		return FAILURE;
 	}
 
@@ -534,7 +527,7 @@ zend_result vector_calc_div_vector(zend_object *self, zend_object *other, zval *
 			return FAILURE;
 		}
 
-		if (vector_write_result(result, i, a / b, "divide the given Vectors") == FAILURE) {
+		if (vector_write_result(result, i, a / b, "compute Hadamard quotient of the given Vectors") == FAILURE) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
 			return FAILURE;
@@ -542,5 +535,23 @@ zend_result vector_calc_div_vector(zend_object *self, zend_object *other, zval *
 	}
 
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{ OceanMoon\Math\Vector::hadamardDiv(Vector $other): Vector
+ *
+ * Matches the PHP package's Vector::hadamardDiv().
+ */
+PHP_METHOD(OceanMoon_Math_Vector, hadamardDiv)
+{
+	zval *other;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(other, vector_ce_Vector)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (vector_calc_hadamard_div(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(other), return_value) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */

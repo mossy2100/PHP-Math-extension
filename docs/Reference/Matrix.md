@@ -188,7 +188,7 @@ $result = $x / $m;  // int|float / Matrix → Matrix
 
 Both forms are element-wise, and not commutative. `$x / $m` divides the scalar by each element of the
 `Matrix` in turn. There's no equivalent named method for this direction. `Matrix::div()` only ever divides the `Matrix`
-by a scalar, never the reverse. It throws `ArithmeticException` for a zero element, matching `reciprocal()`. This is
+by a scalar, never the reverse. It throws `ArithmeticException` for a zero element, matching `hadamardInv()`. This is
 distinct from `x * A⁻¹` (inverse scaling). Use `$x * $m ** -1` (or `$x * $m->inv()`) for that instead.
 
 Unsupported form:
@@ -218,10 +218,10 @@ $m = Matrix::fromArray([[1, 2], [4, 8]]);
 
 **Equivalence table:**
 
-| Operation | Equivalent to               |
-| --------- | --------------------------- |
-| `$m / $x` | `$m->div($x)`               |
-| `$x / $m` | `$m->reciprocal()->mul($x)` |
+| Operation | Equivalent to                |
+| --------- | ---------------------------- |
+| `$m / $x` | `$m->div($x)`                |
+| `$x / $m` | `$m->hadamardInv()->mul($x)` |
 
 ---
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: de22ba39e72613745f12048b604d675339e05f49 */
+ * Stub hash: 1acec746e42847b44a6a695f84bd29fe47a3cf6d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OceanMoon_Math_Complex___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real, IS_DOUBLE, 0, "0")
@@ -34,7 +34,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Complex_neg, 0, 0, OceanMoon\\Math\\Complex, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OceanMoon_Math_Complex_inv arginfo_class_OceanMoon_Math_Complex_neg
+#define arginfo_class_OceanMoon_Math_Complex_recip arginfo_class_OceanMoon_Math_Complex_neg
 
 #define arginfo_class_OceanMoon_Math_Complex_conj arginfo_class_OceanMoon_Math_Complex_neg
 
@@ -168,7 +168,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Rational_neg arginfo_class_OceanMoon_Math_Rational_abs
 
-#define arginfo_class_OceanMoon_Math_Rational_inv arginfo_class_OceanMoon_Math_Rational_abs
+#define arginfo_class_OceanMoon_Math_Rational_recip arginfo_class_OceanMoon_Math_Rational_abs
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Rational_add, 0, 1, OceanMoon\\Math\\Rational, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Rational, MAY_BE_LONG, NULL)
@@ -232,7 +232,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_neg, 0, 0, OceanMoon\\Math\\Vector, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_OceanMoon_Math_Vector_reciprocal arginfo_class_OceanMoon_Math_Vector_neg
+#define arginfo_class_OceanMoon_Math_Vector_hadamardInv arginfo_class_OceanMoon_Math_Vector_neg
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_add, 0, 1, OceanMoon\\Math\\Vector, 0)
 	ZEND_ARG_OBJ_INFO(0, other, OceanMoon\\Math\\Vector, 0)
@@ -241,12 +241,16 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_OceanMoon_Math_Vector_sub arginfo_class_OceanMoon_Math_Vector_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_mul, 0, 1, OceanMoon\\Math\\Vector, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix, MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, multiplier, OceanMoon\\Math\\Matrix, MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OceanMoon_Math_Vector_div, 0, 1, OceanMoon\\Math\\Vector, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, other, OceanMoon\\Math\\Vector, MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_TYPE_INFO(0, scalar, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_OceanMoon_Math_Vector_hadamardMul arginfo_class_OceanMoon_Math_Vector_add
+
+#define arginfo_class_OceanMoon_Math_Vector_hadamardDiv arginfo_class_OceanMoon_Math_Vector_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OceanMoon_Math_Vector_dot, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_OBJ_INFO(0, other, OceanMoon\\Math\\Vector, 0)
@@ -351,7 +355,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_OceanMoon_Math_Matrix_neg arginfo_class_OceanMoon_Math_Vector_toRowMatrix
 
-#define arginfo_class_OceanMoon_Math_Matrix_reciprocal arginfo_class_OceanMoon_Math_Vector_toRowMatrix
+#define arginfo_class_OceanMoon_Math_Matrix_hadamardInv arginfo_class_OceanMoon_Math_Vector_toRowMatrix
 
 #define arginfo_class_OceanMoon_Math_Matrix_inv arginfo_class_OceanMoon_Math_Vector_toRowMatrix
 
@@ -413,7 +417,7 @@ ZEND_METHOD(OceanMoon_Math_Complex, isReal);
 ZEND_METHOD(OceanMoon_Math_Complex, equal);
 ZEND_METHOD(OceanMoon_Math_Complex, approxEqual);
 ZEND_METHOD(OceanMoon_Math_Complex, neg);
-ZEND_METHOD(OceanMoon_Math_Complex, inv);
+ZEND_METHOD(OceanMoon_Math_Complex, recip);
 ZEND_METHOD(OceanMoon_Math_Complex, conj);
 ZEND_METHOD(OceanMoon_Math_Complex, add);
 ZEND_METHOD(OceanMoon_Math_Complex, sub);
@@ -461,7 +465,7 @@ ZEND_METHOD(OceanMoon_Math_Rational, approxEqual);
 ZEND_METHOD(OceanMoon_Math_Rational, approxCompare);
 ZEND_METHOD(OceanMoon_Math_Rational, abs);
 ZEND_METHOD(OceanMoon_Math_Rational, neg);
-ZEND_METHOD(OceanMoon_Math_Rational, inv);
+ZEND_METHOD(OceanMoon_Math_Rational, recip);
 ZEND_METHOD(OceanMoon_Math_Rational, add);
 ZEND_METHOD(OceanMoon_Math_Rational, sub);
 ZEND_METHOD(OceanMoon_Math_Rational, mul);
@@ -484,11 +488,13 @@ ZEND_METHOD(OceanMoon_Math_Vector, set);
 ZEND_METHOD(OceanMoon_Math_Vector, equal);
 ZEND_METHOD(OceanMoon_Math_Vector, approxEqual);
 ZEND_METHOD(OceanMoon_Math_Vector, neg);
-ZEND_METHOD(OceanMoon_Math_Vector, reciprocal);
+ZEND_METHOD(OceanMoon_Math_Vector, hadamardInv);
 ZEND_METHOD(OceanMoon_Math_Vector, add);
 ZEND_METHOD(OceanMoon_Math_Vector, sub);
 ZEND_METHOD(OceanMoon_Math_Vector, mul);
 ZEND_METHOD(OceanMoon_Math_Vector, div);
+ZEND_METHOD(OceanMoon_Math_Vector, hadamardMul);
+ZEND_METHOD(OceanMoon_Math_Vector, hadamardDiv);
 ZEND_METHOD(OceanMoon_Math_Vector, dot);
 ZEND_METHOD(OceanMoon_Math_Vector, cross);
 ZEND_METHOD(OceanMoon_Math_Vector, outer);
@@ -519,7 +525,7 @@ ZEND_METHOD(OceanMoon_Math_Matrix, equal);
 ZEND_METHOD(OceanMoon_Math_Matrix, approxEqual);
 ZEND_METHOD(OceanMoon_Math_Matrix, resize);
 ZEND_METHOD(OceanMoon_Math_Matrix, neg);
-ZEND_METHOD(OceanMoon_Math_Matrix, reciprocal);
+ZEND_METHOD(OceanMoon_Math_Matrix, hadamardInv);
 ZEND_METHOD(OceanMoon_Math_Matrix, inv);
 ZEND_METHOD(OceanMoon_Math_Matrix, add);
 ZEND_METHOD(OceanMoon_Math_Matrix, sub);
@@ -551,7 +557,7 @@ static const zend_function_entry class_OceanMoon_Math_Complex_methods[] = {
 	ZEND_ME(OceanMoon_Math_Complex, equal, arginfo_class_OceanMoon_Math_Complex_equal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, approxEqual, arginfo_class_OceanMoon_Math_Complex_approxEqual, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, neg, arginfo_class_OceanMoon_Math_Complex_neg, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Complex, inv, arginfo_class_OceanMoon_Math_Complex_inv, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Complex, recip, arginfo_class_OceanMoon_Math_Complex_recip, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, conj, arginfo_class_OceanMoon_Math_Complex_conj, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, add, arginfo_class_OceanMoon_Math_Complex_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Complex, sub, arginfo_class_OceanMoon_Math_Complex_sub, ZEND_ACC_PUBLIC)
@@ -603,7 +609,7 @@ static const zend_function_entry class_OceanMoon_Math_Rational_methods[] = {
 	ZEND_ME(OceanMoon_Math_Rational, approxCompare, arginfo_class_OceanMoon_Math_Rational_approxCompare, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, abs, arginfo_class_OceanMoon_Math_Rational_abs, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, neg, arginfo_class_OceanMoon_Math_Rational_neg, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Rational, inv, arginfo_class_OceanMoon_Math_Rational_inv, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Rational, recip, arginfo_class_OceanMoon_Math_Rational_recip, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, add, arginfo_class_OceanMoon_Math_Rational_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, sub, arginfo_class_OceanMoon_Math_Rational_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Rational, mul, arginfo_class_OceanMoon_Math_Rational_mul, ZEND_ACC_PUBLIC)
@@ -630,11 +636,13 @@ static const zend_function_entry class_OceanMoon_Math_Vector_methods[] = {
 	ZEND_ME(OceanMoon_Math_Vector, equal, arginfo_class_OceanMoon_Math_Vector_equal, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, approxEqual, arginfo_class_OceanMoon_Math_Vector_approxEqual, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, neg, arginfo_class_OceanMoon_Math_Vector_neg, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Vector, reciprocal, arginfo_class_OceanMoon_Math_Vector_reciprocal, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Vector, hadamardInv, arginfo_class_OceanMoon_Math_Vector_hadamardInv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, add, arginfo_class_OceanMoon_Math_Vector_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, sub, arginfo_class_OceanMoon_Math_Vector_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, mul, arginfo_class_OceanMoon_Math_Vector_mul, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, div, arginfo_class_OceanMoon_Math_Vector_div, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Vector, hadamardMul, arginfo_class_OceanMoon_Math_Vector_hadamardMul, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Vector, hadamardDiv, arginfo_class_OceanMoon_Math_Vector_hadamardDiv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, dot, arginfo_class_OceanMoon_Math_Vector_dot, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, cross, arginfo_class_OceanMoon_Math_Vector_cross, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Vector, outer, arginfo_class_OceanMoon_Math_Vector_outer, ZEND_ACC_PUBLIC)
@@ -669,7 +677,7 @@ static const zend_function_entry class_OceanMoon_Math_Matrix_methods[] = {
 	ZEND_ME(OceanMoon_Math_Matrix, approxEqual, arginfo_class_OceanMoon_Math_Matrix_approxEqual, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, resize, arginfo_class_OceanMoon_Math_Matrix_resize, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, neg, arginfo_class_OceanMoon_Math_Matrix_neg, ZEND_ACC_PUBLIC)
-	ZEND_ME(OceanMoon_Math_Matrix, reciprocal, arginfo_class_OceanMoon_Math_Matrix_reciprocal, ZEND_ACC_PUBLIC)
+	ZEND_ME(OceanMoon_Math_Matrix, hadamardInv, arginfo_class_OceanMoon_Math_Matrix_hadamardInv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, inv, arginfo_class_OceanMoon_Math_Matrix_inv, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, add, arginfo_class_OceanMoon_Math_Matrix_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(OceanMoon_Math_Matrix, sub, arginfo_class_OceanMoon_Math_Matrix_sub, ZEND_ACC_PUBLIC)
@@ -762,7 +770,9 @@ static zend_class_entry *register_class_OceanMoon_Math_Vector(zend_class_entry *
 
 	zval property_count_default_value;
 	ZVAL_LONG(&property_count_default_value, 0);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_COUNT), &property_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string *property_count_name = zend_string_init("count", sizeof("count") - 1, 1);
+	zend_declare_typed_property(class_entry, property_count_name, &property_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_count_name);
 
 	zval property_data_default_value;
 	ZVAL_EMPTY_ARRAY(&property_data_default_value);

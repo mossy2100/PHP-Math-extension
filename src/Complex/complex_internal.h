@@ -72,7 +72,7 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag);
 /* Formats a complex number from its parts, matching __toString(). Defined in complex_conversion.c. */
 zend_string *complex_parts_to_str(double real, double imag);
 
-/* The computational core of div(), shared with inv() and the `/` operator (complex_operators.c), using Smith's
+/* The computational core of div(), shared with recip() and the `/` operator (complex_operators.c), using Smith's
  * algorithm. Defined in complex_arithmetic.c. Returns FAILURE (with an exception already thrown) for a zero
  * divisor, or a result too large to represent. */
 zend_result complex_calc_div(double a, double b, double c, double d, double *out_real, double *out_imag);

@@ -39,7 +39,7 @@ final class Complex implements \Stringable, \ArrayAccess
 
     public function neg(): Complex {}
 
-    public function inv(): Complex {}
+    public function recip(): Complex {}
 
     public function conj(): Complex {}
 
@@ -148,7 +148,7 @@ final class Rational implements \Stringable
 
     public function neg(): Rational {}
 
-    public function inv(): Rational {}
+    public function recip(): Rational {}
 
     public function add(Rational|int $other): Rational {}
 
@@ -204,15 +204,19 @@ final class Vector implements \Stringable, \Countable, \ArrayAccess, \IteratorAg
 
     public function neg(): Vector {}
 
-    public function reciprocal(): Vector {}
+    public function hadamardInv(): Vector {}
 
     public function add(Vector $other): Vector {}
 
     public function sub(Vector $other): Vector {}
 
-    public function mul(float|Vector|Matrix $other): Vector {}
+    public function mul(float|Matrix $multiplier): Vector {}
 
-    public function div(float|Vector $other): Vector {}
+    public function div(float $scalar): Vector {}
+
+    public function hadamardMul(Vector $other): Vector {}
+
+    public function hadamardDiv(Vector $other): Vector {}
 
     public function dot(Vector $other): float {}
 
@@ -284,7 +288,7 @@ final class Matrix implements \Stringable, \Countable, \ArrayAccess, \IteratorAg
 
     public function neg(): Matrix {}
 
-    public function reciprocal(): Matrix {}
+    public function hadamardInv(): Matrix {}
 
     public function inv(): Matrix {}
 

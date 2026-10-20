@@ -1,7 +1,7 @@
 /*
  * matrix_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Matrix: neg(), reciprocal(), inv(),
+ * Unary and binary arithmetic methods for OceanMoon\Math\Matrix: neg(), hadamardInv(), inv(),
  * add(), sub(), mul(), div(), hadamardMul(), hadamardDiv(). Mirrors the "Unary arithmetic methods"
  * and "Binary arithmetic methods" regions of the PHP package's Matrix class.
  */
@@ -110,11 +110,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::reciprocal(): Matrix
+/* {{{ OceanMoon\Math\Matrix::hadamardInv(): Matrix
  *
- * Matches the PHP package's Matrix::reciprocal(): element-wise reciprocal, not the matrix inverse.
+ * Matches the PHP package's Matrix::hadamardInv(): element-wise reciprocal, not the matrix inverse.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, reciprocal)
+PHP_METHOD(OceanMoon_Math_Matrix, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -638,7 +638,7 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
  * The computational core of the `/` operator's `float / Matrix` form (matrix_operators.c) -
  * Matrix has no named method for this direction, only the operator (`Matrix / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
- * $matrix->reciprocal()`. Throws ArithmeticException for a zero element, matching reciprocal().
+ * $matrix->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv().
  */
 zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *return_value)
 {
@@ -739,7 +739,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardMul)
 			double a, b;
 			matrix_read_element(self, i, j, &a);
 			matrix_read_element(other_obj, i, j, &b);
-			if (matrix_write_result(result, i, j, a * b, "multiply the given Matrices element-wise") == FAILURE) {
+			if (matrix_write_result(result, i, j, a * b, "compute Hadamard product of the given Matrices") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
@@ -800,7 +800,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardDiv)
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
 			}
-			if (matrix_write_result(result, i, j, a / divisor, "divide the given Matrices element-wise") == FAILURE) {
+			if (matrix_write_result(result, i, j, a / divisor, "compute Hadamard quotient of the given Matrices") == FAILURE) {
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
