@@ -85,12 +85,65 @@ zend_result complex_calc_exp(double real, double imag, double *out_real, double 
 }
 /* }}} */
 
+/* {{{ complex_sum_exact
+ *
+ * Matches the PHP package's Complex::sumExact(): a + b exactly, as the rounded sum and its rounding error (Knuth's
+ * two-sum). Relies on the build's -ffp-contract=off, like all the extension's float code.
+ */
+static void complex_sum_exact(double a, double b, double *sum, double *err)
+{
+	*sum = a + b;
+	double b_virtual = *sum - a;
+	*err = (a - (*sum - b_virtual)) + (b - b_virtual);
+}
+/* }}} */
+
+/* {{{ complex_square_exact
+ *
+ * Matches the PHP package's Complex::squareExact(): x² exactly, as the rounded square and its rounding error, by
+ * Dekker's product with Veltkamp's split. Valid when the square doesn't overflow.
+ */
+static void complex_square_exact(double x, double *square, double *err)
+{
+	*square = x * x;
+	double c = 134217729.0 * x;
+	double high = c - (c - x);
+	double low = x - high;
+	*err = ((high * high - *square) + 2 * high * low) + low * low;
+}
+/* }}} */
+
+/* {{{ complex_calc_ln_magnitude
+ *
+ * Matches the PHP package's Complex::calcLnMagnitude(): ln|z|, accurate near |z| = 1. Between 0.5 and 2, it's
+ * log1p(|z|² - 1) / 2, with |z|² - 1 = x² + y² - 1 calculated almost exactly, rather than log(|z|), which loses most
+ * of its digits as |z| is rounded first.
+ */
+static double complex_calc_ln_magnitude(double real, double imag, double magnitude)
+{
+	if (magnitude <= 0.5 || magnitude >= 2) {
+		return log(magnitude);
+	}
+
+	/* Add the terms from largest to smallest: the two squares, then -1, then the squares' rounding errors. */
+	double x2, x2_err, y2, y2_err, sum, err1, err2, err3, err4;
+	complex_square_exact(fmax(fabs(real), fabs(imag)), &x2, &x2_err);
+	complex_square_exact(fmin(fabs(real), fabs(imag)), &y2, &y2_err);
+	complex_sum_exact(x2, -1.0, &sum, &err1);
+	complex_sum_exact(sum, y2, &sum, &err2);
+	complex_sum_exact(sum, x2_err, &sum, &err3);
+	complex_sum_exact(sum, y2_err, &sum, &err4);
+
+	return log1p(sum + ((err1 + err2) + (err3 + err4))) / 2;
+}
+/* }}} */
+
 /* {{{ complex_calc_ln
  *
  * Matches the PHP package's Complex::ln(): the natural logarithm. Uses the same shortcuts for
  * well-known values, falling back to ln(z) = ln|z| + i*arg(z) for the general case - reading the
  * magnitude/phase properties off obj (rather than recomputing hypot()/atan2() directly) so the
- * result matches the PHP package's `log($this->magnitude)`/`$this->phase` exactly.
+ * result matches the PHP package's calcLnMagnitude()/`$this->phase` exactly.
  *
  * Returns FAILURE (with ArithmeticException already thrown) if obj represents zero.
  */
@@ -135,7 +188,7 @@ zend_result complex_calc_ln(zend_object *obj, double *out_real, double *out_imag
 	double magnitude, phase;
 	complex_read_magnitude_phase(obj, &magnitude, &phase);
 
-	*out_real = log(magnitude);
+	*out_real = complex_calc_ln_magnitude(real, imag, magnitude);
 	*out_imag = phase;
 	return SUCCESS;
 }

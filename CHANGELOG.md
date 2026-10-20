@@ -105,6 +105,12 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Complex::sqr()` and `pow(2)` lost digits in the real part when the parts are close in size,** e.g. 32 ulps for
+  `266.21 - 263.63i`. The real part is now (a - b)(a + b) rather than a² - b². `sqr()` is now slightly more accurate
+  than `$z->mul($z)`, and just as quick. `** 2` uses it too.
+- **`Complex::ln()` lost digits in the real part near |z| = 1,** e.g. `new Complex(1, 1e-10)->ln()` had a real part of
+  0 rather than 5e-21. Between |z| = 0.5 and 2, ln|z| is now calculated from |z|² - 1, computed almost exactly, and is
+  within 2 ulps. `log()` and `pow()` with a non-integer exponent benefit too. Matches the package.
 - **`Complex::sqrt()` was inaccurate when both parts are subnormal,** by up to about 4e10 ulps, e.g. for
   `new Complex(3.4e-314, -1.5e-315)`. It's now within 2 ulps, matching the package.
 - **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.

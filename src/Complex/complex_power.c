@@ -25,6 +25,18 @@ static zend_result complex_calc_pow_general(
 	double *out_imag
 );
 
+/* {{{ complex_calc_sqr
+ *
+ * Matches the PHP package's Complex::sqr(): with z = a + bi, the real part is (a - b)(a + b) rather than a² - b²,
+ * which loses most of its digits when |a| ≈ |b|. The caller checks the result.
+ */
+static void complex_calc_sqr(double real, double imag, double *out_real, double *out_imag)
+{
+	*out_real = (real - imag) * (real + imag);
+	*out_imag = 2 * (real * imag);
+}
+/* }}} */
+
 /* {{{ complex_calc_pow
  *
  * The computational core of pow(), factored out so complex_do_operation() (complex_operators.c)
@@ -99,10 +111,9 @@ static zend_result complex_calc_pow_general(
 	double *out_imag
 )
 {
-	/* Exponent 2: delegate to sqr(). The caller checks the result. */
+	/* Exponent 2: delegate to sqr(), which is more accurate. The caller checks the result. */
 	if (other_real == 2.0 && other_imag == 0.0) {
-		*out_real = real * real - imag * imag;
-		*out_imag = real * imag + imag * real;
+		complex_calc_sqr(real, imag, out_real, out_imag);
 		return SUCCESS;
 	}
 
@@ -205,8 +216,8 @@ PHP_METHOD(OceanMoon_Math_Complex, pow)
 
 /* {{{ OceanMoon\Math\Complex::sqr(): Complex
  *
- * Matches the PHP package's Complex::sqr(): this * this. Equivalent to pow(2), but more
- * efficient/readable.
+ * Matches the PHP package's Complex::sqr(): equivalent to pow(2), and slightly more accurate than mul(). See
+ * complex_calc_sqr().
  */
 PHP_METHOD(OceanMoon_Math_Complex, sqr)
 {
@@ -215,8 +226,8 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
 	double real, imag;
 	complex_read_parts(Z_OBJ_P(ZEND_THIS), &real, &imag);
 
-	double out_real = real * real - imag * imag;
-	double out_imag = real * imag + imag * real;
+	double out_real, out_imag;
+	complex_calc_sqr(real, imag, &out_real, &out_imag);
 	if (complex_create_result(return_value, out_real, out_imag, "square the given Complex") == FAILURE) {
 		RETURN_THROWS();
 	}
