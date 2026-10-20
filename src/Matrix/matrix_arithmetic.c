@@ -20,25 +20,6 @@
 #include "exceptions.h"
 #include "floats.h"
 
-/* {{{ matrix_check_scalar
- *
- * Throws DomainException "Invalid scalar: <value>. Must be finite." for a non-finite scalar argument, matching the
- * PHP package's Matrix::mul() and div().
- */
-static zend_result matrix_check_scalar(double scalar)
-{
-	if (zend_finite(scalar)) {
-		return SUCCESS;
-	}
-	zend_string *scalar_str = math_floats_to_str(scalar);
-	zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-	zend_string_release(msg);
-	return FAILURE;
-}
-/* }}} */
-
 /* {{{ matrix_scalar_operation
  *
  * Formats an overflow message's operation for a scalar operand, e.g. "multiply the given Matrix by 1.0E+200". The
@@ -434,7 +415,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, sub)
  */
 zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
 {
-	if (matrix_check_scalar(scalar) == FAILURE) {
+	if (math_floats_check_scalar(scalar) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -609,7 +590,7 @@ zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *return_value)
 {
 	/* Dividing by ±INF would otherwise silently give a zero matrix. */
-	if (matrix_check_scalar(scalar) == FAILURE) {
+	if (math_floats_check_scalar(scalar) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -650,10 +631,15 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
  * The computational core of the `/` operator's `float / Matrix` form (matrix_operators.c) -
  * Matrix has no named method for this direction, only the operator (`Matrix / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
- * $matrix->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv().
+ * $matrix->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv(). Throws
+ * DomainException for a non-finite scalar, like the other scalar forms.
  */
 zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *return_value)
 {
+	if (math_floats_check_scalar(scalar) == FAILURE) {
+		return FAILURE;
+	}
+
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
 

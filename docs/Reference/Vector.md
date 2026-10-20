@@ -208,7 +208,7 @@ Unsupported form:
 **Throws:**
 
 - `ArithmeticException` if dividing by zero, or by a vector with a zero element.
-- `DomainException` if the scalar divisor isn't finite.
+- `DomainException` if the scalar isn't finite, on either side.
 - `LengthException` if the vectors have different counts.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't a `Vector`, `int` or `float`.

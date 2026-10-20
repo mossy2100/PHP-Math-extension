@@ -66,6 +66,20 @@ zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol)
 	return math_floats_validate_tolerance("absolute", abs_tol);
 }
 
+zend_result math_floats_check_scalar(double scalar)
+{
+	if (zend_finite(scalar)) {
+		return SUCCESS;
+	}
+
+	zend_string *scalar_str = math_floats_to_str(scalar);
+	zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
+	zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
+	zend_string_release(msg);
+	return FAILURE;
+}
+
 double math_floats_normalize_zero(double value)
 {
 	return value == 0.0 ? 0.0 : value;

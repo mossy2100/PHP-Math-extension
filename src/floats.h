@@ -38,6 +38,14 @@ bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol
 zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol);
 /* }}} */
 
+/* {{{ math_floats_check_scalar
+ *
+ * Throws DomainException "Invalid scalar: <value>. Must be finite." and returns FAILURE for a non-finite scalar operand
+ * of a Vector or Matrix operation, matching the PHP package's mul() and div().
+ */
+zend_result math_floats_check_scalar(double scalar);
+/* }}} */
+
 /* {{{ math_floats_normalize_zero
  *
  * Ports OceanMoon\Core\Floats::normalizeZero(): collapses -0.0 to 0.0, leaving every other value

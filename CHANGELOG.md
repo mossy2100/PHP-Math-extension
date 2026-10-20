@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`INF / $v` and `NAN / $m` threw `OverflowException`,** and `INF / new Vector(0)` returned an empty Vector. A
+  non-finite scalar on the left of `/` now throws `DomainException`, as on the right and with `*`.
 - **`Matrix::inv()` inverted some exactly singular matrices (breaking),** matching the package, e.g. a 4×4 or larger one
   with a row that's a combination of two others. The inverse is now also rejected if the condition number shows it has
   no correct digits, which also rejects e.g. the 12×12 Hilbert matrix.

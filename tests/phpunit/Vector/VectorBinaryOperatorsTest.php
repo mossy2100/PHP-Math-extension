@@ -282,6 +282,24 @@ class VectorBinaryOperatorsTest extends TestCase
     }
 
     /**
+     * Test int|float / Vector with a non-finite scalar throws DomainException, as for the other scalar forms, even for
+     * an empty Vector.
+     */
+    public function testDivNonFiniteScalarOverVectorThrows(): void
+    {
+        foreach ([Vector::fromArray([1, 2]), new Vector(0)] as $v) {
+            foreach ([INF, -INF, NAN] as $scalar) {
+                try {
+                    $result = $scalar / $v;
+                    $this->fail('Expected DomainException was not thrown for ' . var_export($scalar, true) . '.');
+                } catch (DomainException $e) {
+                    $this->assertStringEndsWith('. Must be finite.', $e->getMessage());
+                }
+            }
+        }
+    }
+
+    /**
      * Test Vector / Vector is Hadamard (element-wise) division, matching hadamardDiv().
      */
     public function testDivVectorOverVector(): void

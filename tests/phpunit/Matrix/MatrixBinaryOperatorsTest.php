@@ -374,6 +374,24 @@ class MatrixBinaryOperatorsTest extends TestCase
     }
 
     /**
+     * Test int|float / Matrix with a non-finite scalar throws DomainException, as for the other scalar forms, even for
+     * an empty Matrix.
+     */
+    public function testDivNonFiniteScalarOverMatrixThrows(): void
+    {
+        foreach ([Matrix::fromArray([[1, 2], [4, 8]]), new Matrix(0, 0)] as $m) {
+            foreach ([INF, -INF, NAN] as $scalar) {
+                try {
+                    $result = $scalar / $m;
+                    $this->fail('Expected DomainException was not thrown for ' . var_export($scalar, true) . '.');
+                } catch (DomainException $e) {
+                    $this->assertStringEndsWith('. Must be finite.', $e->getMessage());
+                }
+            }
+        }
+    }
+
+    /**
      * Test Matrix / Matrix is unsupported: ambiguous between A*B⁻¹, B⁻¹*A, and Hadamard division.
      */
     public function testDivMatrixOverMatrixThrows(): void

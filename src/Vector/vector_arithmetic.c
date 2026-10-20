@@ -220,15 +220,11 @@ PHP_METHOD(OceanMoon_Math_Vector, sub)
  */
 zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *return_value)
 {
-	zend_string *scalar_str = math_floats_to_str(scalar);
-
-	if (!zend_finite(scalar)) {
-		zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
-		zend_string_release(scalar_str);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (math_floats_check_scalar(scalar) == FAILURE) {
 		return FAILURE;
 	}
+
+	zend_string *scalar_str = math_floats_to_str(scalar);
 
 	zend_long count = vector_read_count(self);
 	if (vector_create(return_value, count) == FAILURE) {
@@ -343,12 +339,7 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 {
 	/* Dividing by ±INF would otherwise silently give a zero vector. */
-	if (!zend_finite(scalar)) {
-		zend_string *scalar_str = math_floats_to_str(scalar);
-		zend_string *msg = strpprintf(0, "Invalid scalar: %s. Must be finite.", ZSTR_VAL(scalar_str));
-		zend_string_release(scalar_str);
-		zend_throw_exception(spl_ce_DomainException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
+	if (math_floats_check_scalar(scalar) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -387,10 +378,15 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
  * The computational core of the `/` operator's `float / Vector` form (vector_operators.c) -
  * Vector has no named method for this direction, only the operator (`Vector / float` is div(),
  * above). Element-wise: divides $scalar by each element in turn, equivalent to `$scalar *
- * $vector->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv().
+ * $vector->hadamardInv()`. Throws ArithmeticException for a zero element, matching hadamardInv(). Throws
+ * DomainException for a non-finite scalar, like the other scalar forms.
  */
 zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return_value)
 {
+	if (math_floats_check_scalar(scalar) == FAILURE) {
+		return FAILURE;
+	}
+
 	zend_long count = vector_read_count(obj);
 	if (vector_create(return_value, count) == FAILURE) {
 		return FAILURE;

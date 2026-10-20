@@ -202,7 +202,7 @@ Unsupported form:
 **Throws:**
 
 - `ArithmeticException` if dividing by zero, or by a matrix with a zero element.
-- `DomainException` if the scalar divisor isn't finite.
+- `DomainException` if the scalar isn't finite, on either side.
 - `OverflowException` if the result is too large to represent.
 - `TypeError` if the other operand isn't an `int` or `float`.
 
