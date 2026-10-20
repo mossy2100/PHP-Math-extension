@@ -103,8 +103,9 @@ Two things worth noting from the fuller set of extensions:
 - **The result type isn't always a constant.** `RationalBinaryOperatorExtension::specifyType()` has to compute the
   return type from the operand types, because a genuine `float` operand widens the whole expression to `float` (matching
   this extension's numeric-widening behavior for `Rational`; see `docs/Reference/Rational.md`), while an `int` operand
-  widens to `Rational`. `MatrixBinaryOperatorExtension::specifyType()` similarly special-cases `Matrix * Vector` to
-  return `Vector` rather than `Matrix`, matching `Matrix::mul()`'s conditional return type.
+  widens to `Rational`. An operand that may be either, e.g. `int|float`, gives `Rational|float`.
+  `MatrixBinaryOperatorExtension::specifyType()` similarly special-cases `Matrix * Vector` to return `Vector` rather
+  than `Matrix`, matching `Matrix::mul()`'s conditional return type.
 - **Cross-class operators are split by which side is "self".** `Vector * Matrix` is handled entirely by
   `VectorBinaryOperatorExtension` (since `Vector` is always the left operand there), while `Matrix * Vector` is handled
   entirely by `MatrixBinaryOperatorExtension`. Each extension only claims the forms its own class's `do_operation`

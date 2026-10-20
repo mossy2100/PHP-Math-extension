@@ -98,6 +98,8 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **PHPStan typed `Rational + int|float` as `Rational`,** but it's a `float` at runtime when the operand is a float. An
+  operand that may be a float now gives `Rational|float`, for all the arithmetic operators.
 - **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They stripped
   `\f` but not NUL, so e.g. `Complex::fromString("3\0")` threw `FormatException`. They now strip what `trim()` does.
 - **`INF / $v` and `NAN / $m` threw `OverflowException`,** and `INF / new Vector(0)` returned an empty Vector. A

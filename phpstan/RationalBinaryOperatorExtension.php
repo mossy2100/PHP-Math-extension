@@ -23,7 +23,8 @@ use PHPStan\Type\UnionType;
  * type widening" section, a genuine float operand widens the whole operation to float, so
  * specifyType() must compute the result type from the operand types rather than returning a
  * constant. ** follows the same rule as the other operators: a float if either operand is a
- * float, otherwise a Rational (see rational_do_pow() in rational_operators.c).
+ * float, otherwise a Rational (see rational_do_pow() in rational_operators.c). An operand that
+ * may or may not be a float, e.g. int|float, gives Rational|float.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag.
  */
@@ -60,18 +61,23 @@ final class RationalBinaryOperatorExtension implements OperatorTypeSpecifyingExt
 
     public function specifyType(string $operatorSigil, Type $leftSide, Type $rightSide): Type
     {
-        $rationalType = new ObjectType(Rational::class);
+        $floatType = new FloatType();
+        $leftIsFloat = $floatType->isSuperTypeOf($leftSide);
+        $rightIsFloat = $floatType->isSuperTypeOf($rightSide);
 
-        if ($this->isFloat($leftSide) || $this->isFloat($rightSide)) {
-            return new FloatType();
+        // A float on either side makes the result a float. A side that may or may not be a float, e.g. int|float,
+        // makes it either.
+        if ($leftIsFloat->yes() || $rightIsFloat->yes()) {
+            return $floatType;
         }
 
-        return $rationalType;
-    }
+        $rationalType = new ObjectType(Rational::class);
 
-    private function isFloat(Type $type): bool
-    {
-        return (new FloatType())->isSuperTypeOf($type)->yes();
+        if ($leftIsFloat->no() && $rightIsFloat->no()) {
+            return $rationalType;
+        }
+
+        return new UnionType([$rationalType, $floatType]);
     }
 
     private function isRationalOrScalar(Type $type): bool
