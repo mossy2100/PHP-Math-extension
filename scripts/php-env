@@ -24,7 +24,7 @@
 #
 # Why 8.4 is the default: a compiled extension is ABI-locked to the exact PHP minor version it was
 # built against, and the published module targets 8.4 (the minimum PHP for the OceanMoon packages -
-# see README, "Why PHP 8.4?"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
+# see README, "Supported PHP Versions"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
 # inheriting PATH therefore silently builds for the wrong version.
 
 target_version="${PHP_VERSION:-8.4}"

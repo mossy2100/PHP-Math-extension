@@ -2,7 +2,7 @@
  * vector_operators.c
  *
  * Operator overloading for OceanMoon\Math\Vector: +, -, *, / (plus unary - (negate), which PHP
- * lowers to `$v * -1` - see vector_do_operation()'s doc comment). Mirrors docs/Vector.md in this
+ * lowers to `$v * -1` - see vector_do_operation()'s doc comment). Mirrors docs/Reference/Vector.md in this
  * repo - these operators only exist here in the extension; the userland package has no way to
  * overload operators, so it exposes the same behavior only as named methods (add()/sub()/mul()/
  * div()/hadamardMul()/hadamardDiv()/neg()). No `**` (raising a vector to a power isn't a valid
@@ -15,9 +15,8 @@
  * are element-wise (Hadamard), matching hadamardMul()/hadamardDiv().
  *
  * Installed on vector_object_handlers in vector_properties_minit() (vector_properties.c),
- * alongside that table's `read_property` override - Vector, like Complex, needs two different
- * handler overrides on the one custom handlers table, so there's no separate handlers table or
- * create_object function here.
+ * alongside that table's other overrides (clone_obj, read_property, write_property, has_property
+ * and get_properties_for), so there's no separate handlers table or create_object function here.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -53,14 +52,14 @@ static zend_result vector_operand_scalar(zval *zv, double *out)
 /* {{{ vector_do_operation
  *
  * The `do_operation` object handler backing Vector's operator overloads: +, -, *, / - see
- * docs/Vector.md for the exact supported forms of each. Unary - needs no special-casing here: PHP
+ * docs/Reference/Vector.md for the exact supported forms of each. Unary - needs no special-casing here: PHP
  * has no dedicated opcode for it, and the compiler lowers `-$v` to `$v * -1` (unary + similarly
  * lowers to `$v * 1`), so both are already covered by the ZEND_MUL case below.
  *
  * Called by the engine whenever at least one operand of one of the above opcodes is an object with
  * a do_operation handler (op1 checked first, then op2). Returning FAILURE (without throwing) for
  * any unsupported operand combination - including Vector + int and Vector / Matrix, both
- * deliberately unsupported per docs/Vector.md - lets the engine fall
+ * deliberately unsupported per docs/Reference/Vector.md - lets the engine fall
  * through to its own standard "Unsupported operand types" TypeError, or try the other operand's
  * handler if it has one (e.g. `Matrix * Vector`, handled by matrix_do_operation instead).
  *

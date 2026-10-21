@@ -435,7 +435,7 @@ zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval
 }
 /* }}} */
 
-/* {{ OceanMoon\Math\Vector::hadamardMul(Vector $other): Vector
+/* {{{ OceanMoon\Math\Vector::hadamardMul(Vector $other): Vector
  *
  * Matches the PHP package's Vector::hadamardMul().
  */
@@ -470,7 +470,7 @@ zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval
 }
 /* }}} */
 
-/* {{ OceanMoon\Math\Vector::hadamardDiv(Vector $other): Vector
+/* {{{ OceanMoon\Math\Vector::hadamardDiv(Vector $other): Vector
  *
  * Matches the PHP package's Vector::hadamardDiv().
  */

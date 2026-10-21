@@ -62,7 +62,8 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 	/* Mark the read-only properties of every class: the PHP package declares them private(set), and
 	 * gen_stub cannot express asymmetric visibility (it emits ZEND_ACC_PUBLIC for `private(set)` without
 	 * a word), so the flags are applied here, after registration. The engine then rejects userland
-	 * writes while the extension's own writes, via zend_update_property(ce, ...), keep working. */
+	 * writes while the extension's own writes, straight to the property slot via math_types_write_property()
+	 * (types.h), keep working. */
 	static const char *const complex_read_only[] = { "real", "imaginary", "magnitude", "phase" };
 	math_types_mark_read_only(complex_ce_Complex, complex_read_only, sizeof(complex_read_only) / sizeof(complex_read_only[0]));
 	static const char *const rational_read_only[] = { "numerator", "denominator" };

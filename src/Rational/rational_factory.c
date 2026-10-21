@@ -296,8 +296,9 @@ PHP_METHOD(OceanMoon_Math_Rational, fromFloat)
  *
  * Calls the real userland filter_var($str, $filter) - rather than reimplementing
  * FILTER_VALIDATE_INT's parsing rules in C - so fromString()'s int detection is guaranteed
- * byte-for-byte identical to the PHP package's, which uses the same function. $filter is looked up by its constant name each call rather than hard-coded, in case
- * its integer value ever changes (unlikely, but free to guard against).
+ * byte-for-byte identical to the PHP package's, which uses the same function. $filter is looked
+ * up by its constant name each call rather than hard-coded, in case its integer value ever changes
+ * (unlikely, but free to guard against).
  *
  * Returns FAILURE only if the FILTER_VALIDATE_* constant itself can't be found (ext/filter not
  * loaded) or the call itself fails - an unmatched value (filter_var() returning false) is still

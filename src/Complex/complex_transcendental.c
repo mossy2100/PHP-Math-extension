@@ -321,7 +321,8 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 		/* Built-in constant for log_10(e). */
 		result = complex_create(return_value, M_LOG10E, 0.0);
 	} else if (imag == 0.0 && base_imag == 0.0 && real > 0.0 && base_real > 0.0) {
-		/* Positive reals only: log() returns the principal value only there, so a negative real $this or $base takes the general branch below. */
+		/* Positive reals only: log() returns the principal value only there, so a negative real $this or $base
+		 * takes the general branch below. */
 		/* Matches PHP's log($x, $base), which uses log2() or log10() for those bases. */
 		double value = base_real == 2.0 ? log2(real) : base_real == 10.0 ? log10(real) : log(real) / log(base_real);
 		result = complex_create(return_value, value, 0.0);

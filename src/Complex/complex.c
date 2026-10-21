@@ -9,8 +9,7 @@
  * complex_minit()/complex_rinit() are called from the module's real
  * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION in ../oceanmoon_math.c, which owns module
  * lifecycle for the whole `math` extension. Everything in this directory is
- * Complex-specific; rational_*.c/vector_*.c/matrix_*.c (in their own
- * directories) will follow the same pattern once those classes are built.
+ * Complex-specific.
  *
  * Conversion methods (__toString) live in complex_conversion.c; comparison methods (equal/
  * approxEqual) live in complex_comparison.c; arithmetic/power/root/transcendental methods live in

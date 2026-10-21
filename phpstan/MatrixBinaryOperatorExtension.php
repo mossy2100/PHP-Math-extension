@@ -16,7 +16,7 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Matrix's binary operator overloading (+, -, *, /, **), which only exists at
  * the C level (the `do_operation` object handler in Matrix/matrix_operators.c) and so is otherwise
- * entirely invisible to static analysis - see docs/Matrix.md for the runtime behavior this
+ * entirely invisible to static analysis - see docs/Reference/Matrix.md for the runtime behavior this
  * mirrors. Same approach as ComplexBinaryOperatorExtension/RationalBinaryOperatorExtension.
  *
  * Unlike Rational, there's no float-widening rule here: every supported form results in a Matrix,

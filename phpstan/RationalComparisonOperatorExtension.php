@@ -18,7 +18,7 @@ use PHPStan\Type\UnionType;
  * which only exists at the C level (the `compare` object handler in
  * Rational/rational_operators.c) and so is otherwise entirely invisible to static analysis. `==`/
  * `!=` are covered here too, since PHP wires them to the same `compare` handler as an unavoidable
- * side effect of `<=>` existing - see docs/Rational.md. Never applies to ===/!==, which always
+ * side effect of `<=>` existing - see docs/Reference/Rational.md. Never applies to ===/!==, which always
  * mean reference identity for objects regardless of any compare handler.
  *
  * Registered in phpstan.neon via the phpstan.broker.operatorTypeSpecifyingExtension service tag,

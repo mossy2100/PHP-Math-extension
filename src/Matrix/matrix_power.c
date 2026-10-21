@@ -155,7 +155,7 @@ static zend_result matrix_calc_pow_general(zend_object *self, zend_long exponent
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::pow(int $exponent): Matrix
+/* {{{ OceanMoon\Math\Matrix::pow(int $exp): Matrix
  *
  * Matches the PHP package's Matrix::pow().
  */

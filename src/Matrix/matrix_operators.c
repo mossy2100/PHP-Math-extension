@@ -2,7 +2,7 @@
  * matrix_operators.c
  *
  * Operator overloading for OceanMoon\Math\Matrix: +, -, *, /, ** (plus unary - (negate), which PHP
- * lowers to `$A * -1` - see matrix_do_operation()'s doc comment). Mirrors docs/Matrix.md in this
+ * lowers to `$A * -1` - see matrix_do_operation()'s doc comment). Mirrors docs/Reference/Matrix.md in this
  * repo - these operators only exist here in the extension; the userland package has no way to
  * overload operators, so it exposes the same behavior only as named methods (add()/sub()/mul()/
  * div()/pow()/neg()). No comparison operators (matrices have no natural sort order).
@@ -13,8 +13,7 @@
  * so operator and method results/exceptions are guaranteed identical.
  *
  * Installed on matrix_object_handlers in matrix_minit() (matrix.c), alongside that table's
- * `clone_obj` override - Matrix, like Vector, needs two different handler overrides on the one
- * custom handlers table.
+ * `clone_obj` override, which deep-clones the rows.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -49,7 +48,7 @@ static zend_result matrix_operand_scalar(zval *zv, double *out)
 /* {{{ matrix_do_operation
  *
  * The `do_operation` object handler backing Matrix's operator overloads: +, -, *, /, ** - see
- * docs/Matrix.md for the exact supported forms of each. Unary - needs no special-casing here: PHP
+ * docs/Reference/Matrix.md for the exact supported forms of each. Unary - needs no special-casing here: PHP
  * has no dedicated opcode for it, and the compiler lowers `-$A` to `$A * -1` (unary + similarly
  * lowers to `$A * 1`), so both are already covered by the ZEND_MUL case below.
  *
@@ -57,7 +56,7 @@ static zend_result matrix_operand_scalar(zval *zv, double *out)
  * a do_operation handler (op1 checked first, then op2). Returning FAILURE (without throwing) for
  * any unsupported operand combination - including Matrix + int, Matrix * Matrix with incompatible
  * dimensions falling through to a thrown exception instead, Matrix / Matrix, and int ** Matrix, all
- * deliberately unsupported per docs/Matrix.md - lets the engine fall through to its own standard
+ * deliberately unsupported per docs/Reference/Matrix.md - lets the engine fall through to its own standard
  * "Unsupported operand types" TypeError, or try the other operand's handler if it has one (e.g.
  * `Vector * Matrix`, handled by vector_do_operation instead, since Vector is always op1 in that
  * expression and so is tried first).

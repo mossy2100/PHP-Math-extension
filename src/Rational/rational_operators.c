@@ -4,10 +4,10 @@
  * Operator overloading for OceanMoon\Math\Rational: +, -, *, /, ** (each accepting a Rational,
  * int, or float operand - see below for how a float operand changes the result type), plus
  * unary - (negate), and the comparison operators <, <=, >, >=, <=>, ==, != (all backed by a
- * single `compare` object handler). Mirrors docs/Rational.md in this repo - these operators
+ * single `compare` object handler). Mirrors docs/Reference/Rational.md in this repo - these operators
  * only exist here in the extension; the userland package has no way to overload operators, so
  * it exposes the same behavior only as named methods (add()/sub()/mul()/div()/pow()/neg()/
- * compare()/etc.). None of those arithmetic methods accepts a float operand (see docs/Rational.md's
+ * compare()/etc.). None of those arithmetic methods accepts a float operand (see docs/Reference/Rational.md's
  * "Numeric Type Widening" section for why the operators can support float where the methods can't).
  *
  * Numeric widening: when either operand of +, -, *, /, or ** is a genuine float, both operands
@@ -16,11 +16,10 @@
  * operand instead widens to Rational, and the result stays an exact Rational. The one exception
  * is `int ** Rational`, whose int base doesn't widen (see rational_calc_int_pow_rational()).
  *
- * Also owns installing the custom object handlers table (do_operation/compare) on
- * Rational's class entry - unlike Complex, Rational has no lazy computed properties needing
- * their own read_property override, so there's no separate rational_properties.c; this file's
- * rational_operators_minit() is the only place Rational needs a non-default handlers table at
- * all.
+ * Also owns installing the custom object handlers table (clone_obj/do_operation/compare/cast_object)
+ * on Rational's class entry. Rational has no computed properties, so unlike Complex and Vector there's
+ * no separate rational_properties.c; this file's rational_operators_minit() is the only place Rational
+ * needs a non-default handlers table at all.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -350,7 +349,7 @@ static zend_result rational_throw_unsupported_mod(zval *op1, zval *op2)
  * so it's already covered by the ZEND_MUL case. (Unary + similarly lowers to `$r * 1`.)
  *
  * For +, -, *, /, %: if either operand is a genuine float, both widen to float and
- * rational_do_float_operation() handles it (see docs/Rational.md's "Numeric Type Widening"
+ * rational_do_float_operation() handles it (see docs/Reference/Rational.md's "Numeric Type Widening"
  * section); otherwise an int operand widens to Rational and the exact-Rational path below
  * applies, matching add()/sub()/mul()/div()/mod().
  *
@@ -484,10 +483,8 @@ int rational_do_compare(zval *op1, zval *op2)
 /* }}} */
 
 /* The custom object handlers for Rational, installed by rational_create_object(). A copy of the
- * standard handlers with `do_operation`/`compare` overridden (and `clone_obj`, so a clone keeps
- * them), matching how
- * Complex/complex_properties.c installs Complex's (which also overrides `read_property`, for its
- * lazy computed properties - Rational has none, so this is the only override it needs). */
+ * standard handlers with `do_operation`/`compare`/`cast_object` overridden (and `clone_obj`, so a
+ * clone keeps them), matching how Complex/complex_properties.c installs Complex's. */
 static zend_object_handlers rational_object_handlers;
 
 /* {{{ rational_create_object

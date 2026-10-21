@@ -34,8 +34,9 @@ uint32_t rational_offset_denominator;
  *
  * Validate num/den and set numerator/denominator (in canonical, reduced form) on an
  * already-allocated Rational object. Shared by __construct() and rational_create() (used by
- * future from*() factory methods), mirroring how the PHP implementation's factory methods all
- * funnel through `new self(...)`, so the canonicalization logic lives in exactly one place.
+ * the from*() factory methods and every method that returns a new Rational), mirroring how the
+ * PHP implementation's factory methods all funnel through `new self(...)`, so the
+ * canonicalization logic lives in exactly one place.
  *
  * Ports the PHP source's __construct() body exactly, with two C-specific safety adjustments
  * neither needed in PHP:
@@ -122,9 +123,9 @@ zend_result rational_init(zend_object *obj, zend_long num, zend_long den)
 /* {{{ rational_create
  *
  * Allocate a new Rational object into return_value and initialize it via rational_init(). Used by
- * all the from*() factory paths (once they exist). If rational_init() throws, the object is freed
- * and return_value left undefined, since an operator's result, unlike a method's return value, is
- * not cleaned up by the engine.
+ * the from*() factory methods and every method that returns a new Rational. If rational_init()
+ * throws, the object is freed and return_value left undefined, since an operator's result, unlike
+ * a method's return value, is not cleaned up by the engine.
  */
 zend_result rational_create(zval *return_value, zend_long num, zend_long den)
 {
@@ -141,7 +142,7 @@ zend_result rational_create(zval *return_value, zend_long num, zend_long den)
 /* {{{ rational_read_parts
  *
  * Reads the numerator and denominator off a zend_object already known to be a Rational instance.
- * Shared by every rational_*.c implementation file (once they exist).
+ * Shared by every rational_*.c implementation file.
  */
 void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_den)
 {

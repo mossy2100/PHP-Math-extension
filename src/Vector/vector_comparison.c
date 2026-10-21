@@ -20,7 +20,7 @@
 #include "types.h"
 #include <float.h>
 
-/* {{{ vector_check_same_size_operand
+/* {{{ vector_check_operand
  *
  * Shared by equal() and approxEqual(): checks $other is a Vector, throwing InvalidArgumentException
  * otherwise. Matches the PHP package's own type check; the count comparison (returning false, not

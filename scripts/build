@@ -5,7 +5,7 @@
 # .c file) require phpize/configure to be re-run to pick them up - `make` alone would silently
 # keep building the old file list.
 #
-# Builds against PHP 8.4 by default (currently supports 8.4 and 8.5 - see README "Why PHP 8.4?"),
+# Builds against PHP 8.4 by default (currently supports 8.4 and 8.5 - see README "Supported PHP Versions"),
 # resolved by scripts/php-env rather than inherited from PATH, because the 8.4 formula is keg-only
 # and /opt/homebrew/bin/php is 8.5. A compiled extension is ABI-locked to the exact PHP minor
 # version it was built against (Zend Extension API number), so the resulting .so only loads under

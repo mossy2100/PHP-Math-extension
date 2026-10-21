@@ -2,7 +2,7 @@
  * rational_arithmetic.c
  *
  * Unary and binary arithmetic methods for OceanMoon\Math\Rational: abs(), neg(), recip(), add(),
- * sub(), mul(), div(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
+ * sub(), mul(), div(), mod(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
  * of the PHP package's Rational class.
  */
 
@@ -21,8 +21,9 @@
 /* {{{ rational_add_checked/rational_sub_checked/rational_mul_checked
  *
  * Thin wrappers around math_integers_add()/sub()/mul() that throw OverflowException with the
- * exact message Core\Integers::add()/sub()/mul() themselves use, matching the PHP package's
- * arithmetic methods (which call those directly and let the OverflowException propagate).
+ * message Core\Integers::add()/sub()/mul() use. The methods then replace it with one naming the
+ * operation, via math_rethrow_overflow(), chaining it as the previous exception, as the package
+ * does.
  */
 static zend_result rational_add_checked(zend_long a, zend_long b, zend_long *out)
 {

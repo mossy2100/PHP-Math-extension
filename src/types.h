@@ -1,8 +1,7 @@
 /*
  * types.h
  *
- * Shared type-inspection helpers, not specific to any one class - used by Complex's equal()/
- * approxEqual() today, and intended for Rational/Vector/Matrix's equivalents later.
+ * Shared type and property helpers, not specific to any one class - used by all four classes.
  */
 
 #ifndef PHP_MATH_TYPES_H

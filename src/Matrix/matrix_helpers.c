@@ -320,9 +320,10 @@ void matrix_lu_free(matrix_lu *lu)
  *
  * Mirrors Matrix::isIllConditioned(): true if the matrix is too ill-conditioned for its computed inverse to have any
  * correct digits. Calculates the 1-norm condition number, ||A||1 x ||A^-1||1, of the matrix with its columns and rows
- * scaled as in matrix_lu_decompose(), so a matrix that's merely badly scaled isn't penalised. For scaled B = R^-1 A C^-1,
- * where R and C are the diagonal matrices of row and column scales, B^-1 = C A^-1 R. A condition number of at least
- * 1 / (n x DBL_EPSILON) means the inverse is meaningless. Same operation order as the package, so bit-identical.
+ * scaled as in matrix_lu_decompose(), so a matrix that's merely badly scaled isn't penalised. For scaled
+ * B = R^-1 A C^-1, where R and C are the diagonal matrices of row and column scales, B^-1 = C A^-1 R. A condition
+ * number of at least 1 / (n x DBL_EPSILON) means the inverse is meaningless. Same operation order as the package, so
+ * bit-identical.
  */
 bool matrix_is_ill_conditioned(zend_object *matrix, zend_object *inverse, const matrix_lu *lu)
 {

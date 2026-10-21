@@ -15,7 +15,7 @@ use PHPStan\Type\UnionType;
 /**
  * Teaches PHPStan about Complex's binary operator overloading (+, -, *, /, **), which only exists
  * at the C level (the `do_operation` object handler in Complex/complex_operators.c) and so is
- * otherwise entirely invisible to static analysis - see docs/Complex.md for the runtime behavior
+ * otherwise entirely invisible to static analysis - see docs/Reference/Complex.md for the runtime behavior
  * this mirrors. Same problem, and same fix, as PHPStan needing this for GMP/BCMath, which is what
  * this extension type is designed for; see
  * https://phpstan.org/developing-extensions/operator-type-specifying-extensions.

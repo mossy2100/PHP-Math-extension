@@ -131,7 +131,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetUnset)
 }
 /* }}} */
 
-/* {{ OceanMoon\Math\Matrix::getIterator(): Traversable
+/* {{{ OceanMoon\Math\Matrix::getIterator(): Traversable
  *
  * Matches the PHP package's Matrix::getIterator(): an ArrayIterator over the rows. The $data array holds the
  * row Vector objects, so the rows are live, matching offsetGet().
@@ -145,4 +145,4 @@ PHP_METHOD(OceanMoon_Math_Matrix, getIterator)
 		RETURN_THROWS();
 	}
 }
-/* }} */
+/* }}} */

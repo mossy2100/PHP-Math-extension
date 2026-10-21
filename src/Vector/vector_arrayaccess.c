@@ -124,7 +124,7 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetUnset)
 }
 /* }}} */
 
-/* {{ OceanMoon\Math\Vector::getIterator(): Traversable
+/* {{{ OceanMoon\Math\Vector::getIterator(): Traversable
  *
  * Matches the PHP package's Vector::getIterator(): an ArrayIterator over the elements. The elements are a
  * snapshot, as ArrayIterator copies the array.
@@ -138,4 +138,4 @@ PHP_METHOD(OceanMoon_Math_Vector, getIterator)
 		RETURN_THROWS();
 	}
 }
-/* }} */
+/* }}} */

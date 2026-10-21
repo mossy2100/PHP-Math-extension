@@ -3,7 +3,7 @@
  *
  * Operator overloading for OceanMoon\Math\Complex: +, -, *, /, ** (each accepting a Complex or
  * int|float operand on either side), plus unary - (negate) and ~ (conjugate). Mirrors
- * docs/Complex.md in this repo - these operators only exist here in the extension; the userland
+ * docs/Reference/Complex.md in this repo - these operators only exist here in the extension; the userland
  * package has no way to overload operators, so it exposes the same behavior only as named methods
  * (add()/sub()/mul()/div()/pow()/neg()/conj()).
  */

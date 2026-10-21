@@ -1,8 +1,7 @@
 /*
  * floats.h
  *
- * Shared floating-point helpers, not specific to any one class - used by Complex's
- * approxEqual() today, and intended for Rational/Vector/Matrix's equivalents later.
+ * Shared floating-point helpers, not specific to any one class - used by all four classes.
  */
 
 #ifndef PHP_MATH_FLOATS_H

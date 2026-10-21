@@ -189,7 +189,7 @@ static zend_result complex_calc_pow_general(
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::pow(Complex|float $other): Complex */
+/* {{{ OceanMoon\Math\Complex::pow(Complex|float $exp): Complex */
 PHP_METHOD(OceanMoon_Math_Complex, pow)
 {
 	zval *other;
