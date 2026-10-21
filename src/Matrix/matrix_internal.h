@@ -23,6 +23,9 @@ zend_result matrix_write_result(zend_object *obj, zend_long row, zend_long col, 
 
 void matrix_throw_index_error(const char *axis, zend_long index, zend_long size);
 zend_result matrix_check_range(const char *axis, zend_long start, zend_long count, zend_long size);
+zend_result matrix_set_row(zend_object *self, zend_long row, zend_object *vec);
+zend_result matrix_identity(zend_long size, zval *out);
+void matrix_to_data_array(zend_object *obj, zval *out);
 
 double matrix_calc_det(zval *data_array);
 void matrix_get_minor(zend_object *obj, zend_long exclude_row, zend_long exclude_col, zval *out_array);

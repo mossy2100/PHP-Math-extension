@@ -15,6 +15,44 @@
 #include "matrix_internal.h"
 #include "../../oceanmoon_math_arginfo.h"
 
+/* {{{ matrix_set_row
+ *
+ * Copies vec's elements into the row's existing Vector in place, preserving the row's object identity. Shared by
+ * setRow() and offsetSet() (matrix_arrayaccess.c). Returns FAILURE, with an exception thrown, if the row index is out
+ * of range or vec's count doesn't match the column count.
+ */
+zend_result matrix_set_row(zend_object *self, zend_long row, zend_object *vec)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	if (row < 0 || row >= row_count) {
+		matrix_throw_index_error("row", row, row_count);
+		return FAILURE;
+	}
+
+	zend_long vector_count = vector_read_count(vec);
+	zend_long column_count = matrix_read_column_count(self);
+	if (vector_count != column_count) {
+		zend_string *msg = strpprintf(
+			0, "Cannot set row due to incorrect Vector count: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
+			vector_count, column_count
+		);
+		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
+		zend_string_release(msg);
+		return FAILURE;
+	}
+
+	for (zend_long col = 0; col < column_count; col++) {
+		double value;
+		if (vector_read_element(vec, col, &value) == FAILURE
+			|| matrix_write_element(self, row, col, value) == FAILURE) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::set(int $row, int $col, float $value): void
  *
  * Matches the PHP package's Matrix::set().
@@ -38,8 +76,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, set)
 
 /* {{{ OceanMoon\Math\Matrix::setRow(int $row, Vector $vec): void
  *
- * Matches the PHP package's Matrix::setRow(): copies $vec's elements into the row's existing
- * Vector in place, preserving the row's object identity.
+ * Matches the PHP package's Matrix::setRow(). See matrix_set_row().
  */
 PHP_METHOD(OceanMoon_Math_Matrix, setRow)
 {
@@ -51,32 +88,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, setRow)
 		Z_PARAM_OBJECT_OF_CLASS(vec, vector_ce_Vector)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	if (row < 0 || row >= row_count) {
-		matrix_throw_index_error("row", row, row_count);
+	if (matrix_set_row(Z_OBJ_P(ZEND_THIS), row, Z_OBJ_P(vec)) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	zend_object *vec_obj = Z_OBJ_P(vec);
-	zend_long vector_count = vector_read_count(vec_obj);
-	zend_long column_count = matrix_read_column_count(self);
-	if (vector_count != column_count) {
-		zend_string *msg = strpprintf(
-			0, "Cannot set row due to incorrect Vector count: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
-			vector_count, column_count
-		);
-		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
-		RETURN_THROWS();
-	}
-
-	for (zend_long col = 0; col < column_count; col++) {
-		double value;
-		vector_read_element(vec_obj, col, &value);
-		if (matrix_write_element(self, row, col, value) == FAILURE) {
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */

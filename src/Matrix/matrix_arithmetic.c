@@ -34,32 +34,6 @@ static zend_string *matrix_scalar_operation(const char *format, double scalar)
 }
 /* }}} */
 
-/* {{{ matrix_to_data_array
- *
- * Builds a list<list<float>> zval from a Matrix object, matching toArray()'s output - used by
- * inv()/det() as the input to matrix_calc_det().
- */
-static void matrix_to_data_array(zend_object *obj, zval *out)
-{
-	zend_long row_count = matrix_read_row_count(obj);
-	zend_long column_count = matrix_read_column_count(obj);
-
-	array_init_size(out, (uint32_t) row_count);
-	for (zend_long i = 0; i < row_count; i++) {
-		zval row;
-		array_init_size(&row, (uint32_t) column_count);
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(obj, i, j, &value);
-			zval v;
-			ZVAL_DOUBLE(&v, value);
-			zend_hash_next_index_insert(Z_ARRVAL(row), &v);
-		}
-		zend_hash_next_index_insert(Z_ARRVAL_P(out), &row);
-	}
-}
-/* }}} */
-
 /* {{{ OceanMoon\Math\Matrix::neg(): Matrix
  *
  * Matches the PHP package's Matrix::neg(): `$this->mul(-1)`.

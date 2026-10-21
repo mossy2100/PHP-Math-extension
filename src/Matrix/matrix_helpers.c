@@ -4,8 +4,8 @@
  * Private helpers for OceanMoon\Math\Matrix, not PHP-visible: matrix_calc_det() (mirrors
  * Matrix::calcDet()), matrix_get_minor() (mirrors Matrix::getMinor()), and the LU decomposition helpers
  * matrix_lu_decompose(), matrix_inv_from_lu() and matrix_is_ill_conditioned() (mirroring Matrix::luDecompose(),
- * Matrix::invFromLu() and Matrix::isIllConditioned()). Used by det() and inv() in matrix_linear_algebra.c and
- * matrix_arithmetic.c. Also matrix_throw_index_error() and
+ * Matrix::invFromLu() and Matrix::isIllConditioned()), and matrix_to_data_array(), which builds their input. Used by
+ * det() and inv() in matrix_linear_algebra.c and matrix_arithmetic.c. Also matrix_throw_index_error() and
  * matrix_check_range() (mirroring Matrix::indexMessage() and Matrix::checkRange()), for the index and range checks.
  */
 
@@ -73,6 +73,32 @@ zend_result matrix_check_range(const char *axis, zend_long start, zend_long coun
 	zend_throw_exception(spl_ce_OutOfRangeException, ZSTR_VAL(msg), 0);
 	zend_string_release(msg);
 	return FAILURE;
+}
+/* }}} */
+
+/* {{{ matrix_to_data_array
+ *
+ * Builds a list<list<float>> zval from a Matrix object, matching toArray()'s output. Used by inv() and det() as the
+ * input to matrix_calc_det() and matrix_lu_decompose().
+ */
+void matrix_to_data_array(zend_object *obj, zval *out)
+{
+	zend_long row_count = matrix_read_row_count(obj);
+	zend_long column_count = matrix_read_column_count(obj);
+
+	array_init_size(out, (uint32_t) row_count);
+	for (zend_long i = 0; i < row_count; i++) {
+		zval row;
+		array_init_size(&row, (uint32_t) column_count);
+		for (zend_long j = 0; j < column_count; j++) {
+			double value;
+			matrix_read_element(obj, i, j, &value);
+			zval v;
+			ZVAL_DOUBLE(&v, value);
+			zend_hash_next_index_insert(Z_ARRVAL(row), &v);
+		}
+		zend_hash_next_index_insert(Z_ARRVAL_P(out), &row);
+	}
 }
 /* }}} */
 

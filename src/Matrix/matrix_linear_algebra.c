@@ -64,22 +64,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 		RETURN_THROWS();
 	}
 
-	zend_long count = row_count;
 	zval data_array;
-	array_init_size(&data_array, (uint32_t) count);
-	for (zend_long i = 0; i < count; i++) {
-		zval row;
-		array_init_size(&row, (uint32_t) count);
-		for (zend_long j = 0; j < count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			zval v;
-			ZVAL_DOUBLE(&v, value);
-			zend_hash_next_index_insert(Z_ARRVAL(row), &v);
-		}
-		zend_hash_next_index_insert(Z_ARRVAL(data_array), &row);
-	}
-
+	matrix_to_data_array(self, &data_array);
 	double det = matrix_calc_det(&data_array);
 	zval_ptr_dtor(&data_array);
 

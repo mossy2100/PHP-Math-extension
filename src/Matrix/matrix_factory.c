@@ -143,6 +143,28 @@ PHP_METHOD(OceanMoon_Math_Matrix, fromArray)
 }
 /* }}} */
 
+/* {{{ matrix_identity
+ *
+ * Builds an identity Matrix of the given size into out. Shared by identity() and pow() (matrix_power.c). Returns
+ * FAILURE, with DomainException thrown, if size is negative.
+ */
+zend_result matrix_identity(zend_long size, zval *out)
+{
+	if (matrix_create(out, size, size) == FAILURE) {
+		return FAILURE;
+	}
+	zend_object *obj = Z_OBJ_P(out);
+	for (zend_long i = 0; i < size; i++) {
+		if (matrix_write_element(obj, i, i, 1.0) == FAILURE) {
+			zval_ptr_dtor(out);
+			ZVAL_UNDEF(out);
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::identity(int $size): Matrix */
 PHP_METHOD(OceanMoon_Math_Matrix, identity)
 {
@@ -152,17 +174,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, identity)
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (matrix_create(return_value, size, size) == FAILURE) {
+	if (matrix_identity(size, return_value) == FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *obj = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < size; i++) {
-		if (matrix_write_element(obj, i, i, 1.0) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */

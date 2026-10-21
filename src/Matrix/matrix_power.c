@@ -18,29 +18,6 @@
 #include "exceptions.h"
 #include "../../oceanmoon_math_arginfo.h"
 
-/* {{{ matrix_identity
- *
- * Builds an identity Matrix of the given size into *out. Mirrors Matrix::identity(), used
- * internally by matrix_pow_positive() (no bounds/exception handling needed here since $size is
- * always this->rowCount, already known valid).
- */
-static zend_result matrix_identity(zend_long size, zval *out)
-{
-	if (matrix_create(out, size, size) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *obj = Z_OBJ_P(out);
-	for (zend_long i = 0; i < size; i++) {
-		if (matrix_write_element(obj, i, i, 1.0) == FAILURE) {
-			zval_ptr_dtor(out);
-			ZVAL_UNDEF(out);
-			return FAILURE;
-		}
-	}
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ matrix_pow_positive
  *
  * Exponentiation by squaring for a positive $exponent (>= 1), used by pow() for its main case and

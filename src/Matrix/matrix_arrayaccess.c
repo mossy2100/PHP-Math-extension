@@ -107,33 +107,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetSet)
 		RETURN_THROWS();
 	}
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row = Z_LVAL_P(offset);
-	zend_long row_count = matrix_read_row_count(self);
-	if (row < 0 || row >= row_count) {
-		matrix_throw_index_error("row", row, row_count);
+	if (matrix_set_row(Z_OBJ_P(ZEND_THIS), Z_LVAL_P(offset), Z_OBJ_P(value)) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	zend_object *vec_obj = Z_OBJ_P(value);
-	zend_long vector_count = vector_read_count(vec_obj);
-	zend_long column_count = matrix_read_column_count(self);
-	if (vector_count != column_count) {
-		zend_string *msg = strpprintf(
-			0, "Cannot set row due to incorrect Vector count: " ZEND_LONG_FMT ". Expected " ZEND_LONG_FMT ".",
-			vector_count, column_count
-		);
-		zend_throw_exception(spl_ce_LengthException, ZSTR_VAL(msg), 0);
-		zend_string_release(msg);
-		RETURN_THROWS();
-	}
-
-	for (zend_long col = 0; col < column_count; col++) {
-		double element;
-		vector_read_element(vec_obj, col, &element);
-		if (matrix_write_element(self, row, col, element) == FAILURE) {
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */
