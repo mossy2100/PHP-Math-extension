@@ -20,17 +20,132 @@
 #include "exceptions.h"
 #include "floats.h"
 
-/* {{{ matrix_scalar_operation
+/* Element-wise operations, for matrix_calc_elementwise(). */
+typedef enum {
+	MATRIX_NEG,
+	MATRIX_RECIPROCAL,
+	MATRIX_ADD,
+	MATRIX_SUB,
+	MATRIX_HADAMARD_MUL,
+	MATRIX_HADAMARD_DIV,
+	MATRIX_MUL_SCALAR,
+	MATRIX_DIV_SCALAR,
+	MATRIX_SCALAR_DIV
+} matrix_elementwise_op;
+
+/* {{{ matrix_calc_elementwise
  *
- * Formats an overflow message's operation for a scalar operand, e.g. "multiply the given Matrix by 1.0E+200". The
- * format has one %s, for the scalar. The caller releases the result.
+ * The shared core of the element-wise methods. Applies op to each element of self, with the same element of other or
+ * with scalar, and stores the results in a new Matrix in return_value. The caller has already checked other's
+ * dimensions and the scalar. Like the package, it works in row-major order, and fails at the first element that has a
+ * zero divisor (ArithmeticException) or a non-finite result (OverflowException "Cannot <operation>. The result would
+ * overflow.").
  */
-static zend_string *matrix_scalar_operation(const char *format, double scalar)
+static zend_result matrix_calc_elementwise(
+	matrix_elementwise_op op, zend_object *self, zend_object *other, double scalar, const char *operation,
+	zval *return_value
+)
+{
+	zend_long row_count = matrix_read_row_count(self);
+	zend_long column_count = matrix_read_column_count(self);
+
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		return FAILURE;
+	}
+	double *other_values = NULL;
+	if (other != NULL) {
+		other_values = matrix_read_all(other);
+		if (other_values == NULL) {
+			efree(values);
+			return FAILURE;
+		}
+	}
+
+	zend_result status = SUCCESS;
+	zend_long count = row_count * column_count;
+	for (zend_long k = 0; k < count; k++) {
+		double divisor = 1.0;
+		double result;
+		switch (op) {
+			case MATRIX_NEG:
+				result = -values[k];
+				break;
+			case MATRIX_RECIPROCAL:
+				divisor = values[k];
+				result = 1.0 / divisor;
+				break;
+			case MATRIX_ADD:
+				result = values[k] + other_values[k];
+				break;
+			case MATRIX_SUB:
+				result = values[k] - other_values[k];
+				break;
+			case MATRIX_HADAMARD_MUL:
+				result = values[k] * other_values[k];
+				break;
+			case MATRIX_HADAMARD_DIV:
+				divisor = other_values[k];
+				result = values[k] / divisor;
+				break;
+			case MATRIX_MUL_SCALAR:
+				result = values[k] * scalar;
+				break;
+			case MATRIX_DIV_SCALAR:
+				result = values[k] / scalar;
+				break;
+			case MATRIX_SCALAR_DIV:
+				divisor = values[k];
+				result = scalar / divisor;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+
+		if (divisor == 0.0) {
+			zend_string *msg = strpprintf(
+				0, "Cannot %s at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ".",
+				op == MATRIX_RECIPROCAL ? "compute reciprocal of zero" : "divide by zero",
+				k / column_count, k % column_count
+			);
+			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			status = FAILURE;
+			break;
+		}
+		if (!zend_finite(result)) {
+			math_throw_overflow(operation);
+			status = FAILURE;
+			break;
+		}
+		values[k] = result;
+	}
+
+	if (status == SUCCESS) {
+		matrix_create_from(return_value, row_count, column_count, values);
+	}
+	efree(values);
+	if (other_values != NULL) {
+		efree(other_values);
+	}
+	return status;
+}
+/* }}} */
+
+/* {{{ matrix_calc_scalar_elementwise
+ *
+ * matrix_calc_elementwise() for an operation with a scalar operand. format is the overflow message's operation, with
+ * one %s for the scalar.
+ */
+static zend_result matrix_calc_scalar_elementwise(
+	matrix_elementwise_op op, zend_object *self, double scalar, const char *format, zval *return_value
+)
 {
 	zend_string *scalar_str = math_floats_to_str(scalar);
 	zend_string *operation = strpprintf(0, format, ZSTR_VAL(scalar_str));
 	zend_string_release(scalar_str);
-	return operation;
+	zend_result result = matrix_calc_elementwise(op, self, NULL, scalar, ZSTR_VAL(operation), return_value);
+	zend_string_release(operation);
+	return result;
 }
 /* }}} */
 
@@ -42,25 +157,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+	if (matrix_calc_elementwise(MATRIX_NEG, Z_OBJ_P(ZEND_THIS), NULL, 0.0, "negate the given Matrix", return_value)
+		== FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_element(result, i, j, -value) == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-		}
 	}
 }
 /* }}} */
@@ -73,36 +172,10 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+	if (matrix_calc_elementwise(
+		MATRIX_RECIPROCAL, Z_OBJ_P(ZEND_THIS), NULL, 0.0, "compute reciprocal of the given Matrix", return_value
+	) == FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (value == 0.0) {
-				zend_string *msg = strpprintf(
-					0, "Cannot compute reciprocal of zero at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ".",
-					i, j
-				);
-				zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-				zend_string_release(msg);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-			if (matrix_write_result(result, i, j, 1.0 / value, "compute reciprocal of the given Matrix") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-		}
 	}
 }
 /* }}} */
@@ -168,7 +241,10 @@ static zend_result matrix_invert(zend_object *self, zval *data_array, const matr
 			}
 			scaled = Z_OBJ(scaled_zv);
 			zval scaled_data;
-			matrix_to_data_array(scaled, &scaled_data);
+			if (matrix_to_data_array(scaled, &scaled_data) == FAILURE) {
+				zval_ptr_dtor(&scaled_zv);
+				return FAILURE;
+			}
 			det = matrix_calc_det(&scaled_data);
 			zval_ptr_dtor(&scaled_data);
 		}
@@ -231,7 +307,9 @@ zend_result matrix_calc_inv(zend_object *self, zval *return_value)
 
 	/* Check the matrix isn't singular. */
 	zval data_array;
-	matrix_to_data_array(self, &data_array);
+	if (matrix_to_data_array(self, &data_array) == FAILURE) {
+		return FAILURE;
+	}
 	matrix_lu lu;
 	matrix_lu_decompose(&data_array, &lu);
 	if (lu.singular) {
@@ -279,25 +357,7 @@ zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_
 		return FAILURE;
 	}
 
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other, i, j, &b);
-			if (matrix_write_result(result, i, j, a + b, "add the given Matrices") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-		}
-	}
-
-	return SUCCESS;
+	return matrix_calc_elementwise(MATRIX_ADD, self, other, 0.0, "add the given Matrices", return_value);
 }
 /* }}} */
 
@@ -342,25 +402,7 @@ zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_
 		return FAILURE;
 	}
 
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other, i, j, &b);
-			if (matrix_write_result(result, i, j, a - b, "subtract the given Matrices") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-		}
-	}
-
-	return SUCCESS;
+	return matrix_calc_elementwise(MATRIX_SUB, self, other, 0.0, "subtract the given Matrices", return_value);
 }
 /* }}} */
 
@@ -393,30 +435,9 @@ zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *operation = matrix_scalar_operation("multiply the given Matrix by %s", scalar);
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_result(result, i, j, value * scalar, ZSTR_VAL(operation)) == FAILURE) {
-				zend_string_release(operation);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return matrix_calc_scalar_elementwise(
+		MATRIX_MUL_SCALAR, self, scalar, "multiply the given Matrix by %s", return_value
+	);
 }
 /* }}} */
 
@@ -442,27 +463,38 @@ zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval 
 		return FAILURE;
 	}
 
-	if (vector_create(return_value, row_count) == FAILURE) {
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
 		return FAILURE;
 	}
-	zend_object *result = Z_OBJ_P(return_value);
+	double *vector_values = vector_read_all(vector);
+	if (vector_values == NULL) {
+		efree(values);
+		return FAILURE;
+	}
+	double *results = safe_emalloc((size_t) (row_count > 0 ? row_count : 1), sizeof(double), 0);
 
+	zend_result status = SUCCESS;
 	for (zend_long i = 0; i < row_count; i++) {
 		double sum = 0.0;
 		for (zend_long k = 0; k < column_count; k++) {
-			double a, b;
-			matrix_read_element(self, i, k, &a);
-			vector_read_element(vector, k, &b);
-			sum += a * b;
+			sum += values[i * column_count + k] * vector_values[k];
 		}
-		if (vector_write_result(result, i, sum, "multiply the given Matrix and Vector") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
+		if (!zend_finite(sum)) {
+			math_throw_overflow("multiply the given Matrix and Vector");
+			status = FAILURE;
+			break;
 		}
+		results[i] = sum;
 	}
 
-	return SUCCESS;
+	if (status == SUCCESS) {
+		vector_create_from(return_value, row_count, results);
+	}
+	efree(values);
+	efree(vector_values);
+	efree(results);
+	return status;
 }
 /* }}} */
 
@@ -531,29 +563,43 @@ zend_result matrix_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 		return FAILURE;
 	}
 
-	if (matrix_create(return_value, row_count, other_column_count) == FAILURE) {
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
 		return FAILURE;
 	}
-	zend_object *result = Z_OBJ_P(return_value);
+	double *other_values = matrix_read_all(other);
+	if (other_values == NULL) {
+		efree(values);
+		return FAILURE;
+	}
+	double *results = safe_emalloc(
+		(size_t) (row_count > 0 ? row_count : 1),
+		(size_t) (other_column_count > 0 ? other_column_count : 1) * sizeof(double), 0
+	);
 
-	for (zend_long i = 0; i < row_count; i++) {
+	zend_result status = SUCCESS;
+	for (zend_long i = 0; i < row_count && status == SUCCESS; i++) {
 		for (zend_long j = 0; j < other_column_count; j++) {
 			double sum = 0.0;
 			for (zend_long k = 0; k < column_count; k++) {
-				double a, b;
-				matrix_read_element(self, i, k, &a);
-				matrix_read_element(other, k, j, &b);
-				sum += a * b;
+				sum += values[i * column_count + k] * other_values[k * other_column_count + j];
 			}
-			if (matrix_write_result(result, i, j, sum, "multiply the given Matrices") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
+			if (!zend_finite(sum)) {
+				math_throw_overflow("multiply the given Matrices");
+				status = FAILURE;
+				break;
 			}
+			results[i * other_column_count + j] = sum;
 		}
 	}
 
-	return SUCCESS;
+	if (status == SUCCESS) {
+		matrix_create_from(return_value, row_count, other_column_count, results);
+	}
+	efree(values);
+	efree(other_values);
+	efree(results);
+	return status;
 }
 /* }}} */
 
@@ -573,30 +619,9 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *operation = matrix_scalar_operation("divide the given Matrix by %s", scalar);
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_result(result, i, j, value / scalar, ZSTR_VAL(operation)) == FAILURE) {
-				zend_string_release(operation);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return matrix_calc_scalar_elementwise(
+		MATRIX_DIV_SCALAR, self, scalar, "divide the given Matrix by %s", return_value
+	);
 }
 /* }}} */
 
@@ -614,41 +639,9 @@ zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *retur
 		return FAILURE;
 	}
 
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *operation = matrix_scalar_operation("divide %s by the given Matrix", scalar);
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (value == 0.0) {
-				zend_string *msg = strpprintf(
-					0, "Cannot divide by zero at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ".", i, j
-				);
-				zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-				zend_string_release(msg);
-				zend_string_release(operation);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-			if (matrix_write_result(result, i, j, scalar / value, ZSTR_VAL(operation)) == FAILURE) {
-				zend_string_release(operation);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				return FAILURE;
-			}
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return matrix_calc_scalar_elementwise(
+		MATRIX_SCALAR_DIV, self, scalar, "divide %s by the given Matrix", return_value
+	);
 }
 /* }}} */
 
@@ -701,22 +694,10 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardMul)
 		RETURN_THROWS();
 	}
 
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+	if (matrix_calc_elementwise(
+		MATRIX_HADAMARD_MUL, self, other_obj, 0.0, "compute Hadamard product of the given Matrices", return_value
+	) == FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other_obj, i, j, &b);
-			if (matrix_write_result(result, i, j, a * b, "compute Hadamard product of the given Matrices") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-		}
 	}
 }
 /* }}} */
@@ -752,32 +733,10 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardDiv)
 		RETURN_THROWS();
 	}
 
-	if (matrix_create(return_value, row_count, column_count) == FAILURE) {
+	if (matrix_calc_elementwise(
+		MATRIX_HADAMARD_DIV, self, other_obj, 0.0, "compute Hadamard quotient of the given Matrices", return_value
+	) == FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, divisor;
-			matrix_read_element(self, i, j, &a);
-			matrix_read_element(other_obj, i, j, &divisor);
-			if (divisor == 0.0) {
-				zend_string *msg = strpprintf(
-					0, "Cannot divide by zero at row " ZEND_LONG_FMT ", column " ZEND_LONG_FMT ".", i, j
-				);
-				zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-				zend_string_release(msg);
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-			if (matrix_write_result(result, i, j, a / divisor, "compute Hadamard quotient of the given Matrices") == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
-		}
 	}
 }
 /* }}} */

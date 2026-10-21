@@ -200,6 +200,87 @@ zend_result vector_write_result(zend_object *obj, zend_long index, double value,
 }
 /* }}} */
 
+/* {{{ vector_read_all
+ *
+ * Reads every element into a new buffer of vector_read_count() doubles, which the caller frees with efree(). Faster
+ * than calling vector_read_element() for each element, since it reads $count and $data only once. Returns NULL, with
+ * Error thrown, if $data is invalid (see vector_read_element()).
+ */
+double *vector_read_all(zend_object *obj)
+{
+	zend_long count = vector_read_count(obj);
+	HashTable *ht = Z_ARRVAL_P(math_types_read_property(obj, vector_offset_data));
+
+	/* Check the size first, so a $count changed through Reflection can't make the allocation fail. */
+	if (UNEXPECTED(count < 0 || zend_hash_num_elements(ht) != (uint32_t) count)) {
+		zend_throw_error(NULL, "Vector data is invalid.");
+		return NULL;
+	}
+
+	double *values = safe_emalloc((size_t) (count > 0 ? count : 1), sizeof(double), 0);
+	if (vector_read_into(obj, values) == FAILURE) {
+		efree(values);
+		return NULL;
+	}
+	return values;
+}
+/* }}} */
+
+/* {{{ vector_read_into
+ *
+ * Reads every element into values, which has room for vector_read_count() doubles. Like vector_read_all(), for a
+ * caller that reads several Vectors into one buffer, e.g. a Matrix's rows. Returns FAILURE, with Error thrown, if
+ * $data is invalid (see vector_read_element()).
+ */
+zend_result vector_read_into(zend_object *obj, double *values)
+{
+	zend_long count = vector_read_count(obj);
+	HashTable *ht = Z_ARRVAL_P(math_types_read_property(obj, vector_offset_data));
+
+	for (zend_long i = 0; i < count; i++) {
+		zval *element = zend_hash_index_find(ht, (zend_ulong) i);
+		if (UNEXPECTED(element == NULL || Z_TYPE_P(element) != IS_DOUBLE)) {
+			zend_throw_error(NULL, "Vector data is invalid.");
+			return FAILURE;
+		}
+		values[i] = Z_DVAL_P(element);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ vector_create_from
+ *
+ * Allocates a new Vector into return_value holding count elements copied from values, with negative zeros stored as
+ * positive zeros. Faster than vector_create() then vector_write_result() for each element, since it builds $data in
+ * one pass. Every value must be finite, so the caller checks results as it calculates them. count must not be
+ * negative.
+ */
+void vector_create_from(zval *return_value, zend_long count, const double *values)
+{
+	object_init_ex(return_value, vector_ce_Vector);
+	zend_object *obj = Z_OBJ_P(return_value);
+
+	zval data;
+	array_init_size(&data, (uint32_t) count);
+	zend_hash_real_init_packed(Z_ARRVAL(data));
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL(data)) {
+		for (zend_long i = 0; i < count; i++) {
+			ZEND_ASSERT(zend_finite(values[i]));
+			ZEND_HASH_FILL_SET_DOUBLE(math_floats_normalize_zero(values[i]));
+			ZEND_HASH_FILL_NEXT();
+		}
+	} ZEND_HASH_FILL_END();
+
+	/* Moves data into the slot (no extra reference to release). */
+	math_types_write_property(obj, vector_offset_data, &data);
+
+	zval count_zval;
+	ZVAL_LONG(&count_zval, count);
+	math_types_write_property(obj, vector_offset_count, &count_zval);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::__construct(int $count) */
 PHP_METHOD(OceanMoon_Math_Vector, __construct)
 {

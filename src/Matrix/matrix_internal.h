@@ -20,12 +20,14 @@ zend_object *matrix_read_row(zend_object *obj, zend_long row);
 zend_result matrix_read_element(zend_object *obj, zend_long row, zend_long col, double *out_value);
 zend_result matrix_write_element(zend_object *obj, zend_long row, zend_long col, double value);
 zend_result matrix_write_result(zend_object *obj, zend_long row, zend_long col, double value, const char *operation);
+double *matrix_read_all(zend_object *obj);
+void matrix_create_from(zval *return_value, zend_long row_count, zend_long column_count, const double *values);
 
 void matrix_throw_index_error(const char *axis, zend_long index, zend_long size);
 zend_result matrix_check_range(const char *axis, zend_long start, zend_long count, zend_long size);
 zend_result matrix_set_row(zend_object *self, zend_long row, zend_object *vec);
 zend_result matrix_identity(zend_long size, zval *out);
-void matrix_to_data_array(zend_object *obj, zval *out);
+zend_result matrix_to_data_array(zend_object *obj, zval *out);
 
 double matrix_calc_det(zval *data_array);
 void matrix_get_minor(zend_object *obj, zend_long exclude_row, zend_long exclude_col, zval *out_array);

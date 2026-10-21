@@ -238,6 +238,81 @@ zend_result matrix_write_result(zend_object *obj, zend_long row, zend_long col, 
 }
 /* }}} */
 
+/* {{{ matrix_read_all
+ *
+ * Reads every element into a new row-major buffer of rowCount x columnCount doubles, which the caller frees with
+ * efree(). Faster than calling matrix_read_element() for each element, since it reads the counts and each row's
+ * $data only once. Returns NULL, with Error thrown, if $data is invalid (see matrix_read_row()).
+ */
+double *matrix_read_all(zend_object *obj)
+{
+	zend_long row_count = matrix_read_row_count(obj);
+	zend_long column_count = matrix_read_column_count(obj);
+	HashTable *ht = Z_ARRVAL_P(math_types_read_property(obj, matrix_offset_data));
+
+	/* Check the sizes first, so counts changed through Reflection can't make the allocation fail. matrix_read_row()
+	 * checks the first row's $count matches the column count, and this checks its $data does too. */
+	if (UNEXPECTED(row_count < 0 || zend_hash_num_elements(ht) != (uint32_t) row_count)) {
+		zend_throw_error(NULL, "Matrix data is invalid.");
+		return NULL;
+	}
+	if (row_count > 0) {
+		zend_object *first_row = matrix_read_row(obj, 0);
+		if (first_row == NULL) {
+			return NULL;
+		}
+		HashTable *first_ht = Z_ARRVAL_P(math_types_read_property(first_row, vector_offset_data));
+		if (UNEXPECTED(zend_hash_num_elements(first_ht) != (uint32_t) column_count)) {
+			zend_throw_error(NULL, "Matrix data is invalid.");
+			return NULL;
+		}
+	}
+
+	double *values = safe_emalloc(
+		(size_t) (row_count > 0 ? row_count : 1), (size_t) (column_count > 0 ? column_count : 1) * sizeof(double), 0
+	);
+	for (zend_long i = 0; i < row_count; i++) {
+		zend_object *row = matrix_read_row(obj, i);
+		if (row == NULL || vector_read_into(row, values + i * column_count) == FAILURE) {
+			efree(values);
+			return NULL;
+		}
+	}
+	return values;
+}
+/* }}} */
+
+/* {{{ matrix_create_from
+ *
+ * Allocates a new Matrix into return_value holding the elements of a row-major buffer, with negative zeros stored as
+ * positive zeros. Faster than matrix_create() then matrix_write_result() for each element, since it builds each row in
+ * one pass. Every value must be finite, so the caller checks results as it calculates them. Neither count may be
+ * negative.
+ */
+void matrix_create_from(zval *return_value, zend_long row_count, zend_long column_count, const double *values)
+{
+	object_init_ex(return_value, matrix_ce_Matrix);
+	zend_object *obj = Z_OBJ_P(return_value);
+
+	zval data;
+	array_init_size(&data, (uint32_t) row_count);
+	for (zend_long i = 0; i < row_count; i++) {
+		zval row;
+		vector_create_from(&row, column_count, values + i * column_count);
+		zend_hash_next_index_insert(Z_ARRVAL(data), &row);
+	}
+
+	/* Moves data into the slot (no extra reference to release). */
+	math_types_write_property(obj, matrix_offset_data, &data);
+
+	zval count_zval;
+	ZVAL_LONG(&count_zval, row_count);
+	math_types_write_property(obj, matrix_offset_row_count, &count_zval);
+	ZVAL_LONG(&count_zval, column_count);
+	math_types_write_property(obj, matrix_offset_column_count, &count_zval);
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Matrix::__construct(int $rowCount, int $columnCount) */
 PHP_METHOD(OceanMoon_Math_Matrix, __construct)
 {

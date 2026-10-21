@@ -65,7 +65,9 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 	}
 
 	zval data_array;
-	matrix_to_data_array(self, &data_array);
+	if (matrix_to_data_array(self, &data_array) == FAILURE) {
+		RETURN_THROWS();
+	}
 	double det = matrix_calc_det(&data_array);
 	zval_ptr_dtor(&data_array);
 

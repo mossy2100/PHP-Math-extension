@@ -47,6 +47,131 @@ static zend_result vector_check_same_count(zend_object *self, zend_object *other
 }
 /* }}} */
 
+/* Element-wise operations, for vector_calc_elementwise(). */
+typedef enum {
+	VECTOR_NEG,
+	VECTOR_RECIPROCAL,
+	VECTOR_ADD,
+	VECTOR_SUB,
+	VECTOR_HADAMARD_MUL,
+	VECTOR_HADAMARD_DIV,
+	VECTOR_MUL_SCALAR,
+	VECTOR_DIV_SCALAR,
+	VECTOR_SCALAR_DIV
+} vector_elementwise_op;
+
+/* {{{ vector_calc_elementwise
+ *
+ * The shared core of the element-wise methods. Applies op to each element of self, with the same element of other or
+ * with scalar, and stores the results in a new Vector in return_value. The caller has already checked other's count
+ * and the scalar. Like the package, it fails at the first element that has a zero divisor (ArithmeticException) or a
+ * non-finite result (OverflowException "Cannot <operation>. The result would overflow.").
+ */
+static zend_result vector_calc_elementwise(
+	vector_elementwise_op op, zend_object *self, zend_object *other, double scalar, const char *operation,
+	zval *return_value
+)
+{
+	zend_long count = vector_read_count(self);
+
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		return FAILURE;
+	}
+	double *other_values = NULL;
+	if (other != NULL) {
+		other_values = vector_read_all(other);
+		if (other_values == NULL) {
+			efree(values);
+			return FAILURE;
+		}
+	}
+
+	zend_result status = SUCCESS;
+	for (zend_long i = 0; i < count; i++) {
+		double divisor = 1.0;
+		double result;
+		switch (op) {
+			case VECTOR_NEG:
+				result = -values[i];
+				break;
+			case VECTOR_RECIPROCAL:
+				divisor = values[i];
+				result = 1.0 / divisor;
+				break;
+			case VECTOR_ADD:
+				result = values[i] + other_values[i];
+				break;
+			case VECTOR_SUB:
+				result = values[i] - other_values[i];
+				break;
+			case VECTOR_HADAMARD_MUL:
+				result = values[i] * other_values[i];
+				break;
+			case VECTOR_HADAMARD_DIV:
+				divisor = other_values[i];
+				result = values[i] / divisor;
+				break;
+			case VECTOR_MUL_SCALAR:
+				result = values[i] * scalar;
+				break;
+			case VECTOR_DIV_SCALAR:
+				result = values[i] / scalar;
+				break;
+			case VECTOR_SCALAR_DIV:
+				divisor = values[i];
+				result = scalar / divisor;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+
+		if (divisor == 0.0) {
+			zend_string *msg = strpprintf(
+				0, "Cannot %s at index " ZEND_LONG_FMT ".",
+				op == VECTOR_RECIPROCAL ? "compute reciprocal of zero" : "divide by zero", i
+			);
+			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
+			zend_string_release(msg);
+			status = FAILURE;
+			break;
+		}
+		if (!zend_finite(result)) {
+			math_throw_overflow(operation);
+			status = FAILURE;
+			break;
+		}
+		values[i] = result;
+	}
+
+	if (status == SUCCESS) {
+		vector_create_from(return_value, count, values);
+	}
+	efree(values);
+	if (other_values != NULL) {
+		efree(other_values);
+	}
+	return status;
+}
+/* }}} */
+
+/* {{{ vector_calc_scalar_elementwise
+ *
+ * vector_calc_elementwise() for an operation with a scalar operand. format is the overflow message's operation, with
+ * one %s for the scalar.
+ */
+static zend_result vector_calc_scalar_elementwise(
+	vector_elementwise_op op, zend_object *self, double scalar, const char *format, zval *return_value
+)
+{
+	zend_string *scalar_str = math_floats_to_str(scalar);
+	zend_string *operation = strpprintf(0, format, ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
+	zend_result result = vector_calc_elementwise(op, self, NULL, scalar, ZSTR_VAL(operation), return_value);
+	zend_string_release(operation);
+	return result;
+}
+/* }}} */
+
 /* {{{ OceanMoon\Math\Vector::neg(): Vector
  *
  * Matches the PHP package's Vector::neg(): mul(-1).
@@ -55,22 +180,9 @@ PHP_METHOD(OceanMoon_Math_Vector, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long count = vector_read_count(self);
-
-	if (vector_create(return_value, count) == FAILURE) {
+	if (vector_calc_elementwise(VECTOR_NEG, Z_OBJ_P(ZEND_THIS), NULL, 0.0, "negate the given Vector", return_value)
+		== FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
-		if (vector_write_element(result, i, -element) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */
@@ -83,32 +195,10 @@ PHP_METHOD(OceanMoon_Math_Vector, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long count = vector_read_count(self);
-
-	if (vector_create(return_value, count) == FAILURE) {
+	if (vector_calc_elementwise(
+		VECTOR_RECIPROCAL, Z_OBJ_P(ZEND_THIS), NULL, 0.0, "compute reciprocal of the given Vector", return_value
+	) == FAILURE) {
 		RETURN_THROWS();
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
-
-		if (element == 0.0) {
-			zend_string *msg = strpprintf(0, "Cannot compute reciprocal of zero at index " ZEND_LONG_FMT ".", i);
-			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
-
-		if (vector_write_result(result, i, 1.0 / element, "compute reciprocal of the given Vector") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
 	}
 }
 /* }}} */
@@ -124,24 +214,7 @@ zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other, i, &b);
-		if (vector_write_result(result, i, a + b, "add the given Vectors") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
+	return vector_calc_elementwise(VECTOR_ADD, self, other, 0.0, "add the given Vectors", return_value);
 }
 /* }}} */
 
@@ -174,24 +247,7 @@ zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other, i, &b);
-		if (vector_write_result(result, i, a - b, "subtract the given Vectors") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
+	return vector_calc_elementwise(VECTOR_SUB, self, other, 0.0, "subtract the given Vectors", return_value);
 }
 /* }}} */
 
@@ -224,30 +280,9 @@ zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	zend_string *scalar_str = math_floats_to_str(scalar);
-
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		zend_string_release(scalar_str);
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *operation = strpprintf(0, "multiply the given Vector by %s", ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
-		if (vector_write_result(result, i, element * scalar, ZSTR_VAL(operation)) == FAILURE) {
-			zend_string_release(operation);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return vector_calc_scalar_elementwise(
+		VECTOR_MUL_SCALAR, self, scalar, "multiply the given Vector by %s", return_value
+	);
 }
 /* }}} */
 
@@ -352,28 +387,9 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(obj);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *scalar_str = math_floats_to_str(scalar);
-	zend_string *operation = strpprintf(0, "divide the given Vector by %s", ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(obj, i, &element);
-		if (vector_write_result(result, i, element / scalar, ZSTR_VAL(operation)) == FAILURE) {
-			zend_string_release(operation);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return vector_calc_scalar_elementwise(
+		VECTOR_DIV_SCALAR, obj, scalar, "divide the given Vector by %s", return_value
+	);
 }
 /* }}} */
 
@@ -391,40 +407,9 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(obj);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	zend_string *scalar_str = math_floats_to_str(scalar);
-	zend_string *operation = strpprintf(0, "divide %s by the given Vector", ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-
-	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(obj, i, &element);
-
-		if (element == 0.0) {
-			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
-			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
-			zend_string_release(operation);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-
-		if (vector_write_result(result, i, scalar / element, ZSTR_VAL(operation)) == FAILURE) {
-			zend_string_release(operation);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-	zend_string_release(operation);
-
-	return SUCCESS;
+	return vector_calc_scalar_elementwise(
+		VECTOR_SCALAR_DIV, obj, scalar, "divide %s by the given Vector", return_value
+	);
 }
 /* }}} */
 
@@ -457,24 +442,9 @@ zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other, i, &b);
-		if (vector_write_result(result, i, a * b, "compute Hadamard product of the given Vectors") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
+	return vector_calc_elementwise(
+		VECTOR_HADAMARD_MUL, self, other, 0.0, "compute Hadamard product of the given Vectors", return_value
+	);
 }
 /* }}} */
 
@@ -507,34 +477,9 @@ zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval
 		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(self);
-	if (vector_create(return_value, count) == FAILURE) {
-		return FAILURE;
-	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other, i, &b);
-
-		if (b == 0.0) {
-			zend_string *msg = strpprintf(0, "Cannot divide by zero at index " ZEND_LONG_FMT ".", i);
-			zend_throw_exception(math_ce_ArithmeticException, ZSTR_VAL(msg), 0);
-			zend_string_release(msg);
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-
-		if (vector_write_result(result, i, a / b, "compute Hadamard quotient of the given Vectors") == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
-	return SUCCESS;
+	return vector_calc_elementwise(
+		VECTOR_HADAMARD_DIV, self, other, 0.0, "compute Hadamard quotient of the given Vectors", return_value
+	);
 }
 /* }}} */
 

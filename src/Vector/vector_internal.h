@@ -28,6 +28,9 @@ void vector_throw_index_error(zend_long index, zend_long count);
 zend_result vector_read_element(zend_object *obj, zend_long index, double *out_value);
 zend_result vector_write_element(zend_object *obj, zend_long index, double value);
 zend_result vector_write_result(zend_object *obj, zend_long index, double value, const char *operation);
+double *vector_read_all(zend_object *obj);
+zend_result vector_read_into(zend_object *obj, double *values);
+void vector_create_from(zval *return_value, zend_long count, const double *values);
 
 /* Installs the custom object handlers (do_operation, create_object, read_property) shared by
  * every Vector instance. Defined in vector_properties.c; called from vector_minit() (vector.c). */
