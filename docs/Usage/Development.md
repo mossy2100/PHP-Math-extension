@@ -86,6 +86,18 @@ it just reports "No tests were run".
 
 ---
 
+## Benchmarking
+
+```bash
+scripts/bench       # extension vs package timings, PHP 8.4
+scripts/bench 8.5   # the same, PHP 8.5
+```
+
+It prints a Markdown table of the time per call and the speed-up, as quoted in the README. The package is loaded from
+the sibling `packages/Math` checkout, or from `MATH_PACKAGE_DIR`, which needs its own `composer install`.
+
+---
+
 ## Project Structure
 
 - Top level: `oceanmoon_math.c` (MINIT/RINIT/MINFO/module entry), `php_oceanmoon_math.h`, and `oceanmoon_math.stub.php`

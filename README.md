@@ -47,15 +47,20 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 - **Operations with no method equivalent** - some operator forms have no matching method. For example,
   `Rational + float` widens to a `float` result, but `add()` only accepts a `Rational` or `int`. See the equivalence
   table on each class's operator page.
-- **Performance** - all four classes run faster than the package. In a simple benchmark:
+- **Performance** - all four classes run faster than the package. With opcache on, `scripts/bench` gives:
 
-| Operation             | PHP 8.4         | PHP 8.5        |
-| --------------------- | --------------- | -------------- |
-| `Complex::mul()`      | 5 times faster  | 3 times faster |
-| `Rational::add()`     | 9 times faster  | 7 times faster |
-| `Vector::dot()` (3D)  | 3 times faster  | 2 times faster |
-| `Matrix::mul()` (4×4) | 15 times faster | 7 times faster |
-#claude I would have expected PHP 8.5 to be faster.
+| Operation               | PHP 8.4         | PHP 8.5         |
+| ----------------------- | --------------- | --------------- |
+| `Complex::mul()`        | 7 times faster  | 5 times faster  |
+| `Rational::add()`       | 17 times faster | 11 times faster |
+| `Vector::dot()` (3D)    | 3 times faster  | 2 times faster  |
+| `Matrix::mul()` (4×4)   | 23 times faster | 14 times faster |
+| `Matrix::add()` (50×50) | 38 times faster | 21 times faster |
+| `Matrix::mul()` (50×50) | 39 times faster | 21 times faster |
+| `Matrix::inv()` (50×50) | 28 times faster | 17 times faster |
+
+  The extension runs at about the same speed on both versions, but the package runs faster on PHP 8.5, so the gap is
+  smaller there. Timings vary between machines and runs.
 
 ### Disadvantages
 

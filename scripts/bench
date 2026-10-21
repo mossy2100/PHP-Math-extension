@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Benchmark the extension against the userland package (oceanmoon/math), and print a table of the time per call and
+# the speed-up for each operation. The benchmarks themselves are in scripts/bench.php.
+#
+# Both runs use the same PHP binary with opcache enabled for the CLI, and the ini scan directory cleared, so the only
+# difference is whether the module is loaded. The package is loaded from its sibling checkout (packages/Math), or from
+# MATH_PACKAGE_DIR, which needs its own `composer install` for vendor/autoload.php.
+#
+# Timings vary from run to run and machine to machine, so treat them as indicative.
+#
+# Usage:
+#   scripts/bench           # PHP 8.4
+#   scripts/bench 8.5       # PHP 8.5
+#
+set -euo pipefail
+
+EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Optional positional override; PHP_VERSION is the mechanism shared with the other scripts.
+if [[ $# -ge 1 ]]; then
+    PHP_VERSION="$1"
+fi
+
+# Resolves the target PHP toolchain and the module built for it (default 8.4).
+# shellcheck source=php-env
+source "$EXT_DIR/scripts/php-env"
+
+if [ ! -f "$PHP_MODULE" ]; then
+    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL - run 'scripts/build $PHP_VERSION' first." >&2
+    exit 1
+fi
+
+PACKAGE_DIR="${MATH_PACKAGE_DIR:-$EXT_DIR/../../packages/Math}"
+if [ ! -f "$PACKAGE_DIR/vendor/autoload.php" ]; then
+    echo "No vendor/autoload.php in $PACKAGE_DIR - set MATH_PACKAGE_DIR, or run 'composer install' there." >&2
+    exit 1
+fi
+
+# Opcache is built into PHP 8.5, but a shared extension in 8.4.
+opcache=( -d opcache.enable_cli=1 )
+# Capture the list first: with pipefail, `grep -q` exiting early can fail the pipeline with SIGPIPE.
+modules="$(php -n -m)"
+if ! grep -qi '^Zend OPcache$' <<< "$modules"; then
+    opcache+=( -d zend_extension=opcache )
+fi
+
+echo "PHP $PHP_VERSION_FULL, opcache on"
+PHP_INI_SCAN_DIR= exec php -n "${opcache[@]}" "$EXT_DIR/scripts/bench.php" \
+    "$PHP_MODULE" "$PACKAGE_DIR/vendor/autoload.php" "${opcache[@]}"
