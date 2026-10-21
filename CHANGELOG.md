@@ -29,14 +29,17 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 - **`Rational::mod()` and `%`.** `mod()` matches the package. `%` on a `Rational` is `mod()`, with a `Rational`, `int`
   or `float` on either side, widening to `float` like the other operators. `%=` works too. Any other operand throws
   `TypeError`, as for the other operators.
+- **`scripts/bench`** times the extension against the package, with opcache on, and prints a Markdown table. See
+  [Development](docs/Usage/Development.md#benchmarking).
 - **Windows DLLs for PIE.** Each GitHub release gets prebuilt DLLs for PHP 8.4 and 8.5, NTS and TS (64-bit), built by
   PHP's own php-windows-builder actions, so `pie install` works on Windows.
 
 ### Changed
 
-- **`Matrix` and `Vector` arithmetic is faster,** especially for larger matrices. Each method reads its operands once
-  into a flat buffer, instead of reading each element through the property. On PHP 8.5, 50×50 `Matrix::mul()` went
-  from 1.9 ms to 63 µs, and element-wise methods like `add()` are about 4 times faster.
+- **`Matrix` and `Vector` methods that read every element are faster,** especially for larger matrices. Each one reads
+  its operands once into a flat buffer, instead of reading each element through the property. On PHP 8.5, 50×50
+  `Matrix::mul()` went from 1.9 ms to 63 µs, and element-wise methods like `add()` are about 4 times faster. This also
+  covers `t()`, the norms, `equal()`, `toArray()` and the other methods that read every element.
 - **`Rational::fromFloat()` gives the simplest `Rational` whose `toFloat()` is the float (breaking).** It's found from
   the exact continued fraction of the float, using integer arithmetic only, and tries semiconvergents as well as
   convergents. Previously, the floating-point continued fraction drifted, and about 3% of random floats didn't
