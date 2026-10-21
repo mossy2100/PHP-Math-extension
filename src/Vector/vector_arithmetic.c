@@ -47,7 +47,7 @@ static zend_result vector_check_same_count(zend_object *self, zend_object *other
 }
 /* }}} */
 
-/* Element-wise operations, for vector_calc_elementwise(). */
+/* Element-wise operations, for vector_calc_elementwise(). The ones with a scalar operand come last. */
 typedef enum {
 	VECTOR_NEG,
 	VECTOR_RECIPROCAL,
@@ -65,7 +65,8 @@ typedef enum {
  * The shared core of the element-wise methods. Applies op to each element of self, with the same element of other or
  * with scalar, and stores the results in a new Vector in return_value. The caller has already checked other's count
  * and the scalar. Like the package, it fails at the first element that has a zero divisor (ArithmeticException) or a
- * non-finite result (OverflowException "Cannot <operation>. The result would overflow.").
+ * non-finite result (OverflowException "Cannot <operation>. The result would overflow."). For an operation with a
+ * scalar operand, operation has one %s, for the scalar, and the message is only formatted if it's thrown.
  */
 static zend_result vector_calc_elementwise(
 	vector_elementwise_op op, zend_object *self, zend_object *other, double scalar, const char *operation,
@@ -136,7 +137,11 @@ static zend_result vector_calc_elementwise(
 			break;
 		}
 		if (!zend_finite(result)) {
-			math_throw_overflow(operation);
+			if (op >= VECTOR_MUL_SCALAR) {
+				math_throw_scalar_overflow(operation, scalar);
+			} else {
+				math_throw_overflow(operation);
+			}
 			status = FAILURE;
 			break;
 		}
@@ -151,24 +156,6 @@ static zend_result vector_calc_elementwise(
 		efree(other_values);
 	}
 	return status;
-}
-/* }}} */
-
-/* {{{ vector_calc_scalar_elementwise
- *
- * vector_calc_elementwise() for an operation with a scalar operand. format is the overflow message's operation, with
- * one %s for the scalar.
- */
-static zend_result vector_calc_scalar_elementwise(
-	vector_elementwise_op op, zend_object *self, double scalar, const char *format, zval *return_value
-)
-{
-	zend_string *scalar_str = math_floats_to_str(scalar);
-	zend_string *operation = strpprintf(0, format, ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-	zend_result result = vector_calc_elementwise(op, self, NULL, scalar, ZSTR_VAL(operation), return_value);
-	zend_string_release(operation);
-	return result;
 }
 /* }}} */
 
@@ -280,8 +267,8 @@ zend_result vector_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	return vector_calc_scalar_elementwise(
-		VECTOR_MUL_SCALAR, self, scalar, "multiply the given Vector by %s", return_value
+	return vector_calc_elementwise(
+		VECTOR_MUL_SCALAR, self, NULL, scalar, "multiply the given Vector by %s", return_value
 	);
 }
 /* }}} */
@@ -387,8 +374,8 @@ zend_result vector_calc_div(zend_object *obj, double scalar, zval *return_value)
 		return FAILURE;
 	}
 
-	return vector_calc_scalar_elementwise(
-		VECTOR_DIV_SCALAR, obj, scalar, "divide the given Vector by %s", return_value
+	return vector_calc_elementwise(
+		VECTOR_DIV_SCALAR, obj, NULL, scalar, "divide the given Vector by %s", return_value
 	);
 }
 /* }}} */
@@ -407,8 +394,8 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 		return FAILURE;
 	}
 
-	return vector_calc_scalar_elementwise(
-		VECTOR_SCALAR_DIV, obj, scalar, "divide %s by the given Vector", return_value
+	return vector_calc_elementwise(
+		VECTOR_SCALAR_DIV, obj, NULL, scalar, "divide %s by the given Vector", return_value
 	);
 }
 /* }}} */

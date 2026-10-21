@@ -20,7 +20,7 @@
 #include "exceptions.h"
 #include "floats.h"
 
-/* Element-wise operations, for matrix_calc_elementwise(). */
+/* Element-wise operations, for matrix_calc_elementwise(). The ones with a scalar operand come last. */
 typedef enum {
 	MATRIX_NEG,
 	MATRIX_RECIPROCAL,
@@ -113,7 +113,11 @@ static zend_result matrix_calc_elementwise(
 			break;
 		}
 		if (!zend_finite(result)) {
-			math_throw_overflow(operation);
+			if (op >= MATRIX_MUL_SCALAR) {
+				math_throw_scalar_overflow(operation, scalar);
+			} else {
+				math_throw_overflow(operation);
+			}
 			status = FAILURE;
 			break;
 		}
@@ -128,24 +132,6 @@ static zend_result matrix_calc_elementwise(
 		efree(other_values);
 	}
 	return status;
-}
-/* }}} */
-
-/* {{{ matrix_calc_scalar_elementwise
- *
- * matrix_calc_elementwise() for an operation with a scalar operand. format is the overflow message's operation, with
- * one %s for the scalar.
- */
-static zend_result matrix_calc_scalar_elementwise(
-	matrix_elementwise_op op, zend_object *self, double scalar, const char *format, zval *return_value
-)
-{
-	zend_string *scalar_str = math_floats_to_str(scalar);
-	zend_string *operation = strpprintf(0, format, ZSTR_VAL(scalar_str));
-	zend_string_release(scalar_str);
-	zend_result result = matrix_calc_elementwise(op, self, NULL, scalar, ZSTR_VAL(operation), return_value);
-	zend_string_release(operation);
-	return result;
 }
 /* }}} */
 
@@ -435,8 +421,8 @@ zend_result matrix_calc_mul_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	return matrix_calc_scalar_elementwise(
-		MATRIX_MUL_SCALAR, self, scalar, "multiply the given Matrix by %s", return_value
+	return matrix_calc_elementwise(
+		MATRIX_MUL_SCALAR, self, NULL, scalar, "multiply the given Matrix by %s", return_value
 	);
 }
 /* }}} */
@@ -619,8 +605,8 @@ zend_result matrix_calc_div_scalar(zend_object *self, double scalar, zval *retur
 		return FAILURE;
 	}
 
-	return matrix_calc_scalar_elementwise(
-		MATRIX_DIV_SCALAR, self, scalar, "divide the given Matrix by %s", return_value
+	return matrix_calc_elementwise(
+		MATRIX_DIV_SCALAR, self, NULL, scalar, "divide the given Matrix by %s", return_value
 	);
 }
 /* }}} */
@@ -639,8 +625,8 @@ zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *retur
 		return FAILURE;
 	}
 
-	return matrix_calc_scalar_elementwise(
-		MATRIX_SCALAR_DIV, self, scalar, "divide %s by the given Matrix", return_value
+	return matrix_calc_elementwise(
+		MATRIX_SCALAR_DIV, self, NULL, scalar, "divide %s by the given Matrix", return_value
 	);
 }
 /* }}} */

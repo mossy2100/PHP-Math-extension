@@ -37,6 +37,14 @@ zend_result math_exceptions_minit(void);
 void math_throw_overflow(const char *operation);
 /* }}} */
 
+/* {{{ math_throw_scalar_overflow
+ *
+ * math_throw_overflow() for an operation with a scalar operand. format has one %s, for the scalar, e.g. "multiply the
+ * given Matrix by %s". Formatting the message only when it's thrown saves the cost on every successful call.
+ */
+void math_throw_scalar_overflow(const char *format, double scalar);
+/* }}} */
+
 /* {{{ math_rethrow_overflow
  *
  * If the pending exception is an OverflowException from an intermediate step, replaces it with one naming the

@@ -14,6 +14,7 @@
 #include "Zend/zend_smart_str.h"
 
 #include "exceptions.h"
+#include "floats.h"
 
 zend_class_entry *math_ce_FormatException;
 zend_class_entry *math_ce_ArithmeticException;
@@ -42,6 +43,15 @@ void math_throw_overflow(const char *operation)
 	zend_string *msg = strpprintf(0, "Cannot %s. The result would overflow.", operation);
 	zend_throw_exception(spl_ce_OverflowException, ZSTR_VAL(msg), 0);
 	zend_string_release(msg);
+}
+
+void math_throw_scalar_overflow(const char *format, double scalar)
+{
+	zend_string *scalar_str = math_floats_to_str(scalar);
+	zend_string *operation = strpprintf(0, format, ZSTR_VAL(scalar_str));
+	zend_string_release(scalar_str);
+	math_throw_overflow(ZSTR_VAL(operation));
+	zend_string_release(operation);
 }
 
 void math_rethrow_overflow(const char *operation)
