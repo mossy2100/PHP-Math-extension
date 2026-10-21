@@ -138,8 +138,8 @@ $conjugate = ~$z;  // 3 - 4i
 
 ## Binary Arithmetic Operators
 
-Each operator accepts a `Complex`, `int`, or `float` operand on either side. An `int` or `float` operand is promoted to a
-`Complex`, so `$x - $z` gives what `new Complex($x)->sub($z)` would. The equivalence table in each section gives the
+Each operator accepts a `Complex`, `int`, or `float` operand on either side. An `int` or `float` operand is promoted to
+a `Complex`, so `$x - $z` gives what `new Complex($x)->sub($z)` would. The equivalence table in each section gives the
 matching method.
 
 ---

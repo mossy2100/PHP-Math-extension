@@ -348,6 +348,9 @@ Unlike PHP's own `%`, which converts both operands to ints, the result is exact:
 > `$f % $r` with a non-integral `float` gives the right result, but PHP also emits its "Implicit conversion from float
 > to int loses precision" deprecation. The engine converts a non-object left operand of `%` to an int before passing
 > the operation to the `Rational`. `fmod($f, $r->toFloat())` gives the same result without it.
+>
+> On PHP 8.5, a `NAN`, `INF` or a `float` beyond the `int` range on the left emits "The float ... is not representable
+> as an int, cast occurred" too, or instead. On 8.4, it emits the deprecation alone.
 
 **Throws:**
 
