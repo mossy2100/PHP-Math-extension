@@ -3,6 +3,30 @@
     "description": "A native PHP extension providing the same Complex, Rational, Vector and Matrix classes from oceanmoon/math, plus operators.",
     "type": "php-ext",
     "license": "MIT",
+    "keywords": [
+        "php",
+        "extension",
+        "math",
+        "complex",
+        "rational",
+        "fraction",
+        "arithmetic",
+        "vector",
+        "matrix",
+        "trigonometry",
+        "operator-overloading"
+    ],
+    "authors": [
+        {
+            "name": "Shaun Moss",
+            "email": "mossy2100@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/mossy2100/PHP-Math-extension",
+    "support": {
+        "issues": "https://github.com/mossy2100/PHP-Math-extension/issues",
+        "source": "https://github.com/mossy2100/PHP-Math-extension"
+    },
     "require": {
         "php": ">=8.4 <8.6"
     },
