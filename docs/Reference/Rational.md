@@ -340,7 +340,7 @@ $remainder = $f % $r;    // float % Rational → float
 ```
 
 The remainder of dividing the left operand by the right, matching `mod()`. The result has the sign of the dividend,
-like PHP's own `%`.
+like PHP's `%` with integers and `fmod()` with floats. This is called "truncated modulo".
 
 Unlike PHP's own `%`, which converts both operands to ints, the result is exact: `new Rational(7, 2) % 2` is 3/2, not 1.
 
