@@ -34,6 +34,9 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Changed
 
+- **`Matrix` and `Vector` arithmetic is faster,** especially for larger matrices. Each method reads its operands once
+  into a flat buffer, instead of reading each element through the property. On PHP 8.5, 50×50 `Matrix::mul()` went
+  from 1.9 ms to 63 µs, and element-wise methods like `add()` are about 4 times faster.
 - **`Rational::fromFloat()` gives the simplest `Rational` whose `toFloat()` is the float (breaking).** It's found from
   the exact continued fraction of the float, using integer arithmetic only, and tries semiconvergents as well as
   convergents. Previously, the floating-point continued fraction drifted, and about 3% of random floats didn't
