@@ -105,6 +105,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Fixed
 
+- **`Vector::prod()` could return -0.0,** e.g. for `[0, -3]`. It now returns 0.0, matching the package.
 - **`Complex::sqr()` and `pow(2)` lost digits in the real part when the parts are close in size,** e.g. 32 ulps for
   `266.21 - 263.63i`. The real part is now (a - b)(a + b) rather than a² - b². `sqr()` is now slightly more accurate
   than `$z->mul($z)`, and just as quick. `** 2` uses it too.
@@ -117,7 +118,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A
   missing or wrong-typed element or row now throws `Error`: "Vector data is invalid." or "Matrix data is invalid.". This
-  also covers objects built by `unserialize()`.
+  also covers objects built by `unserialize()`. A count changed to a huge value throws too, rather than hanging.
 - **PHPStan typed `Rational + int|float` as `Rational`,** but it's a `float` at runtime when the operand is a float. An
   operand that may be a float now gives `Rational|float`, for all the arithmetic operators.
 - **`Complex::fromString()` and `Rational::fromString()` trimmed different characters from the package.** They didn't

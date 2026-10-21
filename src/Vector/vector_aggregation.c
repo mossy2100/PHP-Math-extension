@@ -12,6 +12,7 @@
 #include "php.h"
 #include "vector_internal.h"
 #include "exceptions.h"
+#include "floats.h"
 #include "../../oceanmoon_math_arginfo.h"
 
 /* {{{ OceanMoon\Math\Vector::sum(): float
@@ -70,7 +71,8 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 		RETURN_THROWS();
 	}
 
-	RETURN_DOUBLE(prod);
+	/* As in the package, a zero product with a negative factor is 0.0, not -0.0. */
+	RETURN_DOUBLE(math_floats_normalize_zero(prod));
 }
 /* }}} */
 
