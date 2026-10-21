@@ -1,7 +1,7 @@
 /*
  * complex_properties.c
  *
- * Computes the `magnitude`/`phase` properties on OceanMoon\Math\Complex, and installs the custom
+ * Computes the `magnitude`/`phase` properties on Mossy2100\Math\Complex, and installs the custom
  * object handlers (do_operation, compare, create_object) shared by every Complex instance.
  *
  * magnitude/phase are plain stored properties, eagerly computed once in complex_init()
@@ -17,9 +17,9 @@
 #include <math.h>
 
 #include "php.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 
 /* {{{ complex_compute_magnitude

@@ -1,7 +1,7 @@
 /*
  * complex_transcendental.c
  *
- * Transcendental methods for OceanMoon\Math\Complex: exp(), ln(), and log(). Mirrors the
+ * Transcendental methods for Mossy2100\Math\Complex: exp(), ln(), and log(). Mirrors the
  * "Transcendental methods" region of the PHP package's Complex class.
  *
  * complex_calc_exp()/complex_calc_ln() are the computational cores, factored out so pow()
@@ -20,7 +20,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
@@ -194,8 +194,8 @@ zend_result complex_calc_ln(zend_object *obj, double *out_real, double *out_imag
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::exp(): Complex */
-PHP_METHOD(OceanMoon_Math_Complex, exp)
+/* {{{ Mossy2100\Math\Complex::exp(): Complex */
+PHP_METHOD(Mossy2100_Math_Complex, exp)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -211,8 +211,8 @@ PHP_METHOD(OceanMoon_Math_Complex, exp)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::ln(): Complex */
-PHP_METHOD(OceanMoon_Math_Complex, ln)
+/* {{{ Mossy2100\Math\Complex::ln(): Complex */
+PHP_METHOD(Mossy2100_Math_Complex, ln)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -227,7 +227,7 @@ PHP_METHOD(OceanMoon_Math_Complex, ln)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::log(Complex|float $base): Complex
+/* {{{ Mossy2100\Math\Complex::log(Complex|float $base): Complex
  *
  * Matches the PHP package's Complex::log(): the logarithm with an arbitrary base, via the
  * change-of-base formula log_b(z) = ln(z) / ln(b). Unlike add()/sub()/mul()/div()/pow(), $base
@@ -237,7 +237,7 @@ PHP_METHOD(OceanMoon_Math_Complex, ln)
  * `new self($base)` before `$base->ln()` is ever called. A promoted float therefore gets a
  * throwaway Complex allocated here, destroyed before returning.
  */
-PHP_METHOD(OceanMoon_Math_Complex, log)
+PHP_METHOD(Mossy2100_Math_Complex, log)
 {
 	zval *base_arg;
 
@@ -259,7 +259,7 @@ PHP_METHOD(OceanMoon_Math_Complex, log)
 			d = Z_DVAL_P(base_arg);
 		} else {
 			zend_argument_type_error(
-				1, "must be of type OceanMoon\\Math\\Complex|float, %s given", zend_zval_value_name(base_arg)
+				1, "must be of type Mossy2100\\Math\\Complex|float, %s given", zend_zval_value_name(base_arg)
 			);
 			RETURN_THROWS();
 		}

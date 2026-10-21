@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHPStan-only declaration of OceanMoon\Math\M_I, the Complex(0, 1) constant.
+ * PHPStan-only declaration of Mossy2100\Math\M_I, the Complex(0, 1) constant.
  *
  * Not a real stub - never processed by gen_stub.php (no @generate-class-entries here), and never
  * executed at runtime (only listed in phpstan.neon's scanFiles). The real M_I is registered purely
@@ -12,6 +12,6 @@
  * give PHPStan something to see.
  */
 
-namespace OceanMoon\Math;
+namespace Mossy2100\Math;
 
 const M_I = new Complex(0, 1);

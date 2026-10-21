@@ -1,15 +1,15 @@
 /*
  * exceptions.h
  *
- * Registers OceanMoon\Core\Exceptions\FormatException and ArithmeticException as far as the math
+ * Registers Mossy2100\Core\Exceptions\FormatException and ArithmeticException as far as the math
  * extension needs them (both are trivial empty subclasses of the built-in DomainException in the
  * PHP source - no methods or properties of their own to port). Not the whole of
- * OceanMoon\Core\Exceptions, just the two custom exception types Complex/Rational/Vector/Matrix
+ * Mossy2100\Core\Exceptions, just the two custom exception types Complex/Rational/Vector/Matrix
  * actually throw.
  *
  * Registered against spl_ce_DomainException, PHP's own built-in class entry, so no other Core
  * class needs to exist natively for these to work - same reasoning as floats.h/integers.h being
- * pure, standalone helpers with no dependency on a ported OceanMoon\Core class.
+ * pure, standalone helpers with no dependency on a ported Mossy2100\Core class.
  */
 
 #ifndef PHP_MATH_EXCEPTIONS_H
@@ -23,7 +23,7 @@ extern zend_class_entry *math_ce_ArithmeticException;
 
 /* {{{ math_exceptions_minit
  *
- * Called from PHP_MINIT_FUNCTION(oceanmoon_math) in oceanmoon_math.c, before any class that might throw either
+ * Called from PHP_MINIT_FUNCTION(mossy2100_math) in mossy2100_math.c, before any class that might throw either
  * exception is registered.
  */
 zend_result math_exceptions_minit(void);
@@ -56,7 +56,7 @@ void math_rethrow_overflow(const char *operation);
 
 /* {{{ math_abbrev_string
  *
- * Matches OceanMoon\Core\Stringify::abbrev() for a string, as Stringify::prepEx() shows it in an exception message:
+ * Matches Mossy2100\Core\Stringify::abbrev() for a string, as Stringify::prepEx() shows it in an exception message:
  * single-quoted, with backslashes and single quotes escaped, and cut to 32 characters, ending "…'", if longer.
  * Returns NULL if the string isn't valid UTF-8, which Stringify can't show. The caller releases the result.
  */

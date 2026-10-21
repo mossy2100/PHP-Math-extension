@@ -1,7 +1,7 @@
 /*
  * complex_catrig.c
  *
- * The computational core of the inverse trigonometric and hyperbolic methods of OceanMoon\Math\Complex: asin(),
+ * The computational core of the inverse trigonometric and hyperbolic methods of Mossy2100\Math\Complex: asin(),
  * acos(), atan(), asinh(), acosh() and atanh(). Matches the helpers calcAsinh() to calcLogLarge() in the PHP
  * package's Complex class, operation for operation, so the results agree bit for bit.
  *

@@ -1,7 +1,7 @@
 /*
  * vector_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Vector: neg(), hadamardInv(), add(),
+ * Unary and binary arithmetic methods for Mossy2100\Math\Vector: neg(), hadamardInv(), add(),
  * sub(), mul(), div(), hadamardMul(), hadamardDiv(). Mirrors the "Unary arithmetic methods"/
  * "Binary arithmetic methods" regions of the PHP package's Vector class.
  *
@@ -18,7 +18,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "../Matrix/matrix_internal.h"
 #include "exceptions.h"
 #include "floats.h"
@@ -159,11 +159,11 @@ static zend_result vector_calc_elementwise(
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::neg(): Vector
+/* {{{ Mossy2100\Math\Vector::neg(): Vector
  *
  * Matches the PHP package's Vector::neg(): mul(-1).
  */
-PHP_METHOD(OceanMoon_Math_Vector, neg)
+PHP_METHOD(Mossy2100_Math_Vector, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -174,11 +174,11 @@ PHP_METHOD(OceanMoon_Math_Vector, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::hadamardInv(): Vector
+/* {{{ Mossy2100\Math\Vector::hadamardInv(): Vector
  *
  * Matches the PHP package's Vector::hadamardInv(): element-wise reciprocal.
  */
-PHP_METHOD(OceanMoon_Math_Vector, hadamardInv)
+PHP_METHOD(Mossy2100_Math_Vector, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -205,11 +205,11 @@ zend_result vector_calc_add(zend_object *self, zend_object *other, zval *return_
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::add(Vector $other): Vector
+/* {{{ Mossy2100\Math\Vector::add(Vector $other): Vector
  *
  * Matches the PHP package's Vector::add().
  */
-PHP_METHOD(OceanMoon_Math_Vector, add)
+PHP_METHOD(Mossy2100_Math_Vector, add)
 {
 	zval *other;
 
@@ -238,11 +238,11 @@ zend_result vector_calc_sub(zend_object *self, zend_object *other, zval *return_
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::sub(Vector $other): Vector
+/* {{{ Mossy2100\Math\Vector::sub(Vector $other): Vector
  *
  * Matches the PHP package's Vector::sub().
  */
-PHP_METHOD(OceanMoon_Math_Vector, sub)
+PHP_METHOD(Mossy2100_Math_Vector, sub)
 {
 	zval *other;
 
@@ -320,13 +320,13 @@ zend_result vector_calc_mul_matrix(zend_object *self, zend_object *other, zval *
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::mul(float|Matrix $multiplier): Vector
+/* {{{ Mossy2100\Math\Vector::mul(float|Matrix $multiplier): Vector
  *
  * Matches the PHP package's Vector::mul(): scalar branch scales every element; Matrix branch
  * converts this Vector to a row Matrix, multiplies by $multiplier, and extracts the (only)
  * resulting row as a Vector.
  */
-PHP_METHOD(OceanMoon_Math_Vector, mul)
+PHP_METHOD(Mossy2100_Math_Vector, mul)
 {
 	zval *multiplier;
 
@@ -346,7 +346,7 @@ PHP_METHOD(OceanMoon_Math_Vector, mul)
 
 	if (Z_TYPE_P(multiplier) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(multiplier), matrix_ce_Matrix)) {
 		zend_argument_type_error(
-			1, "must be of type OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(multiplier)
+			1, "must be of type Mossy2100\\Math\\Matrix|float, %s given", zend_zval_value_name(multiplier)
 		);
 		RETURN_THROWS();
 	}
@@ -400,11 +400,11 @@ zend_result vector_calc_scalar_div(double scalar, zend_object *obj, zval *return
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::div(float $scalar): Vector
+/* {{{ Mossy2100\Math\Vector::div(float $scalar): Vector
  *
  * Matches the PHP package's Vector::div(): divides every element by the scalar.
  */
-PHP_METHOD(OceanMoon_Math_Vector, div)
+PHP_METHOD(Mossy2100_Math_Vector, div)
 {
 	double scalar;
 
@@ -435,11 +435,11 @@ zend_result vector_calc_hadamard_mul(zend_object *self, zend_object *other, zval
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::hadamardMul(Vector $other): Vector
+/* {{{ Mossy2100\Math\Vector::hadamardMul(Vector $other): Vector
  *
  * Matches the PHP package's Vector::hadamardMul().
  */
-PHP_METHOD(OceanMoon_Math_Vector, hadamardMul)
+PHP_METHOD(Mossy2100_Math_Vector, hadamardMul)
 {
 	zval *other;
 
@@ -470,11 +470,11 @@ zend_result vector_calc_hadamard_div(zend_object *self, zend_object *other, zval
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::hadamardDiv(Vector $other): Vector
+/* {{{ Mossy2100\Math\Vector::hadamardDiv(Vector $other): Vector
  *
  * Matches the PHP package's Vector::hadamardDiv().
  */
-PHP_METHOD(OceanMoon_Math_Vector, hadamardDiv)
+PHP_METHOD(Mossy2100_Math_Vector, hadamardDiv)
 {
 	zval *other;
 

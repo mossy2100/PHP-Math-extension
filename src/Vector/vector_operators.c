@@ -1,7 +1,7 @@
 /*
  * vector_operators.c
  *
- * Operator overloading for OceanMoon\Math\Vector: +, -, *, / (plus unary - (negate), which PHP
+ * Operator overloading for Mossy2100\Math\Vector: +, -, *, / (plus unary - (negate), which PHP
  * lowers to `$v * -1` - see vector_do_operation()'s doc comment). Mirrors docs/Reference/Vector.md in this
  * repo - these operators only exist here in the extension; the userland package has no way to
  * overload operators, so it exposes the same behavior only as named methods (add()/sub()/mul()/
@@ -25,7 +25,7 @@
 
 #include "php.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "../Matrix/matrix_internal.h"
 
 /* {{{ vector_operand_scalar

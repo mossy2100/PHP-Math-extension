@@ -1,7 +1,7 @@
 /*
  * matrix_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Matrix: equal(), approxEqual(). Mirrors the "Comparison
+ * Comparison methods for Mossy2100\Math\Matrix: equal(), approxEqual(). Mirrors the "Comparison
  * methods" region of the PHP package's Matrix class - both only accept another Matrix (same-type
  * comparison only, per the finalized comparison-trait policy: mixed $other, never self, throw for
  * anything else).
@@ -17,7 +17,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 #include "types.h"
 
@@ -41,11 +41,11 @@ static zend_result matrix_check_operand(zval *other)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::equal(mixed $other): bool
+/* {{{ Mossy2100\Math\Matrix::equal(mixed $other): bool
  *
  * Matches the PHP package's Matrix::equal(): same dimensions and every element exactly equal.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, equal)
+PHP_METHOD(Mossy2100_Math_Matrix, equal)
 {
 	zval *other;
 
@@ -88,11 +88,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, equal)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
+/* {{{ Mossy2100\Math\Matrix::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
  *
  * Matches the PHP package's Matrix::approxEqual().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, approxEqual)
+PHP_METHOD(Mossy2100_Math_Matrix, approxEqual)
 {
 	zval *other;
 	double rel_tol = 1e-9;

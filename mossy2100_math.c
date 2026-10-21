@@ -1,9 +1,9 @@
 /*
- * oceanmoon_math.c
+ * mossy2100_math.c
  *
- * Module-wide lifecycle for the `oceanmoon_math` extension: MINIT/RINIT/MINFO and the module
+ * Module-wide lifecycle for the `mossy2100_math` extension: MINIT/RINIT/MINFO and the module
  * entry. This is the one extension-wide file, kept at the project root alongside
- * php_oceanmoon_math.h per common PHP extension convention; everything else lives under src/,
+ * php_mossy2100_math.h per common PHP extension convention; everything else lives under src/,
  * one subdirectory per class (Complex/, Rational/, Vector/, Matrix/). MINIT/RINIT delegate to
  * each class's own complex_minit()/complex_rinit()-style hooks rather than doing class-specific
  * work here directly.
@@ -21,7 +21,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "exceptions.h"
 #include "types.h"
 #include "Complex/complex_internal.h"
@@ -30,9 +30,9 @@
 #include "Matrix/matrix_internal.h"
 
 /* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(oceanmoon_math)
+PHP_MINIT_FUNCTION(mossy2100_math)
 {
-#if defined(ZTS) && defined(COMPILE_DL_OCEANMOON_MATH)
+#if defined(ZTS) && defined(COMPILE_DL_MOSSY2100_MATH)
 	/* With ZEND_ENABLE_STATIC_TSRMLS_CACHE, engine globals such as EG() are read through this module's own per-thread
 	 * cache, which must be filled before first use, here and in RINIT, or a thread-safe build crashes. */
 	ZEND_TSRMLS_CACHE_UPDATE();
@@ -78,9 +78,9 @@ PHP_MINIT_FUNCTION(oceanmoon_math)
 /* }}} */
 
 /* {{{ PHP_RINIT_FUNCTION */
-PHP_RINIT_FUNCTION(oceanmoon_math)
+PHP_RINIT_FUNCTION(mossy2100_math)
 {
-#if defined(ZTS) && defined(COMPILE_DL_OCEANMOON_MATH)
+#if defined(ZTS) && defined(COMPILE_DL_MOSSY2100_MATH)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
@@ -93,33 +93,33 @@ PHP_RINIT_FUNCTION(oceanmoon_math)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(oceanmoon_math)
+PHP_MINFO_FUNCTION(mossy2100_math)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "math support", "enabled");
-	php_info_print_table_row(2, "version", PHP_OCEANMOON_MATH_VERSION);
+	php_info_print_table_row(2, "version", PHP_MOSSY2100_MATH_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
 
-/* {{{ oceanmoon_math_module_entry */
-zend_module_entry oceanmoon_math_module_entry = {
+/* {{{ mossy2100_math_module_entry */
+zend_module_entry mossy2100_math_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"oceanmoon_math",			/* Extension name */
+	"mossy2100_math",			/* Extension name */
 	NULL,						/* zend_function_entry (no global functions) */
-	PHP_MINIT(oceanmoon_math),	/* PHP_MINIT - Module initialization */
+	PHP_MINIT(mossy2100_math),	/* PHP_MINIT - Module initialization */
 	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
-	PHP_RINIT(oceanmoon_math),	/* PHP_RINIT - Request initialization */
+	PHP_RINIT(mossy2100_math),	/* PHP_RINIT - Request initialization */
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(oceanmoon_math),	/* PHP_MINFO - Module info */
-	PHP_OCEANMOON_MATH_VERSION,	/* Version */
+	PHP_MINFO(mossy2100_math),	/* PHP_MINFO - Module info */
+	PHP_MOSSY2100_MATH_VERSION,	/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
-#ifdef COMPILE_DL_OCEANMOON_MATH
+#ifdef COMPILE_DL_MOSSY2100_MATH
 # ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 # endif
-ZEND_GET_MODULE(oceanmoon_math)
+ZEND_GET_MODULE(mossy2100_math)
 #endif

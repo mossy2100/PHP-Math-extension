@@ -5,8 +5,8 @@
 # implements, used to drive development: run them, see what fails, implement the next method.
 #
 # The run is hermetic: PHP_INI_SCAN_DIR is cleared so this machine's conf.d directory is not scanned.
-# scripts/enable writes an oceanmoon_math.ini there pointing at this same module, and loading it twice
-# makes PHP warn ("Module "oceanmoon_math" is already loaded") at startup. Clearing the scan directory
+# scripts/enable writes an mossy2100_math.ini there pointing at this same module, and loading it twice
+# makes PHP warn ("Module "mossy2100_math" is already loaded") at startup. Clearing the scan directory
 # also means the suite always tests the module built here, whatever is enabled globally - the mirror
 # image of packages/Math's own test script, which clears the same variable to keep this extension out
 # of the package's pure-PHP run.
@@ -44,7 +44,7 @@ fi
 source "$EXT_DIR/scripts/php-env"
 
 if [ ! -f "$PHP_MODULE" ]; then
-    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL - run 'composer build $PHP_VERSION' first." >&2
+    echo "mossy2100_math.so not found for PHP $PHP_VERSION_FULL - run 'composer build $PHP_VERSION' first." >&2
     exit 1
 fi
 
@@ -94,7 +94,7 @@ echo "Testing $PHP_MODULE against PHP $PHP_VERSION_FULL"
 # paths inside it - and any path argument - relative to there.
 cd "$EXT_DIR"
 
-# Clear the ini scan directory for this process, so conf.d/oceanmoon_math.ini (written by
+# Clear the ini scan directory for this process, so conf.d/mossy2100_math.ini (written by
 # scripts/enable) can't load the module a second time - the -d extension= below is the only load.
 PHP_INI_SCAN_DIR= exec php \
     -d extension="$PHP_MODULE" \

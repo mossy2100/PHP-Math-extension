@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Enable oceanmoon_math globally on this machine, by writing a conf.d ini file that points directly
-# at this repo's own built module (build/<php-version>/modules/oceanmoon_math.so) - so enabling
+# Enable mossy2100_math globally on this machine, by writing a conf.d ini file that points directly
+# at this repo's own built module (build/<php-version>/modules/mossy2100_math.so) - so enabling
 # always picks up the latest local build, with no separate "copy the .so somewhere" step needed.
 # Useful for ad-hoc scripts/demos that expect the extension to "just be there" without an explicit
 # -d extension=... flag on every invocation.
@@ -15,7 +15,7 @@
 # module, so enabling for 8.4 and 8.5 are independent.
 #
 # Disabled is the right default for day-to-day development: enabling this globally will silently
-# shadow oceanmoon/math's own userland Complex/Rational/Vector/Matrix classes in EVERY OTHER PHP
+# shadow mossy2100/math's own userland Complex/Rational/Vector/Matrix classes in EVERY OTHER PHP
 # project on this machine too (not just this one), since PHP registers internal (C extension)
 # classes before autoloading ever runs. See packages/Math's tests/bootstrap.php for the guard
 # rail that necessitated on the package side.
@@ -42,10 +42,10 @@ fi
 source "$EXT_DIR/scripts/php-env"
 
 SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
-INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
+INI_FILE="$SCAN_DIR/mossy2100_math.ini"
 
 if [[ ! -f "$PHP_MODULE" ]]; then
-    echo "oceanmoon_math.so not found at $PHP_MODULE - run 'composer build' first." >&2
+    echo "mossy2100_math.so not found at $PHP_MODULE - run 'composer build' first." >&2
     exit 1
 fi
 

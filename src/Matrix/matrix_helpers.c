@@ -1,7 +1,7 @@
 /*
  * matrix_helpers.c
  *
- * Private helpers for OceanMoon\Math\Matrix, not PHP-visible: matrix_calc_det() (mirrors
+ * Private helpers for Mossy2100\Math\Matrix, not PHP-visible: matrix_calc_det() (mirrors
  * Matrix::calcDet()), matrix_get_minor() (mirrors Matrix::getMinor()), and the LU decomposition helpers
  * matrix_lu_decompose(), matrix_inv_from_lu() and matrix_is_ill_conditioned() (mirroring Matrix::luDecompose(),
  * Matrix::invFromLu() and Matrix::isIllConditioned()), and matrix_to_data_array(), which builds their input. Used by

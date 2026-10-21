@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Complex;
+namespace Mossy2100\Math\Tests\Complex;
 
-use OceanMoon\Core\Exceptions\ArithmeticException;
-use OceanMoon\Math\Complex;
+use Mossy2100\Core\Exceptions\ArithmeticException;
+use Mossy2100\Math\Complex;
 use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -337,7 +337,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     public function testModThrows(): void
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\\Math\\Complex % int');
+        $this->expectExceptionMessage('Unsupported operand types: Mossy2100\\Math\\Complex % int');
 
         $result = new Complex(1, 2) % 2; // @phpstan-ignore binaryOp.invalid
     }
@@ -348,7 +348,7 @@ class ComplexBinaryOperatorsTest extends TestCase
     public function testScalarModThrows(): void
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Unsupported operand types: int % OceanMoon\\Math\\Complex');
+        $this->expectExceptionMessage('Unsupported operand types: int % Mossy2100\\Math\\Complex');
 
         $result = 2 % new Complex(1, 2); // @phpstan-ignore binaryOp.invalid
     }

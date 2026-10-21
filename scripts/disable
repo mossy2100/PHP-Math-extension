@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Disable oceanmoon_math globally on this machine, by removing the conf.d ini file that
+# Disable mossy2100_math globally on this machine, by removing the conf.d ini file that
 # scripts/enable writes. This doesn't touch the built .so itself - it just stops PHP loading it.
 #
 # Usage:
@@ -32,7 +32,7 @@ fi
 source "$EXT_DIR/scripts/php-env"
 
 SCAN_DIR="$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')"
-INI_FILE="$SCAN_DIR/oceanmoon_math.ini"
+INI_FILE="$SCAN_DIR/mossy2100_math.ini"
 
 if [[ -f "$INI_FILE" ]]; then
     rm "$INI_FILE"

@@ -1,14 +1,14 @@
 /*
  * rational.c
  *
- * OceanMoon\Math\Rational: class registration, the constructor, and the shared internal helpers
+ * Mossy2100\Math\Rational: class registration, the constructor, and the shared internal helpers
  * (rational_init/rational_create/rational_read_parts) declared in rational_internal.h and used by
  * this file as well as the other rational_*.c implementation files in this directory.
  *
  * Factory methods (fromFloat/fromString) live in rational_factory.c; conversion methods
  * (toFloat/toMixedNumber/__toString) live in rational_conversion.c.
  *
- * rational_minit() is called from the module's real PHP_MINIT_FUNCTION in ../oceanmoon_math.c, which owns
+ * rational_minit() is called from the module's real PHP_MINIT_FUNCTION in ../mossy2100_math.c, which owns
  * module lifecycle for the whole `math` extension.
  */
 
@@ -21,11 +21,11 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "integers.h"
 
-/* The registered class entry for OceanMoon\Math\Rational. */
+/* The registered class entry for Mossy2100\Math\Rational. */
 zend_class_entry *rational_ce_Rational;
 uint32_t rational_offset_numerator;
 uint32_t rational_offset_denominator;
@@ -151,8 +151,8 @@ void rational_read_parts(zend_object *obj, zend_long *out_num, zend_long *out_de
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::__construct(int $num = 0, int $den = 1) */
-PHP_METHOD(OceanMoon_Math_Rational, __construct)
+/* {{{ Mossy2100\Math\Rational::__construct(int $num = 0, int $den = 1) */
+PHP_METHOD(Mossy2100_Math_Rational, __construct)
 {
 	zend_long num = 0, den = 1;
 
@@ -170,13 +170,13 @@ PHP_METHOD(OceanMoon_Math_Rational, __construct)
 
 /* {{{ rational_minit
  *
- * Called from PHP_MINIT_FUNCTION(oceanmoon_math) in ../oceanmoon_math.c. Class entry, method table, and typed
- * properties are all generated from oceanmoon_math.stub.php into oceanmoon_math_arginfo.h; register them
+ * Called from PHP_MINIT_FUNCTION(mossy2100_math) in ../mossy2100_math.c. Class entry, method table, and typed
+ * properties are all generated from mossy2100_math.stub.php into mossy2100_math_arginfo.h; register them
  * here.
  */
 zend_result rational_minit(void)
 {
-	rational_ce_Rational = register_class_OceanMoon_Math_Rational(zend_ce_stringable);
+	rational_ce_Rational = register_class_Mossy2100_Math_Rational(zend_ce_stringable);
 	rational_offset_numerator = math_types_property_offset(rational_ce_Rational, "numerator");
 	rational_offset_denominator = math_types_property_offset(rational_ce_Rational, "denominator");
 

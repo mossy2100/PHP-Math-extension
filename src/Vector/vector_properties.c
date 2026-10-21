@@ -1,7 +1,7 @@
 /*
  * vector_properties.c
  *
- * The `magnitude` computed property on OceanMoon\Math\Vector: computed fresh from the current
+ * The `magnitude` computed property on Mossy2100\Math\Vector: computed fresh from the current
  * elements on every read, never cached - mirrors the PHP package's property-hook-based
  * $magnitude (a `get`-only hook with no backing storage), implemented here via a custom
  * `read_property` object handler since internal (C-registered) classes don't support property
@@ -23,7 +23,7 @@
 
 #include "php.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 
 /* {{{ vector_read_magnitude
@@ -151,7 +151,7 @@ static HashTable *vector_get_properties_for(zend_object *object, zend_prop_purpo
 /* {{{ vector_write_property
  *
  * Custom `write_property` handler: rejects writes to "magnitude" with the same "Property
- * OceanMoon\Math\Vector::$magnitude is read-only" Error the PHP package's `get`-only property
+ * Mossy2100\Math\Vector::$magnitude is read-only" Error the PHP package's `get`-only property
  * hook produces natively - without this override, the backing slot declared for `magnitude`
  * (needed so the property exists at all for reflection/property_exists()) would silently accept
  * writes that read_property() above then ignores on every subsequent read, a silent no-op instead

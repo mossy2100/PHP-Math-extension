@@ -1,6 +1,6 @@
 # Vector Operators
 
-Operator overloading for `OceanMoon\Math\Vector`, available only when this extension is loaded. Plain PHP classes can't
+Operator overloading for `Mossy2100\Math\Vector`, available only when this extension is loaded. Plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Vector` (properties,
 factory methods, conversion, comparison, dot/cross product, `ArrayAccess`, etc.), see the package's own
 [Vector documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md). This page covers only the operators the extension adds on top of it.
@@ -241,7 +241,7 @@ $v1 / $v2;  // [2, 3, 1.5]
 ### % (unsupported)
 
 `%` isn't supported, with a `Vector` on either side. PHP throws its usual `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Vector % int`.
+`Unsupported operand types: Mossy2100\Math\Vector % int`.
 
 ---
 

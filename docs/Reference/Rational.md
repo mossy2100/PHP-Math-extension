@@ -1,6 +1,6 @@
 # Rational Operators
 
-Operator overloading for `OceanMoon\Math\Rational`, available only when this extension is loaded. Plain PHP classes
+Operator overloading for `Mossy2100\Math\Rational`, available only when this extension is loaded. Plain PHP classes
 can't overload operators, so none of this exists in the userland package. For everything else about `Rational`
 (properties, factory methods, conversion, `compare()`/`approxCompare()`, rounding, etc.), see the package's own
 [Rational documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Rational.md). This page covers only the operators the extension adds on top of it.
@@ -94,7 +94,7 @@ The variable is assigned a new `Rational`, and the object it held isn't modified
 [compound assignment](#compound-assignment-operators).
 
 > [!WARNING]
-> If the result overflows, PHP throws `TypeError` "Cannot increment OceanMoon\Math\Rational", with the
+> If the result overflows, PHP throws `TypeError` "Cannot increment Mossy2100\Math\Rational", with the
 > `OverflowException` as its previous exception. This is the engine's handling of `++` and `--` on objects, and can't be
 > changed. Use `$r += 1` to get the `OverflowException` directly.
 

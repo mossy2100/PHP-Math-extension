@@ -48,7 +48,7 @@ jobs:
       - name: Build
         run: |
           phpize
-          ./configure --enable-oceanmoon_math
+          ./configure --enable-mossy2100_math
           make -j"$(nproc)"
 
       - name: Run phpt tests
@@ -58,7 +58,7 @@ jobs:
         run: composer install --no-interaction --no-progress
 
       - name: Run PHPUnit
-        run: php -d extension="$PWD/modules/oceanmoon_math.so" vendor/bin/phpunit
+        run: php -d extension="$PWD/modules/mossy2100_math.so" vendor/bin/phpunit
 
   debug:
     name: Debug and sanitizers, PHP ${{ matrix.php }}
@@ -123,7 +123,7 @@ jobs:
         working-directory: extensions/Math
         run: |
           "$PHP_DEBUG_PREFIX/bin/phpize"
-          ./configure --with-php-config="$PHP_DEBUG_PREFIX/bin/php-config" --enable-oceanmoon_math \
+          ./configure --with-php-config="$PHP_DEBUG_PREFIX/bin/php-config" --enable-mossy2100_math \
             CFLAGS="-g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined" \
             LDFLAGS="-fsanitize=address,undefined"
           make -j"$(nproc)"
@@ -145,7 +145,7 @@ jobs:
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: |
           set -o pipefail
-          "$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/oceanmoon_math.so" -d report_memleaks=1 \
+          "$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/mossy2100_math.so" -d report_memleaks=1 \
             vendor/bin/phpunit 2>&1 | tee phpunit.log
           if grep -q "memory leaks detected" phpunit.log; then
             echo "::error::The debug build reported leaked memory."
@@ -159,7 +159,7 @@ jobs:
           USE_ZEND_ALLOC: '0'
           ASAN_OPTIONS: detect_leaks=0
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
-        run: '"$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/oceanmoon_math.so" vendor/bin/phpunit'
+        run: '"$PHP_DEBUG_PREFIX/bin/php" -n -d extension="$PWD/modules/mossy2100_math.so" vendor/bin/phpunit'
 
   windows:
     name: Windows, PHP ${{ matrix.php }} ${{ matrix.ts }}
@@ -214,7 +214,7 @@ jobs:
       - name: Configure
         shell: cmd
         run: |
-          call configure --enable-oceanmoon_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
+          call configure --enable-mossy2100_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
           if not exist Makefile exit /b 1
 
       - name: Build
@@ -246,5 +246,5 @@ jobs:
         shell: pwsh
         run: |
           $dir = if ('${{ matrix.ts }}' -eq 'ts') { 'Release_TS' } else { 'Release' }
-          php -d "extension=$PWD\x64\$dir\php_oceanmoon_math.dll" vendor/bin/phpunit
+          php -d "extension=$PWD\x64\$dir\php_mossy2100_math.dll" vendor/bin/phpunit
           exit $LASTEXITCODE

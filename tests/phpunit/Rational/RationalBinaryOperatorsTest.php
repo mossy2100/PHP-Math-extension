@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Rational;
+namespace Mossy2100\Math\Tests\Rational;
 
 use DomainException;
-use OceanMoon\Core\Exceptions\ArithmeticException;
-use OceanMoon\Math\Rational;
+use Mossy2100\Core\Exceptions\ArithmeticException;
+use Mossy2100\Math\Rational;
 use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -599,7 +599,7 @@ class RationalBinaryOperatorsTest extends TestCase
     public function testModUnsupportedOperandThrows(): void
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\Math\Rational % string');
+        $this->expectExceptionMessage('Unsupported operand types: Mossy2100\Math\Rational % string');
 
         $result = new Rational(3, 4) % 'x'; // @phpstan-ignore binaryOp.invalid
     }

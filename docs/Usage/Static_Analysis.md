@@ -21,7 +21,7 @@ with objects:
 Example:
 
 ```text
-Binary operation "*" between OceanMoon\Math\Vector and int results in an error.
+Binary operation "*" between Mossy2100\Math\Vector and int results in an error.
 ```
 
 The tempting-but-wrong fix is scattering `@phpstan-ignore binaryOp.invalid` over every call site. That silences the
@@ -121,11 +121,11 @@ Once the class exists, it needs registering as a service in `phpstan.neon`, tagg
 ```neon
 services:
     -
-        class: OceanMoon\Math\PHPStan\VectorBinaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\VectorBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\VectorUnaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\VectorUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
 ```
@@ -136,23 +136,23 @@ above).
 ## The classes also have to be visible to PHPStan as class types at all
 
 Registering the operator extensions solves "does PHPStan understand what `*` means", but PHPStan separately needs to
-know `Complex`/`Rational`/`Vector`/`Matrix` _exist_ as classes with the methods/properties `oceanmoon_math.stub.php`
+know `Complex`/`Rational`/`Vector`/`Matrix` _exist_ as classes with the methods/properties `mossy2100_math.stub.php`
 declares. The compiled `.so` obviously isn't something PHPStan can read. That's what `scanFiles` in `phpstan.neon` is
 for:
 
 ```neon
 parameters:
     scanFiles:
-        - oceanmoon_math.stub.php
+        - mossy2100_math.stub.php
 ```
 
-`oceanmoon_math.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php`; see the
+`mossy2100_math.stub.php` is the exact source of truth already used to generate the C arginfo (`gen_stub.php`; see the
 `Building` section of [Development](Development.md#building)), so this is the same signatures PHP itself uses at runtime, not a separate
 hand-maintained copy that could drift.
 
 ## Constants registered at runtime
 
-`OceanMoon\Math\M_I` (the `Complex(0, 1)` constant) has the same fundamental problem as the operators, for a different
+`Mossy2100\Math\M_I` (the `Complex(0, 1)` constant) has the same fundamental problem as the operators, for a different
 reason: it's registered purely at request start via `zend_register_constant()` in `complex_rinit()`
 (`src/Complex/complex.c`), fresh on every request, so there's no PHP source text anywhere for PHPStan to discover it in.
 `gen_stub.php` can't generate a declaration for it either (constant expressions have to be a "global, non-magic
@@ -196,13 +196,13 @@ Everything above documents how PHPStan is made to understand **this repo's own c
 ```json
 "autoload-dev": {
     "psr-4": {
-        "OceanMoon\\Math\\PHPStan\\": "phpstan/"
+        "Mossy2100\\Math\\PHPStan\\": "phpstan/"
     }
 }
 ```
 
 `autoload-dev` is Composer's mechanism for autoloading needed _to develop this package itself_. It's never included when
-another project does `composer require oceanmoon/math-ext`. That means, as things stand today, a project consuming this
+another project does `composer require mossy2100/math-ext`. That means, as things stand today, a project consuming this
 extension has no way to `require` these extension classes into their own `phpstan.neon` at all: the files simply aren't
 shipped to them. Before this can be documented as "how to set PHPStan up in _your_ project using this extension", the
 extension classes need to move to a real (non-dev) autoload section, or be split into a separate, always-shipped

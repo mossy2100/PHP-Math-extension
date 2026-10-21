@@ -1,7 +1,7 @@
 /*
  * matrix_norm.c
  *
- * Norm methods for OceanMoon\Math\Matrix: norm(), p1Norm(), pInfNorm(). Mirrors the "Norm methods"
+ * Norm methods for Mossy2100\Math\Matrix: norm(), p1Norm(), pInfNorm(). Mirrors the "Norm methods"
  * region of the PHP package's Matrix class.
  */
 
@@ -14,16 +14,16 @@
 #include "php.h"
 #include "matrix_internal.h"
 #include "exceptions.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 
-/* {{{ OceanMoon\Math\Matrix::norm(): float
+/* {{{ Mossy2100\Math\Matrix::norm(): float
  *
  * Matches the PHP package's Matrix::norm(): the Frobenius norm, i.e. the magnitude of the elements as one Vector.
  * Like vector_compute_magnitude() (Vector/vector_linear_algebra.c), it scales the elements by a power of 2 so
  * their squares can't overflow or underflow, then undoes the scaling.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, norm)
+PHP_METHOD(Mossy2100_Math_Matrix, norm)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -71,11 +71,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::p1Norm(): float
+/* {{{ Mossy2100\Math\Matrix::p1Norm(): float
  *
  * Matches the PHP package's Matrix::p1Norm(): maximum absolute column sum.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, p1Norm)
+PHP_METHOD(Mossy2100_Math_Matrix, p1Norm)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -110,11 +110,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, p1Norm)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::pInfNorm(): float
+/* {{{ Mossy2100\Math\Matrix::pInfNorm(): float
  *
  * Matches the PHP package's Matrix::pInfNorm(): maximum absolute row sum.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, pInfNorm)
+PHP_METHOD(Mossy2100_Math_Matrix, pInfNorm)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

@@ -1,6 +1,6 @@
 # Complex Operators
 
-Operator overloading for `OceanMoon\Math\Complex`, available only when this extension is loaded. Plain PHP classes can't
+Operator overloading for `Mossy2100\Math\Complex`, available only when this extension is loaded. Plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Complex` (properties,
 factory methods, conversion, comparison, all the trigonometric/transcendental methods, etc.), see the package's own
 [Complex documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Complex.md). This page covers only the operators the extension adds on top of it.
@@ -151,7 +151,7 @@ with `M_I`, the imaginary unit constant (see the package's
 [Globals documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Globals.md)):
 
 ```php
-use const OceanMoon\Math\M_I;
+use const Mossy2100\Math\M_I;
 
 $z = 3 + 4 * M_I;                    // 3 + 4i, same as new Complex(3, 4)
 $z = 3 - 4 * M_I;                    // 3 - 4i
@@ -363,7 +363,7 @@ $z1 ** 0.5;   // 2 + i           (the principal square root)
 ### % (unsupported)
 
 `%` isn't supported, with a `Complex` on either side. PHP throws its usual `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Complex % int`.
+`Unsupported operand types: Mossy2100\Math\Complex % int`.
 
 ---
 

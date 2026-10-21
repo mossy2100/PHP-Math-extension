@@ -13,7 +13,7 @@
 
 /* {{{ math_floats_approx_equal
  *
- * Ports OceanMoon\Core\Floats::approxEqual(): checks whether two doubles are equal within a
+ * Ports Mossy2100\Core\Floats::approxEqual(): checks whether two doubles are equal within a
  * combined absolute/relative tolerance, matching Python's math.isclose().
  *
  *  - NaN is never approximately equal to anything, including itself.
@@ -31,7 +31,7 @@ bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol
 
 /* {{{ math_floats_validate_tolerances
  *
- * Ports OceanMoon\Core\Floats::validateTolerances(): throws DomainException, with the same
+ * Ports Mossy2100\Core\Floats::validateTolerances(): throws DomainException, with the same
  * message, and returns FAILURE if either tolerance is negative or not finite.
  */
 zend_result math_floats_validate_tolerances(double rel_tol, double abs_tol);
@@ -47,7 +47,7 @@ zend_result math_floats_check_scalar(double scalar);
 
 /* {{{ math_floats_normalize_zero
  *
- * Ports OceanMoon\Core\Floats::normalizeZero(): collapses -0.0 to 0.0, leaving every other value
+ * Ports Mossy2100\Core\Floats::normalizeZero(): collapses -0.0 to 0.0, leaving every other value
  * (including NaN and the infinities) unchanged.
  */
 double math_floats_normalize_zero(double value);
@@ -55,7 +55,7 @@ double math_floats_normalize_zero(double value);
 
 /* {{{ math_floats_is_int
  *
- * Ports OceanMoon\Core\Floats::isInt(): true if value is finite and has no fractional part (i.e.
+ * Ports Mossy2100\Core\Floats::isInt(): true if value is finite and has no fractional part (i.e.
  * floor(value) == value). False for NaN, +/-INF, and any value with a fractional component.
  */
 bool math_floats_is_int(double value);
@@ -63,7 +63,7 @@ bool math_floats_is_int(double value);
 
 /* {{{ math_floats_to_int
  *
- * Ports OceanMoon\Core\Floats::toInt(): attempts to convert f to a zend_long losslessly. Returns
+ * Ports Mossy2100\Core\Floats::toInt(): attempts to convert f to a zend_long losslessly. Returns
  * true and sets *out on success; returns false (leaving *out untouched) if f is not an
  * math_floats_is_int() value, or is outside the representable zend_long range.
  *
@@ -83,7 +83,7 @@ bool math_floats_to_int(double f, zend_long *out);
 
 /* {{{ math_floats_to_str
  *
- * Ports OceanMoon\Core\Stringify::stringifyFloat(): NAN/+INF/-INF stringify to their literal
+ * Ports Mossy2100\Core\Stringify::stringifyFloat(): NAN/+INF/-INF stringify to their literal
  * names ("NAN", "INF", "-INF"); every other (finite) value goes through the engine's normal
  * (string) cast machinery, for byte-for-byte parity with what `(string) $value` would produce in
  * PHP (governed by the `precision` ini setting), with ".0" appended if the result would otherwise

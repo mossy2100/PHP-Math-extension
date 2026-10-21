@@ -1,7 +1,7 @@
 /*
  * matrix_linear_algebra.c
  *
- * Linear algebra methods for OceanMoon\Math\Matrix: t(), det(), trace(). Mirrors the
+ * Linear algebra methods for Mossy2100\Math\Matrix: t(), det(), trace(). Mirrors the
  * "Linear algebra methods" region of the PHP package's Matrix class.
  */
 
@@ -14,13 +14,13 @@
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
 #include "exceptions.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Matrix::t(): Matrix
+/* {{{ Mossy2100\Math\Matrix::t(): Matrix
  *
  * Matches the PHP package's Matrix::t(): the transpose.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, t)
+PHP_METHOD(Mossy2100_Math_Matrix, t)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -47,11 +47,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, t)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::det(): float
+/* {{{ Mossy2100\Math\Matrix::det(): float
  *
  * Matches the PHP package's Matrix::det(): `$this->calcDet($this->toArray())`.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, det)
+PHP_METHOD(Mossy2100_Math_Matrix, det)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -80,11 +80,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, det)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::trace(): float
+/* {{{ Mossy2100\Math\Matrix::trace(): float
  *
  * Matches the PHP package's Matrix::trace(): sum of diagonal elements.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, trace)
+PHP_METHOD(Mossy2100_Math_Matrix, trace)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

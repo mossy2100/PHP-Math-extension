@@ -1,7 +1,7 @@
 /*
  * complex_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Complex: equal() and approxEqual() (mirroring the
+ * Comparison methods for Mossy2100\Math\Complex: equal() and approxEqual() (mirroring the
  * "Comparison methods" region of the PHP package's Complex class, which has no natural ordering
  * of its own), plus complex_calc_compare()/complex_do_compare(), the extension-only <, <=, >, >=,
  * <=> operators (and, as an unavoidable side effect of PHP wiring all of these to the same
@@ -21,11 +21,11 @@
 #include <float.h>
 
 #include "php.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 #include "types.h"
 
@@ -79,11 +79,11 @@ static zend_result complex_normalize_operand(zval *value, double *out_real, doub
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::equal(mixed $other): bool
+/* {{{ Mossy2100\Math\Complex::equal(mixed $other): bool
  *
  * Matches the PHP package's Complex::equal(): exact equality of real/imaginary parts.
  */
-PHP_METHOD(OceanMoon_Math_Complex, equal)
+PHP_METHOD(Mossy2100_Math_Complex, equal)
 {
 	zval *other;
 
@@ -107,12 +107,12 @@ PHP_METHOD(OceanMoon_Math_Complex, equal)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
+/* {{{ Mossy2100\Math\Complex::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
  *
  * Matches the PHP package's Complex::approxEqual(): both real and imaginary parts must be
  * approximately equal, via math_floats_approx_equal() (see floats.c).
  */
-PHP_METHOD(OceanMoon_Math_Complex, approxEqual)
+PHP_METHOD(Mossy2100_Math_Complex, approxEqual)
 {
 	zval *other;
 	double rel_tol = 1e-9;

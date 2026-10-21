@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Matches the `oceanmoon/math` `[Unreleased]` changes.
+Matches the `mossy2100/math` `[Unreleased]` changes.
 
 ### Added
 
@@ -36,6 +36,10 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
 
 ### Changed
 
+- **Renamed the extension from `oceanmoon_math` to `mossy2100_math`, its package from `oceanmoon/math-ext` to
+  `mossy2100/math-ext`, and its classes from `OceanMoon\Math` to `Mossy2100\Math` (breaking),** matching the
+  `mossy2100/math` package and the author's GitHub and Packagist name. Load it with `extension=mossy2100_math`, and
+  install it with `pie install mossy2100/math-ext`. The exceptions it throws are `Mossy2100\Core\Exceptions\...`.
 - **`Matrix` and `Vector` methods that read every element are faster,** especially for larger matrices. Each one reads
   its operands once into a flat buffer, instead of reading each element through the property. On PHP 8.5, 50×50
   `Matrix::mul()` went from 1.9 ms to 63 µs, and element-wise methods like `add()` are about 4 times faster. This also
@@ -203,7 +207,7 @@ Matches the `oceanmoon/math` `[Unreleased]` changes.
   `json_encode()`, `get_object_vars()` and `var_export()` include it. Previously `isset()` was `false`, those functions
   left it out, and `var_dump()` showed it as uninitialized.
 - **`TypeError` messages match the package** for parameters taking an object or a number, e.g. "must be of type
-  OceanMoon\Math\Vector|OceanMoon\Math\Matrix|float, true given". Previously they used short class names, a different
+  Mossy2100\Math\Vector|Mossy2100\Math\Matrix|float, true given". Previously they used short class names, a different
   order, and the type rather than the value ("bool given").
 - **`Complex::round()` and `Rational::round()` accepted `null` for `$mode`**, using the default. They now throw
   `TypeError`, like the package.

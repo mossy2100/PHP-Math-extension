@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Matrix;
+namespace Mossy2100\Math\Tests\Matrix;
 
 use DomainException;
 use LengthException;
-use OceanMoon\Core\Exceptions\ArithmeticException;
-use OceanMoon\Math\Matrix;
-use OceanMoon\Math\Vector;
+use Mossy2100\Core\Exceptions\ArithmeticException;
+use Mossy2100\Math\Matrix;
+use Mossy2100\Math\Vector;
 use OverflowException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -480,7 +480,7 @@ class MatrixBinaryOperatorsTest extends TestCase
     public function testModThrows(): void
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Unsupported operand types: OceanMoon\\Math\\Matrix % int');
+        $this->expectExceptionMessage('Unsupported operand types: Mossy2100\\Math\\Matrix % int');
 
         $result = Matrix::fromArray([ // @phpstan-ignore binaryOp.invalid
             [1, 2],
@@ -493,7 +493,7 @@ class MatrixBinaryOperatorsTest extends TestCase
     public function testScalarModThrows(): void
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Unsupported operand types: int % OceanMoon\\Math\\Matrix');
+        $this->expectExceptionMessage('Unsupported operand types: int % Mossy2100\\Math\\Matrix');
 
         $result = 2 % Matrix::fromArray([ // @phpstan-ignore binaryOp.invalid
             [1, 2],

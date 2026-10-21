@@ -8,14 +8,14 @@ this package's `composer.json` `"type": "php-ext"` configuration (`extension-nam
 Composer only manages PHP-space autoloading, not native builds.
 
 ```bash
-pie install oceanmoon/math-ext
+pie install mossy2100/math-ext
 ```
 
 Until it's published, you can point PIE directly at this repository instead:
 
 ```bash
 pie repository:add vcs https://github.com/mossy2100/PHP-Math-extension.git
-pie install oceanmoon/math-ext
+pie install mossy2100/math-ext
 ```
 
 PIE requires the same build tools as a manual build (below) - a C compiler and the PHP development headers - since, on
@@ -29,7 +29,7 @@ prebuilt binary.
 ### Build from source
 
 See [Development](../Development.md#building) for the full `phpize`/`configure`/`make` workflow. Once built,
-`build/<php-version>/modules/oceanmoon_math.so` is a standard PHP extension module.
+`build/<php-version>/modules/mossy2100_math.so` is a standard PHP extension module.
 
 ### Enable the extension
 
@@ -39,32 +39,32 @@ Go to the local folder containing the git repository for the extension. Let's ca
 
 Run `composer enable`.
 
-This will set up a custom `oceanmoon_math.ini` file in the PHP scan directory (as described below), telling PHP to load
-the compiled `oceanmoon_math.so` extension directly from the `extension-dir/build/<php-version>/modules` subfolder - the
+This will set up a custom `mossy2100_math.ini` file in the PHP scan directory (as described below), telling PHP to load
+the compiled `mossy2100_math.so` extension directly from the `extension-dir/build/<php-version>/modules` subfolder - the
 one matching the PHP version the module was built for (see `PHP_VERSION` in [Development](../Development.md#building)).
 
 The advantage of this approach is that PHP is linked to the repo's own build rather than a copied file, so every
 subsequent rebuild is picked up automatically without redeploying.
 
-Run `composer disable` to disable the extension. This doesn't affect the `.so` file but will remove `oceanmoon_math.ini`
+Run `composer disable` to disable the extension. This doesn't affect the `.so` file but will remove `mossy2100_math.ini`
 so the extension isn't loaded by PHP.
 
 #### Option 2 - Manual setup
 
-Decide whether you want to copy `oceanmoon_math.so` to PHP's extensions folder and load it from there, or just link
+Decide whether you want to copy `mossy2100_math.so` to PHP's extensions folder and load it from there, or just link
 directly to the build version (i.e. the one in `extension-dir/build/<php-version>/modules`).
 
 To copy the extension to PHP's own extensions folder, first go to `extension-dir`. Then (substituting the version you
 built for):
 
 ```bash
-cp build/8.4/modules/oceanmoon_math.so "$(php -r 'echo ini_get("extension_dir");')/"
+cp build/8.4/modules/mossy2100_math.so "$(php -r 'echo ini_get("extension_dir");')/"
 ```
 
 Tell PHP to load the extension (from wherever you decided) either by adding a small custom `.ini` file
-(`oceanmoon_math.ini`) to the configuration scan directory, or editing `php.ini`.
+(`mossy2100_math.ini`) to the configuration scan directory, or editing `php.ini`.
 
-To add an `oceanmoon_math.ini` file, go to PHP's configuration scan directory:
+To add an `mossy2100_math.ini` file, go to PHP's configuration scan directory:
 
 ```bash
 cd $(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
@@ -73,13 +73,13 @@ cd $(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
 Create the new file:
 
 ```bash
-sudo nano oceanmoon_math.ini
+sudo nano mossy2100_math.ini
 ```
 
 With this content:
 
 ```ini
-extension={path to oceanmoon_math.so}
+extension={path to mossy2100_math.so}
 ```
 
 Otherwise, to modify `php.ini` directly:
@@ -94,7 +94,7 @@ Look for the "Dynamic Extensions" section and a bunch of lines that look like `e
 Add this line:
 
 ```ini
-extension={path to oceanmoon_math.so}
+extension={path to mossy2100_math.so}
 ```
 
 ### Restart, if PHP is running as a persistent daemon
@@ -117,12 +117,12 @@ sudo apachectl restart
 ### Confirm it loaded
 
 ```bash
-php -m | grep oceanmoon_math
+php -m | grep mossy2100_math
 ```
 
-The response should just be `oceanmoon_math`.
+The response should just be `mossy2100_math`.
 
 **Note:** this only confirms the CLI SAPI has it loaded. If your actual use case is a web request handled by
 `php-fpm`/Apache (not the CLI), that's a separate PHP process with its own separately-loaded extension list, so `php -m`
 here says nothing about whether _that_ process has it. Confirm via a script executed through the web server itself (e.g.
-`<?php var_dump(extension_loaded('oceanmoon_math'));`), not just the command line.
+`<?php var_dump(extension_loaded('mossy2100_math'));`), not just the command line.

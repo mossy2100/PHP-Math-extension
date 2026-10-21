@@ -7,7 +7,7 @@ source there: it downloads a prebuilt DLL from the extension's GitHub release, m
 safety and architecture.
 
 ```bash
-pie install oceanmoon/math-ext
+pie install mossy2100/math-ext
 ```
 
 Each release includes DLLs for PHP 8.4 and 8.5, thread-safe (TS) or not (NTS), for 64-bit Windows. They're built by
@@ -33,20 +33,20 @@ this repository:
 
 ```bash
 phpize
-configure --enable-oceanmoon_math --with-prefix=<path to your PHP>
+configure --enable-mossy2100_math --with-prefix=<path to your PHP>
 nmake
 ```
 
-The build produces `php_oceanmoon_math.dll`, in `x64\Release` (NTS) or `x64\Release_TS` (TS). The CI workflow
+The build produces `php_mossy2100_math.dll`, in `x64\Release` (NTS) or `x64\Release_TS` (TS). The CI workflow
 (`.github/workflows/ci.yml`) runs exactly these steps, and the full test suite, on every push.
 
 ### Enable the extension
 
-Place `php_oceanmoon_math.dll` in PHP's extension directory (`extension_dir` in `php -i`), then add this line to
+Place `php_mossy2100_math.dll` in PHP's extension directory (`extension_dir` in `php -i`), then add this line to
 `php.ini`:
 
 ```ini
-extension=oceanmoon_math
+extension=mossy2100_math
 ```
 
 If PHP is running as a persistent process, e.g. under IIS via FastCGI, restart it to pick up the change.
@@ -57,4 +57,4 @@ If PHP is running as a persistent process, e.g. under IIS via FastCGI, restart i
 php -m
 ```
 
-Look for `oceanmoon_math` in the list.
+Look for `mossy2100_math` in the list.

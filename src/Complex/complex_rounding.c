@@ -1,7 +1,7 @@
 /*
  * complex_rounding.c
  *
- * The round() method for OceanMoon\Math\Complex. Mirrors the "Rounding methods" region of the
+ * The round() method for Mossy2100\Math\Complex. Mirrors the "Rounding methods" region of the
  * PHP package's Complex class.
  */
 
@@ -13,9 +13,9 @@
 #include "ext/standard/php_math.h"
 #include "ext/standard/php_math_round_mode.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Complex::round(int $precision = 0, RoundingMode $mode = RoundingMode::HalfAwayFromZero): Complex
+/* {{{ Mossy2100\Math\Complex::round(int $precision = 0, RoundingMode $mode = RoundingMode::HalfAwayFromZero): Complex
  *
  * Matches the PHP package's Complex::round(): rounds the real and imaginary parts independently,
  * each via PHP's own round(). Calls the same underlying engine primitives PHP's round() itself
@@ -25,7 +25,7 @@
  * any of the eight rounding-mode behaviors here, guaranteeing byte-identical results with zero
  * risk of drift from PHP's own round().
  */
-PHP_METHOD(OceanMoon_Math_Complex, round)
+PHP_METHOD(Mossy2100_Math_Complex, round)
 {
 	zend_long precision = 0;
 	zend_object *mode_obj = NULL;

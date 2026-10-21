@@ -1,12 +1,12 @@
 /*
  * rational_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Rational: compare(), approxEqual(), plus the methods the
+ * Comparison methods for Mossy2100\Math\Rational: compare(), approxEqual(), plus the methods the
  * PHP package's Rational class inherits from the ApproxComparable trait (equal(), lessThan(),
  * lessThanOrEqual(), greaterThan(), greaterThanOrEqual(), approxCompare()) - internal classes
  * can't use traits, so this file ports both the class's own methods and the trait's, matching the
  * "Comparison methods" region of the PHP package's Rational class plus
- * OceanMoon\Core\Traits\Comparison\Comparable/ApproxComparable.
+ * Mossy2100\Core\Traits\Comparison\Comparable/ApproxComparable.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,7 +20,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 #include "integers.h"
 #include "types.h"
@@ -278,8 +278,8 @@ static zend_result rational_calc_approx_equal(zend_object *self_obj, zval *other
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::compare(mixed $other): int */
-PHP_METHOD(OceanMoon_Math_Rational, compare)
+/* {{{ Mossy2100\Math\Rational::compare(mixed $other): int */
+PHP_METHOD(Mossy2100_Math_Rational, compare)
 {
 	zval *other;
 
@@ -295,8 +295,8 @@ PHP_METHOD(OceanMoon_Math_Rational, compare)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::equal(mixed $other): bool */
-PHP_METHOD(OceanMoon_Math_Rational, equal)
+/* {{{ Mossy2100\Math\Rational::equal(mixed $other): bool */
+PHP_METHOD(Mossy2100_Math_Rational, equal)
 {
 	zval *other;
 
@@ -312,8 +312,8 @@ PHP_METHOD(OceanMoon_Math_Rational, equal)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::lessThan(mixed $other): bool */
-PHP_METHOD(OceanMoon_Math_Rational, lessThan)
+/* {{{ Mossy2100\Math\Rational::lessThan(mixed $other): bool */
+PHP_METHOD(Mossy2100_Math_Rational, lessThan)
 {
 	zval *other;
 
@@ -329,8 +329,8 @@ PHP_METHOD(OceanMoon_Math_Rational, lessThan)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::lessThanOrEqual(mixed $other): bool */
-PHP_METHOD(OceanMoon_Math_Rational, lessThanOrEqual)
+/* {{{ Mossy2100\Math\Rational::lessThanOrEqual(mixed $other): bool */
+PHP_METHOD(Mossy2100_Math_Rational, lessThanOrEqual)
 {
 	zval *other;
 
@@ -346,8 +346,8 @@ PHP_METHOD(OceanMoon_Math_Rational, lessThanOrEqual)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::greaterThan(mixed $other): bool */
-PHP_METHOD(OceanMoon_Math_Rational, greaterThan)
+/* {{{ Mossy2100\Math\Rational::greaterThan(mixed $other): bool */
+PHP_METHOD(Mossy2100_Math_Rational, greaterThan)
 {
 	zval *other;
 
@@ -363,8 +363,8 @@ PHP_METHOD(OceanMoon_Math_Rational, greaterThan)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::greaterThanOrEqual(mixed $other): bool */
-PHP_METHOD(OceanMoon_Math_Rational, greaterThanOrEqual)
+/* {{{ Mossy2100\Math\Rational::greaterThanOrEqual(mixed $other): bool */
+PHP_METHOD(Mossy2100_Math_Rational, greaterThanOrEqual)
 {
 	zval *other;
 
@@ -380,8 +380,8 @@ PHP_METHOD(OceanMoon_Math_Rational, greaterThanOrEqual)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool */
-PHP_METHOD(OceanMoon_Math_Rational, approxEqual)
+/* {{{ Mossy2100\Math\Rational::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool */
+PHP_METHOD(Mossy2100_Math_Rational, approxEqual)
 {
 	zval *other;
 	double rel_tol = 1e-9;
@@ -402,12 +402,12 @@ PHP_METHOD(OceanMoon_Math_Rational, approxEqual)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::approxCompare(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): int
+/* {{{ Mossy2100\Math\Rational::approxCompare(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): int
  *
  * Matches ApproxComparable::approxCompare(): 0 if approxEqual() (within tolerance), otherwise
  * falls back to exact compare() for ordering.
  */
-PHP_METHOD(OceanMoon_Math_Rational, approxCompare)
+PHP_METHOD(Mossy2100_Math_Rational, approxCompare)
 {
 	zval *other;
 	double rel_tol = 1e-9;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Matrix;
+namespace Mossy2100\Math\Tests\Matrix;
 
-use OceanMoon\Math\Matrix;
+use Mossy2100\Math\Matrix;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -145,7 +145,7 @@ class MatrixUnaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot perform bitwise not on OceanMoon\Math\Matrix');
+        $this->expectExceptionMessage('Cannot perform bitwise not on Mossy2100\Math\Matrix');
 
         $result = ~$m; // @phpstan-ignore unaryOp.invalid
     }
@@ -165,7 +165,7 @@ class MatrixUnaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot increment OceanMoon\Math\Matrix');
+        $this->expectExceptionMessage('Cannot increment Mossy2100\Math\Matrix');
 
         $m++; // @phpstan-ignore postInc.type
     }
@@ -181,7 +181,7 @@ class MatrixUnaryOperatorsTest extends TestCase
         ]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot decrement OceanMoon\Math\Matrix');
+        $this->expectExceptionMessage('Cannot decrement Mossy2100\Math\Matrix');
 
         $m--; // @phpstan-ignore postDec.type
     }

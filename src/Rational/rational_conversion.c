@@ -1,7 +1,7 @@
 /*
  * rational_conversion.c
  *
- * Conversion methods for OceanMoon\Math\Rational: toFloat(), toMixedNumber(), __toString().
+ * Conversion methods for Mossy2100\Math\Rational: toFloat(), toMixedNumber(), __toString().
  * Mirrors the "Conversion methods" region of the PHP package's Rational class. Also the `cast_object`
  * handler behind `(float) $r` and `(int) $r`, which only exist in the extension.
  */
@@ -13,13 +13,13 @@
 #include "php.h"
 #include "Zend/zend_smart_str.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Rational::toFloat(): float
+/* {{{ Mossy2100\Math\Rational::toFloat(): float
  *
  * Matches the PHP package's Rational::toFloat(): numerator / denominator.
  */
-PHP_METHOD(OceanMoon_Math_Rational, toFloat)
+PHP_METHOD(Mossy2100_Math_Rational, toFloat)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -54,13 +54,13 @@ zend_result rational_cast_object(zend_object *obj, zval *result, int type)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::toMixedNumber(): array
+/* {{{ Mossy2100\Math\Rational::toMixedNumber(): array
  *
  * Matches the PHP package's Rational::toMixedNumber(): an [integer part, fractional remainder]
  * tuple, using trunc/frac semantics. C's `/` and `%` truncate toward zero, like PHP's intdiv() and
  * `%`, so the remainder has the same sign as the original.
  */
-PHP_METHOD(OceanMoon_Math_Rational, toMixedNumber)
+PHP_METHOD(Mossy2100_Math_Rational, toMixedNumber)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -78,12 +78,12 @@ PHP_METHOD(OceanMoon_Math_Rational, toMixedNumber)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::__toString(): string
+/* {{{ Mossy2100\Math\Rational::__toString(): string
  *
  * Matches the PHP package's Rational::__toString(): "numerator" if denominator is 1, otherwise
  * "numerator/denominator".
  */
-PHP_METHOD(OceanMoon_Math_Rational, __toString)
+PHP_METHOD(Mossy2100_Math_Rational, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

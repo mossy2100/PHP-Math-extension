@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Vector;
+namespace Mossy2100\Math\Tests\Vector;
 
-use OceanMoon\Math\Vector;
+use Mossy2100\Math\Vector;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -107,7 +107,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1, 2, 3]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot perform bitwise not on OceanMoon\Math\Vector');
+        $this->expectExceptionMessage('Cannot perform bitwise not on Mossy2100\Math\Vector');
 
         $result = ~$v; // @phpstan-ignore unaryOp.invalid
     }
@@ -124,7 +124,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1, 2, 3]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot increment OceanMoon\Math\Vector');
+        $this->expectExceptionMessage('Cannot increment Mossy2100\Math\Vector');
 
         $v++; // @phpstan-ignore postInc.type
     }
@@ -137,7 +137,7 @@ class VectorUnaryOperatorsTest extends TestCase
         $v = Vector::fromArray([1, 2, 3]);
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot decrement OceanMoon\Math\Vector');
+        $this->expectExceptionMessage('Cannot decrement Mossy2100\Math\Vector');
 
         $v--; // @phpstan-ignore postDec.type
     }

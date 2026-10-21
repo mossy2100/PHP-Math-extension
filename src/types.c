@@ -42,7 +42,7 @@ uint32_t math_types_property_offset(zend_class_entry *ce, const char *name)
 {
 	zend_property_info *info = zend_hash_str_find_ptr(&ce->properties_info, name, strlen(name));
 
-	/* Every name passed here is declared in oceanmoon_math.stub.php, so a miss is a bug in the
+	/* Every name passed here is declared in mossy2100_math.stub.php, so a miss is a bug in the
 	 * extension itself, not something a user can trigger. */
 	ZEND_ASSERT(info != NULL && !(info->flags & ZEND_ACC_STATIC));
 

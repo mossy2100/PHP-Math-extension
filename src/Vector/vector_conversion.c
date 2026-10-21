@@ -1,7 +1,7 @@
 /*
  * vector_conversion.c
  *
- * Conversion methods for OceanMoon\Math\Vector: toArray(), toRowMatrix(), toColumnMatrix(),
+ * Conversion methods for Mossy2100\Math\Vector: toArray(), toRowMatrix(), toColumnMatrix(),
  * __toString(). Mirrors the "Conversion methods" region of the PHP package's Vector class.
  */
 
@@ -11,7 +11,7 @@
 
 #include "php.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "../Matrix/matrix_internal.h"
 #include "Zend/zend_smart_str.h"
 
@@ -50,11 +50,11 @@ zend_result vector_to_column_matrix(zend_object *obj, zval *return_value)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::toRowMatrix(): Matrix
+/* {{{ Mossy2100\Math\Vector::toRowMatrix(): Matrix
  *
  * Matches the PHP package's Vector::toRowMatrix().
  */
-PHP_METHOD(OceanMoon_Math_Vector, toRowMatrix)
+PHP_METHOD(Mossy2100_Math_Vector, toRowMatrix)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -64,11 +64,11 @@ PHP_METHOD(OceanMoon_Math_Vector, toRowMatrix)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::toColumnMatrix(): Matrix
+/* {{{ Mossy2100\Math\Vector::toColumnMatrix(): Matrix
  *
  * Matches the PHP package's Vector::toColumnMatrix().
  */
-PHP_METHOD(OceanMoon_Math_Vector, toColumnMatrix)
+PHP_METHOD(Mossy2100_Math_Vector, toColumnMatrix)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -78,14 +78,14 @@ PHP_METHOD(OceanMoon_Math_Vector, toColumnMatrix)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::toArray(): array
+/* {{{ Mossy2100\Math\Vector::toArray(): array
  *
  * Matches the PHP package's Vector::toArray(): a copy of the internal data. Arrays are
  * copy-on-write in PHP, so simply returning the property's own array (via RETURN_ZVAL with the
  * copy flag) is already safe - the caller gets an independent array the moment either side
  * mutates it.
  */
-PHP_METHOD(OceanMoon_Math_Vector, toArray)
+PHP_METHOD(Mossy2100_Math_Vector, toArray)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -94,11 +94,11 @@ PHP_METHOD(OceanMoon_Math_Vector, toArray)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::__toString(): string
+/* {{{ Mossy2100\Math\Vector::__toString(): string
  *
  * Matches the PHP package's Vector::__toString(): '⟨' . implode(', ', $this->data) . '⟩'.
  */
-PHP_METHOD(OceanMoon_Math_Vector, __toString)
+PHP_METHOD(Mossy2100_Math_Vector, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

@@ -51,7 +51,7 @@ math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out)
 	return MATH_INTEGERS_OK;
 }
 
-/* Ports OceanMoon\Core\Integers::addModNegative(): (x + y) reduced into (neg_m, 0], for x and y in (neg_m, 0],
+/* Ports Mossy2100\Core\Integers::addModNegative(): (x + y) reduced into (neg_m, 0], for x and y in (neg_m, 0],
  * without overflowing. Used by math_integers_mul_mod(). */
 static zend_long math_integers_add_mod_negative(zend_long x, zend_long y, zend_long neg_m)
 {

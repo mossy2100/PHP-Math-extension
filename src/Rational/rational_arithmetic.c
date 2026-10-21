@@ -1,7 +1,7 @@
 /*
  * rational_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Rational: abs(), neg(), recip(), add(),
+ * Unary and binary arithmetic methods for Mossy2100\Math\Rational: abs(), neg(), recip(), add(),
  * sub(), mul(), div(), mod(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
  * of the PHP package's Rational class.
  */
@@ -14,7 +14,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "integers.h"
 
@@ -191,17 +191,17 @@ static zend_result rational_operand_components(
 		return SUCCESS;
 	}
 
-	zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Rational|int, %s given", zend_zval_value_name(other));
+	zend_argument_type_error(1, "must be of type Mossy2100\\Math\\Rational|int, %s given", zend_zval_value_name(other));
 	return FAILURE;
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::abs(): Rational
+/* {{{ Mossy2100\Math\Rational::abs(): Rational
  *
  * Matches the PHP package's Rational::abs(). Negating numerator is always safe: this class's own
  * invariant guarantees numerator is never ZEND_LONG_MIN.
  */
-PHP_METHOD(OceanMoon_Math_Rational, abs)
+PHP_METHOD(Mossy2100_Math_Rational, abs)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -214,11 +214,11 @@ PHP_METHOD(OceanMoon_Math_Rational, abs)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::neg(): Rational
+/* {{{ Mossy2100\Math\Rational::neg(): Rational
  *
  * Matches the PHP package's Rational::neg().
  */
-PHP_METHOD(OceanMoon_Math_Rational, neg)
+PHP_METHOD(Mossy2100_Math_Rational, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -231,13 +231,13 @@ PHP_METHOD(OceanMoon_Math_Rational, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::recip(): Rational
+/* {{{ Mossy2100\Math\Rational::recip(): Rational
  *
  * Matches the PHP package's Rational::recip(): the reciprocal, preserving sign (numerator/
  * denominator swap, negating both if the numerator was negative so the denominator stays
  * positive).
  */
-PHP_METHOD(OceanMoon_Math_Rational, recip)
+PHP_METHOD(Mossy2100_Math_Rational, recip)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -250,11 +250,11 @@ PHP_METHOD(OceanMoon_Math_Rational, recip)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::add(Rational|int $other): Rational
+/* {{{ Mossy2100\Math\Rational::add(Rational|int $other): Rational
  *
  * Matches the PHP package's Rational::add(), via rational_calc_add_sub().
  */
-PHP_METHOD(OceanMoon_Math_Rational, add)
+PHP_METHOD(Mossy2100_Math_Rational, add)
 {
 	zval *other;
 
@@ -274,11 +274,11 @@ PHP_METHOD(OceanMoon_Math_Rational, add)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::sub(Rational|int $other): Rational
+/* {{{ Mossy2100\Math\Rational::sub(Rational|int $other): Rational
  *
  * Matches the PHP package's Rational::sub(), via rational_calc_add_sub().
  */
-PHP_METHOD(OceanMoon_Math_Rational, sub)
+PHP_METHOD(Mossy2100_Math_Rational, sub)
 {
 	zval *other;
 
@@ -298,12 +298,12 @@ PHP_METHOD(OceanMoon_Math_Rational, sub)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::mul(Rational|int $other): Rational
+/* {{{ Mossy2100\Math\Rational::mul(Rational|int $other): Rational
  *
  * Matches the PHP package's Rational::mul(): (a/b) * (c/d) = ac/bd, cross-cancelling gcd(a,d) and
  * gcd(b,c) first to avert overflow.
  */
-PHP_METHOD(OceanMoon_Math_Rational, mul)
+PHP_METHOD(Mossy2100_Math_Rational, mul)
 {
 	zval *other;
 
@@ -323,12 +323,12 @@ PHP_METHOD(OceanMoon_Math_Rational, mul)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::div(Rational|int $other): Rational
+/* {{{ Mossy2100\Math\Rational::div(Rational|int $other): Rational
  *
  * Matches the PHP package's Rational::div(): (a/b) / (c/d) = (a/b) * (d/c) = ad/bc, cross-
  * cancelling gcd(a,c) and gcd(b,d) first to avert overflow.
  */
-PHP_METHOD(OceanMoon_Math_Rational, div)
+PHP_METHOD(Mossy2100_Math_Rational, div)
 {
 	zval *other;
 
@@ -406,11 +406,11 @@ zend_result rational_calc_mod(zend_long a, zend_long b, zend_long c, zend_long d
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::mod(Rational|int $other): Rational
+/* {{{ Mossy2100\Math\Rational::mod(Rational|int $other): Rational
  *
  * Matches the PHP package's Rational::mod(). The result has the sign of the dividend, as with PHP's % and fmod().
  */
-PHP_METHOD(OceanMoon_Math_Rational, mod)
+PHP_METHOD(Mossy2100_Math_Rational, mod)
 {
 	zval *other;
 

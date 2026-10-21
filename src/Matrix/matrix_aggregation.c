@@ -1,7 +1,7 @@
 /*
  * matrix_aggregation.c
  *
- * Aggregation methods for OceanMoon\Math\Matrix: count(). Mirrors the "Aggregation methods" region
+ * Aggregation methods for Mossy2100\Math\Matrix: count(). Mirrors the "Aggregation methods" region
  * of the PHP package's Matrix class.
  */
 
@@ -11,14 +11,14 @@
 
 #include "php.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Matrix::count(): int
+/* {{{ Mossy2100\Math\Matrix::count(): int
  *
  * Matches the PHP package's Matrix::count() (Countable): returns $rowCount, matching the row indexes used by
  * offsetGet() and getIterator().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, count)
+PHP_METHOD(Mossy2100_Math_Matrix, count)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

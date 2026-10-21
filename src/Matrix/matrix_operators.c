@@ -1,7 +1,7 @@
 /*
  * matrix_operators.c
  *
- * Operator overloading for OceanMoon\Math\Matrix: +, -, *, /, ** (plus unary - (negate), which PHP
+ * Operator overloading for Mossy2100\Math\Matrix: +, -, *, /, ** (plus unary - (negate), which PHP
  * lowers to `$A * -1` - see matrix_do_operation()'s doc comment). Mirrors docs/Reference/Matrix.md in this
  * repo - these operators only exist here in the extension; the userland package has no way to
  * overload operators, so it exposes the same behavior only as named methods (add()/sub()/mul()/
@@ -22,7 +22,7 @@
 
 #include "php.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
 /* {{{ matrix_operand_scalar
  *

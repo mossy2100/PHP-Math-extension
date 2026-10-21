@@ -45,10 +45,10 @@ a `.dep` left by another version's build (or made stale by a Homebrew PHP upgrad
 Confirm the extension loads (adjust the version to match):
 
 ```bash
-php8.4 -d extension="$PWD/build/8.4/modules/oceanmoon_math.so" -m | grep oceanmoon_math
+php8.4 -d extension="$PWD/build/8.4/modules/mossy2100_math.so" -m | grep mossy2100_math
 ```
 
-You should see simply `oceanmoon_math`.
+You should see simply `mossy2100_math`.
 
 ### Building by hand
 
@@ -58,12 +58,12 @@ want onto `PATH`, then run the standard pipeline in a tree, and use its variable
 
 ```bash
 source scripts/php-env        # PHP_VERSION=8.5 source scripts/php-env, to build for 8.5 instead
-mkdir -p "$PHP_BUILD_DIR" && cp -R config.m4 config.w32 oceanmoon_math.c php_oceanmoon_math.h \
-    oceanmoon_math_arginfo.h oceanmoon_math.stub.php src "$PHP_BUILD_DIR"/
+mkdir -p "$PHP_BUILD_DIR" && cp -R config.m4 config.w32 mossy2100_math.c php_mossy2100_math.h \
+    mossy2100_math_arginfo.h mossy2100_math.stub.php src "$PHP_BUILD_DIR"/
 mkdir -p "$PHP_BUILD_DIR/tests" && cp -R tests/phpt "$PHP_BUILD_DIR/tests/"
 cd "$PHP_BUILD_DIR"
 phpize
-./configure --enable-oceanmoon_math --with-php-config="$PHP_CONFIG"
+./configure --enable-mossy2100_math --with-php-config="$PHP_CONFIG"
 make
 ```
 
@@ -100,8 +100,8 @@ the sibling `packages/Math` checkout, or from `MATH_PACKAGE_DIR`, which needs it
 
 ## Project Structure
 
-- Top level: `oceanmoon_math.c` (MINIT/RINIT/MINFO/module entry), `php_oceanmoon_math.h`, and `oceanmoon_math.stub.php`
-  (plus its generated `oceanmoon_math_arginfo.h`) - one monolithic stub for the whole extension, following the
+- Top level: `mossy2100_math.c` (MINIT/RINIT/MINFO/module entry), `php_mossy2100_math.h`, and `mossy2100_math.stub.php`
+  (plus its generated `mossy2100_math_arginfo.h`) - one monolithic stub for the whole extension, following the
   convention used by most PHP core extensions (`php_dom.stub.php`, `php_reflection.stub.php`, `random.stub.php`, etc.)
   rather than one stub per class.
 - `src/`: everything else.

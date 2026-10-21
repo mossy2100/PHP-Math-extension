@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Benchmark the extension against the userland package (oceanmoon/math), and print a table of the time per call and
+# Benchmark the extension against the userland package (mossy2100/math), and print a table of the time per call and
 # the speed-up for each operation. The benchmarks themselves are in scripts/bench.php.
 #
 # Both runs use the same PHP binary with opcache enabled for the CLI, and the ini scan directory cleared, so the only
@@ -27,7 +27,7 @@ fi
 source "$EXT_DIR/scripts/php-env"
 
 if [ ! -f "$PHP_MODULE" ]; then
-    echo "oceanmoon_math.so not found for PHP $PHP_VERSION_FULL - run 'scripts/build $PHP_VERSION' first." >&2
+    echo "mossy2100_math.so not found for PHP $PHP_VERSION_FULL - run 'scripts/build $PHP_VERSION' first." >&2
     exit 1
 fi
 

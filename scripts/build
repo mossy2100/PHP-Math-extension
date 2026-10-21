@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Compile the extension into build/<php-version>/modules/oceanmoon_math.so. Runs the full phpize/configure/make
+# Compile the extension into build/<php-version>/modules/mossy2100_math.so. Runs the full phpize/configure/make
 # pipeline every time (not just `make`), since config.m4/config.w32 changes (e.g. adding a new
 # .c file) require phpize/configure to be re-run to pick them up - `make` alone would silently
 # keep building the old file list.
@@ -59,7 +59,7 @@ if [[ -n "$pollution" ]]; then
     exit 1
 fi
 
-echo "Building oceanmoon_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_MODULE"
+echo "Building mossy2100_math against PHP $PHP_VERSION_FULL ($PHP_BIN) -> $PHP_MODULE"
 
 # Recreate this version's build tree from scratch. Building out of tree is what lets the build
 # system's fixed paths work: the generated Makefile - and build/Makefile.global, which phpize
@@ -80,7 +80,7 @@ rm -rf "$PHP_BUILD_DIR"
 mkdir -p "$PHP_BUILD_DIR"
 cp -R \
     config.m4 config.w32 \
-    oceanmoon_math.c php_oceanmoon_math.h oceanmoon_math_arginfo.h oceanmoon_math.stub.php \
+    mossy2100_math.c php_mossy2100_math.h mossy2100_math_arginfo.h mossy2100_math.stub.php \
     src \
     "$PHP_BUILD_DIR"/
 # Belt and braces after the directory copy. The guard above should have refused a polluted src/, so this
@@ -94,5 +94,5 @@ cp -R tests/phpt "$PHP_BUILD_DIR/tests/"
 cd "$PHP_BUILD_DIR"
 
 phpize
-./configure --enable-oceanmoon_math --with-php-config="$PHP_CONFIG"
+./configure --enable-mossy2100_math --with-php-config="$PHP_CONFIG"
 make

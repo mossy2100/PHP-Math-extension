@@ -9,10 +9,10 @@
 
 declare(strict_types=1);
 
-use OceanMoon\Math\Complex;
-use OceanMoon\Math\Matrix;
-use OceanMoon\Math\Rational;
-use OceanMoon\Math\Vector;
+use Mossy2100\Math\Complex;
+use Mossy2100\Math\Matrix;
+use Mossy2100\Math\Rational;
+use Mossy2100\Math\Vector;
 
 /**
  * Build an n×n Matrix of values between -1 and 1, plus n on the diagonal, so it's well-conditioned for inv().

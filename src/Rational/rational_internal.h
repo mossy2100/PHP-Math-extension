@@ -2,7 +2,7 @@
  * rational_internal.h
  *
  * Cross-file declarations shared between rational.c and the other rational_*.c implementation
- * files in this directory. Also exposes rational_minit() to ../oceanmoon_math.c, which calls it from the
+ * files in this directory. Also exposes rational_minit() to ../mossy2100_math.c, which calls it from the
  * module's real PHP_MINIT_FUNCTION. Not a public API - nothing here is exposed to other
  * extensions.
  */
@@ -13,7 +13,7 @@
 #include "php.h"
 #include "types.h"
 
-/* The registered class entry for OceanMoon\Math\Rational. Defined in rational.c. */
+/* The registered class entry for Mossy2100\Math\Rational. Defined in rational.c. */
 extern zend_class_entry *rational_ce_Rational;
 
 /* Slot offsets of the $numerator and $denominator properties, set in rational_minit(). See
@@ -76,7 +76,7 @@ zend_result rational_operators_minit(void);
  * installed by rational_operators_minit(). */
 zend_result rational_cast_object(zend_object *obj, zval *result, int type);
 
-/* Module lifecycle hook, called from ../oceanmoon_math.c. See its doc comment in rational.c. */
+/* Module lifecycle hook, called from ../mossy2100_math.c. See its doc comment in rational.c. */
 zend_result rational_minit(void);
 
 #endif /* PHP_RATIONAL_INTERNAL_H */

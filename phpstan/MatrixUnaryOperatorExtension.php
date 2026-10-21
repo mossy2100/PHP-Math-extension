@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\PHPStan;
+namespace Mossy2100\Math\PHPStan;
 
-use OceanMoon\Math\Matrix;
+use Mossy2100\Math\Matrix;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\UnaryOperatorTypeSpecifyingExtension;

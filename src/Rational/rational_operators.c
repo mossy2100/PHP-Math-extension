@@ -1,7 +1,7 @@
 /*
  * rational_operators.c
  *
- * Operator overloading for OceanMoon\Math\Rational: +, -, *, /, ** (each accepting a Rational,
+ * Operator overloading for Mossy2100\Math\Rational: +, -, *, /, ** (each accepting a Rational,
  * int, or float operand - see below for how a float operand changes the result type), plus
  * unary - (negate), and the comparison operators <, <=, >, >=, <=>, ==, != (all backed by a
  * single `compare` object handler). Mirrors docs/Reference/Rational.md in this repo - these operators
@@ -33,7 +33,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 

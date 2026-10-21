@@ -2,7 +2,7 @@
  * matrix_internal.h
  *
  * Cross-file declarations shared between matrix.c and the other matrix_*.c implementation files in this directory,
- * and with the Vector files that build or multiply a Matrix. Also exposes matrix_minit() to ../oceanmoon_math.c, which
+ * and with the Vector files that build or multiply a Matrix. Also exposes matrix_minit() to ../mossy2100_math.c, which
  * calls it from the module's real PHP_MINIT_FUNCTION. Not a public API - nothing here is exposed to other extensions.
  */
 
@@ -12,7 +12,7 @@
 #include "php.h"
 #include "../Vector/vector_internal.h"
 
-/* The registered class entry for OceanMoon\Math\Matrix. Defined in matrix.c. */
+/* The registered class entry for Mossy2100\Math\Matrix. Defined in matrix.c. */
 extern zend_class_entry *matrix_ce_Matrix;
 
 /* Slot offsets of the $rowCount, $columnCount and $data properties, set in matrix_minit(). See
@@ -86,7 +86,7 @@ zend_result matrix_calc_pow(zend_object *self, zend_long exponent, zval *return_
  * in matrix_operators.c. Installed on matrix_object_handlers in matrix_minit() (matrix.c). */
 zend_result matrix_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
 
-/* Module lifecycle hook, called from ../oceanmoon_math.c. See its doc comment in matrix.c. */
+/* Module lifecycle hook, called from ../mossy2100_math.c. See its doc comment in matrix.c. */
 zend_result matrix_minit(void);
 
 #endif /* PHP_MATRIX_INTERNAL_H */

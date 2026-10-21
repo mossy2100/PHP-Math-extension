@@ -1,7 +1,7 @@
 /*
  * complex_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Complex: neg(), recip(), conj(), add(),
+ * Unary and binary arithmetic methods for Mossy2100\Math\Complex: neg(), recip(), conj(), add(),
  * sub(), mul(), div(). Mirrors the "Unary arithmetic methods"/"Binary arithmetic methods" regions
  * of the PHP package's Complex class.
  */
@@ -16,7 +16,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 
 /* {{{ complex_read_other
@@ -43,7 +43,7 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
 		complex_read_parts(Z_OBJ_P(other), out_real, out_imag);
 		return SUCCESS;
 	} else {
-		zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Complex|float, %s given", zend_zval_value_name(other));
+		zend_argument_type_error(1, "must be of type Mossy2100\\Math\\Complex|float, %s given", zend_zval_value_name(other));
 		return FAILURE;
 	}
 
@@ -57,11 +57,11 @@ zend_result complex_read_other(zval *other, double *out_real, double *out_imag)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::neg(): Complex
+/* {{{ Mossy2100\Math\Complex::neg(): Complex
  *
  * Matches the PHP package's Complex::neg().
  */
-PHP_METHOD(OceanMoon_Math_Complex, neg)
+PHP_METHOD(Mossy2100_Math_Complex, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -74,11 +74,11 @@ PHP_METHOD(OceanMoon_Math_Complex, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::recip(): Complex
+/* {{{ Mossy2100\Math\Complex::recip(): Complex
  *
  * Matches the PHP package's Complex::recip(): `new self(1)->div($this)`.
  */
-PHP_METHOD(OceanMoon_Math_Complex, recip)
+PHP_METHOD(Mossy2100_Math_Complex, recip)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -96,11 +96,11 @@ PHP_METHOD(OceanMoon_Math_Complex, recip)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::conj(): Complex
+/* {{{ Mossy2100\Math\Complex::conj(): Complex
  *
  * Matches the PHP package's Complex::conj().
  */
-PHP_METHOD(OceanMoon_Math_Complex, conj)
+PHP_METHOD(Mossy2100_Math_Complex, conj)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -113,11 +113,11 @@ PHP_METHOD(OceanMoon_Math_Complex, conj)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::add(Complex|float $other): Complex
+/* {{{ Mossy2100\Math\Complex::add(Complex|float $other): Complex
  *
  * Matches the PHP package's Complex::add().
  */
-PHP_METHOD(OceanMoon_Math_Complex, add)
+PHP_METHOD(Mossy2100_Math_Complex, add)
 {
 	zval *other;
 
@@ -141,11 +141,11 @@ PHP_METHOD(OceanMoon_Math_Complex, add)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::sub(Complex|float $other): Complex
+/* {{{ Mossy2100\Math\Complex::sub(Complex|float $other): Complex
  *
  * Matches the PHP package's Complex::sub().
  */
-PHP_METHOD(OceanMoon_Math_Complex, sub)
+PHP_METHOD(Mossy2100_Math_Complex, sub)
 {
 	zval *other;
 
@@ -168,11 +168,11 @@ PHP_METHOD(OceanMoon_Math_Complex, sub)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::mul(Complex|float $other): Complex
+/* {{{ Mossy2100\Math\Complex::mul(Complex|float $other): Complex
  *
  * Matches the PHP package's Complex::mul(): (a+bi)(c+di) = (ac-bd) + (ad+bc)i.
  */
-PHP_METHOD(OceanMoon_Math_Complex, mul)
+PHP_METHOD(Mossy2100_Math_Complex, mul)
 {
 	zval *other;
 
@@ -233,11 +233,11 @@ zend_result complex_calc_div(double a, double b, double c, double d, double *out
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::div(Complex|float $other): Complex
+/* {{{ Mossy2100\Math\Complex::div(Complex|float $other): Complex
  *
  * Matches the PHP package's Complex::div(), via complex_calc_div().
  */
-PHP_METHOD(OceanMoon_Math_Complex, div)
+PHP_METHOD(Mossy2100_Math_Complex, div)
 {
 	zval *other;
 

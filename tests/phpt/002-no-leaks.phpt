@@ -5,15 +5,15 @@ Exercises every operator and compound assignment, ++ and --, on all four classes
 and untyped and typed properties, including the failure paths. Under a debug PHP build, any leaked allocation is
 reported at shutdown, which makes the output differ from --EXPECT-- and fails the test. CI runs this in its debug job.
 --EXTENSIONS--
-oceanmoon_math
+mossy2100_math
 --FILE--
 <?php
 declare(strict_types=1);
 
-use OceanMoon\Math\Complex;
-use OceanMoon\Math\Matrix;
-use OceanMoon\Math\Rational;
-use OceanMoon\Math\Vector;
+use Mossy2100\Math\Complex;
+use Mossy2100\Math\Matrix;
+use Mossy2100\Math\Rational;
+use Mossy2100\Math\Vector;
 
 final class Holder
 {

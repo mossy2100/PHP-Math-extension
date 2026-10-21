@@ -11,7 +11,7 @@
 
 /* {{{ math_types_debug_type_name
  *
- * A narrow equivalent of OceanMoon\Core\Globals\get_debug_type() (PHP's own get_debug_type()),
+ * A narrow equivalent of Mossy2100\Core\Globals\get_debug_type() (PHP's own get_debug_type()),
  * covering only what type-check exception messages need: the scalar/array/null type names, or
  * the class name for an object. Good enough for an exception message - not a general-purpose
  * replacement for get_debug_type().

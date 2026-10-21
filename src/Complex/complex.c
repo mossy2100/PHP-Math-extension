@@ -1,13 +1,13 @@
 /*
  * complex.c
  *
- * OceanMoon\Math\Complex: class registration, the constructor, factory
+ * Mossy2100\Math\Complex: class registration, the constructor, factory
  * methods, and the shared internal helpers (complex_init/complex_create)
  * declared in complex_internal.h and used by this file as well as the other
  * complex_*.c implementation files in this directory.
  *
  * complex_minit()/complex_rinit() are called from the module's real
- * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION in ../oceanmoon_math.c, which owns module
+ * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION in ../mossy2100_math.c, which owns module
  * lifecycle for the whole `math` extension. Everything in this directory is
  * Complex-specific.
  *
@@ -34,13 +34,13 @@
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_constants.h"
 #include "Zend/zend_strtod.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
-/* The registered class entry for OceanMoon\Math\Complex. */
+/* The registered class entry for Mossy2100\Math\Complex. */
 zend_class_entry *complex_ce_Complex;
 uint32_t complex_offset_real;
 uint32_t complex_offset_imaginary;
@@ -199,8 +199,8 @@ void complex_read_magnitude_phase(zend_object *obj, double *out_magnitude, doubl
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::__construct(float $real = 0, float $imag = 0) */
-PHP_METHOD(OceanMoon_Math_Complex, __construct)
+/* {{{ Mossy2100\Math\Complex::__construct(float $real = 0, float $imag = 0) */
+PHP_METHOD(Mossy2100_Math_Complex, __construct)
 {
 	double real = 0.0, imag = 0.0;
 
@@ -469,8 +469,8 @@ static zend_result complex_from_string(zval *return_value, zend_string *str)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::fromString(string $str): Complex */
-PHP_METHOD(OceanMoon_Math_Complex, fromString)
+/* {{{ Mossy2100\Math\Complex::fromString(string $str): Complex */
+PHP_METHOD(Mossy2100_Math_Complex, fromString)
 {
 	zend_string *str;
 
@@ -514,8 +514,8 @@ zend_result complex_from_polar(zval *return_value, double mag, double phase)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::fromPolar(float $mag, float $phase): Complex */
-PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
+/* {{{ Mossy2100\Math\Complex::fromPolar(float $mag, float $phase): Complex */
+PHP_METHOD(Mossy2100_Math_Complex, fromPolar)
 {
 	double mag, phase;
 
@@ -532,12 +532,12 @@ PHP_METHOD(OceanMoon_Math_Complex, fromPolar)
 
 /* {{{ complex_minit
  *
- * Called from PHP_MINIT_FUNCTION(oceanmoon_math) in ../oceanmoon_math.c. Class entry, method table, and typed
- * properties are all generated from oceanmoon_math.stub.php into oceanmoon_math_arginfo.h; register them here.
+ * Called from PHP_MINIT_FUNCTION(mossy2100_math) in ../mossy2100_math.c. Class entry, method table, and typed
+ * properties are all generated from mossy2100_math.stub.php into mossy2100_math_arginfo.h; register them here.
  */
 zend_result complex_minit(void)
 {
-	complex_ce_Complex = register_class_OceanMoon_Math_Complex(zend_ce_stringable, zend_ce_arrayaccess);
+	complex_ce_Complex = register_class_Mossy2100_Math_Complex(zend_ce_stringable, zend_ce_arrayaccess);
 	complex_offset_real = math_types_property_offset(complex_ce_Complex, "real");
 	complex_offset_imaginary = math_types_property_offset(complex_ce_Complex, "imaginary");
 	complex_offset_magnitude = math_types_property_offset(complex_ce_Complex, "magnitude");
@@ -549,7 +549,7 @@ zend_result complex_minit(void)
 
 /* {{{ complex_rinit
  *
- * Called from PHP_RINIT_FUNCTION(oceanmoon_math) in ../oceanmoon_math.c. Registers OceanMoon\Math\M_I, a constant
+ * Called from PHP_RINIT_FUNCTION(mossy2100_math) in ../mossy2100_math.c. Registers Mossy2100\Math\M_I, a constant
  * Complex(0, 1), fresh on every request.
  *
  * This deliberately runs at RINIT rather than MINIT. MINIT executes once per
@@ -574,7 +574,7 @@ zend_result complex_rinit(int module_number)
 		return FAILURE;
 	}
 
-	c.name = zend_string_init("OceanMoon\\Math\\M_I", sizeof("OceanMoon\\Math\\M_I") - 1, 0);
+	c.name = zend_string_init("Mossy2100\\Math\\M_I", sizeof("Mossy2100\\Math\\M_I") - 1, 0);
 #if PHP_VERSION_ID >= 80500
 	/* zend_constant gained these fields in PHP 8.5; absent on 8.4 and earlier. */
 	c.filename = NULL;

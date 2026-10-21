@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Signature stub for the oceanmoon_math extension (source of truth for arginfo).
+ * Signature stub for the mossy2100_math extension (source of truth for arginfo).
  *
  * This mirrors the public shape the extension exposes and is the source of
- * truth for oceanmoon_math_arginfo.h. Regenerate that header after editing this file:
+ * truth for mossy2100_math_arginfo.h. Regenerate that header after editing this file:
  *
- *   php $(php-config --prefix)/lib/php/build/gen_stub.php oceanmoon_math.stub.php
+ *   php $(php-config --prefix)/lib/php/build/gen_stub.php mossy2100_math.stub.php
  *
  * @generate-class-entries
  */
 
-namespace OceanMoon\Math;
+namespace Mossy2100\Math;
 
 final class Complex implements \Stringable, \ArrayAccess
 {

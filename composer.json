@@ -1,6 +1,6 @@
 {
-    "name": "oceanmoon/math-ext",
-    "description": "A native PHP extension providing the same Complex, Rational, Vector and Matrix classes from oceanmoon/math, plus operators.",
+    "name": "mossy2100/math-ext",
+    "description": "A native PHP extension providing the same Complex, Rational, Vector and Matrix classes from mossy2100/math, plus operators.",
     "type": "php-ext",
     "license": "MIT",
     "keywords": [
@@ -35,12 +35,12 @@
         "squizlabs/php_codesniffer": "^4.0",
         "phpstan/phpstan": "^2.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "oceanmoon/coding-standard": "^2.2",
-        "oceanmoon/core": "^4.0"
+        "mossy2100/coding-standard": "^2.2",
+        "mossy2100/core": "^4.0"
     },
     "autoload-dev": {
         "psr-4": {
-            "OceanMoon\\Math\\PHPStan\\": "phpstan/"
+            "Mossy2100\\Math\\PHPStan\\": "phpstan/"
         }
     },
     "config": {
@@ -52,7 +52,7 @@
         }
     },
     "php-ext": {
-        "extension-name": "oceanmoon_math",
+        "extension-name": "mossy2100_math",
         "support-zts": true,
         "support-nts": true,
         "priority": 80,

@@ -2,7 +2,7 @@
  * vector_internal.h
  *
  * Cross-file declarations shared between vector.c and the other vector_*.c implementation files
- * in this directory. Also exposes vector_minit() to ../oceanmoon_math.c, which calls it from the module's
+ * in this directory. Also exposes vector_minit() to ../mossy2100_math.c, which calls it from the module's
  * real PHP_MINIT_FUNCTION. Not a public API - nothing here is exposed to other extensions.
  */
 
@@ -12,7 +12,7 @@
 #include "php.h"
 #include "types.h"
 
-/* The registered class entry for OceanMoon\Math\Vector. Defined in vector.c. */
+/* The registered class entry for Mossy2100\Math\Vector. Defined in vector.c. */
 extern zend_class_entry *vector_ce_Vector;
 
 /* Slot offsets of the $count and $data properties, set in vector_minit(). See
@@ -69,7 +69,7 @@ zend_result vector_to_column_matrix(zend_object *obj, zval *return_value);
  * (vector_properties.c). */
 zend_result vector_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
 
-/* Module lifecycle hook, called from ../oceanmoon_math.c. See its doc comment in vector.c. */
+/* Module lifecycle hook, called from ../mossy2100_math.c. See its doc comment in vector.c. */
 zend_result vector_minit(void);
 
 #endif /* PHP_VECTOR_INTERNAL_H */

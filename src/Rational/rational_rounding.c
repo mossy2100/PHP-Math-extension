@@ -1,7 +1,7 @@
 /*
  * rational_rounding.c
  *
- * Rounding methods for OceanMoon\Math\Rational: round(), floor(), ceil(), trunc(). Mirrors the
+ * Rounding methods for Mossy2100\Math\Rational: round(), floor(), ceil(), trunc(). Mirrors the
  * "Rounding methods" region of the PHP package's Rational class.
  */
 
@@ -12,9 +12,9 @@
 #include "php.h"
 #include "ext/standard/php_math_round_mode.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Rational::round(RoundingMode $mode = RoundingMode::HalfAwayFromZero): int
+/* {{{ Mossy2100\Math\Rational::round(RoundingMode $mode = RoundingMode::HalfAwayFromZero): int
  *
  * Matches the PHP package's Rational::round() exactly: all arithmetic is performed exactly on the
  * numerator and denominator, never converting to a float, so there's no precision loss.
@@ -27,7 +27,7 @@
  * NegativeInfinity/PositiveInfinity/TowardsZero/AwayFromZero natively rather than delegating to
  * PHP's built-in round().
  */
-PHP_METHOD(OceanMoon_Math_Rational, round)
+PHP_METHOD(Mossy2100_Math_Rational, round)
 {
 	zend_object *mode_obj = NULL;
 
@@ -110,11 +110,11 @@ PHP_METHOD(OceanMoon_Math_Rational, round)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::floor(): int
+/* {{{ Mossy2100\Math\Rational::floor(): int
  *
  * Matches the PHP package's Rational::floor().
  */
-PHP_METHOD(OceanMoon_Math_Rational, floor)
+PHP_METHOD(Mossy2100_Math_Rational, floor)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -133,11 +133,11 @@ PHP_METHOD(OceanMoon_Math_Rational, floor)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::ceil(): int
+/* {{{ Mossy2100\Math\Rational::ceil(): int
  *
  * Matches the PHP package's Rational::ceil().
  */
-PHP_METHOD(OceanMoon_Math_Rational, ceil)
+PHP_METHOD(Mossy2100_Math_Rational, ceil)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -156,12 +156,12 @@ PHP_METHOD(OceanMoon_Math_Rational, ceil)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::trunc(): int
+/* {{{ Mossy2100\Math\Rational::trunc(): int
  *
  * Matches the PHP package's Rational::trunc(): the integer part, truncating toward zero, as C's `/`
  * does. The denominator is always positive, so the division can't overflow.
  */
-PHP_METHOD(OceanMoon_Math_Rational, trunc)
+PHP_METHOD(Mossy2100_Math_Rational, trunc)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

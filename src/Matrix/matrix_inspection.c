@@ -1,7 +1,7 @@
 /*
  * matrix_inspection.c
  *
- * Inspection methods for OceanMoon\Math\Matrix: isSquare(), get(), getRow(), getColumn(), copy().
+ * Inspection methods for Mossy2100\Math\Matrix: isSquare(), get(), getRow(), getColumn(), copy().
  * Mirrors the "Inspection methods" region of the PHP package's Matrix class.
  */
 
@@ -13,13 +13,13 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Matrix::isSquare(?int $size = null): bool
+/* {{{ Mossy2100\Math\Matrix::isSquare(?int $size = null): bool
  *
  * Matches the PHP package's Matrix::isSquare().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, isSquare)
+PHP_METHOD(Mossy2100_Math_Matrix, isSquare)
 {
 	zend_long size = 0;
 	bool size_is_null = 1;
@@ -37,11 +37,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, isSquare)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::get(int $row, int $col): float
+/* {{{ Mossy2100\Math\Matrix::get(int $row, int $col): float
  *
  * Matches the PHP package's Matrix::get().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, get)
+PHP_METHOD(Mossy2100_Math_Matrix, get)
 {
 	zend_long row, col;
 
@@ -59,12 +59,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, get)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::getRow(int $row): Vector
+/* {{{ Mossy2100\Math\Matrix::getRow(int $row): Vector
  *
  * Matches the PHP package's Matrix::getRow(): `clone $this->data[$row]` - an independent copy,
  * unlike offsetGet()'s live reference.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, getRow)
+PHP_METHOD(Mossy2100_Math_Matrix, getRow)
 {
 	zend_long row;
 
@@ -88,11 +88,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, getRow)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::getColumn(int $col): Vector
+/* {{{ Mossy2100\Math\Matrix::getColumn(int $col): Vector
  *
  * Matches the PHP package's Matrix::getColumn().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, getColumn)
+PHP_METHOD(Mossy2100_Math_Matrix, getColumn)
 {
 	zend_long col;
 
@@ -123,11 +123,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, getColumn)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::copy(int $row, int $col, int $rowCount, int $colCount): Matrix
+/* {{{ Mossy2100\Math\Matrix::copy(int $row, int $col, int $rowCount, int $colCount): Matrix
  *
  * Matches the PHP package's Matrix::copy().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, copy)
+PHP_METHOD(Mossy2100_Math_Matrix, copy)
 {
 	zend_long row, col, sub_row_count, sub_col_count;
 

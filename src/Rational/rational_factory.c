@@ -1,7 +1,7 @@
 /*
  * rational_factory.c
  *
- * Factory methods for OceanMoon\Math\Rational: fromFloat(), fromString(). Mirrors the "Factory
+ * Factory methods for Mossy2100\Math\Rational: fromFloat(), fromString(). Mirrors the "Factory
  * methods" region of the PHP package's Rational class.
  */
 
@@ -16,7 +16,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 #include "integers.h"
@@ -277,8 +277,8 @@ zend_result rational_calc_from_float(double value, zval *return_value)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::fromFloat(float $value): Rational */
-PHP_METHOD(OceanMoon_Math_Rational, fromFloat)
+/* {{{ Mossy2100\Math\Rational::fromFloat(float $value): Rational */
+PHP_METHOD(Mossy2100_Math_Rational, fromFloat)
 {
 	double value;
 
@@ -382,14 +382,14 @@ static void rational_throw_string_out_of_range(zend_string *str)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::fromString(string $str): Rational
+/* {{{ Mossy2100\Math\Rational::fromString(string $str): Rational
  *
  * Matches the PHP package's Rational::fromString(): accepts an int ("123"), a float ("123.456",
  * converted via fromFloat()), or a fraction ("1/2"). Delegates int recognition to the real
  * filter_var() (see rational_filter_var()'s doc comment for why), and float recognition to
  * is_numeric_string(), which backs the package's is_numeric().
  */
-PHP_METHOD(OceanMoon_Math_Rational, fromString)
+PHP_METHOD(Mossy2100_Math_Rational, fromString)
 {
 	zend_string *str;
 

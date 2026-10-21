@@ -1,7 +1,7 @@
 /*
  * matrix_conversion.c
  *
- * Conversion methods for OceanMoon\Math\Matrix: toArray(), __toString(). Mirrors the "Conversion
+ * Conversion methods for Mossy2100\Math\Matrix: toArray(), __toString(). Mirrors the "Conversion
  * methods" region of the PHP package's Matrix class.
  */
 
@@ -11,15 +11,15 @@
 
 #include "php.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "Zend/zend_smart_str.h"
 
-/* {{{ OceanMoon\Math\Matrix::toArray(): array
+/* {{{ Mossy2100\Math\Matrix::toArray(): array
  *
  * Matches the PHP package's Matrix::toArray(): a rectangular list<list<float>> copy of the
  * matrix data.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, toArray)
+PHP_METHOD(Mossy2100_Math_Matrix, toArray)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -29,12 +29,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, toArray)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::__toString(): string
+/* {{{ Mossy2100\Math\Matrix::__toString(): string
  *
  * Matches the PHP package's Matrix::__toString(): box-drawing-character rendering, right-aligned
  * columns padded to the widest cell's width.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, __toString)
+PHP_METHOD(Mossy2100_Math_Matrix, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

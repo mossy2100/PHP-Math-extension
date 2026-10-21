@@ -1,7 +1,7 @@
 /*
  * complex_arrayaccess.c
  *
- * ArrayAccess methods for OceanMoon\Math\Complex: offsetExists(), offsetGet(), offsetSet(),
+ * ArrayAccess methods for Mossy2100\Math\Complex: offsetExists(), offsetGet(), offsetSet(),
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Complex class -
  * $z[0]/$z[1] read the real/imaginary parts; the class is immutable, so offsetSet()/offsetUnset()
  * always throw.
@@ -15,13 +15,13 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Complex::offsetExists(mixed $offset): bool
+/* {{{ Mossy2100\Math\Complex::offsetExists(mixed $offset): bool
  *
  * Matches the PHP package's Complex::offsetExists(): only the (strictly-typed) int 0 or 1 counts.
  */
-PHP_METHOD(OceanMoon_Math_Complex, offsetExists)
+PHP_METHOD(Mossy2100_Math_Complex, offsetExists)
 {
 	zval *offset;
 
@@ -34,11 +34,11 @@ PHP_METHOD(OceanMoon_Math_Complex, offsetExists)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::offsetGet(mixed $offset): float
+/* {{{ Mossy2100\Math\Complex::offsetGet(mixed $offset): float
  *
  * Matches the PHP package's Complex::offsetGet(): $z[0] is real, $z[1] is imaginary.
  */
-PHP_METHOD(OceanMoon_Math_Complex, offsetGet)
+PHP_METHOD(Mossy2100_Math_Complex, offsetGet)
 {
 	zval *offset;
 
@@ -68,11 +68,11 @@ PHP_METHOD(OceanMoon_Math_Complex, offsetGet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::offsetSet(mixed $offset, mixed $value): void
+/* {{{ Mossy2100\Math\Complex::offsetSet(mixed $offset, mixed $value): void
  *
  * Matches the PHP package's Complex::offsetSet(): always throws, since Complex is immutable.
  */
-PHP_METHOD(OceanMoon_Math_Complex, offsetSet)
+PHP_METHOD(Mossy2100_Math_Complex, offsetSet)
 {
 	zval *offset, *value;
 
@@ -86,11 +86,11 @@ PHP_METHOD(OceanMoon_Math_Complex, offsetSet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::offsetUnset(mixed $offset): void
+/* {{{ Mossy2100\Math\Complex::offsetUnset(mixed $offset): void
  *
  * Matches the PHP package's Complex::offsetUnset(): always throws, since Complex is immutable.
  */
-PHP_METHOD(OceanMoon_Math_Complex, offsetUnset)
+PHP_METHOD(Mossy2100_Math_Complex, offsetUnset)
 {
 	zval *offset;
 

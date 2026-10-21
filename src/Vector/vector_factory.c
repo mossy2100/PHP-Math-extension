@@ -1,7 +1,7 @@
 /*
  * vector_factory.c
  *
- * Factory methods for OceanMoon\Math\Vector: fromArray(). Mirrors the PHP package's
+ * Factory methods for Mossy2100\Math\Vector: fromArray(). Mirrors the PHP package's
  * Vector::fromArray(): validates the argument is a list of finite int|float values, then builds a
  * Vector from it.
  */
@@ -14,11 +14,11 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 
-/* {{{ OceanMoon\Math\Vector::fromArray(array $arr): Vector */
-PHP_METHOD(OceanMoon_Math_Vector, fromArray)
+/* {{{ Mossy2100\Math\Vector::fromArray(array $arr): Vector */
+PHP_METHOD(Mossy2100_Math_Vector, fromArray)
 {
 	zend_array *arr;
 

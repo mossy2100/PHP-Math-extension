@@ -1,7 +1,7 @@
 /*
  * matrix_power.c
  *
- * Power methods for OceanMoon\Math\Matrix: pow(), sqr(). Mirrors the "Power methods" region of the
+ * Power methods for Mossy2100\Math\Matrix: pow(), sqr(). Mirrors the "Power methods" region of the
  * PHP package's Matrix class, composing matrix_calc_mul_matrix()/matrix_calc_inv() (the shared
  * cores behind mul()/inv() in matrix_arithmetic.c) directly rather than round-tripping through the
  * PHP_METHOD entry points.
@@ -16,7 +16,7 @@
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
 #include "exceptions.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
 /* {{{ matrix_pow_positive
  *
@@ -155,11 +155,11 @@ static zend_result matrix_calc_pow_general(zend_object *self, zend_long exponent
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::pow(int $exp): Matrix
+/* {{{ Mossy2100\Math\Matrix::pow(int $exp): Matrix
  *
  * Matches the PHP package's Matrix::pow().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, pow)
+PHP_METHOD(Mossy2100_Math_Matrix, pow)
 {
 	zend_long exponent;
 
@@ -173,12 +173,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, pow)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::sqr(): Matrix
+/* {{{ Mossy2100\Math\Matrix::sqr(): Matrix
  *
  * Matches the PHP package's Matrix::sqr(): `$this->mul($this)`, via matrix_calc_mul_matrix()
  * directly.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, sqr)
+PHP_METHOD(Mossy2100_Math_Matrix, sqr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

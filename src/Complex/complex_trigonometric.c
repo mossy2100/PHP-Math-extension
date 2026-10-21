@@ -1,7 +1,7 @@
 /*
  * complex_trigonometric.c
  *
- * Trigonometric and inverse trigonometric methods for OceanMoon\Math\Complex: sin(), cos(), tan(),
+ * Trigonometric and inverse trigonometric methods for Mossy2100\Math\Complex: sin(), cos(), tan(),
  * asin(), acos(), atan(). Mirrors the "Trigonometric methods"/"Inverse trigonometric methods"
  * regions of the PHP package's Complex class.
  *
@@ -18,14 +18,14 @@
 #include "php.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 
-/* {{{ OceanMoon\Math\Complex::sin(): Complex
+/* {{{ Mossy2100\Math\Complex::sin(): Complex
  *
  * Matches the PHP package's Complex::sin(): sin(z) = sin(x)cosh(y) + i·cos(x)sinh(y), z = x + iy.
  */
-PHP_METHOD(OceanMoon_Math_Complex, sin)
+PHP_METHOD(Mossy2100_Math_Complex, sin)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -40,11 +40,11 @@ PHP_METHOD(OceanMoon_Math_Complex, sin)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::cos(): Complex
+/* {{{ Mossy2100\Math\Complex::cos(): Complex
  *
  * Matches the PHP package's Complex::cos(): cos(z) = cos(x)cosh(y) - i·sin(x)sinh(y), z = x + iy.
  */
-PHP_METHOD(OceanMoon_Math_Complex, cos)
+PHP_METHOD(Mossy2100_Math_Complex, cos)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -58,12 +58,12 @@ PHP_METHOD(OceanMoon_Math_Complex, cos)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::tan(): Complex
+/* {{{ Mossy2100\Math\Complex::tan(): Complex
  *
  * Matches the PHP package's Complex::tan(): tan(z) = -i*tanh(iz), where iz = -y + ix. If tanh(iz) = u + iv, then
  * tan(z) = v - iu.
  */
-PHP_METHOD(OceanMoon_Math_Complex, tan)
+PHP_METHOD(Mossy2100_Math_Complex, tan)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -79,11 +79,11 @@ PHP_METHOD(OceanMoon_Math_Complex, tan)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::asin(): Complex
+/* {{{ Mossy2100\Math\Complex::asin(): Complex
  *
  * Matches the PHP package's Complex::asin(): asinh(y + ix) with its parts swapped.
  */
-PHP_METHOD(OceanMoon_Math_Complex, asin)
+PHP_METHOD(Mossy2100_Math_Complex, asin)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -100,11 +100,11 @@ PHP_METHOD(OceanMoon_Math_Complex, asin)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::acos(): Complex
+/* {{{ Mossy2100\Math\Complex::acos(): Complex
  *
  * Matches the PHP package's Complex::acos().
  */
-PHP_METHOD(OceanMoon_Math_Complex, acos)
+PHP_METHOD(Mossy2100_Math_Complex, acos)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -120,11 +120,11 @@ PHP_METHOD(OceanMoon_Math_Complex, acos)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::atan(): Complex
+/* {{{ Mossy2100\Math\Complex::atan(): Complex
  *
  * Matches the PHP package's Complex::atan(): atanh(y + ix) with its parts swapped.
  */
-PHP_METHOD(OceanMoon_Math_Complex, atan)
+PHP_METHOD(Mossy2100_Math_Complex, atan)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

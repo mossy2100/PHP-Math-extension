@@ -1,7 +1,7 @@
 /*
  * matrix_factory.c
  *
- * Factory methods for OceanMoon\Math\Matrix: fromArray(), identity(). Mirrors the PHP package's
+ * Factory methods for Mossy2100\Math\Matrix: fromArray(), identity(). Mirrors the PHP package's
  * Matrix::fromArray() (validates the argument is a rectangular list of lists of int|float values)
  * and Matrix::identity().
  */
@@ -14,11 +14,11 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 
-/* {{{ OceanMoon\Math\Matrix::fromArray(array $arr): Matrix */
-PHP_METHOD(OceanMoon_Math_Matrix, fromArray)
+/* {{{ Mossy2100\Math\Matrix::fromArray(array $arr): Matrix */
+PHP_METHOD(Mossy2100_Math_Matrix, fromArray)
 {
 	zend_array *arr;
 
@@ -165,8 +165,8 @@ zend_result matrix_identity(zend_long size, zval *out)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::identity(int $size): Matrix */
-PHP_METHOD(OceanMoon_Math_Matrix, identity)
+/* {{{ Mossy2100\Math\Matrix::identity(int $size): Matrix */
+PHP_METHOD(Mossy2100_Math_Matrix, identity)
 {
 	zend_long size;
 

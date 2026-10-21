@@ -1,7 +1,7 @@
 /*
  * complex_conversion.c
  *
- * Conversion methods for OceanMoon\Math\Complex: __toString(). Mirrors the
+ * Conversion methods for Mossy2100\Math\Complex: __toString(). Mirrors the
  * "Conversion Methods" region of the PHP package's Complex class.
  */
 
@@ -12,9 +12,9 @@
 #include <math.h>
 
 #include "php.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "Zend/zend_smart_str.h"
 
 /* {{{ complex_double_to_str
@@ -86,11 +86,11 @@ zend_string *complex_parts_to_str(double real, double imag)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::__toString(): string
+/* {{{ Mossy2100\Math\Complex::__toString(): string
  *
  * Matches the PHP package's Complex::__toString().
  */
-PHP_METHOD(OceanMoon_Math_Complex, __toString)
+PHP_METHOD(Mossy2100_Math_Complex, __toString)
 {
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 

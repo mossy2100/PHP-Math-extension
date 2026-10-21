@@ -4,49 +4,49 @@ parameters:
     paths:
         - tests/phpunit
     scanFiles:
-        - oceanmoon_math.stub.php
+        - mossy2100_math.stub.php
         - phpstan/constants.php
     bootstrapFiles:
         - tests/bootstrap.php
 
 services:
     -
-        class: OceanMoon\Math\PHPStan\ComplexBinaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\ComplexBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\ComplexUnaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\ComplexUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\ComplexComparisonOperatorExtension
+        class: Mossy2100\Math\PHPStan\ComplexComparisonOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\RationalBinaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\RationalBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\RationalUnaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\RationalUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\RationalComparisonOperatorExtension
+        class: Mossy2100\Math\PHPStan\RationalComparisonOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\VectorBinaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\VectorBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\VectorUnaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\VectorUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\MatrixBinaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\MatrixBinaryOperatorExtension
         tags:
             - phpstan.broker.operatorTypeSpecifyingExtension
     -
-        class: OceanMoon\Math\PHPStan\MatrixUnaryOperatorExtension
+        class: Mossy2100\Math\PHPStan\MatrixUnaryOperatorExtension
         tags:
             - phpstan.broker.unaryOperatorTypeSpecifyingExtension

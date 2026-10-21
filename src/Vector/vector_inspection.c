@@ -1,7 +1,7 @@
 /*
  * vector_inspection.c
  *
- * Inspection methods for OceanMoon\Math\Vector: get(). Mirrors the "Inspection methods" region of
+ * Inspection methods for Mossy2100\Math\Vector: get(). Mirrors the "Inspection methods" region of
  * the PHP package's Vector class.
  */
 
@@ -11,13 +11,13 @@
 
 #include "php.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Vector::get(int $index): float
+/* {{{ Mossy2100\Math\Vector::get(int $index): float
  *
  * Matches the PHP package's Vector::get().
  */
-PHP_METHOD(OceanMoon_Math_Vector, get)
+PHP_METHOD(Mossy2100_Math_Vector, get)
 {
 	zend_long index;
 

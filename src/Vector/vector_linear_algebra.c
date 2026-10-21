@@ -1,7 +1,7 @@
 /*
  * vector_linear_algebra.c
  *
- * Linear algebra methods for OceanMoon\Math\Vector: dot(), cross(), outer(), normalize(). Mirrors
+ * Linear algebra methods for Mossy2100\Math\Vector: dot(), cross(), outer(), normalize(). Mirrors
  * the "Linear algebra methods" region of the PHP package's Vector class.
  */
 
@@ -15,7 +15,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "../Matrix/matrix_internal.h"
 #include "exceptions.h"
 #include "floats.h"
@@ -94,11 +94,11 @@ static bool vector_all_finite(const double values[3])
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::dot(Vector $other): float
+/* {{{ Mossy2100\Math\Vector::dot(Vector $other): float
  *
  * Matches the PHP package's Vector::dot().
  */
-PHP_METHOD(OceanMoon_Math_Vector, dot)
+PHP_METHOD(Mossy2100_Math_Vector, dot)
 {
 	zval *other;
 
@@ -146,11 +146,11 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::cross(Vector $other): Vector
+/* {{{ Mossy2100\Math\Vector::cross(Vector $other): Vector
  *
  * Matches the PHP package's Vector::cross(): both vectors must be count 3.
  */
-PHP_METHOD(OceanMoon_Math_Vector, cross)
+PHP_METHOD(Mossy2100_Math_Vector, cross)
 {
 	zval *other;
 
@@ -239,11 +239,11 @@ PHP_METHOD(OceanMoon_Math_Vector, cross)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::outer(Vector $other): Matrix
+/* {{{ Mossy2100\Math\Vector::outer(Vector $other): Matrix
  *
  * Matches the PHP package's Vector::outer(): `$this->toColumnMatrix()->mul($other->toRowMatrix())`.
  */
-PHP_METHOD(OceanMoon_Math_Vector, outer)
+PHP_METHOD(Mossy2100_Math_Vector, outer)
 {
 	zval *other;
 
@@ -272,13 +272,13 @@ PHP_METHOD(OceanMoon_Math_Vector, outer)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::normalize(): Vector
+/* {{{ Mossy2100\Math\Vector::normalize(): Vector
  *
  * Matches the PHP package's Vector::normalize(): scales the vector so its largest element is in the range [1, 2),
  * then divides by the magnitude, which can't overflow. Both divisions go through the same vector_calc_div() core
  * div() itself uses (vector_arithmetic.c).
  */
-PHP_METHOD(OceanMoon_Math_Vector, normalize)
+PHP_METHOD(Mossy2100_Math_Vector, normalize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

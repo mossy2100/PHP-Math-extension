@@ -1,6 +1,6 @@
 # Matrix Operators
 
-Operator overloading for `OceanMoon\Math\Matrix`, available only when this extension is loaded. Plain PHP classes can't
+Operator overloading for `Mossy2100\Math\Matrix`, available only when this extension is loaded. Plain PHP classes can't
 overload operators, so none of this exists in the userland package. For everything else about `Matrix` (properties,
 factory methods, conversion, comparison, transpose/determinant/inverse, `ArrayAccess`, etc.), see the package's own
 [Matrix documentation](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md). This page covers only the operators the extension adds on top of it.
@@ -263,7 +263,7 @@ $m ** -1;   // [[1, -1], [0, 1]]  (the inverse)
 ### % (unsupported)
 
 `%` isn't supported, with a `Matrix` on either side. PHP throws its usual `TypeError`, e.g.
-`Unsupported operand types: OceanMoon\Math\Matrix % int`.
+`Unsupported operand types: Mossy2100\Math\Matrix % int`.
 
 ---
 

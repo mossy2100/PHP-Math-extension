@@ -18,12 +18,12 @@
 #   PHP_VERSION_FULL  Resolved full version (e.g. 8.4.25), for status messages.
 #   PHP_BUILD_DIR     Build tree for this version (build/<version>).
 #   PHP_MODULE_DIR    Module output directory within that tree (build/<version>/modules).
-#   PHP_MODULE        Built module (build/<version>/modules/oceanmoon_math.so).
+#   PHP_MODULE        Built module (build/<version>/modules/mossy2100_math.so).
 #
 # Returns 1 with a diagnostic on stderr if the requested toolchain is missing or doesn't match.
 #
 # Why 8.4 is the default: a compiled extension is ABI-locked to the exact PHP minor version it was
-# built against, and the published module targets 8.4 (the minimum PHP for the OceanMoon packages -
+# built against, and the published module targets 8.4 (the minimum PHP for the Mossy2100 packages -
 # see README, "Supported PHP Versions"). The 8.4 formula is keg-only, so /opt/homebrew/bin/php is 8.5;
 # inheriting PATH therefore silently builds for the wrong version.
 
@@ -61,7 +61,7 @@ PHP_CONFIG="$PHP_BIN/php-config"
 ext_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PHP_BUILD_DIR="$ext_dir/build/$PHP_VERSION"
 PHP_MODULE_DIR="$PHP_BUILD_DIR/modules"
-PHP_MODULE="$PHP_MODULE_DIR/oceanmoon_math.so"
+PHP_MODULE="$PHP_MODULE_DIR/mossy2100_math.so"
 
 # Prepend, but only if it isn't already there: sourcing this file twice in one shell (an
 # interactive session working through the by-hand build steps, say) would otherwise add the same

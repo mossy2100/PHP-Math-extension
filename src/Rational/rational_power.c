@@ -1,7 +1,7 @@
 /*
  * rational_power.c
  *
- * Power methods for OceanMoon\Math\Rational: pow(), sqr(). Mirrors the "Power methods" region of
+ * Power methods for Mossy2100\Math\Rational: pow(), sqr(). Mirrors the "Power methods" region of
  * the PHP package's Rational class, plus the exact-root helpers from its "Helper methods" region.
  */
 
@@ -14,7 +14,7 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_smart_str.h"
 #include "rational_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "integers.h"
 
@@ -330,13 +330,13 @@ zend_result rational_calc_int_pow_rational(zend_long base, zend_long p, zend_lon
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::pow(int|Rational $exp): Rational
+/* {{{ Mossy2100\Math\Rational::pow(int|Rational $exp): Rational
  *
  * Matches the PHP package's Rational::pow(): an int or Rational exponent gives an exact Rational.
  * Like add()/sub()/mul()/div() (rational_arithmetic.c), the union parameter is checked by hand,
  * since an internal function's zval parameter isn't validated against its arginfo type.
  */
-PHP_METHOD(OceanMoon_Math_Rational, pow)
+PHP_METHOD(Mossy2100_Math_Rational, pow)
 {
 	zval *exp;
 
@@ -355,7 +355,7 @@ PHP_METHOD(OceanMoon_Math_Rational, pow)
 		rational_read_parts(Z_OBJ_P(exp), &p, &q);
 		result = rational_calc_pow_rational(num, den, p, q, return_value);
 	} else {
-		zend_argument_type_error(1, "must be of type OceanMoon\\Math\\Rational|int, %s given", zend_zval_value_name(exp));
+		zend_argument_type_error(1, "must be of type Mossy2100\\Math\\Rational|int, %s given", zend_zval_value_name(exp));
 		RETURN_THROWS();
 	}
 
@@ -366,13 +366,13 @@ PHP_METHOD(OceanMoon_Math_Rational, pow)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Rational::sqr(): Rational
+/* {{{ Mossy2100\Math\Rational::sqr(): Rational
  *
  * Matches the PHP package's Rational::sqr(): this * this. Equivalent to pow(2), but more
  * efficient/readable - reuses rational_calc_mul() directly, same as rational_calc_pow()'s own
  * exponent-2 shortcut above.
  */
-PHP_METHOD(OceanMoon_Math_Rational, sqr)
+PHP_METHOD(Mossy2100_Math_Rational, sqr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

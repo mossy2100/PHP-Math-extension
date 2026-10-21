@@ -1,7 +1,7 @@
 /*
  * vector.c
  *
- * OceanMoon\Math\Vector: class registration, the constructor, factory
+ * Mossy2100\Math\Vector: class registration, the constructor, factory
  * methods, and the shared internal helpers (vector_init/vector_create/
  * vector_read_element/vector_write_element) declared in vector_internal.h
  * and used by this file as well as the other vector_*.c implementation
@@ -14,7 +14,7 @@
  * vector_write_element() below, which is the one place bounds-checking and finite-value validation
  * live.
  *
- * vector_minit() is called from the module's real PHP_MINIT_FUNCTION in ../oceanmoon_math.c. Conversion
+ * vector_minit() is called from the module's real PHP_MINIT_FUNCTION in ../mossy2100_math.c. Conversion
  * methods (toArray/__toString/toRowMatrix/toColumnMatrix) live in vector_conversion.c; the
  * magnitude() method lives in vector_linear_algebra.c; inspection/modification/comparison/
  * arithmetic/linear-algebra/aggregation/ArrayAccess methods live in their own vector_*.c files,
@@ -29,13 +29,13 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
-/* The registered class entry for OceanMoon\Math\Vector. */
+/* The registered class entry for Mossy2100\Math\Vector. */
 zend_class_entry *vector_ce_Vector;
 uint32_t vector_offset_count;
 uint32_t vector_offset_data;
@@ -281,8 +281,8 @@ void vector_create_from(zval *return_value, zend_long count, const double *value
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::__construct(int $count) */
-PHP_METHOD(OceanMoon_Math_Vector, __construct)
+/* {{{ Mossy2100\Math\Vector::__construct(int $count) */
+PHP_METHOD(Mossy2100_Math_Vector, __construct)
 {
 	zend_long count;
 
@@ -298,12 +298,12 @@ PHP_METHOD(OceanMoon_Math_Vector, __construct)
 
 /* {{{ vector_minit
  *
- * Called from PHP_MINIT_FUNCTION(oceanmoon_math) in ../oceanmoon_math.c. Class entry, method table, and typed
- * properties are all generated from oceanmoon_math.stub.php into oceanmoon_math_arginfo.h; register them here.
+ * Called from PHP_MINIT_FUNCTION(mossy2100_math) in ../mossy2100_math.c. Class entry, method table, and typed
+ * properties are all generated from mossy2100_math.stub.php into mossy2100_math_arginfo.h; register them here.
  */
 zend_result vector_minit(void)
 {
-	vector_ce_Vector = register_class_OceanMoon_Math_Vector(
+	vector_ce_Vector = register_class_Mossy2100_Math_Vector(
 		zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess, zend_ce_aggregate
 	);
 	vector_offset_count = math_types_property_offset(vector_ce_Vector, "count");

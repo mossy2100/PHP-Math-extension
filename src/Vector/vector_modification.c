@@ -1,7 +1,7 @@
 /*
  * vector_modification.c
  *
- * Modification methods for OceanMoon\Math\Vector: set(). Mirrors the "Modification methods"
+ * Modification methods for Mossy2100\Math\Vector: set(). Mirrors the "Modification methods"
  * region of the PHP package's Vector class.
  */
 
@@ -13,14 +13,14 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 
-/* {{{ OceanMoon\Math\Vector::set(int $index, float $value): void
+/* {{{ Mossy2100\Math\Vector::set(int $index, float $value): void
  *
  * Matches the PHP package's Vector::set().
  */
-PHP_METHOD(OceanMoon_Math_Vector, set)
+PHP_METHOD(Mossy2100_Math_Vector, set)
 {
 	zend_long index;
 	double value;

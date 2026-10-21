@@ -3,7 +3,7 @@
  *
  * Cross-file declarations shared between complex.c and the other complex_*.c
  * implementation files in this directory. Also exposes complex_minit()/
- * complex_rinit() to ../oceanmoon_math.c, which calls them from the module's real
+ * complex_rinit() to ../mossy2100_math.c, which calls them from the module's real
  * PHP_MINIT_FUNCTION/PHP_RINIT_FUNCTION. Not a public API - nothing here is
  * exposed to other extensions.
  */
@@ -14,7 +14,7 @@
 #include "php.h"
 #include "types.h"
 
-/* The registered class entry for OceanMoon\Math\Complex. Defined in complex.c. */
+/* The registered class entry for Mossy2100\Math\Complex. Defined in complex.c. */
 extern zend_class_entry *complex_ce_Complex;
 
 /* Slot offsets of the $real, $imaginary, $magnitude and $phase properties, set in complex_minit().
@@ -98,7 +98,7 @@ zend_result complex_do_operation(uint8_t opcode, zval *result, zval *op1, zval *
 zend_result complex_calc_compare(zend_object *self_obj, zval *other, int *out);
 int complex_do_compare(zval *op1, zval *op2);
 
-/* Module lifecycle hooks, called from ../oceanmoon_math.c. See their doc comments in complex.c. */
+/* Module lifecycle hooks, called from ../mossy2100_math.c. See their doc comments in complex.c. */
 zend_result complex_minit(void);
 zend_result complex_rinit(int module_number);
 

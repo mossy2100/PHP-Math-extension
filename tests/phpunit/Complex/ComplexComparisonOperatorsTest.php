@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\Tests\Complex;
+namespace Mossy2100\Math\Tests\Complex;
 
-use OceanMoon\Math\Complex;
-use OceanMoon\Math\Rational;
+use Mossy2100\Math\Complex;
+use Mossy2100\Math\Rational;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;

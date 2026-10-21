@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OceanMoon\Math\PHPStan;
+namespace Mossy2100\Math\PHPStan;
 
-use OceanMoon\Math\Complex;
+use Mossy2100\Math\Complex;
 use PHPStan\Type\FloatType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;

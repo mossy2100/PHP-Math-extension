@@ -1,7 +1,7 @@
 /*
  * matrix.c
  *
- * OceanMoon\Math\Matrix: class registration, the constructor, and the shared internal helpers
+ * Mossy2100\Math\Matrix: class registration, the constructor, and the shared internal helpers
  * (matrix_init/matrix_create/matrix_read_row_count/matrix_read_column_count/matrix_read_row/
  * matrix_read_element/matrix_write_element) declared in matrix_internal.h and used by this file as
  * well as the other matrix_*.c implementation files in this directory.
@@ -18,7 +18,7 @@
  * first, then deep-clones each row Vector, exactly mirroring Matrix::__clone()'s
  * `array_map(fn ($v) => clone $v, $this->data)` in the pure-PHP package.
  *
- * matrix_minit() is called from the module's real PHP_MINIT_FUNCTION in ../oceanmoon_math.c.
+ * matrix_minit() is called from the module's real PHP_MINIT_FUNCTION in ../mossy2100_math.c.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -32,13 +32,13 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_objects.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
-/* The registered class entry for OceanMoon\Math\Matrix. */
+/* The registered class entry for Mossy2100\Math\Matrix. */
 zend_class_entry *matrix_ce_Matrix;
 uint32_t matrix_offset_row_count;
 uint32_t matrix_offset_column_count;
@@ -313,8 +313,8 @@ void matrix_create_from(zval *return_value, zend_long row_count, zend_long colum
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::__construct(int $rowCount, int $columnCount) */
-PHP_METHOD(OceanMoon_Math_Matrix, __construct)
+/* {{{ Mossy2100\Math\Matrix::__construct(int $rowCount, int $columnCount) */
+PHP_METHOD(Mossy2100_Math_Matrix, __construct)
 {
 	zend_long row_count, column_count;
 
@@ -376,12 +376,12 @@ static zend_object *matrix_create_object(zend_class_entry *ce)
 
 /* {{{ matrix_minit
  *
- * Called from PHP_MINIT_FUNCTION(oceanmoon_math) in ../oceanmoon_math.c. Class entry, method table, and typed
- * properties are all generated from oceanmoon_math.stub.php into oceanmoon_math_arginfo.h; register them here.
+ * Called from PHP_MINIT_FUNCTION(mossy2100_math) in ../mossy2100_math.c. Class entry, method table, and typed
+ * properties are all generated from mossy2100_math.stub.php into mossy2100_math_arginfo.h; register them here.
  */
 zend_result matrix_minit(void)
 {
-	matrix_ce_Matrix = register_class_OceanMoon_Math_Matrix(
+	matrix_ce_Matrix = register_class_Mossy2100_Math_Matrix(
 		zend_ce_stringable, zend_ce_countable, zend_ce_arrayaccess, zend_ce_aggregate
 	);
 	matrix_offset_row_count = math_types_property_offset(matrix_ce_Matrix, "rowCount");

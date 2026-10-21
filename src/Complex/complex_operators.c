@@ -1,7 +1,7 @@
 /*
  * complex_operators.c
  *
- * Operator overloading for OceanMoon\Math\Complex: +, -, *, /, ** (each accepting a Complex or
+ * Operator overloading for Mossy2100\Math\Complex: +, -, *, /, ** (each accepting a Complex or
  * int|float operand on either side), plus unary - (negate) and ~ (conjugate). Mirrors
  * docs/Reference/Complex.md in this repo - these operators only exist here in the extension; the userland
  * package has no way to overload operators, so it exposes the same behavior only as named methods
@@ -16,7 +16,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 
 /* {{{ complex_operand_to_parts

@@ -1,7 +1,7 @@
 /*
  * vector_arrayaccess.c
  *
- * ArrayAccess methods for OceanMoon\Math\Vector: offsetExists(), offsetGet(), offsetSet(),
+ * ArrayAccess methods for Mossy2100\Math\Vector: offsetExists(), offsetGet(), offsetSet(),
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Vector class -
  * unlike Complex (immutable), Vector is mutable, so offsetSet() actually writes; only
  * offsetUnset() always throws, since Vector has a fixed count.
@@ -17,14 +17,14 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "types.h"
 
-/* {{{ OceanMoon\Math\Vector::offsetExists(mixed $offset): bool
+/* {{{ Mossy2100\Math\Vector::offsetExists(mixed $offset): bool
  *
  * Matches the PHP package's Vector::offsetExists().
  */
-PHP_METHOD(OceanMoon_Math_Vector, offsetExists)
+PHP_METHOD(Mossy2100_Math_Vector, offsetExists)
 {
 	zval *offset;
 
@@ -42,11 +42,11 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetExists)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::offsetGet(mixed $offset): float
+/* {{{ Mossy2100\Math\Vector::offsetGet(mixed $offset): float
  *
  * Matches the PHP package's Vector::offsetGet().
  */
-PHP_METHOD(OceanMoon_Math_Vector, offsetGet)
+PHP_METHOD(Mossy2100_Math_Vector, offsetGet)
 {
 	zval *offset;
 
@@ -71,11 +71,11 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetGet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::offsetSet(mixed $offset, mixed $value): void
+/* {{{ Mossy2100\Math\Vector::offsetSet(mixed $offset, mixed $value): void
  *
  * Matches the PHP package's Vector::offsetSet().
  */
-PHP_METHOD(OceanMoon_Math_Vector, offsetSet)
+PHP_METHOD(Mossy2100_Math_Vector, offsetSet)
 {
 	zval *offset, *value;
 
@@ -107,11 +107,11 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetSet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::offsetUnset(mixed $offset): void
+/* {{{ Mossy2100\Math\Vector::offsetUnset(mixed $offset): void
  *
  * Matches the PHP package's Vector::offsetUnset(): always throws, since Vector has a fixed count.
  */
-PHP_METHOD(OceanMoon_Math_Vector, offsetUnset)
+PHP_METHOD(Mossy2100_Math_Vector, offsetUnset)
 {
 	zval *offset;
 
@@ -124,12 +124,12 @@ PHP_METHOD(OceanMoon_Math_Vector, offsetUnset)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::getIterator(): Traversable
+/* {{{ Mossy2100\Math\Vector::getIterator(): Traversable
  *
  * Matches the PHP package's Vector::getIterator(): an ArrayIterator over the elements. The elements are a
  * snapshot, as ArrayIterator copies the array.
  */
-PHP_METHOD(OceanMoon_Math_Vector, getIterator)
+PHP_METHOD(Mossy2100_Math_Vector, getIterator)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

@@ -1,7 +1,7 @@
 /*
  * complex_power.c
  *
- * Power and root methods for OceanMoon\Math\Complex: pow(), sqr(), roots(), sqrt(). Mirrors the
+ * Power and root methods for Mossy2100\Math\Complex: pow(), sqr(), roots(), sqrt(). Mirrors the
  * "Power methods"/"Root methods" regions of the PHP package's Complex class.
  */
 
@@ -16,7 +16,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
@@ -189,8 +189,8 @@ static zend_result complex_calc_pow_general(
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::pow(Complex|float $exp): Complex */
-PHP_METHOD(OceanMoon_Math_Complex, pow)
+/* {{{ Mossy2100\Math\Complex::pow(Complex|float $exp): Complex */
+PHP_METHOD(Mossy2100_Math_Complex, pow)
 {
 	zval *other;
 
@@ -214,12 +214,12 @@ PHP_METHOD(OceanMoon_Math_Complex, pow)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::sqr(): Complex
+/* {{{ Mossy2100\Math\Complex::sqr(): Complex
  *
  * Matches the PHP package's Complex::sqr(): equivalent to pow(2), and slightly more accurate than mul(). See
  * complex_calc_sqr().
  */
-PHP_METHOD(OceanMoon_Math_Complex, sqr)
+PHP_METHOD(Mossy2100_Math_Complex, sqr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -234,13 +234,13 @@ PHP_METHOD(OceanMoon_Math_Complex, sqr)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::roots(int $degree): array
+/* {{{ Mossy2100\Math\Complex::roots(int $degree): array
  *
  * Matches the PHP package's Complex::roots(): all $degree roots via De Moivre's theorem, reading
  * the magnitude/phase computed properties (not recomputing them) to match the PHP source exactly.
  * Roots that lie on an axis are exact, and the square roots are sqrt() and its negative.
  */
-PHP_METHOD(OceanMoon_Math_Complex, roots)
+PHP_METHOD(Mossy2100_Math_Complex, roots)
 {
 	zend_long degree;
 
@@ -394,12 +394,12 @@ void complex_calc_sqrt(double real, double imag, double *out_real, double *out_i
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Complex::sqrt(): Complex
+/* {{{ Mossy2100\Math\Complex::sqrt(): Complex
  *
  * Matches the PHP package's Complex::sqrt(): the principal square root. For both square roots, call roots(2)
  * instead.
  */
-PHP_METHOD(OceanMoon_Math_Complex, sqrt)
+PHP_METHOD(Mossy2100_Math_Complex, sqrt)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

@@ -2,7 +2,7 @@
  * integers.h
  *
  * Shared overflow-checked integer helpers, not specific to any one class - ports of
- * OceanMoon\Core\Integers, intended for Rational's arithmetic methods.
+ * Mossy2100\Core\Integers, intended for Rational's arithmetic methods.
  *
  * Unlike the PHP source (which detects overflow for free, by checking whether the engine silently
  * promoted an int expression to float), C has no such promotion: signed integer overflow is
@@ -24,7 +24,7 @@
  * Every function in this file returns one of these instead of throwing directly, matching the
  * "pure C, caller throws" pattern used throughout this file and floats.h - the caller picks the
  * PHP exception class/message (OverflowException, DomainException, ArgumentCountError; see
- * OceanMoon\Core\Integers' PHP source for which applies to which failure).
+ * Mossy2100\Core\Integers' PHP source for which applies to which failure).
  */
 typedef enum {
 	MATH_INTEGERS_OK,
@@ -40,28 +40,28 @@ typedef enum {
 
 /* {{{ math_integers_add
  *
- * Ports OceanMoon\Core\Integers::add(): a + b, with overflow detection.
+ * Ports Mossy2100\Core\Integers::add(): a + b, with overflow detection.
  */
 math_integers_result math_integers_add(zend_long a, zend_long b, zend_long *out);
 /* }}} */
 
 /* {{{ math_integers_sub
  *
- * Ports OceanMoon\Core\Integers::sub(): a - b, with overflow detection.
+ * Ports Mossy2100\Core\Integers::sub(): a - b, with overflow detection.
  */
 math_integers_result math_integers_sub(zend_long a, zend_long b, zend_long *out);
 /* }}} */
 
 /* {{{ math_integers_mul
  *
- * Ports OceanMoon\Core\Integers::mul(): a * b, with overflow detection.
+ * Ports Mossy2100\Core\Integers::mul(): a * b, with overflow detection.
  */
 math_integers_result math_integers_mul(zend_long a, zend_long b, zend_long *out);
 /* }}} */
 
 /* {{{ math_integers_mul_mod
  *
- * Ports OceanMoon\Core\Integers::mulMod(): (a * b) % m, without overflowing, even when a * b would. The result has
+ * Ports Mossy2100\Core\Integers::mulMod(): (a * b) % m, without overflowing, even when a * b would. The result has
  * the sign of the product, and its magnitude is less than |m|. MATH_INTEGERS_DIVISION_BY_ZERO if m is 0.
  */
 math_integers_result math_integers_mul_mod(zend_long a, zend_long b, zend_long m, zend_long *out);
@@ -69,7 +69,7 @@ math_integers_result math_integers_mul_mod(zend_long a, zend_long b, zend_long m
 
 /* {{{ math_integers_pow
  *
- * Ports OceanMoon\Core\Integers::pow(): a ** b for a non-negative integer exponent b, with
+ * Ports Mossy2100\Core\Integers::pow(): a ** b for a non-negative integer exponent b, with
  * overflow detection. Implemented via exponentiation by squaring using math_integers_mul() at
  * each step (rather than a single native a ** b, which C has no overflow-checked equivalent of),
  * so overflow is caught at the same point the true mathematical result would first exceed the
@@ -80,7 +80,7 @@ math_integers_result math_integers_pow(zend_long a, zend_long b, zend_long *out)
 
 /* {{{ math_integers_gcd
  *
- * Ports OceanMoon\Core\Integers::gcd(): the greatest common divisor of `count` integers via
+ * Ports Mossy2100\Core\Integers::gcd(): the greatest common divisor of `count` integers via
  * Euclid's algorithm, run on the raw signed values (abs() applied only once, to the final
  * result) so a ZEND_LONG_MIN input combined with any other non-zero, non-ZEND_LONG_MIN value
  * still produces the correct result. `nums` must have at least one element (MATH_INTEGERS_EMPTY

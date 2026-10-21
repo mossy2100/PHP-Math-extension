@@ -1,7 +1,7 @@
 /*
  * vector_comparison.c
  *
- * Comparison methods for OceanMoon\Math\Vector: equal(), approxEqual(). Mirrors the "Comparison
+ * Comparison methods for Mossy2100\Math\Vector: equal(), approxEqual(). Mirrors the "Comparison
  * methods" region of the PHP package's Vector class - both only accept another Vector (same-type
  * comparison only, per the finalized comparison-trait policy: mixed $other, never self, throw for
  * anything else).
@@ -15,7 +15,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "vector_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "floats.h"
 #include "types.h"
 #include <float.h>
@@ -41,11 +41,11 @@ static zend_result vector_check_operand(zval *other)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::equal(mixed $other): bool
+/* {{{ Mossy2100\Math\Vector::equal(mixed $other): bool
  *
  * Matches the PHP package's Vector::equal(): same count and every element exactly equal.
  */
-PHP_METHOD(OceanMoon_Math_Vector, equal)
+PHP_METHOD(Mossy2100_Math_Vector, equal)
 {
 	zval *other;
 
@@ -86,12 +86,12 @@ PHP_METHOD(OceanMoon_Math_Vector, equal)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Vector::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
+/* {{{ Mossy2100\Math\Vector::approxEqual(mixed $other, float $relTol = 1e-9, float $absTol = PHP_FLOAT_EPSILON): bool
  *
  * Matches the PHP package's Vector::approxEqual(): same count and every element approximately
  * equal, via math_floats_approx_equal().
  */
-PHP_METHOD(OceanMoon_Math_Vector, approxEqual)
+PHP_METHOD(Mossy2100_Math_Vector, approxEqual)
 {
 	zval *other;
 	double rel_tol = 1e-9;

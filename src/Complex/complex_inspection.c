@@ -1,7 +1,7 @@
 /*
  * complex_inspection.c
  *
- * Inspection methods for OceanMoon\Math\Complex. Mirrors the "Inspection
+ * Inspection methods for Mossy2100\Math\Complex. Mirrors the "Inspection
  * methods" region of the PHP package's Complex class.
  */
 
@@ -10,15 +10,15 @@
 #endif
 
 #include "php.h"
-#include "php_oceanmoon_math.h"
+#include "php_mossy2100_math.h"
 #include "complex_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Complex::isReal(): bool
+/* {{{ Mossy2100\Math\Complex::isReal(): bool
  *
  * Matches the PHP package's Complex::isReal(): true if the imaginary part is zero.
  */
-PHP_METHOD(OceanMoon_Math_Complex, isReal)
+PHP_METHOD(Mossy2100_Math_Complex, isReal)
 {
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 

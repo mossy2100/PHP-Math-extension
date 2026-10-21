@@ -1,4 +1,4 @@
-# OceanMoon PHP Math extension
+# Mossy2100 PHP Math extension
 
 Provides classes for Complex numbers, Rational numbers, Vectors, and Matrices.
 
@@ -7,7 +7,7 @@ Provides classes for Complex numbers, Rational numbers, Vectors, and Matrices.
 ![PHP 8.4](docs/images/logo_php8_4-125w.png) ![PHP 8.5](docs/images/logo_php8_5-125w.png)
 
 A native PHP extension that implements the `Complex`, `Rational`, `Vector`, and `Matrix` classes from the
-[OceanMoon PHP Math package](https://github.com/mossy2100/PHP-Math) in C, and adds operator overloading, which userland PHP classes can't offer on their own.
+[Mossy2100 PHP Math package](https://github.com/mossy2100/PHP-Math) in C, and adds operator overloading, which userland PHP classes can't offer on their own.
 
 Each class has the same fully-qualified name and API as its package counterpart, so loading the extension replaces the
 userland class with no code changes. The extension's version always matches the package version it mirrors.
@@ -20,13 +20,13 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 **Key Features:**
 
-- **Drop-in replacement** - same class names, methods and behaviour as `oceanmoon/math`.
+- **Drop-in replacement** - same class names, methods and behaviour as `mossy2100/math`.
 - **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable) and their compound assignment forms (`+=`
   etc.), `~` (conjugate) for `Complex`, and `%` for `Rational`. `Complex` and `Rational` also get `++`, `--` and the
   full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
 - **Behavioural parity** - a PHPUnit conformance suite runs the package's own tests against the extension's classes, so
   the two stay identical in behaviour, not just API shape.
-- **Standalone** - no runtime dependency on `oceanmoon/core`, `oceanmoon/math` or any other package, despite sharing
+- **Standalone** - no runtime dependency on `mossy2100/core`, `mossy2100/math` or any other package, despite sharing
   their namespaces.
 
 ### Why Keep the Package and Extension in Step?
@@ -104,7 +104,7 @@ two behave identically.
 
 All code was reviewed by the author. Correctness is validated by:
 
-- A PHPUnit conformance suite (`tests/phpunit/`), which runs the userland package's own tests (`oceanmoon/math`) against
+- A PHPUnit conformance suite (`tests/phpunit/`), which runs the userland package's own tests (`mossy2100/math`) against
   this extension's native classes. So behavior stays identical between the two, not just the method signatures.
 - [PHPStan](https://phpstan.org/) at level 9, with custom operator-type-specifying extensions so static analysis understands the operator
   overloads that only exist here.

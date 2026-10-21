@@ -30,17 +30,17 @@ Move your built extension file into the exact folder discovered in Step 1.
 
 - **From your local machine** (using `scp`):
   ```bash
-  scp build/8.4/modules/oceanmoon_math.so root@your_server_ip:/usr/lib/php/20240924/
+  scp build/8.4/modules/mossy2100_math.so root@your_server_ip:/usr/lib/php/20240924/
   ```
 - **If the file is already on the server** (e.g. you built it there):
   ```bash
-  sudo mv oceanmoon_math.so /usr/lib/php/20240924/
+  sudo mv mossy2100_math.so /usr/lib/php/20240924/
   ```
 
 Set the correct file permissions so PHP has read access:
 
 ```bash
-sudo chmod 644 /usr/lib/php/20240924/oceanmoon_math.so
+sudo chmod 644 /usr/lib/php/20240924/mossy2100_math.so
 ```
 
 ## Step 3: Find your PHP configuration folder
@@ -58,7 +58,7 @@ directly in the scan directory. This is what lets a single `.ini` be shared betw
 symlinks, rather than needing a separate copy configured per SAPI:
 
 ```bash
-sudo nano /etc/php/8.4/mods-available/oceanmoon_math.ini
+sudo nano /etc/php/8.4/mods-available/mossy2100_math.ini
 ```
 
 (Replace `8.4` with your active PHP version.)
@@ -66,7 +66,7 @@ sudo nano /etc/php/8.4/mods-available/oceanmoon_math.ini
 Paste the following line into the file, save, and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
 
 ```ini
-extension=oceanmoon_math.so
+extension=mossy2100_math.so
 ```
 
 ## Step 5: Enable the extension
@@ -75,7 +75,7 @@ Link the configuration file so both the command line (CLI) and your web server's
 read it:
 
 ```bash
-sudo phpenmod oceanmoon_math
+sudo phpenmod mossy2100_math
 ```
 
 ## Step 6: Restart the service that actually serves your requests
@@ -95,13 +95,13 @@ process until it's restarted. Only the next fresh CLI invocation picks it up aut
 ## Step 7: Verify the installation
 
 ```bash
-php -m | grep oceanmoon_math
+php -m | grep mossy2100_math
 ```
 
 This confirms the **CLI SAPI** loaded it. It does _not_ confirm `php-fpm`/Apache did. That's a separate process with its
 own independently-loaded extension list. To actually confirm the SAPI serving your web requests has it, either:
 
 - Check via a script executed through the web server itself, e.g. a route/page that runs
-  `var_dump(extension_loaded('oceanmoon_math'));`, or
-- For FPM specifically: `sudo php-fpm8.4 -m | grep oceanmoon_math` (running the FPM binary's own `-m` flag, not the CLI
+  `var_dump(extension_loaded('mossy2100_math'));`, or
+- For FPM specifically: `sudo php-fpm8.4 -m | grep mossy2100_math` (running the FPM binary's own `-m` flag, not the CLI
   binary's), or check its status page if you have one configured.

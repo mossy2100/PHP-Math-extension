@@ -1,7 +1,7 @@
 /*
  * matrix_arrayaccess.c
  *
- * ArrayAccess methods for OceanMoon\Math\Matrix: offsetExists(), offsetGet(), offsetSet(),
+ * ArrayAccess methods for Mossy2100\Math\Matrix: offsetExists(), offsetGet(), offsetSet(),
  * offsetUnset(). Mirrors the "ArrayAccess methods" region of the PHP package's Matrix class -
  * offsetGet() returns the Matrix's actual internal row Vector (a live reference, unlike getRow()'s
  * independent copy), which is what makes `$m[$row][$col] = $x` work. Also getIterator(), from the
@@ -16,14 +16,14 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "types.h"
 
-/* {{{ OceanMoon\Math\Matrix::offsetExists(mixed $offset): bool
+/* {{{ Mossy2100\Math\Matrix::offsetExists(mixed $offset): bool
  *
  * Matches the PHP package's Matrix::offsetExists().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, offsetExists)
+PHP_METHOD(Mossy2100_Math_Matrix, offsetExists)
 {
 	zval *offset;
 
@@ -41,11 +41,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetExists)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::offsetGet(mixed $offset): Vector
+/* {{{ Mossy2100\Math\Matrix::offsetGet(mixed $offset): Vector
  *
  * Matches the PHP package's Matrix::offsetGet(): returns the live row Vector, not a copy.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, offsetGet)
+PHP_METHOD(Mossy2100_Math_Matrix, offsetGet)
 {
 	zval *offset;
 
@@ -78,11 +78,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetGet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::offsetSet(mixed $offset, mixed $value): void
+/* {{{ Mossy2100\Math\Matrix::offsetSet(mixed $offset, mixed $value): void
  *
  * Matches the PHP package's Matrix::offsetSet(): equivalent to setRow().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, offsetSet)
+PHP_METHOD(Mossy2100_Math_Matrix, offsetSet)
 {
 	zval *offset, *value;
 
@@ -113,12 +113,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetSet)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::offsetUnset(mixed $offset): void
+/* {{{ Mossy2100\Math\Matrix::offsetUnset(mixed $offset): void
  *
  * Matches the PHP package's Matrix::offsetUnset(): always throws, since Matrix has a fixed number
  * of rows.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, offsetUnset)
+PHP_METHOD(Mossy2100_Math_Matrix, offsetUnset)
 {
 	zval *offset;
 
@@ -131,12 +131,12 @@ PHP_METHOD(OceanMoon_Math_Matrix, offsetUnset)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::getIterator(): Traversable
+/* {{{ Mossy2100\Math\Matrix::getIterator(): Traversable
  *
  * Matches the PHP package's Matrix::getIterator(): an ArrayIterator over the rows. The $data array holds the
  * row Vector objects, so the rows are live, matching offsetGet().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, getIterator)
+PHP_METHOD(Mossy2100_Math_Matrix, getIterator)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

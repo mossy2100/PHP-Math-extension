@@ -1,7 +1,7 @@
 /*
  * matrix_arithmetic.c
  *
- * Unary and binary arithmetic methods for OceanMoon\Math\Matrix: neg(), hadamardInv(), inv(),
+ * Unary and binary arithmetic methods for Mossy2100\Math\Matrix: neg(), hadamardInv(), inv(),
  * add(), sub(), mul(), div(), hadamardMul(), hadamardDiv(). Mirrors the "Unary arithmetic methods"
  * and "Binary arithmetic methods" regions of the PHP package's Matrix class.
  */
@@ -16,7 +16,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 #include "exceptions.h"
 #include "floats.h"
 
@@ -135,11 +135,11 @@ static zend_result matrix_calc_elementwise(
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::neg(): Matrix
+/* {{{ Mossy2100\Math\Matrix::neg(): Matrix
  *
  * Matches the PHP package's Matrix::neg(): `$this->mul(-1)`.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, neg)
+PHP_METHOD(Mossy2100_Math_Matrix, neg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -150,11 +150,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, neg)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::hadamardInv(): Matrix
+/* {{{ Mossy2100\Math\Matrix::hadamardInv(): Matrix
  *
  * Matches the PHP package's Matrix::hadamardInv(): element-wise reciprocal, not the matrix inverse.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, hadamardInv)
+PHP_METHOD(Mossy2100_Math_Matrix, hadamardInv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -166,13 +166,13 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardInv)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::inv(): Matrix
+/* {{{ Mossy2100\Math\Matrix::inv(): Matrix
  *
  * Matches the PHP package's Matrix::inv(). The actual logic lives in matrix_calc_inv() (this file),
  * shared with pow()'s negative-exponent branch (matrix_power.c), matching the "shared calc core"
  * pattern used elsewhere in this extension.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, inv)
+PHP_METHOD(Mossy2100_Math_Matrix, inv)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -347,11 +347,11 @@ zend_result matrix_calc_add(zend_object *self, zend_object *other, zval *return_
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::add(Matrix $other): Matrix
+/* {{{ Mossy2100\Math\Matrix::add(Matrix $other): Matrix
  *
  * Matches the PHP package's Matrix::add().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, add)
+PHP_METHOD(Mossy2100_Math_Matrix, add)
 {
 	zval *other;
 
@@ -392,11 +392,11 @@ zend_result matrix_calc_sub(zend_object *self, zend_object *other, zval *return_
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::sub(Matrix $other): Matrix
+/* {{{ Mossy2100\Math\Matrix::sub(Matrix $other): Matrix
  *
  * Matches the PHP package's Matrix::sub().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, sub)
+PHP_METHOD(Mossy2100_Math_Matrix, sub)
 {
 	zval *other;
 
@@ -484,12 +484,12 @@ zend_result matrix_calc_mul_vector(zend_object *self, zend_object *vector, zval 
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::mul(float|Vector|Matrix $other): Vector|Matrix
+/* {{{ Mossy2100\Math\Matrix::mul(float|Vector|Matrix $other): Vector|Matrix
  *
  * Matches the PHP package's Matrix::mul(): scalar branch scales every element; Vector branch gives
  * Ax as a Vector; Matrix branch does real matrix multiplication.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, mul)
+PHP_METHOD(Mossy2100_Math_Matrix, mul)
 {
 	zval *other;
 
@@ -516,7 +516,7 @@ PHP_METHOD(OceanMoon_Math_Matrix, mul)
 
 	if (Z_TYPE_P(other) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(other), matrix_ce_Matrix)) {
 		zend_argument_type_error(
-			1, "must be of type OceanMoon\\Math\\Vector|OceanMoon\\Math\\Matrix|float, %s given", zend_zval_value_name(other)
+			1, "must be of type Mossy2100\\Math\\Vector|Mossy2100\\Math\\Matrix|float, %s given", zend_zval_value_name(other)
 		);
 		RETURN_THROWS();
 	}
@@ -631,11 +631,11 @@ zend_result matrix_calc_scalar_div(double scalar, zend_object *self, zval *retur
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::div(float $scalar): Matrix
+/* {{{ Mossy2100\Math\Matrix::div(float $scalar): Matrix
  *
  * Matches the PHP package's Matrix::div().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, div)
+PHP_METHOD(Mossy2100_Math_Matrix, div)
 {
 	double scalar;
 
@@ -649,11 +649,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, div)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::hadamardMul(Matrix $other): Matrix
+/* {{{ Mossy2100\Math\Matrix::hadamardMul(Matrix $other): Matrix
  *
  * Matches the PHP package's Matrix::hadamardMul().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, hadamardMul)
+PHP_METHOD(Mossy2100_Math_Matrix, hadamardMul)
 {
 	zval *other;
 
@@ -688,11 +688,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, hadamardMul)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::hadamardDiv(Matrix $other): Matrix
+/* {{{ Mossy2100\Math\Matrix::hadamardDiv(Matrix $other): Matrix
  *
  * Matches the PHP package's Matrix::hadamardDiv().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, hadamardDiv)
+PHP_METHOD(Mossy2100_Math_Matrix, hadamardDiv)
 {
 	zval *other;
 

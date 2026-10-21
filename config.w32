@@ -3,34 +3,34 @@
 // The source files must match config.m4's. Those outside the top-level directory go through ADD_SOURCES(), one
 // call per directory, as in PHP's own extensions.
 
-ARG_ENABLE("oceanmoon_math", "enable OceanMoon math support", "no");
+ARG_ENABLE("mossy2100_math", "enable Mossy2100 math support", "no");
 
-if (PHP_OCEANMOON_MATH != "no") {
-  EXTENSION("oceanmoon_math", "oceanmoon_math.c", PHP_OCEANMOON_MATH_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-  ADD_FLAG("CFLAGS_OCEANMOON_MATH", "/I " + configure_module_dirname + " /I " + configure_module_dirname + "\\src");
+if (PHP_MOSSY2100_MATH != "no") {
+  EXTENSION("mossy2100_math", "mossy2100_math.c", PHP_MOSSY2100_MATH_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+  ADD_FLAG("CFLAGS_MOSSY2100_MATH", "/I " + configure_module_dirname + " /I " + configure_module_dirname + "\\src");
 
   ADD_SOURCES(configure_module_dirname + "\\src",
     "floats.c integers.c types.c exceptions.c",
-    "oceanmoon_math");
+    "mossy2100_math");
   ADD_SOURCES(configure_module_dirname + "\\src\\Complex",
     "complex.c complex_conversion.c complex_inspection.c complex_comparison.c complex_properties.c " +
     "complex_arithmetic.c complex_transcendental.c complex_power.c complex_operators.c complex_rounding.c " +
     "complex_trigonometric.c complex_hyperbolic.c complex_catrig.c complex_arrayaccess.c",
-    "oceanmoon_math");
+    "mossy2100_math");
   ADD_SOURCES(configure_module_dirname + "\\src\\Rational",
     "rational.c rational_factory.c rational_conversion.c rational_inspection.c rational_comparison.c " +
     "rational_arithmetic.c rational_power.c rational_rounding.c rational_operators.c",
-    "oceanmoon_math");
+    "mossy2100_math");
   ADD_SOURCES(configure_module_dirname + "\\src\\Vector",
     "vector.c vector_factory.c vector_properties.c vector_conversion.c vector_inspection.c " +
     "vector_modification.c vector_comparison.c vector_arithmetic.c vector_linear_algebra.c vector_aggregation.c " +
     "vector_arrayaccess.c vector_operators.c",
-    "oceanmoon_math");
+    "mossy2100_math");
   ADD_SOURCES(configure_module_dirname + "\\src\\Matrix",
     "matrix.c matrix_factory.c matrix_conversion.c matrix_inspection.c matrix_modification.c " +
     "matrix_comparison.c matrix_transformation.c matrix_arithmetic.c matrix_power.c matrix_linear_algebra.c " +
     "matrix_norm.c matrix_aggregation.c matrix_arrayaccess.c matrix_helpers.c matrix_operators.c",
-    "oceanmoon_math");
+    "mossy2100_math");
 
-  AC_DEFINE("HAVE_OCEANMOON_MATH", 1, "OceanMoon math support");
+  AC_DEFINE("HAVE_MOSSY2100_MATH", 1, "Mossy2100 math support");
 }

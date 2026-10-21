@@ -1,7 +1,7 @@
 /*
  * matrix_transformation.c
  *
- * Transformation methods for OceanMoon\Math\Matrix: resize(). Mirrors the "Transformation methods"
+ * Transformation methods for Mossy2100\Math\Matrix: resize(). Mirrors the "Transformation methods"
  * region of the PHP package's Matrix class.
  */
 
@@ -11,14 +11,14 @@
 
 #include "php.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
-/* {{{ OceanMoon\Math\Matrix::resize(int $rowCount, int $columnCount): Matrix
+/* {{{ Mossy2100\Math\Matrix::resize(int $rowCount, int $columnCount): Matrix
  *
  * Matches the PHP package's Matrix::resize(): anchored at (0, 0), zero-filling extra rows/columns
  * or dropping excess ones.
  */
-PHP_METHOD(OceanMoon_Math_Matrix, resize)
+PHP_METHOD(Mossy2100_Math_Matrix, resize)
 {
 	zend_long row_count, column_count;
 

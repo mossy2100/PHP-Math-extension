@@ -1,7 +1,7 @@
 /*
  * matrix_modification.c
  *
- * Modification methods for OceanMoon\Math\Matrix: set(), setRow(), setColumn(), paste(). Mirrors
+ * Modification methods for Mossy2100\Math\Matrix: set(), setRow(), setColumn(), paste(). Mirrors
  * the "Modification methods" region of the PHP package's Matrix class.
  */
 
@@ -13,7 +13,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 #include "matrix_internal.h"
-#include "../../oceanmoon_math_arginfo.h"
+#include "../../mossy2100_math_arginfo.h"
 
 /* {{{ matrix_set_row
  *
@@ -53,11 +53,11 @@ zend_result matrix_set_row(zend_object *self, zend_long row, zend_object *vec)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::set(int $row, int $col, float $value): void
+/* {{{ Mossy2100\Math\Matrix::set(int $row, int $col, float $value): void
  *
  * Matches the PHP package's Matrix::set().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, set)
+PHP_METHOD(Mossy2100_Math_Matrix, set)
 {
 	zend_long row, col;
 	double value;
@@ -74,11 +74,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, set)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::setRow(int $row, Vector $vec): void
+/* {{{ Mossy2100\Math\Matrix::setRow(int $row, Vector $vec): void
  *
  * Matches the PHP package's Matrix::setRow(). See matrix_set_row().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, setRow)
+PHP_METHOD(Mossy2100_Math_Matrix, setRow)
 {
 	zend_long row;
 	zval *vec;
@@ -94,11 +94,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, setRow)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::setColumn(int $col, Vector $vec): void
+/* {{{ Mossy2100\Math\Matrix::setColumn(int $col, Vector $vec): void
  *
  * Matches the PHP package's Matrix::setColumn().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, setColumn)
+PHP_METHOD(Mossy2100_Math_Matrix, setColumn)
 {
 	zend_long col;
 	zval *vec;
@@ -141,11 +141,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, setColumn)
 }
 /* }}} */
 
-/* {{{ OceanMoon\Math\Matrix::paste(Matrix $other, int $row = 0, int $col = 0): void
+/* {{{ Mossy2100\Math\Matrix::paste(Matrix $other, int $row = 0, int $col = 0): void
  *
  * Matches the PHP package's Matrix::paste(): mutates this Matrix in place, matching set().
  */
-PHP_METHOD(OceanMoon_Math_Matrix, paste)
+PHP_METHOD(Mossy2100_Math_Matrix, paste)
 {
 	zval *other;
 	zend_long row = 0, col = 0;
