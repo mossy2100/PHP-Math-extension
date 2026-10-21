@@ -66,18 +66,25 @@ PHP_METHOD(OceanMoon_Math_Matrix, equal)
 		RETURN_FALSE;
 	}
 
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self_obj, i, j, &a);
-			matrix_read_element(other_obj, i, j, &b);
-			if (a != b) {
-				RETURN_FALSE;
-			}
-		}
+	double *values = matrix_read_all(self_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double *other_values = matrix_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(values);
+		RETURN_THROWS();
 	}
 
-	RETURN_TRUE;
+	bool equal = true;
+	zend_long count = row_count * column_count;
+	for (zend_long k = 0; k < count && equal; k++) {
+		equal = values[k] == other_values[k];
+	}
+	efree(values);
+	efree(other_values);
+
+	RETURN_BOOL(equal);
 }
 /* }}} */
 
@@ -116,17 +123,24 @@ PHP_METHOD(OceanMoon_Math_Matrix, approxEqual)
 		RETURN_THROWS();
 	}
 
-	for (zend_long i = 0; i < row_count; i++) {
-		for (zend_long j = 0; j < column_count; j++) {
-			double a, b;
-			matrix_read_element(self_obj, i, j, &a);
-			matrix_read_element(other_obj, i, j, &b);
-			if (!math_floats_approx_equal(a, b, rel_tol, abs_tol)) {
-				RETURN_FALSE;
-			}
-		}
+	double *values = matrix_read_all(self_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double *other_values = matrix_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(values);
+		RETURN_THROWS();
 	}
 
-	RETURN_TRUE;
+	bool equal = true;
+	zend_long count = row_count * column_count;
+	for (zend_long k = 0; k < count && equal; k++) {
+		equal = math_floats_approx_equal(values[k], other_values[k], rel_tol, abs_tol);
+	}
+	efree(values);
+	efree(other_values);
+
+	RETURN_BOOL(equal);
 }
 /* }}} */

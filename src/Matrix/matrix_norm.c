@@ -30,18 +30,22 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 
 	/* Handle a zero or empty matrix. */
 	double max = 0.0;
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
+			double value = values[i * column_count + j];
 			max = fmax(max, fabs(value));
 		}
 	}
 	double scale = math_floats_power_of_2_scale(max);
 	if (scale == 0.0) {
+		efree(values);
 		RETURN_DOUBLE(0.0);
 	}
 
@@ -49,12 +53,13 @@ PHP_METHOD(OceanMoon_Math_Matrix, norm)
 	double sum = 0.0;
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
+			double value = values[i * column_count + j];
 			double scaled = value / scale;
 			sum += scaled * scaled;
 		}
 	}
+
+	efree(values);
 
 	double norm = scale * sqrt(sum);
 	if (!zend_finite(norm)) {
@@ -77,19 +82,24 @@ PHP_METHOD(OceanMoon_Math_Matrix, p1Norm)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 
 	double max = 0.0;
 	for (zend_long j = 0; j < column_count; j++) {
 		double col_sum = 0.0;
 		for (zend_long i = 0; i < row_count; i++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
+			double value = values[i * column_count + j];
 			col_sum += fabs(value);
 		}
 		if (col_sum > max) {
 			max = col_sum;
 		}
 	}
+
+	efree(values);
 
 	if (!zend_finite(max)) {
 		math_throw_overflow("compute P1 norm of the given Matrix");
@@ -111,19 +121,24 @@ PHP_METHOD(OceanMoon_Math_Matrix, pInfNorm)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 
 	double max = 0.0;
 	for (zend_long i = 0; i < row_count; i++) {
 		double row_sum = 0.0;
 		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
+			double value = values[i * column_count + j];
 			row_sum += fabs(value);
 		}
 		if (row_sum > max) {
 			max = row_sum;
 		}
 	}
+
+	efree(values);
 
 	if (!zend_finite(max)) {
 		math_throw_overflow("compute P-infinity norm of the given Matrix");

@@ -40,7 +40,7 @@ zend_result vector_properties_minit(void);
  * vector_linear_algebra.c; backs the `magnitude` computed property (vector_properties.c), and is
  * also called directly (bypassing property read dispatch) by normalize() (vector_linear_algebra.c).
  */
-double vector_compute_magnitude(zend_object *obj);
+zend_result vector_compute_magnitude(zend_object *obj, double *out);
 
 /* The computational cores of add()/sub()/mul()/div()/hadamardMul()/hadamardDiv(), defined in
  * vector_arithmetic.c. Shared with the operator overloads (vector_operators.c) so operator and

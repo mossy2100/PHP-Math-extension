@@ -25,12 +25,15 @@ PHP_METHOD(OceanMoon_Math_Vector, sum)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long count = vector_read_count(self);
 
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 	double sum = 0.0;
 	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
-		sum += element;
+		sum += values[i];
 	}
+	efree(values);
 
 	if (!zend_finite(sum)) {
 		math_throw_overflow("compute sum of the given Vector");
@@ -52,12 +55,15 @@ PHP_METHOD(OceanMoon_Math_Vector, prod)
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long count = vector_read_count(self);
 
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 	double prod = 1.0;
 	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
-		prod *= element;
+		prod *= values[i];
 	}
+	efree(values);
 
 	if (!zend_finite(prod)) {
 		math_throw_overflow("compute product of the given Vector");

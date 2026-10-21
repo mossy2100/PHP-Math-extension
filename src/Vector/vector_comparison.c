@@ -65,16 +65,24 @@ PHP_METHOD(OceanMoon_Math_Vector, equal)
 		RETURN_FALSE;
 	}
 
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self_obj, i, &a);
-		vector_read_element(other_obj, i, &b);
-		if (a != b) {
-			RETURN_FALSE;
-		}
+	double *values = vector_read_all(self_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double *other_values = vector_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(values);
+		RETURN_THROWS();
 	}
 
-	RETURN_TRUE;
+	bool equal = true;
+	for (zend_long i = 0; i < count && equal; i++) {
+		equal = values[i] == other_values[i];
+	}
+	efree(values);
+	efree(other_values);
+
+	RETURN_BOOL(equal);
 }
 /* }}} */
 
@@ -113,15 +121,23 @@ PHP_METHOD(OceanMoon_Math_Vector, approxEqual)
 		RETURN_THROWS();
 	}
 
-	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self_obj, i, &a);
-		vector_read_element(other_obj, i, &b);
-		if (!math_floats_approx_equal(a, b, rel_tol, abs_tol)) {
-			RETURN_FALSE;
-		}
+	double *values = vector_read_all(self_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double *other_values = vector_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(values);
+		RETURN_THROWS();
 	}
 
-	RETURN_TRUE;
+	bool equal = true;
+	for (zend_long i = 0; i < count && equal; i++) {
+		equal = math_floats_approx_equal(values[i], other_values[i], rel_tol, abs_tol);
+	}
+	efree(values);
+	efree(other_values);
+
+	RETURN_BOOL(equal);
 }
 /* }}} */

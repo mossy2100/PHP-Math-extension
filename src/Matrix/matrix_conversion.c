@@ -23,22 +23,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, toArray)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	zend_long row_count = matrix_read_row_count(self);
-	zend_long column_count = matrix_read_column_count(self);
-
-	array_init_size(return_value, (uint32_t) row_count);
-	for (zend_long i = 0; i < row_count; i++) {
-		zval row_array;
-		array_init_size(&row_array, (uint32_t) column_count);
-		for (zend_long j = 0; j < column_count; j++) {
-			double element;
-			matrix_read_element(self, i, j, &element);
-			zval v;
-			ZVAL_DOUBLE(&v, element);
-			zend_hash_next_index_insert(Z_ARRVAL(row_array), &v);
-		}
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &row_array);
+	if (matrix_to_data_array(Z_OBJ_P(ZEND_THIS), return_value) == FAILURE) {
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -63,6 +49,11 @@ PHP_METHOD(OceanMoon_Math_Matrix, __toString)
 		RETURN_STR(buf.s);
 	}
 
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+
 	/* Format every cell up front so column widths are calculated against the same strings that
 	 * get rendered. */
 	zend_string ***cells = safe_emalloc(sizeof(zend_string **), row_count, 0);
@@ -70,11 +61,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, __toString)
 	for (zend_long i = 0; i < row_count; i++) {
 		cells[i] = safe_emalloc(sizeof(zend_string *), column_count, 0);
 		for (zend_long j = 0; j < column_count; j++) {
-			double element;
-			matrix_read_element(self, i, j, &element);
-
 			zval tmp;
-			ZVAL_DOUBLE(&tmp, element);
+			ZVAL_DOUBLE(&tmp, values[i * column_count + j]);
 			convert_to_string(&tmp);
 			cells[i][j] = Z_STR(tmp);
 
@@ -83,6 +71,8 @@ PHP_METHOD(OceanMoon_Math_Matrix, __toString)
 			}
 		}
 	}
+
+	efree(values);
 
 	smart_str buf = {0};
 

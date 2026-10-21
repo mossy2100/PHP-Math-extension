@@ -108,20 +108,18 @@ PHP_METHOD(OceanMoon_Math_Matrix, getColumn)
 		RETURN_THROWS();
 	}
 
-	if (vector_create(return_value, row_count) == FAILURE) {
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
 		RETURN_THROWS();
 	}
-	zend_object *result = Z_OBJ_P(return_value);
-
+	double *column = safe_emalloc((size_t) (row_count > 0 ? row_count : 1), sizeof(double), 0);
 	for (zend_long i = 0; i < row_count; i++) {
-		double value;
-		matrix_read_element(self, i, col, &value);
-		if (vector_write_element(result, i, value) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			RETURN_THROWS();
-		}
+		column[i] = values[i * column_count + col];
 	}
+
+	vector_create_from(return_value, row_count, column);
+	efree(values);
+	efree(column);
 }
 /* }}} */
 
@@ -149,21 +147,22 @@ PHP_METHOD(OceanMoon_Math_Matrix, copy)
 		RETURN_THROWS();
 	}
 
-	if (matrix_create(return_value, sub_row_count, sub_col_count) == FAILURE) {
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
 		RETURN_THROWS();
 	}
-	zend_object *result = Z_OBJ_P(return_value);
-
+	double *sub_values = safe_emalloc(
+		(size_t) (sub_row_count > 0 ? sub_row_count : 1),
+		(size_t) (sub_col_count > 0 ? sub_col_count : 1) * sizeof(double), 0
+	);
 	for (zend_long i = 0; i < sub_row_count; i++) {
 		for (zend_long j = 0; j < sub_col_count; j++) {
-			double value;
-			matrix_read_element(self, row + i, col + j, &value);
-			if (matrix_write_element(result, i, j, value) == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
+			sub_values[i * sub_col_count + j] = values[(row + i) * column_count + col + j];
 		}
 	}
+
+	matrix_create_from(return_value, sub_row_count, sub_col_count, sub_values);
+	efree(values);
+	efree(sub_values);
 }
 /* }}} */

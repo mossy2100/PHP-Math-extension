@@ -82,5 +82,55 @@ class VectorInvalidDataTest extends TestCase
         }
     }
 
+    /**
+     * Test the methods that read every element at once throw Error for a tampered Vector, including one whose count is
+     * too large to allocate or loop over.
+     */
+    #[DataProvider('tamperProvider')]
+    #[DataProvider('hugeCountProvider')]
+    public function testBulkReadsOfTamperedThrow(string $property, mixed $value): void
+    {
+        $v = Vector::fromArray([1.0, 2.0]);
+        new ReflectionProperty($v, $property)->setValue($v, $value);
+        $reads = [
+            'neg'         => static fn () => $v->neg(),
+            'hadamardDiv' => static fn () => $v->hadamardDiv($v),
+            'mul'         => static fn () => $v->mul(2.0),
+            '/'           => static fn () => 2.0 / $v,
+            'sum'         => static fn () => $v->sum(),
+            'prod'        => static fn () => $v->prod(),
+            'dot'         => static fn () => $v->dot($v),
+            'magnitude'   => static fn () => $v->magnitude,
+            'normalize'   => static fn () => $v->normalize(),
+            'equal'       => static fn () => $v->equal($v),
+            'approxEqual' => static fn () => $v->approxEqual($v),
+            'toString'    => static fn () => (string) $v,
+            'toRowMatrix' => static fn () => $v->toRowMatrix(),
+            'json_encode' => static fn () => json_encode($v),
+        ];
+
+        foreach ($reads as $name => $read) {
+            try {
+                $read();
+                $this->fail("Expected Error from $name.");
+            } catch (Error $e) {
+                $this->assertSame('Vector data is invalid.', $e->getMessage(), $name);
+            }
+        }
+    }
+
+    /**
+     * Counts too large to allocate a buffer for or loop over.
+     *
+     * @return array<string, array{string, int}>
+     */
+    public static function hugeCountProvider(): array
+    {
+        return [
+            'huge count'     => ['count', PHP_INT_MAX],
+            'negative count' => ['count', -1],
+        ];
+    }
+
     #endregion
 }

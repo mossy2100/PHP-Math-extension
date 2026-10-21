@@ -25,15 +25,11 @@
  * Ports the PHP package's Vector::powerOf2Scale() for a Vector's elements: the power of 2 that scales the
  * largest absolute element into the range [1, 2), or 0.0 for a zero or empty vector.
  */
-static double vector_scale(zend_object *obj)
+static double vector_scale(const double *values, zend_long count)
 {
-	zend_long count = vector_read_count(obj);
 	double max = 0.0;
-
 	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(obj, i, &element);
-		max = fmax(max, fabs(element));
+		max = fmax(max, fabs(values[i]));
 	}
 
 	return math_floats_power_of_2_scale(max);
@@ -45,27 +41,33 @@ static double vector_scale(zend_object *obj)
  * Matches the PHP package's Vector::$magnitude hook: scales the elements by a power of 2 so their squares can't
  * overflow or underflow, takes sqrt(sum of squares), then undoes the scaling. Backs the `magnitude` computed
  * property (vector_properties.c), and is also called directly (bypassing property read dispatch) by normalize()
- * below.
+ * below. Returns FAILURE, with Error thrown, if $data is invalid (see vector_read_element()).
  */
-double vector_compute_magnitude(zend_object *obj)
+zend_result vector_compute_magnitude(zend_object *obj, double *out)
 {
-	/* Handle a zero or empty vector. */
-	double scale = vector_scale(obj);
-	if (scale == 0.0) {
-		return 0.0;
+	zend_long count = vector_read_count(obj);
+	double *values = vector_read_all(obj);
+	if (values == NULL) {
+		return FAILURE;
 	}
 
-	zend_long count = vector_read_count(obj);
+	/* Handle a zero or empty vector. */
+	double scale = vector_scale(values, count);
+	if (scale == 0.0) {
+		efree(values);
+		*out = 0.0;
+		return SUCCESS;
+	}
+
 	double sum = 0.0;
 	for (zend_long i = 0; i < count; i++) {
-		double element;
-		/* Bounds are trivially satisfied (0..count-1), so this never fails. */
-		vector_read_element(obj, i, &element);
-		double scaled = element / scale;
+		double scaled = values[i] / scale;
 		sum += scaled * scaled;
 	}
+	efree(values);
 
-	return scale * sqrt(sum);
+	*out = scale * sqrt(sum);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -119,13 +121,21 @@ PHP_METHOD(OceanMoon_Math_Vector, dot)
 		RETURN_THROWS();
 	}
 
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double *other_values = vector_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(values);
+		RETURN_THROWS();
+	}
 	double sum = 0.0;
 	for (zend_long i = 0; i < count; i++) {
-		double a, b;
-		vector_read_element(self, i, &a);
-		vector_read_element(other_obj, i, &b);
-		sum += a * b;
+		sum += values[i] * other_values[i];
 	}
+	efree(values);
+	efree(other_values);
 
 	if (!zend_finite(sum)) {
 		math_throw_overflow("compute dot product of the given Vectors");
@@ -172,18 +182,29 @@ PHP_METHOD(OceanMoon_Math_Vector, cross)
 	}
 
 	/* Calculate the cross product directly, which is exact for ordinary values. */
-	double a[3], b[3], cross[3];
-	for (zend_long i = 0; i < 3; i++) {
-		vector_read_element(self, i, &a[i]);
-		vector_read_element(other_obj, i, &b[i]);
+	double *self_values = vector_read_all(self);
+	if (self_values == NULL) {
+		RETURN_THROWS();
 	}
+	double *other_values = vector_read_all(other_obj);
+	if (other_values == NULL) {
+		efree(self_values);
+		RETURN_THROWS();
+	}
+	double a[3], b[3], cross[3];
+	for (int i = 0; i < 3; i++) {
+		a[i] = self_values[i];
+		b[i] = other_values[i];
+	}
+	efree(self_values);
+	efree(other_values);
 	vector_calc_cross(a, b, cross);
 
 	/* If an intermediate product overflowed, scale each vector so its largest element is in the range [1, 2), and
 	 * try again. Scaling by a power of 2 is exact. Neither vector can be zero here, or every product would be 0. */
 	if (!vector_all_finite(cross)) {
-		double scale_a = vector_scale(self);
-		double scale_b = vector_scale(other_obj);
+		double scale_a = vector_scale(a, 3);
+		double scale_b = vector_scale(b, 3);
 		double scaled_a[3], scaled_b[3];
 		for (int i = 0; i < 3; i++) {
 			scaled_a[i] = a[i] / scale_a;
@@ -263,7 +284,12 @@ PHP_METHOD(OceanMoon_Math_Vector, normalize)
 
 	/* Check for a zero (or empty) vector. */
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
-	double scale = vector_scale(self);
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	double scale = vector_scale(values, vector_read_count(self));
+	efree(values);
 	if (scale == 0.0) {
 		zend_throw_exception(math_ce_ArithmeticException, "Cannot normalize zero Vector.", 0);
 		RETURN_THROWS();
@@ -274,7 +300,11 @@ PHP_METHOD(OceanMoon_Math_Vector, normalize)
 		RETURN_THROWS();
 	}
 
-	zend_result result = vector_calc_div(Z_OBJ(scaled), vector_compute_magnitude(Z_OBJ(scaled)), return_value);
+	double magnitude;
+	zend_result result = vector_compute_magnitude(Z_OBJ(scaled), &magnitude);
+	if (result == SUCCESS) {
+		result = vector_calc_div(Z_OBJ(scaled), magnitude, return_value);
+	}
 	zval_ptr_dtor(&scaled);
 	if (result == FAILURE) {
 		RETURN_THROWS();

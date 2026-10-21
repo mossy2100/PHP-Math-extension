@@ -28,22 +28,22 @@ PHP_METHOD(OceanMoon_Math_Matrix, t)
 	zend_long row_count = matrix_read_row_count(self);
 	zend_long column_count = matrix_read_column_count(self);
 
-	if (matrix_create(return_value, column_count, row_count) == FAILURE) {
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
 		RETURN_THROWS();
 	}
-	zend_object *result = Z_OBJ_P(return_value);
-
+	double *transposed = safe_emalloc(
+		(size_t) (row_count > 0 ? row_count : 1), (size_t) (column_count > 0 ? column_count : 1) * sizeof(double), 0
+	);
 	for (zend_long i = 0; i < row_count; i++) {
 		for (zend_long j = 0; j < column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_element(result, j, i, value) == FAILURE) {
-				zval_ptr_dtor(return_value);
-				ZVAL_UNDEF(return_value);
-				RETURN_THROWS();
-			}
+			transposed[j * row_count + i] = values[i * column_count + j];
 		}
 	}
+
+	matrix_create_from(return_value, column_count, row_count, transposed);
+	efree(values);
+	efree(transposed);
 }
 /* }}} */
 
@@ -97,12 +97,15 @@ PHP_METHOD(OceanMoon_Math_Matrix, trace)
 		RETURN_THROWS();
 	}
 
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 	double sum = 0.0;
 	for (zend_long i = 0; i < row_count; i++) {
-		double value;
-		matrix_read_element(self, i, i, &value);
-		sum += value;
+		sum += values[i * row_count + i];
 	}
+	efree(values);
 
 	if (!zend_finite(sum)) {
 		math_throw_overflow("compute trace of the given Matrix");

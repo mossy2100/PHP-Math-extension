@@ -39,16 +39,22 @@ PHP_METHOD(OceanMoon_Math_Matrix, resize)
 	}
 	zend_object *result = Z_OBJ_P(return_value);
 
+	double *values = matrix_read_all(self);
+	if (values == NULL) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		RETURN_THROWS();
+	}
 	for (zend_long i = 0; i < copy_row_count; i++) {
 		for (zend_long j = 0; j < copy_column_count; j++) {
-			double value;
-			matrix_read_element(self, i, j, &value);
-			if (matrix_write_element(result, i, j, value) == FAILURE) {
+			if (matrix_write_element(result, i, j, values[i * self_column_count + j]) == FAILURE) {
+				efree(values);
 				zval_ptr_dtor(return_value);
 				ZVAL_UNDEF(return_value);
 				RETURN_THROWS();
 			}
 		}
 	}
+	efree(values);
 }
 /* }}} */

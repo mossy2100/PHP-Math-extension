@@ -33,7 +33,9 @@
  */
 static zend_result vector_read_magnitude(zend_object *object, double *out)
 {
-	*out = vector_compute_magnitude(object);
+	if (vector_compute_magnitude(object, out) == FAILURE) {
+		return FAILURE;
+	}
 	if (!zend_finite(*out)) {
 		math_throw_overflow("compute magnitude of the given Vector");
 		return FAILURE;

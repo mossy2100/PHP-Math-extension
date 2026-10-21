@@ -128,13 +128,16 @@ PHP_METHOD(OceanMoon_Math_Matrix, setColumn)
 		RETURN_THROWS();
 	}
 
+	double *values = vector_read_all(vec_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 	for (zend_long row = 0; row < row_count; row++) {
-		double value;
-		vector_read_element(vec_obj, row, &value);
-		if (matrix_write_element(self, row, col, value) == FAILURE) {
-			RETURN_THROWS();
+		if (matrix_write_element(self, row, col, values[row]) == FAILURE) {
+			break;
 		}
 	}
+	efree(values);
 }
 /* }}} */
 
@@ -169,14 +172,17 @@ PHP_METHOD(OceanMoon_Math_Matrix, paste)
 		RETURN_THROWS();
 	}
 
-	for (zend_long i = 0; i < other_row_count; i++) {
+	double *values = matrix_read_all(other_obj);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
+	for (zend_long i = 0; i < other_row_count && !EG(exception); i++) {
 		for (zend_long j = 0; j < other_column_count; j++) {
-			double value;
-			matrix_read_element(other_obj, i, j, &value);
-			if (matrix_write_element(self, row + i, col + j, value) == FAILURE) {
-				RETURN_THROWS();
+			if (matrix_write_element(self, row + i, col + j, values[i * other_column_count + j]) == FAILURE) {
+				break;
 			}
 		}
 	}
+	efree(values);
 }
 /* }}} */

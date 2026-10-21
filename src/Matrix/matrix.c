@@ -339,25 +339,22 @@ static zend_object *matrix_clone_obj(zend_object *object)
 {
 	zend_object *new_obj = math_types_clone_obj(object);
 
-	zend_long row_count = matrix_read_row_count(new_obj);
-
 	zval *data = math_types_read_property(new_obj, matrix_offset_data);
 	SEPARATE_ARRAY(data);
-	HashTable *ht = Z_ARRVAL_P(data);
 
-	for (zend_long i = 0; i < row_count; i++) {
-		zval *row = zend_hash_index_find(ht, (zend_ulong) i);
+	/* Iterate the array itself rather than up to $rowCount, so counts changed through Reflection, or by
+	 * unserialize(), can't make it loop past the rows that exist. */
+	zval *row;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), row) {
 		/* Only possible if $data was changed through Reflection, or by unserialize(). The clone keeps it, and
 		 * throws on first use, as the original does. */
-		if (UNEXPECTED(row == NULL || Z_TYPE_P(row) != IS_OBJECT)) {
+		if (UNEXPECTED(Z_TYPE_P(row) != IS_OBJECT)) {
 			continue;
 		}
 		zend_object *row_obj = Z_OBJ_P(row);
-		zend_object *cloned_row = row_obj->handlers->clone_obj(row_obj);
-		zval cloned_zval;
-		ZVAL_OBJ(&cloned_zval, cloned_row);
-		zend_hash_index_update(ht, (zend_ulong) i, &cloned_zval);
-	}
+		ZVAL_OBJ(row, row_obj->handlers->clone_obj(row_obj));
+		OBJ_RELEASE(row_obj);
+	} ZEND_HASH_FOREACH_END();
 
 	return new_obj;
 }

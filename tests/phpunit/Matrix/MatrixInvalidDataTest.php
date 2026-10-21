@@ -91,5 +91,61 @@ class MatrixInvalidDataTest extends TestCase
         }
     }
 
+    /**
+     * Test the methods that read every element at once throw Error for a tampered Matrix, including one whose counts
+     * are too large to allocate or loop over.
+     */
+    #[DataProvider('tamperProvider')]
+    #[DataProvider('hugeCountProvider')]
+    public function testBulkReadsOfTamperedThrow(string $property, mixed $value): void
+    {
+        $m = Matrix::fromArray([
+            [1.0, 2.0],
+            [3.0, 4.0],
+        ]);
+        new ReflectionProperty($m, $property)->setValue($m, $value);
+        $reads = [
+            'neg'         => static fn () => $m->neg(),
+            'hadamardInv' => static fn () => $m->hadamardInv(),
+            'add'         => static fn () => $m->add($m),
+            'mul'         => static fn () => $m->mul(2.0),
+            '/'           => static fn () => 2.0 / $m,
+            't'           => static fn () => $m->t(),
+            'norm'        => static fn () => $m->norm(),
+            'p1Norm'      => static fn () => $m->p1Norm(),
+            'pInfNorm'    => static fn () => $m->pInfNorm(),
+            'equal'       => static fn () => $m->equal($m),
+            'approxEqual' => static fn () => $m->approxEqual($m),
+            'toArray'     => static fn () => $m->toArray(),
+            'toString'    => static fn () => (string) $m,
+            'getColumn'   => static fn () => $m->getColumn(0),
+            'copy'        => static fn () => $m->copy(0, 0, 1, 1),
+            'resize'      => static fn () => $m->resize(1, 1),
+            'clone'       => static fn () => (clone $m)->toArray(),
+        ];
+
+        foreach ($reads as $name => $read) {
+            try {
+                $read();
+                $this->fail("Expected Error from $name.");
+            } catch (Error $e) {
+                $this->assertSame('Matrix data is invalid.', $e->getMessage(), $name);
+            }
+        }
+    }
+
+    /**
+     * Counts too large to allocate a buffer for or loop over.
+     *
+     * @return array<string, array{string, int}>
+     */
+    public static function hugeCountProvider(): array
+    {
+        return [
+            'huge row count'    => ['rowCount', PHP_INT_MAX],
+            'huge column count' => ['columnCount', PHP_INT_MAX],
+        ];
+    }
+
     #endregion
 }

@@ -22,23 +22,12 @@
  */
 zend_result vector_to_row_matrix(zend_object *obj, zval *return_value)
 {
-	zend_long count = vector_read_count(obj);
-
-	if (matrix_create(return_value, 1, count) == FAILURE) {
+	double *values = vector_read_all(obj);
+	if (values == NULL) {
 		return FAILURE;
 	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double value;
-		vector_read_element(obj, i, &value);
-		if (matrix_write_element(result, 0, i, value) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
+	matrix_create_from(return_value, 1, vector_read_count(obj), values);
+	efree(values);
 	return SUCCESS;
 }
 /* }}} */
@@ -51,23 +40,12 @@ zend_result vector_to_row_matrix(zend_object *obj, zval *return_value)
  */
 zend_result vector_to_column_matrix(zend_object *obj, zval *return_value)
 {
-	zend_long count = vector_read_count(obj);
-
-	if (matrix_create(return_value, count, 1) == FAILURE) {
+	double *values = vector_read_all(obj);
+	if (values == NULL) {
 		return FAILURE;
 	}
-	zend_object *result = Z_OBJ_P(return_value);
-
-	for (zend_long i = 0; i < count; i++) {
-		double value;
-		vector_read_element(obj, i, &value);
-		if (matrix_write_element(result, i, 0, value) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			ZVAL_UNDEF(return_value);
-			return FAILURE;
-		}
-	}
-
+	matrix_create_from(return_value, vector_read_count(obj), 1, values);
+	efree(values);
 	return SUCCESS;
 }
 /* }}} */
@@ -126,13 +104,16 @@ PHP_METHOD(OceanMoon_Math_Vector, __toString)
 
 	zend_object *self = Z_OBJ_P(ZEND_THIS);
 	zend_long count = vector_read_count(self);
+	double *values = vector_read_all(self);
+	if (values == NULL) {
+		RETURN_THROWS();
+	}
 
 	smart_str buf = {0};
 	smart_str_appendl(&buf, "\xE2\x9F\xA8", 3); /* U+27E8 MATHEMATICAL LEFT ANGLE BRACKET */
 
 	for (zend_long i = 0; i < count; i++) {
-		double element;
-		vector_read_element(self, i, &element);
+		double element = values[i];
 
 		if (i > 0) {
 			smart_str_appends(&buf, ", ");
@@ -145,6 +126,7 @@ PHP_METHOD(OceanMoon_Math_Vector, __toString)
 		zend_string_release(Z_STR(tmp));
 	}
 
+	efree(values);
 	smart_str_appendl(&buf, "\xE2\x9F\xA9", 3); /* U+27E9 MATHEMATICAL RIGHT ANGLE BRACKET */
 	smart_str_0(&buf);
 	RETURN_STR(buf.s);
