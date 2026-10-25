@@ -1,4 +1,4 @@
-# Mossy2100 PHP Math extension
+# Mossy2100 PHP Math Extension
 
 Provides classes for Complex numbers, Rational numbers, Vectors, and Matrices.
 
