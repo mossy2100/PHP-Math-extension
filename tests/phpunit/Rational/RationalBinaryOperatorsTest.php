@@ -529,9 +529,7 @@ class RationalBinaryOperatorsTest extends TestCase
     {
         $r = new Rational(3, 4);
 
-        foreach (
-            [0, 0.0, new Rational(0)] as $zero
-        ) {
+        foreach ([0, 0.0, new Rational(0)] as $zero) {
             try {
                 $result = $r % $zero;
                 $this->fail('Expected ArithmeticException.');
