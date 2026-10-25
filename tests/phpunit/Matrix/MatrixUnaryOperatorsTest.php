@@ -25,16 +25,10 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlus(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
         $m2 = +$m1;
 
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], $m2->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $m2->toArray());
     }
 
     /**
@@ -42,10 +36,7 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlusReturnsNewInstance(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
         $m2 = +$m1;
 
         $this->assertNotSame($m1, $m2);
@@ -61,10 +52,7 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryPlusClonesRows(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
         $m2 = +$m1;
 
         $this->assertNotSame($m1[0], $m2[0]);
@@ -82,16 +70,10 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinus(): void
     {
-        $m = Matrix::fromArray([
-            [1, -2],
-            [3, -4],
-        ]);
+        $m = Matrix::fromArray([[1, -2], [3, -4]]);
         $negated = -$m;
 
-        $this->assertSame([
-            [-1.0, 2.0],
-            [-3.0, 4.0],
-        ], $negated->toArray());
+        $this->assertSame([[-1.0, 2.0], [-3.0, 4.0]], $negated->toArray());
         $this->assertEquals($m->neg(), $negated);
     }
 
@@ -100,17 +82,11 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testUnaryMinusDoesNotMutate(): void
     {
-        $m = Matrix::fromArray([
-            [1, -2],
-            [3, -4],
-        ]);
+        $m = Matrix::fromArray([[1, -2], [3, -4]]);
 
         $result = -$m;
 
-        $this->assertSame([
-            [1.0, -2.0],
-            [3.0, -4.0],
-        ], $m->toArray());
+        $this->assertSame([[1.0, -2.0], [3.0, -4.0]], $m->toArray());
     }
 
     /**
@@ -118,16 +94,10 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testDoubleUnaryMinus(): void
     {
-        $m = Matrix::fromArray([
-            [1, -2],
-            [3, -4],
-        ]);
+        $m = Matrix::fromArray([[1, -2], [3, -4]]);
         $result = -(-$m);
 
-        $this->assertSame([
-            [1.0, -2.0],
-            [3.0, -4.0],
-        ], $result->toArray());
+        $this->assertSame([[1.0, -2.0], [3.0, -4.0]], $result->toArray());
     }
 
     #endregion
@@ -139,10 +109,7 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testBitwiseNotThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot perform bitwise not on Mossy2100\Math\Matrix');
@@ -159,10 +126,7 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testIncrementThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot increment Mossy2100\Math\Matrix');
@@ -175,10 +139,7 @@ class MatrixUnaryOperatorsTest extends TestCase
      */
     public function testDecrementThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Cannot decrement Mossy2100\Math\Matrix');

@@ -34,20 +34,11 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testAddMatrixPlusMatrix(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[5, 6], [7, 8]]);
         $result = $m1 + $m2;
 
-        $this->assertSame([
-            [6.0, 8.0],
-            [10.0, 12.0],
-        ], $result->toArray());
+        $this->assertSame([[6.0, 8.0], [10.0, 12.0]], $result->toArray());
         $this->assertEquals($m1->add($m2), $result);
     }
 
@@ -56,10 +47,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testAddMatrixPlusScalarThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->expectException(TypeError::class);
         $result = $m + 1; // @phpstan-ignore binaryOp.invalid
@@ -70,25 +58,13 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testAddDoesNotMutate(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[5, 6], [7, 8]]);
 
         $result = $m1 + $m2;
 
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], $m1->toArray());
-        $this->assertSame([
-            [5.0, 6.0],
-            [7.0, 8.0],
-        ], $m2->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $m1->toArray());
+        $this->assertSame([[5.0, 6.0], [7.0, 8.0]], $m2->toArray());
     }
 
     #endregion
@@ -100,20 +76,11 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testSubMatrixMinusMatrix(): void
     {
-        $m1 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
-        $m2 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m1 = Matrix::fromArray([[5, 6], [7, 8]]);
+        $m2 = Matrix::fromArray([[1, 2], [3, 4]]);
         $result = $m1 - $m2;
 
-        $this->assertSame([
-            [4.0, 4.0],
-            [4.0, 4.0],
-        ], $result->toArray());
+        $this->assertSame([[4.0, 4.0], [4.0, 4.0]], $result->toArray());
         $this->assertEquals($m1->sub($m2), $result);
     }
 
@@ -122,10 +89,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testSubMatrixMinusScalarThrows(): void
     {
-        $m = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
+        $m = Matrix::fromArray([[5, 6], [7, 8]]);
 
         $this->expectException(TypeError::class);
         $result = $m - 1; // @phpstan-ignore binaryOp.invalid
@@ -136,25 +100,13 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testSubDoesNotMutate(): void
     {
-        $m1 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
-        $m2 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m1 = Matrix::fromArray([[5, 6], [7, 8]]);
+        $m2 = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $result = $m1 - $m2;
 
-        $this->assertSame([
-            [5.0, 6.0],
-            [7.0, 8.0],
-        ], $m1->toArray());
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], $m2->toArray());
+        $this->assertSame([[5.0, 6.0], [7.0, 8.0]], $m1->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $m2->toArray());
     }
 
     #endregion
@@ -166,15 +118,9 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulMatrixTimesScalar(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
-        $this->assertSame([
-            [2.0, 4.0],
-            [6.0, 8.0],
-        ], ($m * 2)->toArray());
+        $this->assertSame([[2.0, 4.0], [6.0, 8.0]], ($m * 2)->toArray());
         $this->assertEquals($m->mul(2.0), $m * 2);
     }
 
@@ -183,10 +129,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulScalarTimesMatrix(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->assertEquals($m * 2, 2 * $m);
     }
@@ -196,20 +139,11 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulMatrixTimesMatrix(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[5, 6], [7, 8]]);
         $result = $m1 * $m2;
 
-        $this->assertSame([
-            [19.0, 22.0],
-            [43.0, 50.0],
-        ], $result->toArray());
+        $this->assertSame([[19.0, 22.0], [43.0, 50.0]], $result->toArray());
         $this->assertEquals($m1->mul($m2), $result);
     }
 
@@ -218,13 +152,8 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulMatrixTimesMatrixIncompatibleDimensionsThrows(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [1, 2, 3],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[1, 2, 3]]);
 
         $this->expectException(LengthException::class);
         $result = $m1 * $m2;
@@ -235,10 +164,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulMatrixTimesVectorIncompatibleCountThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $v = Vector::fromArray([1, 2, 3]);
 
         $this->expectException(LengthException::class);
@@ -252,10 +178,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulMatrixTimesVector(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $v = Vector::fromArray([1, 2]);
         $result = $m * $v;
 
@@ -268,25 +191,13 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulDoesNotMutate(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [5, 6],
-            [7, 8],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[5, 6], [7, 8]]);
 
         $result = $m1 * $m2;
 
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], $m1->toArray());
-        $this->assertSame([
-            [5.0, 6.0],
-            [7.0, 8.0],
-        ], $m2->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $m1->toArray());
+        $this->assertSame([[5.0, 6.0], [7.0, 8.0]], $m2->toArray());
     }
 
     /**
@@ -294,9 +205,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulOverflowThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1e200],
-        ]);
+        $m = Matrix::fromArray([[1e200]]);
 
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage('Cannot multiply the given Matrices. The result would overflow.');
@@ -308,9 +217,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testMulByNonFiniteThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1],
-        ]);
+        $m = Matrix::fromArray([[1]]);
 
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Invalid scalar: NAN. Must be finite.');
@@ -326,15 +233,9 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivMatrixOverScalar(): void
     {
-        $m = Matrix::fromArray([
-            [2, 4],
-            [6, 8],
-        ]);
+        $m = Matrix::fromArray([[2, 4], [6, 8]]);
 
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], ($m / 2)->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], ($m / 2)->toArray());
         $this->assertEquals($m->div(2.0), $m / 2);
     }
 
@@ -345,16 +246,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivScalarOverMatrix(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [4, 8],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [4, 8]]);
         $result = 8 / $m;
 
-        $this->assertSame([
-            [8.0, 4.0],
-            [2.0, 1.0],
-        ], $result->toArray());
+        $this->assertSame([[8.0, 4.0], [2.0, 1.0]], $result->toArray());
         $this->assertEquals(8 * $m->hadamardInv(), $result);
     }
 
@@ -364,10 +259,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivScalarOverMatrixZeroElementThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 0],
-            [4, 8],
-        ]);
+        $m = Matrix::fromArray([[1, 0], [4, 8]]);
 
         $this->expectException(ArithmeticException::class);
         $result = 8 / $m;
@@ -396,14 +288,8 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivMatrixOverMatrixThrows(): void
     {
-        $m1 = Matrix::fromArray([
-            [2, 4],
-            [6, 8],
-        ]);
-        $m2 = Matrix::fromArray([
-            [1, 0],
-            [0, 1],
-        ]);
+        $m1 = Matrix::fromArray([[2, 4], [6, 8]]);
+        $m2 = Matrix::fromArray([[1, 0], [0, 1]]);
 
         $this->expectException(TypeError::class);
         $result = $m1 / $m2; // @phpstan-ignore binaryOp.invalid
@@ -414,10 +300,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivByZeroThrows(): void
     {
-        $m = Matrix::fromArray([
-            [2, 4],
-            [6, 8],
-        ]);
+        $m = Matrix::fromArray([[2, 4], [6, 8]]);
 
         $this->expectException(ArithmeticException::class);
         $m / 0; // @phpstan-ignore binaryOp.invalid
@@ -428,10 +311,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivByNonFiniteThrows(): void
     {
-        $m = Matrix::fromArray([
-            [2, 4],
-            [6, 8],
-        ]);
+        $m = Matrix::fromArray([[2, 4], [6, 8]]);
 
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Invalid scalar: -INF. Must be finite.');
@@ -443,17 +323,11 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testDivDoesNotMutate(): void
     {
-        $m = Matrix::fromArray([
-            [2, 4],
-            [6, 8],
-        ]);
+        $m = Matrix::fromArray([[2, 4], [6, 8]]);
 
         $result = $m / 2;
 
-        $this->assertSame([
-            [2.0, 4.0],
-            [6.0, 8.0],
-        ], $m->toArray());
+        $this->assertSame([[2.0, 4.0], [6.0, 8.0]], $m->toArray());
     }
 
     /**
@@ -461,9 +335,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testScalarDivOverflowThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1e-300],
-        ]);
+        $m = Matrix::fromArray([[1e-300]]);
 
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage('Cannot divide 1.0E+300 by the given Matrix. The result would overflow.');
@@ -509,16 +381,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowMatrixToInt(): void
     {
-        $m = Matrix::fromArray([
-            [1, 1],
-            [0, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 1], [0, 1]]);
         $result = $m ** 2;
 
-        $this->assertSame([
-            [1.0, 2.0],
-            [0.0, 1.0],
-        ], $result->toArray());
+        $this->assertSame([[1.0, 2.0], [0.0, 1.0]], $result->toArray());
         $this->assertEquals($m->pow(2), $result);
     }
 
@@ -527,10 +393,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowMatrixToNegativeInt(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $result = $m ** -1;
 
         $this->assertEquals($m->inv(), $result);
@@ -542,10 +405,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowIntToMatrixThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->expectException(TypeError::class);
         $result = 2 ** $m; // @phpstan-ignore binaryOp.invalid
@@ -556,14 +416,8 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowMatrixToMatrixThrows(): void
     {
-        $m1 = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m2 = Matrix::fromArray([
-            [1, 0],
-            [0, 1],
-        ]);
+        $m1 = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m2 = Matrix::fromArray([[1, 0], [0, 1]]);
 
         $this->expectException(TypeError::class);
         $result = $m1 ** $m2;
@@ -574,17 +428,11 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowDoesNotMutate(): void
     {
-        $m = Matrix::fromArray([
-            [1, 1],
-            [0, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 1], [0, 1]]);
 
         $result = $m ** 2;
 
-        $this->assertSame([
-            [1.0, 1.0],
-            [0.0, 1.0],
-        ], $m->toArray());
+        $this->assertSame([[1.0, 1.0], [0.0, 1.0]], $m->toArray());
     }
 
     /**
@@ -592,9 +440,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testPowOverflowThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1e200],
-        ]);
+        $m = Matrix::fromArray([[1e200]]);
 
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage('Cannot raise the given Matrix to the given power. The result would overflow.');
@@ -610,10 +456,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testInvertingEquivalence(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $inv = $m->inv();
         $viaPower = $m ** -1;
@@ -627,10 +470,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testInvertingSingularByPowThrows(): void
     {
-        $singular = Matrix::fromArray([
-            [1, 2],
-            [2, 4],
-        ]);
+        $singular = Matrix::fromArray([[1, 2], [2, 4]]);
 
         $this->expectException(ArithmeticException::class);
         $result = $singular ** -1;
@@ -642,10 +482,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testInvertingNonSquareByPowThrows(): void
     {
-        $nonSquare = Matrix::fromArray([
-            [1, 2, 3],
-            [4, 5, 6],
-        ]);
+        $nonSquare = Matrix::fromArray([[1, 2, 3], [4, 5, 6]]);
 
         $this->expectException(DomainException::class);
         $result = $nonSquare ** -1;
@@ -660,24 +497,12 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundAdd(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $original = $m;
-        $m += Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m += Matrix::fromArray([[1, 2], [3, 4]]);
 
-        $this->assertSame([
-            [2.0, 4.0],
-            [6.0, 8.0],
-        ], $m->toArray());
-        $this->assertSame([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ], $original->toArray());
+        $this->assertSame([[2.0, 4.0], [6.0, 8.0]], $m->toArray());
+        $this->assertSame([[1.0, 2.0], [3.0, 4.0]], $original->toArray());
     }
 
     /**
@@ -685,19 +510,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundSubtract(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m -= Matrix::fromArray([
-            [1, 1],
-            [1, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m -= Matrix::fromArray([[1, 1], [1, 1]]);
 
-        $this->assertSame([
-            [0.0, 1.0],
-            [2.0, 3.0],
-        ], $m->toArray());
+        $this->assertSame([[0.0, 1.0], [2.0, 3.0]], $m->toArray());
     }
 
     /**
@@ -705,16 +521,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundMultiplyScalar(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $m *= 2;
 
-        $this->assertSame([
-            [2.0, 4.0],
-            [6.0, 8.0],
-        ], $m->toArray());
+        $this->assertSame([[2.0, 4.0], [6.0, 8.0]], $m->toArray());
     }
 
     /**
@@ -722,19 +532,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundMultiplyMatrix(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
-        $m *= Matrix::fromArray([
-            [0, 1],
-            [1, 0],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
+        $m *= Matrix::fromArray([[0, 1], [1, 0]]);
 
-        $this->assertSame([
-            [2.0, 1.0],
-            [4.0, 3.0],
-        ], $m->toArray());
+        $this->assertSame([[2.0, 1.0], [4.0, 3.0]], $m->toArray());
     }
 
     /**
@@ -742,16 +543,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundDivide(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $m /= 2;
 
-        $this->assertSame([
-            [0.5, 1.0],
-            [1.5, 2.0],
-        ], $m->toArray());
+        $this->assertSame([[0.5, 1.0], [1.5, 2.0]], $m->toArray());
     }
 
     /**
@@ -759,16 +554,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundPower(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $m **= 2;
 
-        $this->assertSame([
-            [7.0, 10.0],
-            [15.0, 22.0],
-        ], $m->toArray());
+        $this->assertSame([[7.0, 10.0], [15.0, 22.0]], $m->toArray());
     }
 
     /**
@@ -777,16 +566,10 @@ class MatrixBinaryOperatorsTest extends TestCase
     public function testCompoundScalarTimesMatrix(): void
     {
         $x = 2;
-        $x *= Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $x *= Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->assertInstanceOf(Matrix::class, $x);
-        $this->assertSame([
-            [2.0, 4.0],
-            [6.0, 8.0],
-        ], $x->toArray());
+        $this->assertSame([[2.0, 4.0], [6.0, 8.0]], $x->toArray());
     }
 
     /**
@@ -794,16 +577,10 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundMultiplySelf(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $m *= $m;
 
-        $this->assertSame([
-            [7.0, 10.0],
-            [15.0, 22.0],
-        ], $m->toArray());
+        $this->assertSame([[7.0, 10.0], [15.0, 22.0]], $m->toArray());
     }
 
     /**
@@ -811,10 +588,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCompoundUnsupportedLeavesVariableUnchanged(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $original = $m;
 
         try {
@@ -834,15 +608,9 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnClone(): void
     {
-        $m = clone Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = clone Matrix::fromArray([[1, 2], [3, 4]]);
 
-        $this->assertSame([
-            [7.0, 10.0],
-            [15.0, 22.0],
-        ], ($m ** 2)->toArray());
+        $this->assertSame([[7.0, 10.0], [15.0, 22.0]], ($m ** 2)->toArray());
     }
 
     /**
@@ -850,10 +618,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnRow(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->assertSame([3.0, 6.0], ($m->getRow(0) * 3)->toArray());
     }
@@ -863,10 +628,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testCloneOfCloneIsDeep(): void
     {
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
         $copy = clone $m;
         $copyOfCopy = clone $copy;
         $copyOfCopy[0][0] = 99;

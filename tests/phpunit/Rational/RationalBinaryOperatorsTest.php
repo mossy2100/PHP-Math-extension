@@ -530,11 +530,7 @@ class RationalBinaryOperatorsTest extends TestCase
         $r = new Rational(3, 4);
 
         foreach (
-            [
-                0,
-                0.0,
-                new Rational(0),
-            ] as $zero
+            [0, 0.0, new Rational(0)] as $zero
         ) {
             try {
                 $result = $r % $zero;
@@ -613,8 +609,8 @@ class RationalBinaryOperatorsTest extends TestCase
         $r = new Rational(7, 2);
         foreach (['2', true, false, null] as $operand) {
             $mods = [
-                fn () => $r % $operand, // @phpstan-ignore binaryOp.invalid
-                fn () => $operand % $r, // @phpstan-ignore binaryOp.invalid
+                static fn () => $r % $operand, // @phpstan-ignore binaryOp.invalid
+                static fn () => $operand % $r, // @phpstan-ignore binaryOp.invalid
             ];
             foreach ($mods as $mod) {
                 try {
@@ -715,14 +711,14 @@ class RationalBinaryOperatorsTest extends TestCase
     public static function floatToRationalProvider(): array
     {
         return [
-            'square root'          => [2.0, 1, 2, M_SQRT2],
-            'root then power'      => [27.0, 2, 3, 9.0],
-            'zero exponent'        => [2.5, 0, 1, 1.0],
-            'zero base'            => [0.0, 1, 2, 0.0],
-            'zero to zero'         => [0.0, 0, 1, 1.0],
+            'square root' => [2.0, 1, 2, M_SQRT2],
+            'root then power' => [27.0, 2, 3, 9.0],
+            'zero exponent' => [2.5, 0, 1, 1.0],
+            'zero base' => [0.0, 1, 2, 0.0],
+            'zero to zero' => [0.0, 0, 1, 1.0],
             'odd root of negative' => [-8.0, 1, 3, -2.0],
             'odd root, even power' => [-8.0, 2, 3, 4.0],
-            'negative exponent'    => [4.0, -1, 2, 0.5],
+            'negative exponent' => [4.0, -1, 2, 0.5],
         ];
     }
 
@@ -764,21 +760,9 @@ class RationalBinaryOperatorsTest extends TestCase
     public static function powRationalToNonFiniteProvider(): array
     {
         return [
-            'NAN'  => [
-                new Rational(1, 2),
-                NAN,
-                'Invalid operand: NAN. Must be finite.',
-            ],
-            'INF'  => [
-                new Rational(2),
-                INF,
-                'Invalid operand: INF. Must be finite.',
-            ],
-            '-INF' => [
-                new Rational(0),
-                -INF,
-                'Invalid operand: -INF. Must be finite.',
-            ],
+            'NAN' => [new Rational(1, 2), NAN, 'Invalid operand: NAN. Must be finite.'],
+            'INF' => [new Rational(2), INF, 'Invalid operand: INF. Must be finite.'],
+            '-INF' => [new Rational(0), -INF, 'Invalid operand: -INF. Must be finite.'],
         ];
     }
 
@@ -801,21 +785,9 @@ class RationalBinaryOperatorsTest extends TestCase
     public static function powNonFiniteToRationalProvider(): array
     {
         return [
-            'NAN'  => [
-                NAN,
-                new Rational(0),
-                'Invalid operand: NAN. Must be finite.',
-            ],
-            'INF'  => [
-                INF,
-                new Rational(1, 2),
-                'Invalid operand: INF. Must be finite.',
-            ],
-            '-INF' => [
-                -INF,
-                new Rational(1, 2),
-                'Invalid operand: -INF. Must be finite.',
-            ],
+            'NAN' => [NAN, new Rational(0), 'Invalid operand: NAN. Must be finite.'],
+            'INF' => [INF, new Rational(1, 2), 'Invalid operand: INF. Must be finite.'],
+            '-INF' => [-INF, new Rational(1, 2), 'Invalid operand: -INF. Must be finite.'],
         ];
     }
 
@@ -896,28 +868,22 @@ class RationalBinaryOperatorsTest extends TestCase
     public static function intToRationalProvider(): array
     {
         return [
-            'square root'                 => [4, 1, 2, 2, 1],
-            'cube root'                   => [27, 1, 3, 3, 1],
-            'root then power'             => [8, 2, 3, 4, 1],
-            'zero exponent'               => [5, 0, 1, 1, 1],
-            'zero base'                   => [0, 1, 2, 0, 1],
-            'base one'                    => [1, 7, 3, 1, 1],
-            'odd root of negative'        => [-8, 1, 3, -2, 1],
-            'odd root, even power'        => [-8, 2, 3, 4, 1],
-            'integer exponent'            => [3, 4, 1, 81, 1],
-            'negative integer exponent'   => [2, -1, 1, 1, 2],
-            'negative square root'        => [4, -1, 2, 1, 2],
-            'negative root then power'    => [8, -2, 3, 1, 4],
+            'square root' => [4, 1, 2, 2, 1],
+            'cube root' => [27, 1, 3, 3, 1],
+            'root then power' => [8, 2, 3, 4, 1],
+            'zero exponent' => [5, 0, 1, 1, 1],
+            'zero base' => [0, 1, 2, 0, 1],
+            'base one' => [1, 7, 3, 1, 1],
+            'odd root of negative' => [-8, 1, 3, -2, 1],
+            'odd root, even power' => [-8, 2, 3, 4, 1],
+            'integer exponent' => [3, 4, 1, 81, 1],
+            'negative integer exponent' => [2, -1, 1, 1, 2],
+            'negative square root' => [4, -1, 2, 1, 2],
+            'negative root then power' => [8, -2, 3, 1, 4],
             'negative odd root, negative' => [-27, -1, 3, -1, 3],
-            'largest square root'         => [
-                3037000499 * 3037000499,
-                1,
-                2,
-                3037000499,
-                1,
-            ],
-            'PHP_INT_MIN cube root'       => [PHP_INT_MIN, 1, 3, -2097152, 1],
-            'PHP_INT_MIN 63rd root'       => [PHP_INT_MIN, 1, 63, -2, 1],
+            'largest square root' => [3037000499 * 3037000499, 1, 2, 3037000499, 1],
+            'PHP_INT_MIN cube root' => [PHP_INT_MIN, 1, 3, -2097152, 1],
+            'PHP_INT_MIN 63rd root' => [PHP_INT_MIN, 1, 63, -2, 1],
         ];
     }
 
@@ -942,11 +908,11 @@ class RationalBinaryOperatorsTest extends TestCase
     public static function intToRationalIrrationalProvider(): array
     {
         return [
-            'square root of 2'        => [2, 1, 2],
-            'cube root of -2'         => [-2, 1, 3],
-            'root degree 63 or more'  => [2, 1, 64],
+            'square root of 2' => [2, 1, 2],
+            'cube root of -2' => [-2, 1, 3],
+            'root degree 63 or more' => [2, 1, 64],
             'PHP_INT_MAX square root' => [PHP_INT_MAX, 1, 2],
-            'PHP_INT_MIN fifth root'  => [PHP_INT_MIN, 1, 5],
+            'PHP_INT_MIN fifth root' => [PHP_INT_MIN, 1, 5],
         ];
     }
 

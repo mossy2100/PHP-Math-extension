@@ -28,13 +28,13 @@ class RationalCastTest extends TestCase
     public static function floatCastProvider(): array
     {
         return [
-            'zero'          => [0, 1],
-            'integer'       => [5, 1],
-            'fraction'      => [3, 4],
-            'negative'      => [-3, 4],
-            'repeating'     => [1, 3],
+            'zero' => [0, 1],
+            'integer' => [5, 1],
+            'fraction' => [3, 4],
+            'negative' => [-3, 4],
+            'repeating' => [1, 3],
             'large integer' => [PHP_INT_MAX, 1],
-            'tiny'          => [1, PHP_INT_MAX],
+            'tiny' => [1, PHP_INT_MAX],
         ];
     }
 
@@ -73,17 +73,17 @@ class RationalCastTest extends TestCase
     public static function intCastProvider(): array
     {
         return [
-            'zero'             => [0, 1, 0],
-            'integer'          => [5, 1, 5],
-            'positive proper'  => [3, 4, 0],
-            'negative proper'  => [-3, 4, 0],
-            'positive'         => [7, 3, 2],
-            'negative'         => [-7, 3, -2],
-            'half'             => [5, 2, 2],
-            'negative half'    => [-5, 2, -2],
-            'largest integer'  => [PHP_INT_MAX, 1, PHP_INT_MAX],
+            'zero' => [0, 1, 0],
+            'integer' => [5, 1, 5],
+            'positive proper' => [3, 4, 0],
+            'negative proper' => [-3, 4, 0],
+            'positive' => [7, 3, 2],
+            'negative' => [-7, 3, -2],
+            'half' => [5, 2, 2],
+            'negative half' => [-5, 2, -2],
+            'largest integer' => [PHP_INT_MAX, 1, PHP_INT_MAX],
             'smallest integer' => [-PHP_INT_MAX, 1, -PHP_INT_MAX],
-            'large fraction'   => [PHP_INT_MAX, 2, 4611686018427387903],
+            'large fraction' => [PHP_INT_MAX, 2, 4611686018427387903],
         ];
     }
 

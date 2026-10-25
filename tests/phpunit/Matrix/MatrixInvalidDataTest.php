@@ -29,19 +29,10 @@ class MatrixInvalidDataTest extends TestCase
     public static function tamperProvider(): array
     {
         return [
-            'empty data'             => [
-                'data',
-                [],
-            ],
-            'non-Vector rows'        => [
-                'data',
-                [
-                    new stdClass(),
-                    'x',
-                ],
-            ],
+            'empty data' => ['data', []],
+            'non-Vector rows' => ['data', [new stdClass(), 'x']],
             'column count too large' => ['columnCount', 3],
-            'row count too large'    => ['rowCount', 3],
+            'row count too large' => ['rowCount', 3],
         ];
     }
 
@@ -51,10 +42,7 @@ class MatrixInvalidDataTest extends TestCase
     #[DataProvider('tamperProvider')]
     public function testReadTamperedThrows(string $property, mixed $value): void
     {
-        $m = Matrix::fromArray([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ]);
+        $m = Matrix::fromArray([[1.0, 2.0], [3.0, 4.0]]);
         new ReflectionProperty($m, $property)->setValue($m, $value);
 
         $this->expectException(Error::class);
@@ -67,17 +55,14 @@ class MatrixInvalidDataTest extends TestCase
      */
     public function testOtherAccessesOfTamperedThrow(): void
     {
-        $m = Matrix::fromArray([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ]);
+        $m = Matrix::fromArray([[1.0, 2.0], [3.0, 4.0]]);
         new ReflectionProperty($m, 'data')->setValue($m, []);
         $accesses = [
-            'offsetGet'   => static fn () => $m[1],
-            'getRow'      => static fn () => $m->getRow(1),
-            'set'         => static fn () => $m->set(1, 1, 5.0),
-            'det'         => static fn () => $m->det(),
-            'mul'         => static fn () => $m->mul($m),
+            'offsetGet' => static fn () => $m[1],
+            'getRow' => static fn () => $m->getRow(1),
+            'set' => static fn () => $m->set(1, 1, 5.0),
+            'det' => static fn () => $m->det(),
+            'mul' => static fn () => $m->mul($m),
             'clone + get' => static fn () => (clone $m)->get(1, 1),
         ];
 
@@ -99,29 +84,26 @@ class MatrixInvalidDataTest extends TestCase
     #[DataProvider('hugeCountProvider')]
     public function testBulkReadsOfTamperedThrow(string $property, mixed $value): void
     {
-        $m = Matrix::fromArray([
-            [1.0, 2.0],
-            [3.0, 4.0],
-        ]);
+        $m = Matrix::fromArray([[1.0, 2.0], [3.0, 4.0]]);
         new ReflectionProperty($m, $property)->setValue($m, $value);
         $reads = [
-            'neg'         => static fn () => $m->neg(),
+            'neg' => static fn () => $m->neg(),
             'hadamardInv' => static fn () => $m->hadamardInv(),
-            'add'         => static fn () => $m->add($m),
-            'mul'         => static fn () => $m->mul(2.0),
-            '/'           => static fn () => 2.0 / $m,
-            't'           => static fn () => $m->t(),
-            'norm'        => static fn () => $m->norm(),
-            'p1Norm'      => static fn () => $m->p1Norm(),
-            'pInfNorm'    => static fn () => $m->pInfNorm(),
-            'equal'       => static fn () => $m->equal($m),
+            'add' => static fn () => $m->add($m),
+            'mul' => static fn () => $m->mul(2.0),
+            '/' => static fn () => 2.0 / $m,
+            't' => static fn () => $m->t(),
+            'norm' => static fn () => $m->norm(),
+            'p1Norm' => static fn () => $m->p1Norm(),
+            'pInfNorm' => static fn () => $m->pInfNorm(),
+            'equal' => static fn () => $m->equal($m),
             'approxEqual' => static fn () => $m->approxEqual($m),
-            'toArray'     => static fn () => $m->toArray(),
-            'toString'    => static fn () => (string) $m,
-            'getColumn'   => static fn () => $m->getColumn(0),
-            'copy'        => static fn () => $m->copy(0, 0, 1, 1),
-            'resize'      => static fn () => $m->resize(1, 1),
-            'clone'       => static fn () => (clone $m)->toArray(),
+            'toArray' => static fn () => $m->toArray(),
+            'toString' => static fn () => (string) $m,
+            'getColumn' => static fn () => $m->getColumn(0),
+            'copy' => static fn () => $m->copy(0, 0, 1, 1),
+            'resize' => static fn () => $m->resize(1, 1),
+            'clone' => static fn () => (clone $m)->toArray(),
         ];
 
         foreach ($reads as $name => $read) {
@@ -141,10 +123,7 @@ class MatrixInvalidDataTest extends TestCase
      */
     public static function hugeCountProvider(): array
     {
-        return [
-            'huge row count'    => ['rowCount', PHP_INT_MAX],
-            'huge column count' => ['columnCount', PHP_INT_MAX],
-        ];
+        return ['huge row count' => ['rowCount', PHP_INT_MAX], 'huge column count' => ['columnCount', PHP_INT_MAX]];
     }
 
     #endregion

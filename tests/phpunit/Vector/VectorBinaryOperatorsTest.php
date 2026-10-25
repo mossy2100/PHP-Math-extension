@@ -152,10 +152,7 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrix(): void
     {
-        $m = Matrix::fromArray([
-            [1, 0],
-            [0, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 0], [0, 1]]);
         $v = Vector::fromArray([1, 2]);
         $result = $v * $m;
 
@@ -168,11 +165,7 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testMulVectorTimesMatrixIncompatibleDimensionsThrows(): void
     {
-        $m = Matrix::fromArray([
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
         $v = Vector::fromArray([1, 2]);
 
         $this->expectException(LengthException::class);
@@ -346,10 +339,7 @@ class VectorBinaryOperatorsTest extends TestCase
     public function testDivVectorOverMatrixThrows(): void
     {
         $v = Vector::fromArray([1, 2]);
-        $m = Matrix::fromArray([
-            [1, 0],
-            [0, 1],
-        ]);
+        $m = Matrix::fromArray([[1, 0], [0, 1]]);
 
         $this->expectException(TypeError::class);
         $result = $v / $m; // @phpstan-ignore binaryOp.invalid
@@ -473,10 +463,7 @@ class VectorBinaryOperatorsTest extends TestCase
     public function testCompoundMultiplyMatrix(): void
     {
         $v = Vector::fromArray([1, 2]);
-        $v *= Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $v *= Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->assertSame([7.0, 10.0], $v->toArray());
     }
@@ -553,10 +540,7 @@ class VectorBinaryOperatorsTest extends TestCase
     public function testOperatorsOnVectorTimesMatrixResult(): void
     {
         $v = Vector::fromArray([1, 2]);
-        $m = Matrix::fromArray([
-            [1, 2],
-            [3, 4],
-        ]);
+        $m = Matrix::fromArray([[1, 2], [3, 4]]);
 
         $this->assertSame([21.0, 30.0], (($v * $m) * 3)->toArray());
     }

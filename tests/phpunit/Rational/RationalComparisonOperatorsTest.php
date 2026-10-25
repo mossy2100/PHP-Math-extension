@@ -69,13 +69,7 @@ class RationalComparisonOperatorsTest extends TestCase
     public function testSpaceshipUnsupportedOperandIsUncomparable(): void
     {
         $r = new Rational(1, 2);
-        $operands = [
-            'string',
-            '0.5',
-            [1],
-            new stdClass(),
-            new Complex(1, 2),
-        ];
+        $operands = ['string', '0.5', [1], new stdClass(), new Complex(1, 2)];
 
         foreach ($operands as $operand) {
             $this->assertSame(1, $r <=> $operand);
@@ -192,18 +186,9 @@ class RationalComparisonOperatorsTest extends TestCase
         $r = new Rational(1, 2);
 
         // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
-        $this->assertTrue(in_array($r, [
-            null,
-            'a',
-            [1],
-            new Rational(1, 2),
-        ], false));
+        $this->assertTrue(in_array($r, [null, 'a', [1], new Rational(1, 2)], false));
         // phpcs:ignore SlevomatCodingStandard.Functions.StrictCall.NonStrictComparison
-        $this->assertFalse(in_array($r, [
-            null,
-            'a',
-            [1],
-        ], false));
+        $this->assertFalse(in_array($r, [null, 'a', [1]], false));
     }
 
     #endregion
