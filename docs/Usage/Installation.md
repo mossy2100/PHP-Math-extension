@@ -1,11 +1,14 @@
 # Installation
 
-**Not yet published on Packagist or [PIE](https://github.com/php/pie).** This extension is still in development (see the Classes section of the main
-`README.md` for what's implemented) and hasn't been tagged for release yet. The pages below describe the intended
-end-user workflow once it is published, plus how to build and install it locally today from a checkout of this
-repository.
+Install the extension with [PIE](https://github.com/php/pie):
 
-Pick the page matching your situation:
+```bash
+pie install mossy2100/math-ext
+```
+
+On Mac and Linux, PIE builds it from source for the PHP it runs under. On Windows, it downloads a prebuilt DLL.
+
+For details, manual builds and server setups, pick the page matching your situation:
 
 - **[Mac, Linux](Installation/Mac,%20Linux.md)** - via [PIE](https://github.com/php/pie), or manually.
 - **[Windows](Installation/Windows.md)** - via [PIE](https://github.com/php/pie), which downloads a prebuilt DLL, or
