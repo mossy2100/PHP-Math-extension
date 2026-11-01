@@ -89,6 +89,27 @@ static bool rational_float_value_is(zend_long num, zend_long den, double x)
 }
 /* }}} */
 
+/* {{{ rational_largest_semiconvergent_t
+ *
+ * Matches the PHP package's Rational::largestSemiconvergentT(): the largest t below the term a, for which the
+ * semiconvergent (h1 + t * h0) / (k1 + t * k0) has its numerator and denominator both at most limit. It's less than 1
+ * if there's none.
+ */
+static zend_long rational_largest_semiconvergent_t(
+	zend_long a, zend_long h0, zend_long k0, zend_long h1, zend_long k1, zend_long limit
+)
+{
+	zend_long t = a - 1;
+	if (k0 != 0 && (limit - k1) / k0 < t) {
+		t = (limit - k1) / k0;
+	}
+	if (h0 != 0 && (limit - h1) / h0 < t) {
+		t = (limit - h1) / h0;
+	}
+	return t;
+}
+/* }}} */
+
 /* {{{ rational_simplest_semiconvergent
  *
  * Matches the PHP package's Rational::simplestSemiconvergent(): the semiconvergent with the smallest t from 1 to
@@ -172,16 +193,20 @@ static void rational_approximate_float(double x, zend_long *num, zend_long *den)
 			|| math_integers_mul(a, k0, &tmp) != MATH_INTEGERS_OK
 			|| math_integers_add(tmp, k1, &k) != MATH_INTEGERS_OK;
 
+		/* If the next convergent goes above MAX_SAFE_INT, where rational_float_value_is() can round twice, first try
+		 * the semiconvergents within it, where it's exact. */
+		if (overflow || h > MAX_SAFE_INT || k > MAX_SAFE_INT) {
+			zend_long t = rational_largest_semiconvergent_t(a, h0, k0, h1, k1, MAX_SAFE_INT);
+			if (t >= 1 && rational_float_value_is(h1 + t * h0, k1 + t * k0, x)) {
+				rational_simplest_semiconvergent(h0, k0, h1, k1, t, x, num, den);
+				return;
+			}
+		}
+
 		/* If the next convergent overflows, try the best semiconvergent that fits: the largest t such that
 		 * (h1 + t * h0) / (k1 + t * k0) is in range. It's less than a, as t = a gives the convergent. */
 		if (overflow) {
-			zend_long t = a - 1;
-			if (k0 != 0 && (ZEND_LONG_MAX - k1) / k0 < t) {
-				t = (ZEND_LONG_MAX - k1) / k0;
-			}
-			if (h0 != 0 && (ZEND_LONG_MAX - h1) / h0 < t) {
-				t = (ZEND_LONG_MAX - h1) / h0;
-			}
+			zend_long t = rational_largest_semiconvergent_t(a, h0, k0, h1, k1, ZEND_LONG_MAX);
 			if (t >= 1) {
 				if (rational_float_value_is(h1 + t * h0, k1 + t * k0, x)) {
 					rational_simplest_semiconvergent(h0, k0, h1, k1, t, x, num, den);

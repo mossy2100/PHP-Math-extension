@@ -126,6 +126,8 @@ Matches the `mossy2100/math` `[Unreleased]` changes.
   `new Complex(3.4e-314, -1.5e-315)`. It's now within 2 ulps, matching the package.
 - **`Complex::ln()` lost about 7 digits when both parts are subnormal,** e.g. for `new Complex(-5.307e-320,
   -3.2386e-320)`. It now scales them first, as `sqrt()` does, and is within 2 ulps, matching the package.
+- **`Rational::fromFloat()` missed the simplest fraction for some floats below about 1e-15,** e.g.
+  `2.138024252903659e-15` gave `177/82786712900761355` rather than `12/5612658501746533`. Matches the package.
 - **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.
   `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A

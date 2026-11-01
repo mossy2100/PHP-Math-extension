@@ -25,9 +25,6 @@
 #include "integers.h"
 #include "types.h"
 
-/* 2^53, the largest power of 2 below which every integer is exactly representable as a double. */
-#define MATH_MAX_EXACT_INT ((zend_long) 1 << 53)
-
 /* {{{ rational_next_binary_digit
  *
  * Matches the PHP package's Rational::nextBinaryDigit(): returns the next binary digit of the fraction rem/den, which
@@ -208,7 +205,7 @@ zend_result rational_calc_compare(zend_object *self_obj, zval *other, int *out)
 			*out = -1;
 		} else if (other_dbl <= -limit) {
 			*out = 1;
-		} else if (self_num >= -MATH_MAX_EXACT_INT && self_num <= MATH_MAX_EXACT_INT && self_den <= MATH_MAX_EXACT_INT
+		} else if (self_num >= -MAX_SAFE_INT && self_num <= MAX_SAFE_INT && self_den <= MAX_SAFE_INT
 			&& (double) self_num / (double) self_den != other_dbl) {
 			/* Fast path: the numerator and denominator are exactly representable as doubles, so the quotient is
 			 * correctly rounded. Rounding preserves order, so if it differs from other_dbl, it's on the same side. */

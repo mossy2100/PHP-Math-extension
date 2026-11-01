@@ -11,6 +11,10 @@
 
 #include "php.h"
 
+/* Ports Mossy2100\Core\Floats::MAX_SAFE_INT: 2^53 - 1, the largest integer that round-trips through a double without
+ * colliding with another. */
+#define MAX_SAFE_INT (((zend_long) 1 << 53) - 1)
+
 /* {{{ math_floats_approx_equal
  *
  * Ports Mossy2100\Core\Floats::approxEqual(): checks whether two doubles are equal within a
