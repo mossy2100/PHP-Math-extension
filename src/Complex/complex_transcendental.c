@@ -117,10 +117,17 @@ static void complex_square_exact(double x, double *square, double *err)
  *
  * Matches the PHP package's Complex::calcLnMagnitude(): ln|z|, accurate near |z| = 1. Between 0.5 and 2, it's
  * log1p(|z|² - 1) / 2, with |z|² - 1 = x² + y² - 1 calculated almost exactly, rather than log(|z|), which loses most
- * of its digits as |z| is rounded first.
+ * of its digits as |z| is rounded first. If both parts are subnormal, so is |z|, which has lost bits, so z is scaled
+ * up by 2^106 first, exactly.
  */
 static double complex_calc_ln_magnitude(double real, double imag, double magnitude)
 {
+	/* If both parts are subnormal, so is |z|, which has lost bits. Scale z up by 2^106, exactly, and subtract
+	 * 106 ln 2. */
+	if (fabs(real) < DBL_MIN && fabs(imag) < DBL_MIN) {
+		return log(hypot(ldexp(real, 106), ldexp(imag, 106))) - 106 * M_LN2;
+	}
+
 	if (magnitude <= 0.5 || magnitude >= 2) {
 		return log(magnitude);
 	}
