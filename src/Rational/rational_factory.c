@@ -140,7 +140,8 @@ static void rational_simplest_semiconvergent(
  * the convergent before term n. With a the nth term, it is if t > a/2, and isn't if t < a/2. If t = a/2, it is if
  * [a(n+1); a(n+2), ...] > [a(n-1); a(n-2), ..., a(1)], compared by Rational::compareContinuedFractions()'s rule: the
  * first differing term decides it, with a term past the end being infinity, and the order reversing at odd positions.
- * A trailing term of 1 in the second is folded into the one before, so equal values compare as equal.
+ * Neither ends in a term of 1, which would make equal values compare as unequal: rational_cf_terms() never ends in one,
+ * and a(1) is at least 1024, as the convergents only overflow for x below 2^-10.
  */
 static bool rational_semiconvergent_is_closer(const zend_long *terms, zend_long count, zend_long n, zend_long t)
 {
@@ -149,20 +150,16 @@ static bool rational_semiconvergent_is_closer(const zend_long *terms, zend_long 
 		return t > a - t;
 	}
 
-	/* rest[i] is terms[n + 1 + i]. ratio[i] is terms[n - 1 - i], for i up to n - 2, with the fold applied. */
+	/* rest[i] is terms[n + 1 + i]. ratio[i] is terms[n - 1 - i], for i up to n - 2. */
 	zend_long rest_len = count - n - 1;
 	zend_long ratio_len = n - 1;
-	bool folded = ratio_len > 1 && terms[1] == 1;
-	if (folded) {
-		ratio_len--;
-	}
 
 	zend_long len = rest_len > ratio_len ? rest_len : ratio_len;
 	for (zend_long i = 0; i < len; i++) {
 		bool rest_inf = i >= rest_len;
 		bool ratio_inf = i >= ratio_len;
 		zend_long rest_term = rest_inf ? 0 : terms[n + 1 + i];
-		zend_long ratio_term = ratio_inf ? 0 : (folded && i == ratio_len - 1 ? terms[2] + 1 : terms[n - 1 - i]);
+		zend_long ratio_term = ratio_inf ? 0 : terms[n - 1 - i];
 		if (rest_inf != ratio_inf || rest_term != ratio_term) {
 			int cmp = rest_inf ? 1 : (ratio_inf ? -1 : (rest_term > ratio_term ? 1 : -1));
 			return (i % 2 == 0 ? cmp : -cmp) > 0;
