@@ -130,6 +130,8 @@ Matches the `mossy2100/math` `[Unreleased]` changes.
   `2.138024252903659e-15` gave `177/82786712900761355` rather than `12/5612658501746533`. Matches the package.
 - **With Xdebug's develop mode on, an exception could be replaced by "Cannot compute magnitude of the given Vector"**
   when a Vector whose magnitude overflows was an argument on the stack. The original exception is now thrown.
+- **Exception messages showed floats to 14 significant digits,** e.g. `-2.5995471317319` for `-2.599547131731895`.
+  They now show the shortest exact form, as the package does.
 - **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.
   `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A

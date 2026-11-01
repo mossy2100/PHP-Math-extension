@@ -87,11 +87,10 @@ bool math_floats_to_int(double f, zend_long *out);
 
 /* {{{ math_floats_to_str
  *
- * Ports Mossy2100\Core\Stringify::stringifyFloat(): NAN/+INF/-INF stringify to their literal
- * names ("NAN", "INF", "-INF"); every other (finite) value goes through the engine's normal
- * (string) cast machinery, for byte-for-byte parity with what `(string) $value` would produce in
- * PHP (governed by the `precision` ini setting), with ".0" appended if the result would otherwise
- * look like an int. Used for embedding a float value in an exception message.
+ * Ports Mossy2100\Core\Stringify::stringifyFloat(), which is var_export(): NAN, INF and -INF give their names, and
+ * every other value gives the shortest string that converts back to it (governed by the serialize_precision ini
+ * setting), with ".0" added if it would otherwise look like an int. Used for embedding a float value in an exception
+ * message.
  *
  * Returns a new zend_string the caller owns and must eventually release.
  */

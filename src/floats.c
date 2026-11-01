@@ -12,6 +12,7 @@
 
 #include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_smart_str.h"
 #include "floats.h"
 
 bool math_floats_approx_equal(double a, double b, double rel_tol, double abs_tol)
@@ -115,20 +116,11 @@ zend_string *math_floats_to_str(double value)
 			: zend_string_init("-INF", sizeof("-INF") - 1, 0);
 	}
 
-	zval tmp;
-	ZVAL_DOUBLE(&tmp, value);
-	convert_to_string(&tmp);
-	zend_string *str = Z_STR(tmp);
-
-	/* If nothing distinguishes the string from an int (no decimal point or exponent), append
-	 * ".0", matching stringifyFloat(). */
-	if (strpbrk(ZSTR_VAL(str), ".eE") == NULL) {
-		zend_string *with_suffix = zend_string_concat2(ZSTR_VAL(str), ZSTR_LEN(str), ".0", 2);
-		zend_string_release(str);
-		return with_suffix;
-	}
-
-	return str;
+	/* As var_export() does: the shortest string that converts back (with the default serialize_precision of -1), and
+	 * ".0" added if it would otherwise look like an int. */
+	smart_str buf = {0};
+	smart_str_append_double(&buf, value, (int) PG(serialize_precision), true);
+	return smart_str_extract(&buf);
 }
 
 double math_floats_power_of_2_scale(double max_abs)
