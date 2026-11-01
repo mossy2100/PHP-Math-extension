@@ -12,7 +12,8 @@ A native PHP extension that implements the `Complex`, `Rational`, `Vector`, and 
 Each class has the same fully-qualified name and API as its package counterpart, so loading the extension replaces the
 userland class with no code changes. The extension's version always matches the package version it mirrors.
 
-The extension isn't published on Packagist or [PIE](https://github.com/php/pie) yet. See [Installation](docs/Usage/Installation.md) to build and install it from source.
+Install it with [PIE](https://github.com/php/pie): `pie install mossy2100/math-ext`. See
+[Installation](docs/Usage/Installation.md) for details.
 
 ---
 
@@ -20,19 +21,19 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 **Key Features:**
 
-- **Drop-in replacement** - same class names, methods and behaviour as `mossy2100/math`.
+- **Drop-in replacement** - same class names, methods and behavior as `mossy2100/math`.
 - **Operator overloading** - `+`, `-`, `*`, `/`, `**` (where applicable) and their compound assignment forms (`+=`
   etc.), `~` (conjugate) for `Complex`, and `%` for `Rational`. `Complex` and `Rational` also get `++`, `--` and the
   full comparison operator set (`==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>`). See [Classes](#classes).
-- **Behavioural parity** - a PHPUnit conformance suite runs the package's own tests against the extension's classes, so
-  the two stay identical in behaviour, not just API shape.
+- **Behavioral parity** - a PHPUnit conformance suite runs the package's own tests against the extension's classes, so
+  the two stay identical in behavior, not just API shape.
 - **Standalone** - no runtime dependency on `mossy2100/core`, `mossy2100/math` or any other package, despite sharing
   their namespaces.
 
 ### Why Keep the Package and Extension in Step?
 
-- Some developers prefer the package: its PHP source is a readable window into the algorithms, and some are wary of
-  installing extensions.
+- Some developers may prefer the package: its PHP source is a readable window into the algorithms, and some developers
+  may be wary of installing extensions.
 - An application built on the package can switch to the extension later without anything breaking.
 - One set of class documentation (in the package) serves both.
 
@@ -47,7 +48,9 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 - **Operations with no method equivalent** - some operator forms have no matching method. For example,
   `Rational + float` widens to a `float` result, but `add()` only accepts a `Rational` or `int`. See the equivalence
   table on each class's operator page.
-- **Performance** - all four classes run faster than the package. With opcache on, `scripts/bench` gives:
+- **Performance** - all four classes run faster than the package. See the benchmarks below.
+
+With opcache on, `scripts/bench` gives:
 
 | Operation               | PHP 8.4         | PHP 8.5         |
 | ----------------------- | --------------- | --------------- |
@@ -59,8 +62,8 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 | `Matrix::mul()` (50×50) | 39 times faster | 21 times faster |
 | `Matrix::inv()` (50×50) | 28 times faster | 17 times faster |
 
-  The extension runs at about the same speed on both versions, but the package runs faster on PHP 8.5, so the gap is
-  smaller there. Timings vary between machines and runs.
+The extension runs at about the same speed on both versions, but the package runs faster on PHP 8.5, so the gap is
+smaller there. Timings vary between machines and runs.
 
 ### Disadvantages
 
@@ -80,8 +83,9 @@ The extension isn't published on Packagist or [PIE](https://github.com/php/pie) 
 
 ### Argument Types
 
-A parameter that takes either an object or a number, such as `add()`'s, is always strict in the extension, as if
-`strict_types=1` were on. Without `strict_types`, the package follows PHP's usual coercion rules for these parameters:
+A parameter that takes either an object or a number, such as the one in `add()`, is always strict in the extension, as
+if `strict_types=1` were on. Without `strict_types`, the package follows PHP's usual coercion rules for these
+parameters:
 
 | Call             | Package    | Extension   |
 | ---------------- | ---------- | ----------- |
@@ -96,18 +100,19 @@ two behave identically.
 
 ## Development and Quality Assurance
 
-[Claude Chat](https://claude.ai) and [Claude Code](https://www.claude.com/product/claude-code) were used extensively in developing this extension:
+This extension was written primarily by AI, using [Claude Code](https://claude.com/product/claude-code) and [DeepSeek](https://www.deepseek.com/):
 
-- Designing the C-level object-handler architecture: the `do_operation`/`compare` overloads, lazily-computed properties,
-  and the custom `clone_obj` handler `Matrix` needs to deep-clone its row `Vector`s.
-- Writing and reviewing the C implementation, stub files and documentation.
+- The public API mirrors the userland package (`mossy2100/math`), which the author designed.
+- The author also specified which operators to implement for each type and how they should work.
+- Claude Code and DeepSeek wrote the C implementation, including the object-handler architecture: the
+  `do_operation`/`compare` overloads, lazily-computed properties, and a custom `clone_obj` handler.
+- They also wrote the stub files, tests and documentation.
 
-All code was reviewed by the author. Correctness is validated by:
+Correctness is validated by:
 
-- A PHPUnit conformance suite (`tests/phpunit/`), which runs the userland package's own tests (`mossy2100/math`) against
-  this extension's native classes. So behavior stays identical between the two, not just the method signatures.
-- [PHPStan](https://phpstan.org/) at level 9, with custom operator-type-specifying extensions so static analysis understands the operator
-  overloads that only exist here.
+- A PHPUnit conformance suite (`tests/phpunit/`) that runs the package's own tests against the extension's classes.
+- [PHPStan](https://phpstan.org/) at level 9, with custom operator-type-specifying extensions so static analysis
+  understands the operator overloads that only exist here.
 
 ---
 
@@ -118,7 +123,7 @@ All code was reviewed by the author. Correctness is validated by:
   from source for the PHP you have installed. On Windows, PIE downloads a prebuilt DLL instead. See
   [Installation](docs/Usage/Installation.md).
 
-#### Supported PHP Versions
+### Supported PHP Versions
 
 A compiled PHP extension only loads in the PHP minor version it was built for, since each has its own Zend Extension API
 number. This affects how you install it:
@@ -138,11 +143,9 @@ minor versions, so it likely won't build. `#if PHP_VERSION_ID` checks can adapt 
 
 ## Usage
 
-See: [Installation](docs/Usage/Installation.md) for using the extension in your project.
-
-See: [Development](docs/Usage/Development.md) for building, testing, and the project's C source layout.
-
-See: [Static Analysis](docs/Usage/Static_Analysis.md) for how to extend PHPStan to support the operators provided by this extension.
+- [Installation](docs/Usage/Installation.md) - using the extension in your project
+- [Development](docs/Usage/Development.md) - building, testing, and the project's C source layout
+- [Static Analysis](docs/Usage/Static_Analysis.md) - extending PHPStan to support the operators
 
 ---
 
@@ -159,9 +162,8 @@ adds (operator overloading) and links to both sets of docs for each class.
 | `Vector`   | `+`, `-`, `*`, `/`                        | None added                              | [Vector](https://github.com/mossy2100/PHP-Math/blob/main/docs/Vector.md)     | [Vector operators](docs/Reference/Vector.md)     |
 | `Matrix`   | `+`, `-`, `*`, `/`, `**`                  | None added                              | [Matrix](https://github.com/mossy2100/PHP-Math/blob/main/docs/Matrix.md)     | [Matrix operators](docs/Reference/Matrix.md)     |
 
-`Vector` and `Matrix` get no extension-provided comparison operators: "None added" above means no `compare` handler is
-installed for them, so PHP's own default object comparison still applies, as it does to any plain PHP object (see
-[Comparison Operators](#comparison-operators) below).
+"None added" means `Vector` and `Matrix` keep PHP's default object comparison. See
+[Comparison Operators](#comparison-operators).
 
 ---
 
@@ -174,35 +176,26 @@ operators (`===`, `!==`) can't be overloaded. See [Comparison Operators](docs/Re
 
 ## Operator Precedence
 
-A fluent chain of method calls has no notion of precedence at all. It only ever evaluates in the order you nest the
-calls, so `$z1->add($z2->mul($z3))` requires you to have already worked out the correct grouping yourself before writing
-a single method call. Operators come with precedence and associativity rules that PHP itself resolves instead, so
-`$z1 + $z2 * $z3` reads the same as ordinary arithmetic and PHP evaluates `$z2 * $z3` first automatically.
+A chain of method calls evaluates in the order you nest it, so you have to work out the grouping yourself. Operators
+follow PHP's precedence rules, so `$z1 + $z2 * $z3` reads like ordinary arithmetic.
 
-That precedence isn't something any of these classes control, though. A PHP extension can overload what an operator
-_does_ (via the `do_operation`/`compare` object handlers, which is how every operator on this page exists at all) but
-not how tightly it binds relative to other operators. Precedence and associativity are fixed by the language grammar
-itself, entirely outside any extension's control. So none of `Complex`/`Rational`/`Vector`/`Matrix` get their own
-precedence rules; they all just inherit PHP's, same as `int` and `float`.
+An extension can change what an operator does, but not how tightly it binds. All four classes use PHP's
+[operator precedence](https://www.php.net/manual/en/language.operators.precedence.php), the same as `int` and `float`.
 
-This is actually a blessing. Most PHP developers already know the most important precedence rules (multiplication before
-addition, etc.), so keeping them fixed should reduce bugs. Refer to the [full PHP operator precedence table](https://www.php.net/manual/en/language.operators.precedence.php) to revise.
+The rules relevant to this extension, tightest-binding first:
 
-The table below shows just the rules relevant to this extension, tightest-binding first:
+| Precedence  | Operators                  | Associativity | Used by                                 | Notes                                              |
+| ----------- | -------------------------- | ------------- | --------------------------------------- | -------------------------------------------------- |
+| 1 (highest) | `**`                       | Right         | `Complex`, `Rational`, `Matrix`         | Binds tighter than a unary operator on its left    |
+| 2           | `-` `+` `~` (unary prefix) | Right         | `-` `+` all four; `~` `Complex` only    | `-$z ** 2` is `-($z ** 2)`, not `(-$z) ** 2`       |
+| 3           | `*` `/`                    | Left          | All four                                |                                                    |
+| 4           | `-` `+` (binary)           | Left          | All four                                |                                                    |
+| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Complex`, `Rational`                   | `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`           |
+| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Complex`, `Rational`                   | `$r1 <=> $r2 == 1` is a parse error                |
 
-| Precedence  | Operators                  | Associativity | Used by                                 | Notes                                                                                                                                         |
-| ----------- | -------------------------- | ------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 (highest) | `**`                       | Right         | `Complex`, `Rational`, `Matrix`         | Binds _tighter_ than unary `-`/`+`/`~` on its left operand - see below.                                                                       |
-| 2           | `-` `+` `~` (unary prefix) | Right         | `-` `+` All four; `~` is `Complex`-only | `-$z ** 2` is `-($z ** 2)`, not `(-$z) ** 2`. This behaviour for the  `**` operator is a special case in PHP, not specific to this extension. |
-| 3           | `*` `/`                    | Left          | All four                                |                                                                                                                                               |
-| 4           | `-` `+` (binary)           | Left          | All four                                |                                                                                                                                               |
-| 5           | `<` `<=` `>` `>=`          | Non-assoc     | `Complex`, `Rational`                   | Looser than arithmetic, so `$r1 + $r2 < $r3` is `($r1 + $r2) < $r3`.                                                                          |
-| 6 (lowest)  | `==` `!=` `<=>`            | Non-assoc     | `Complex`, `Rational`                   | Looser again than `<`/`<=`/`>`/`>=` - `$r1 <=> $r2 == 1` is a parse error, matching PHP's own non-associativity here.                         |
-
-The most tricky thing to remember is that the exponentiation operator `**` has the highest precedence of all, which
-means, for example, `-$z ** 2` is evaluated as `-($z ** 2)` rather than `(-$z) ** 2`. That precedence can be unobvious
-because typical code formatting omits spaces around unary operators, but includes them around binary ones, suggesting
-unary always trumps binary. This is usually true, but not in the case of `**`.
+> [!WARNING]
+> `**` binds tighter than unary `-`, so `-$z ** 2` is `-($z ** 2)`. This is easy to miss, because unary operators are
+> usually written without a space. It's standard PHP, not specific to this extension.
 
 **Examples:**
 
@@ -220,17 +213,15 @@ $z1 + $z2 * $z3;   // $z2 * $z3 is evaluated first: $z1 + ($z2 * $z3)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
 ## Support
 
-- **Issues**: https://github.com/mossy2100/PHP-Math-extension/issues
-- **Documentation**: See [docs/](docs/) directory for detailed class documentation
-- **Examples**: See test files for comprehensive usage examples
-
-For questions or suggestions, please [open an issue](https://github.com/mossy2100/PHP-Math-extension/issues).
+- **Issues and questions:** [open an issue](https://github.com/mossy2100/PHP-Math-extension/issues)
+- **Class documentation:** in the [Math package](https://github.com/mossy2100/PHP-Math/tree/main/docs)
+- **Operator documentation:** in this repo's [docs/Reference/](docs/Reference/) directory
 
 ---
 
