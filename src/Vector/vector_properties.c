@@ -102,7 +102,9 @@ static int vector_has_property(zend_object *object, zend_string *member, int has
  *
  * Custom `get_properties_for` handler: returns the standard property table, with "magnitude" computed for
  * json_encode(), get_object_vars() and var_export(), and left out for every other purpose, matching what the package's
- * hook gives. Without this, those functions skipped "magnitude", and var_dump() showed it as uninitialized.
+ * hook gives. Without this, those functions skipped "magnitude", and var_dump() showed it as uninitialized. If an
+ * exception is already in flight, as when Xdebug's develop mode exports the stack's arguments, it doesn't throw over
+ * it.
  */
 static HashTable *vector_get_properties_for(zend_object *object, zend_prop_purpose purpose)
 {
@@ -110,8 +112,14 @@ static HashTable *vector_get_properties_for(zend_object *object, zend_prop_purpo
 		|| purpose == ZEND_PROP_PURPOSE_VAR_EXPORT;
 
 	double magnitude = 0.0;
-	if (include && vector_read_magnitude(object, &magnitude) == FAILURE) {
-		return NULL;
+	if (include) {
+		if (EG(exception) != NULL) {
+			/* An exception is already in flight, so this is a debugger, such as Xdebug's develop mode, exporting the
+			 * stack's arguments. Don't throw over it: leave magnitude out if it can't be represented. */
+			include = vector_compute_magnitude(object, &magnitude) == SUCCESS && zend_finite(magnitude);
+		} else if (vector_read_magnitude(object, &magnitude) == FAILURE) {
+			return NULL;
+		}
 	}
 
 	HashTable *props = zend_std_get_properties_for(object, purpose);

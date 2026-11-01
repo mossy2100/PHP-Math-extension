@@ -128,6 +128,8 @@ Matches the `mossy2100/math` `[Unreleased]` changes.
   -3.2386e-320)`. It now scales them first, as `sqrt()` does, and is within 2 ulps, matching the package.
 - **`Rational::fromFloat()` missed the simplest fraction for some floats below about 1e-15,** e.g.
   `2.138024252903659e-15` gave `177/82786712900761355` rather than `12/5612658501746533`. Matches the package.
+- **With Xdebug's develop mode on, an exception could be replaced by "Cannot compute magnitude of the given Vector"**
+  when a Vector whose magnitude overflows was an argument on the stack. The original exception is now thrown.
 - **A `fromString()` message cut the string short at a NUL** when the string was over 32 characters, e.g.
   `'ab…'` instead of `'ab\0cdxxx…'`. The message now matches the package.
 - **A `Vector` or `Matrix` changed through Reflection could crash PHP,** e.g. after setting `$data` to `[]`. A
