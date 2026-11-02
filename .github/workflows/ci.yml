@@ -1,8 +1,8 @@
 # Builds and tests the extension on every push to main and every pull request.
 #
 # The PHPUnit suite includes the Math package's shared tests through symlinks (tests/phpunit/*/shared) that point at
-# ../../../../../packages/Math/tests, so each job checks out this repo at extensions/Math and the package at
-# packages/Math, matching the PhpPackages layout.
+# ../../../../../packages/Math/tests, so the Linux and debug jobs check out this repo at extensions/Math and the
+# package at packages/Math, matching the PhpPackages layout. The Windows job copies the shared tests in instead.
 
 name: CI
 
@@ -169,18 +169,24 @@ jobs:
       matrix:
         php: ['8.4', '8.5']
         ts: [nts, ts]
-    defaults:
-      run:
-        working-directory: extensions/Math
     steps:
+      # php-windows-builder builds from the workspace root, so this repo goes there, not in extensions/Math.
       - uses: actions/checkout@v4
+
+      # Builds the DLL with PHP's own Windows toolchain, as the release workflow does, runs the phpt tests, and leaves
+      # the zipped DLL in artifacts/.
+      - name: Build, and run phpt tests
+        uses: php/php-windows-builder/extension@v1
         with:
-          path: extensions/Math
+          php-version: ${{ matrix.php }}
+          arch: x64
+          ts: ${{ matrix.ts }}
+          args: --enable-mossy2100_math
 
       - uses: actions/checkout@v4
         with:
           repository: mossy2100/PHP-Math
-          path: packages/Math
+          path: math-package
 
       # Git for Windows checks the tests/phpunit/*/shared symlinks out as plain files, so replace each with a copy of
       # the package's directory it points to.
@@ -189,62 +195,28 @@ jobs:
         run: |
           foreach ($class in 'Complex', 'Rational', 'Vector', 'Matrix') {
             Remove-Item "tests\phpunit\$class\shared" -Force
-            Copy-Item -Recurse "..\..\packages\Math\tests\$class\shared" "tests\phpunit\$class\shared"
+            Copy-Item -Recurse "math-package\tests\$class\shared" "tests\phpunit\$class\shared"
           }
 
-      - id: setup-php
-        uses: php/setup-php-sdk@v0.12
+      # An official PHP build with the same version and thread safety, so the DLL loads. setup-php enables openssl for
+      # Composer and mbstring for PHPUnit.
+      - uses: shivammathur/setup-php@v2
         with:
-          version: ${{ matrix.php }}
-          arch: x64
-          ts: ${{ matrix.ts }}
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-          toolset: ${{ steps.setup-php.outputs.toolset }}
-
-      # phpize and configure are batch files, and a cmd script ends when a batch file it runs without `call` finishes,
-      # so each command gets its own step.
-      - name: phpize
-        shell: cmd
-        run: phpize
-
-      # configure reports success even when its script fails, so check it wrote a Makefile.
-      - name: Configure
-        shell: cmd
-        run: |
-          call configure --enable-mossy2100_math --with-prefix=${{ steps.setup-php.outputs.prefix }}
-          if not exist Makefile exit /b 1
-
-      - name: Build
-        shell: cmd
-        run: nmake
-
-      - name: Run phpt tests
-        shell: cmd
-        run: nmake test TESTS=tests\phpt
-
-      # The SDK's PHP is the official Windows build, with no php.ini. Composer needs openssl, and PHPUnit mbstring.
-      - name: Configure PHP for Composer and PHPUnit
-        shell: pwsh
-        run: |
-          $prefix = '${{ steps.setup-php.outputs.prefix }}'
-          Set-Content -Path "$prefix\php.ini" -Value @(
-            "extension_dir = `"$prefix\ext`"",
-            'extension = openssl',
-            'extension = mbstring',
-            'memory_limit = -1'
-          )
-          php -v
-          php -m
+          php-version: ${{ matrix.php }}
+          tools: composer
+          coverage: none
+        env:
+          phpts: ${{ matrix.ts }}
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress
 
+      # The builder installs a PHP of its own too, so show which one runs PHPUnit.
       - name: Run PHPUnit
         shell: pwsh
         run: |
-          $dir = if ('${{ matrix.ts }}' -eq 'ts') { 'Release_TS' } else { 'Release' }
-          php -d "extension=$PWD\x64\$dir\php_mossy2100_math.dll" vendor/bin/phpunit
+          Expand-Archive -Path (Get-Item artifacts\*.zip).FullName -DestinationPath dist
+          $dll = (Get-Item dist\*.dll).FullName
+          php -v
+          php -d "extension=$dll" vendor/bin/phpunit
           exit $LASTEXITCODE
