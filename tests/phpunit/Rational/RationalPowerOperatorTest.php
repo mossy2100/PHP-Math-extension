@@ -94,7 +94,7 @@ class RationalPowerOperatorTest extends TestCase
     {
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage(
-            'Cannot raise the given Rational to the given float power. The result would overflow.'
+            'Cannot raise the given Rational to the given float power. The result would overflow.',
         );
         $result = new Rational(PHP_INT_MAX) ** 100.0;
     }
@@ -206,7 +206,7 @@ class RationalPowerOperatorTest extends TestCase
     {
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage(
-            'Cannot raise the given float to the given Rational power. The result would overflow.'
+            'Cannot raise the given float to the given Rational power. The result would overflow.',
         );
         $result = (-1e300) ** new Rational(3);
     }
@@ -357,7 +357,7 @@ class RationalPowerOperatorTest extends TestCase
         // 4^(127/2) = 2^127, which doesn't fit in an int.
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage(
-            'Cannot raise the given int to the given Rational power. The result would overflow.'
+            'Cannot raise the given int to the given Rational power. The result would overflow.',
         );
         $result = 4 ** new Rational(127, 2);
     }
@@ -381,7 +381,7 @@ class RationalPowerOperatorTest extends TestCase
         // (-2)^-63 = 1/-2^63, and 2^63 doesn't fit in an int.
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage(
-            'Cannot raise the given int to the given Rational power. The result would overflow.'
+            'Cannot raise the given int to the given Rational power. The result would overflow.',
         );
         $result = (-2) ** new Rational(-63);
     }

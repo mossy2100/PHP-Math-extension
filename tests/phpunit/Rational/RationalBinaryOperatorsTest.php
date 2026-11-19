@@ -563,7 +563,7 @@ class RationalBinaryOperatorsTest extends TestCase
     {
         $this->expectException(OverflowException::class);
         $this->expectExceptionMessage(
-            'Cannot find the remainder of the given Rational numbers. The result would overflow.'
+            'Cannot find the remainder of the given Rational numbers. The result would overflow.',
         );
 
         // 4000000007 and 4000000009 are prime, so the remainder, 2/(4000000007 × 4000000009), is in lowest terms, and
@@ -604,8 +604,8 @@ class RationalBinaryOperatorsTest extends TestCase
         $r = new Rational(7, 2);
         foreach (['2', true, false, null] as $operand) {
             $mods = [
-                static fn () => $r % $operand, // @phpstan-ignore binaryOp.invalid
-                static fn () => $operand % $r, // @phpstan-ignore binaryOp.invalid
+                static fn() => $r % $operand, // @phpstan-ignore binaryOp.invalid
+                static fn() => $operand % $r, // @phpstan-ignore binaryOp.invalid
             ];
             foreach ($mods as $mod) {
                 try {
@@ -746,7 +746,7 @@ class RationalBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnClone(): void
     {
-        $r = clone new Rational(1, 2);
+        $r = clone(new Rational(1, 2));
 
         $product = $r * 3;
         $this->assertSame(3, $product->numerator);

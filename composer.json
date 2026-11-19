@@ -44,7 +44,7 @@
             "options": {
                 "symlink": true,
                 "versions": {
-                    "mossy2100/coding-standard": "2.2.0"
+                    "mossy2100/phpcs-jumbo": "2.2.0"
                 }
             }
         }
@@ -57,7 +57,7 @@
         "squizlabs/php_codesniffer": "^4.0",
         "phpstan/phpstan": "^2.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "mossy2100/coding-standard": "^2.2",
+        "mossy2100/phpcs-jumbo": "^2.2",
         "mossy2100/core": "^4.0"
     },
     "autoload-dev": {
@@ -82,7 +82,7 @@
     },
     "scripts": {
         "fix": "vendor/bin/phpcbf -vp",
-        "check": "vendor/bin/phpcs -s",
+        "check": "vendor/bin/phpcs -sv --colors",
         "analyze": "scripts/analyze",
         "test": "scripts/test-phpunit",
         "build": "scripts/build",

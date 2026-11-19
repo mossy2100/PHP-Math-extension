@@ -328,7 +328,7 @@ class VectorBinaryOperatorsTest extends TestCase
 
         $this->expectException(LengthException::class);
         $this->expectExceptionMessage(
-            'Cannot compute Hadamard quotient with Vector of incorrect count: 2. Expected 3.'
+            'Cannot compute Hadamard quotient with Vector of incorrect count: 2. Expected 3.',
         );
         $result = $v1 / $v2;
     }
@@ -528,7 +528,7 @@ class VectorBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnClone(): void
     {
-        $v = clone Vector::fromArray([3, 4]);
+        $v = clone(Vector::fromArray([3, 4]));
 
         $this->assertSame([6.0, 8.0], ($v * 2)->toArray());
         $this->assertSame(5.0, $v->magnitude);

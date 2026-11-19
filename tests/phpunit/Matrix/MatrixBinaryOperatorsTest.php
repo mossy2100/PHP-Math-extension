@@ -608,7 +608,7 @@ class MatrixBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnClone(): void
     {
-        $m = clone Matrix::fromArray([[1, 2], [3, 4]]);
+        $m = clone(Matrix::fromArray([[1, 2], [3, 4]]));
 
         $this->assertSame([[7.0, 10.0], [15.0, 22.0]], ($m ** 2)->toArray());
     }
@@ -629,8 +629,8 @@ class MatrixBinaryOperatorsTest extends TestCase
     public function testCloneOfCloneIsDeep(): void
     {
         $m = Matrix::fromArray([[1, 2], [3, 4]]);
-        $copy = clone $m;
-        $copyOfCopy = clone $copy;
+        $copy = clone($m);
+        $copyOfCopy = clone($copy);
         $copyOfCopy[0][0] = 99;
 
         $this->assertSame(1.0, $copy[0][0]);

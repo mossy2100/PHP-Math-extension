@@ -57,10 +57,10 @@ class VectorInvalidDataTest extends TestCase
         $v = Vector::fromArray([1.0, 2.0]);
         new ReflectionProperty($v, 'data')->setValue($v, []);
         $reads = [
-            'offsetGet' => static fn () => $v[1],
-            'magnitude' => static fn () => $v->magnitude,
-            'add' => static fn () => $v->add(Vector::fromArray([1.0, 2.0])),
-            'toString' => static fn () => (string) $v,
+            'offsetGet' => static fn() => $v[1],
+            'magnitude' => static fn() => $v->magnitude,
+            'add' => static fn() => $v->add(Vector::fromArray([1.0, 2.0])),
+            'toString' => static fn() => (string) $v,
         ];
 
         foreach ($reads as $name => $read) {
@@ -84,20 +84,20 @@ class VectorInvalidDataTest extends TestCase
         $v = Vector::fromArray([1.0, 2.0]);
         new ReflectionProperty($v, $property)->setValue($v, $value);
         $reads = [
-            'neg' => static fn () => $v->neg(),
-            'hadamardDiv' => static fn () => $v->hadamardDiv($v),
-            'mul' => static fn () => $v->mul(2.0),
-            '/' => static fn () => 2.0 / $v,
-            'sum' => static fn () => $v->sum(),
-            'prod' => static fn () => $v->prod(),
-            'dot' => static fn () => $v->dot($v),
-            'magnitude' => static fn () => $v->magnitude,
-            'normalize' => static fn () => $v->normalize(),
-            'equal' => static fn () => $v->equal($v),
-            'approxEqual' => static fn () => $v->approxEqual($v),
-            'toString' => static fn () => (string) $v,
-            'toRowMatrix' => static fn () => $v->toRowMatrix(),
-            'json_encode' => static fn () => json_encode($v),
+            'neg' => static fn() => $v->neg(),
+            'hadamardDiv' => static fn() => $v->hadamardDiv($v),
+            'mul' => static fn() => $v->mul(2.0),
+            '/' => static fn() => 2.0 / $v,
+            'sum' => static fn() => $v->sum(),
+            'prod' => static fn() => $v->prod(),
+            'dot' => static fn() => $v->dot($v),
+            'magnitude' => static fn() => $v->magnitude,
+            'normalize' => static fn() => $v->normalize(),
+            'equal' => static fn() => $v->equal($v),
+            'approxEqual' => static fn() => $v->approxEqual($v),
+            'toString' => static fn() => (string) $v,
+            'toRowMatrix' => static fn() => $v->toRowMatrix(),
+            'json_encode' => static fn() => json_encode($v),
         ];
 
         foreach ($reads as $name => $read) {

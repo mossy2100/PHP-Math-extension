@@ -573,7 +573,7 @@ class ComplexBinaryOperatorsTest extends TestCase
      */
     public function testOperatorsOnClone(): void
     {
-        $z = clone new Complex(1, 2);
+        $z = clone(new Complex(1, 2));
 
         $product = $z * 3;
         $this->assertSame(3.0, $product->real);
