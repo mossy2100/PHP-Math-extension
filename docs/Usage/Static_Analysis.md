@@ -49,18 +49,18 @@ This repo already has a complete, working set of these: one binary + one unary e
 comparison extension for `Complex` and `Rational` (the two classes with comparison operators), since those are backed by
 a distinct `compare` object handler, not `do_operation`:
 
-| File                                              | Backs                                   |
-| ------------------------------------------------- | --------------------------------------- |
-| `phpstan/ComplexBinaryOperatorExtension.php`      | `+`, `-`, `*`, `/`, `**`                |
-| `phpstan/ComplexUnaryOperatorExtension.php`       | unary `+`, `-`, `~`                     |
-| `phpstan/ComplexComparisonOperatorExtension.php`  | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
-| `phpstan/RationalBinaryOperatorExtension.php`     | `+`, `-`, `*`, `/`, `%`, `**`           |
-| `phpstan/RationalUnaryOperatorExtension.php`      | unary `+`, `-`                          |
-| `phpstan/RationalComparisonOperatorExtension.php` | `<`, `<=`, `>`, `>=`, `<=>`, `==`, `!=` |
-| `phpstan/VectorBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`                      |
-| `phpstan/VectorUnaryOperatorExtension.php`        | unary `+`, `-`                          |
-| `phpstan/MatrixBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`, `**`                |
-| `phpstan/MatrixUnaryOperatorExtension.php`        | unary `+`, `-`                          |
+| File                                              | Backs                         |
+| ------------------------------------------------- | ----------------------------- |
+| `phpstan/ComplexBinaryOperatorExtension.php`      | `+`, `-`, `*`, `/`, `**`      |
+| `phpstan/ComplexUnaryOperatorExtension.php`       | unary `+`, `-`, `~`           |
+| `phpstan/ComplexComparisonOperatorExtension.php`  | `<`, `<=`, `>`, `>=`, `<=>`   |
+| `phpstan/RationalBinaryOperatorExtension.php`     | `+`, `-`, `*`, `/`, `%`, `**` |
+| `phpstan/RationalUnaryOperatorExtension.php`      | unary `+`, `-`                |
+| `phpstan/RationalComparisonOperatorExtension.php` | `<`, `<=`, `>`, `>=`, `<=>`   |
+| `phpstan/VectorBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`            |
+| `phpstan/VectorUnaryOperatorExtension.php`        | unary `+`, `-`                |
+| `phpstan/MatrixBinaryOperatorExtension.php`       | `+`, `-`, `*`, `/`, `**`      |
+| `phpstan/MatrixUnaryOperatorExtension.php`        | unary `+`, `-`                |
 
 ## Anatomy of one extension
 
@@ -186,6 +186,17 @@ Ignore the error where you use the operator, or write `$r += 1` instead, which t
 ```php
 $r++; // @phpstan-ignore postInc.type
 ```
+
+## Known limitation: `==` and `!=`
+
+`$r == 0.5` and `$z != 5` work at runtime on a `Rational` or `Complex`, through the same `compare` handler as `<=>`
+(see [Comparison Operators](../Reference/Comparison_Operators.md)). PHPStan, though, works out `==` and `!=` itself,
+from how PHP compares a plain object, without asking the comparison extensions. So since PHPStan 2.3.6, it reports
+`$r == 0.5` as always false (`equal.alwaysFalse`), and `$r != 0.5` as always true (`notEqual.alwaysTrue`), and an
+assertion on either as `method.impossibleType` or `method.alreadyNarrowedType`. Some of those verdicts are wrong.
+
+Call `equal()` instead, which PHPStan reads correctly. This repo's own comparison operator tests use the operators on
+purpose, so `phpstan.neon` ignores those four identifiers in those two test files only.
 
 ## Known limitation: not yet usable from a consuming project
 

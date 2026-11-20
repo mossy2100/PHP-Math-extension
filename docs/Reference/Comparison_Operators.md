@@ -6,6 +6,11 @@ where the extension's four classes differ from each other.
 This document covers what the extension changes. For how comparison works *without* the extension - including the
 defaults PHP applies to any object - see the matching [Comparison Operators](https://github.com/mossy2100/PHP-Math/blob/main/docs/Comparison_Operators.md) document in the Math package.
 
+> [!TIP]
+> In a nutshell: use `equal()` rather than `==` and `!=`. The extension makes the operators work on `Complex` and
+> `Rational`, but anyone reading `$r == 0.5` expects PHP's comparison of an object, and so does PHPStan, which
+> reports it as always false. See [Known limitation: `==` and `!=`](../Usage/Static_Analysis.md#known-limitation--and-).
+
 There are two types of comparison operators in PHP:
 
 1. **Loose**: `<=>`, `==`, `!=`, `<`, `<=`, `>`, `>=`. Flexible about type.
