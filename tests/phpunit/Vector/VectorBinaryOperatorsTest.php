@@ -353,7 +353,7 @@ class VectorBinaryOperatorsTest extends TestCase
         $v = Vector::fromArray([2, 4, 6]);
 
         $this->expectException(ArithmeticException::class);
-        $v / 0; // @phpstan-ignore binaryOp.invalid
+        $v / 0;
     }
 
     /**

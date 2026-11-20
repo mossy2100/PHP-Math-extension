@@ -69,7 +69,7 @@ class MatrixInvalidDataTest extends TestCase
         foreach ($accesses as $name => $access) {
             try {
                 $access();
-                $this->fail("Expected Error from $name.");
+                $this->fail("Expected Error from {$name}.");
             } catch (Error $e) {
                 $this->assertSame('Matrix data is invalid.', $e->getMessage(), $name);
             }
@@ -109,7 +109,7 @@ class MatrixInvalidDataTest extends TestCase
         foreach ($reads as $name => $read) {
             try {
                 $read();
-                $this->fail("Expected Error from $name.");
+                $this->fail("Expected Error from {$name}.");
             } catch (Error $e) {
                 $this->assertSame('Matrix data is invalid.', $e->getMessage(), $name);
             }

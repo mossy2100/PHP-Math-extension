@@ -333,9 +333,9 @@ class RationalPowerOperatorTest extends TestCase
         foreach ([-4, -2] as $base) {
             try {
                 $result = $base ** new Rational(1, 2);
-                $this->fail("Expected DomainException was not thrown for $base.");
+                $this->fail("Expected DomainException was not thrown for {$base}.");
             } catch (DomainException $e) {
-                $this->assertSame("Cannot raise $base to power 1/2. The result is not real.", $e->getMessage());
+                $this->assertSame("Cannot raise {$base} to power 1/2. The result is not real.", $e->getMessage());
             }
         }
     }

@@ -275,7 +275,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $z = new Complex(3, 4);
 
         $this->expectException(ArithmeticException::class);
-        $z / 0; // @phpstan-ignore binaryOp.invalid
+        $z / 0;
     }
 
     /**
@@ -557,7 +557,7 @@ class ComplexBinaryOperatorsTest extends TestCase
         $original = $z;
 
         try {
-            $z /= 0; // @phpstan-ignore assignOp.invalid
+            $z /= 0;
             $this->fail('Expected ArithmeticException.');
         } catch (ArithmeticException) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $z);

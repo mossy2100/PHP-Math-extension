@@ -303,7 +303,7 @@ class MatrixBinaryOperatorsTest extends TestCase
         $m = Matrix::fromArray([[2, 4], [6, 8]]);
 
         $this->expectException(ArithmeticException::class);
-        $m / 0; // @phpstan-ignore binaryOp.invalid
+        $m / 0;
     }
 
     /**

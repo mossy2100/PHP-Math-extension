@@ -8,6 +8,17 @@ parameters:
         - phpstan/constants.php
     bootstrapFiles:
         - tests/bootstrap.php
+    ignoreErrors:
+        # PHPStan works out == and != on objects itself, and can't see the extension's native overloading of them.
+        -
+            identifiers:
+                - equal.alwaysFalse
+                - notEqual.alwaysTrue
+                - method.impossibleType
+                - method.alreadyNarrowedType
+            paths:
+                - tests/phpunit/Complex/ComplexComparisonOperatorsTest.php
+                - tests/phpunit/Rational/RationalComparisonOperatorsTest.php
 
 services:
     -

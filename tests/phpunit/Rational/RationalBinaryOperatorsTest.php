@@ -398,7 +398,7 @@ class RationalBinaryOperatorsTest extends TestCase
         $r = new Rational(3, 4);
 
         $this->expectException(ArithmeticException::class);
-        $r / 0; // @phpstan-ignore binaryOp.invalid
+        $r / 0;
     }
 
     /**
@@ -409,7 +409,7 @@ class RationalBinaryOperatorsTest extends TestCase
         $r = new Rational(3, 4);
 
         $this->expectException(ArithmeticException::class);
-        $result = $r / 0.0; // @phpstan-ignore binaryOp.invalid
+        $result = $r / 0.0;
     }
 
     /**
@@ -730,7 +730,7 @@ class RationalBinaryOperatorsTest extends TestCase
         $original = $r;
 
         try {
-            $r /= 0; // @phpstan-ignore assignOp.invalid
+            $r /= 0;
             $this->fail('Expected ArithmeticException.');
         } catch (ArithmeticException) { // @phpstan-ignore catch.neverThrown
             $this->assertSame($original, $r);
